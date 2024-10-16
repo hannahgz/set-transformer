@@ -65,35 +65,26 @@ def wandb_log(
 # TODO: check that this is implemented correctly
 # TODO: add alternate measure for computing accuracy (set prediction, but wrong order of cards)
 @torch.no_grad()
-def calculate_accuracy(model, dataloader):
+def calculate_accuracy(model, dataloader, padding_token):
     model.eval()
     correct = 0
     total = 0
 
     for sequences in dataloader:
-        # print("sequences shape: ", sequences.shape)
-        # print("sequences: ", sequences)
         inputs = sequences[:, : GPTConfig().input_size].to(device)
         targets = sequences[:, GPTConfig().input_size :].to(device)
 
         outputs = model.generate(inputs, max_new_tokens=GPTConfig().target_size)
         predictions = outputs[:, GPTConfig().input_size :]
-        # if targets[0][0] != 12:
-        # # print("inputs: ", inputs)
-        #   print("targets: ", targets)
-        #   print("predictions: ", predictions)
 
         print("targets: ", targets)
         print("predictions: ", predictions)
 
-        breakpoint()
+        # breakpoint()
 
         mask = targets != padding_token  # Create a mask to ignore padding
-        correct += ((predictions == targets) & mask).all(dim=1).sum().item()
+        correct += ((predictions == targets) | ~mask).all(dim=1).sum().item()
         total += mask.any(dim=1).sum().item()
-
-        # correct += (predictions == targets).all(dim=1).sum().item()
-        # total += targets.size(0)
 
     return correct / total
 
@@ -199,10 +190,6 @@ def main():
         else:
             set_sequences.append(tokenized_combo)
 
-    len(set_sequences)
-
-    print(tokenized_combinations[0])
-    print(tokenized_combinations[1000])
     # Create dataset and dataloaders
     # dataset = SetDataset(tokenized_combinations)
     # train_size = int(0.95 * len(dataset))
@@ -225,6 +212,7 @@ def main():
         n_embd=n_embd,
         vocab_size=len(tokenizer.token_to_id),
     )
+    
     config.end_of_seq_token = end_of_seq_token
     config.padding_token = padding_token
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -278,15 +266,9 @@ def main():
                 total_training_samples_seen,
             )
 
-            #wandb_log(
-            #    avg_train_loss,
-            #    avg_val_loss,
-            #    total_training_samples_seen=total_training_samples_seen,
-            #    epoch=epoch,
-            #)
-
         if eval_freq:
             continue
+
         avg_train_loss = total_train_loss / len(train_loader)
         train_losses.append(avg_train_loss)
 
@@ -299,7 +281,7 @@ def main():
             val_losses,
             epoch=epoch,
         )
-        #wandb_log(avg_train_loss, avg_val_loss, epoch=epoch)
+        
     # Comment out if not loading already trained model
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # checkpoint_path = "zxcv.pt"
