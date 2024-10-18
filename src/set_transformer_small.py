@@ -16,7 +16,7 @@ import wandb
 from model import GPT, GPTConfig
 from tokenizer import Tokenizer
 from set_dataset import SetDataset, BalancedSetDataset
-from data_utils import generate_combinations
+from data_utils import generate_simple_combinations, separate_sets_non_sets
 
 
 lr = 1e-3
@@ -37,7 +37,8 @@ def wandb_log(
 ):
     if total_training_samples_seen is not None:
         print(
-            f"Epoch {epoch+1}/{epochs}, Training Samples Seen {total_training_samples_seen}, Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}"
+            f"Epoch {epoch+1}/{epochs}, Training Samples Seen {total_training_samples_seen}, 
+            Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}"
         )
 
         wandb.log(
@@ -156,7 +157,7 @@ def main():
     #)
 
     # # Use the generator instead of storing all combinations in memory
-    optimized_combinations = generate_combinations(
+    optimized_combinations = generate_simple_combinations(
         GPTConfig().block_size, GPTConfig().pad_symbol
     )
 
@@ -182,13 +183,7 @@ def main():
     print("no set token: ", no_set_token)
 
     # Separate out sets from non sets in the tokenized representation
-    set_sequences = []
-    non_set_sequences = []
-    for tokenized_combo in tokenized_combinations:
-        if tokenized_combo[-4] == no_set_token:
-            non_set_sequences.append(tokenized_combo)
-        else:
-            set_sequences.append(tokenized_combo)
+    set_sequences, non_set_sequences = separate_sets_non_sets(tokenized_combinations, no_set_token, -4)
 
     # Create dataset and dataloaders
     # dataset = SetDataset(tokenized_combinations)
@@ -212,7 +207,7 @@ def main():
         n_embd=n_embd,
         vocab_size=len(tokenizer.token_to_id),
     )
-    
+
     config.end_of_seq_token = end_of_seq_token
     config.padding_token = padding_token
     device = "cuda" if torch.cuda.is_available() else "cpu"
