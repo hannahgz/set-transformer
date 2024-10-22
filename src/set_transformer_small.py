@@ -11,7 +11,6 @@ Original file is located at
 import os
 import torch
 from torch import optim
-from torch.utils.data import DataLoader
 import wandb
 from model import GPT, GPTConfig
 from data_utils import initialize_datasets
@@ -104,68 +103,69 @@ def evaluate_val_loss(
     return avg_val_loss, best_val_loss, counter
 
 
-def run():
+def run(load_model = False):
 
-    config = GPTConfig()
-
-    wandb.init(
-       project="set-prediction-small",
-       config={
-           "learning_rate": config.lr,
-           "epochs": config.epochs,
-           "batch_size": config.batch_size,
-           "n_layer": config.n_layer,
-           "n_head": config.n_head,
-           "n_embd": config.n_embd,
-           "patience": config.patience,
-           "eval_freq": config.eval_freq,
-       },
-    )
-
-    train_loader, val_loader = initialize_datasets(config)
-
-    # Update model initialization
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    config = GPTConfig()
     model = GPT(config).to(device)
-    optimizer = optim.AdamW(model.parameters(), lr=config.lr, weight_decay=0.01)
 
-    # Training loop (remains mostly the same)
-    train_losses = []
-    val_losses = []
+    if load_model:
 
-    best_val_loss = 1e9
-
-    counter = 0
-
-    for epoch in range(config.epochs):
-        if counter >= config.patience:
-            break
-        model.train()
-        total_train_loss = 0
-        for index, inputs in enumerate(train_loader): #train_loader, 364 batches (11664/32)
-            model.train()
-            inputs = inputs.to(device)
-            optimizer.zero_grad()
-            _, loss = model(inputs, True)
-            loss.backward()
-            optimizer.step()
-            total_train_loss += loss.item()
-            
-        avg_train_loss = total_train_loss / len(train_loader)
-        train_losses.append(avg_train_loss)
-
-        avg_val_loss, best_val_loss, counter = evaluate_val_loss(
-            model,
-            val_loader,
-            optimizer,
-            counter,
-            best_val_loss,
-            val_losses,
-            config,
-            epoch=epoch,
+        wandb.init(
+        project="set-prediction-small",
+        config={
+            "learning_rate": config.lr,
+            "epochs": config.epochs,
+            "batch_size": config.batch_size,
+            "n_layer": config.n_layer,
+            "n_head": config.n_head,
+            "n_embd": config.n_embd,
+            "patience": config.patience,
+            "eval_freq": config.eval_freq,
+        },
         )
 
-        wandb_log(avg_train_loss, avg_val_loss, epoch = epoch)
+        train_loader, val_loader = initialize_datasets(config)
+
+        optimizer = optim.AdamW(model.parameters(), lr=config.lr, weight_decay=0.01)
+
+        # Training loop (remains mostly the same)
+        train_losses = []
+        val_losses = []
+
+        best_val_loss = 1e9
+
+        counter = 0
+
+        for epoch in range(config.epochs):
+            if counter >= config.patience:
+                break
+            model.train()
+            total_train_loss = 0
+            for inputs in train_loader: #train_loader, 364 batches (11664/32)
+                model.train()
+                inputs = inputs.to(device)
+                optimizer.zero_grad()
+                _, loss = model(inputs, True)
+                loss.backward()
+                optimizer.step()
+                total_train_loss += loss.item()
+                
+            avg_train_loss = total_train_loss / len(train_loader)
+            train_losses.append(avg_train_loss)
+
+            avg_val_loss, best_val_loss, counter = evaluate_val_loss(
+                model,
+                val_loader,
+                optimizer,
+                counter,
+                best_val_loss,
+                val_losses,
+                config,
+                epoch=epoch,
+            )
+
+            wandb_log(avg_train_loss, avg_val_loss, epoch = epoch)
 
         
     # # Comment out if not loading already trained model
@@ -174,9 +174,9 @@ def run():
     # checkpoint_path = "ckpt_small_patience (1).pt"
     # config = GPTConfig(vocab_size=len(tokenizer.token_to_id))
     # model = GPT(config).to(device)
-    # checkpoint = torch.load(checkpoint_path)
     # Restore the model state dict
-    # model.load_state_dict(checkpoint["model"])
+    checkpoint = torch.load(os.path.join(config.out_dir, config.filename))
+    model.load_state_dict(checkpoint["model"])
 
     train_accuracy = calculate_accuracy(model, train_loader)
     val_accuracy = calculate_accuracy(model, val_loader)
