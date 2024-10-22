@@ -2,9 +2,13 @@ from typing import List, Tuple
 import itertools
 from itertools import chain
 import random
+from tokenizer import Tokenizer
+from set_dataset import SetDataset, BalancedSetDataset
+import torch
+from torch.utils.data import DataLoader
 
 n_cards = 3
-card_vectors = ["A", "B", "C"]
+card_vectors = ["A", "B", "C", "D", "E"]
 
 # Define attribute categories
 shapes = ["oval", "squiggle", "diamond"]
@@ -61,10 +65,11 @@ def get_cards():
 def get_target_seq(combination, target_size, pad_symbol):
     target_seq = find_sets_with_cards(combination)
 
-    for _ in range(target_size):
-        target_seq.append(pad_symbol)
-
     target_seq.append(".")
+
+    for _ in range(target_size - len(target_seq)):
+        target_seq.append(pad_symbol)
+    
     return target_seq
 
 # Generate continuous combinations (A x y z B i j k ...) where all attributes directly follow card
@@ -87,50 +92,33 @@ def generate_cont_combinations(block_size, pad_symbol, n_cards = 3):
 
         # Flatten the array to 40 elements using the new flatten_tuple function
         flattened_array = flatten_tuple(flatten_tuple(card_tuples))
-
         flattened_array.append(">")
-
         flattened_array.extend(get_target_seq(combination, target_size, pad_symbol))
-        # flattened_array.extend(find_sets_with_cards(combination))
 
-        # curr_len = len(flattened_array)
-
-        # # Padding with "_" (padding symbol)
-        # for _ in range(curr_len, block_size - 1):
-        #     flattened_array.append(pad_symbol)
-
-        # flattened_array.append(".")
         yield flattened_array
 
-def generate_combinations(block_size, pad_symbol, n_cards = 5):
+def generate_combinations(target_size, pad_symbol, n_cards, random = False):
 
     cards = get_cards()
 
     for combination in itertools.combinations(cards, n_cards):
         # Create the initial array of 20 tuples
-        array_of_20 = [
+        tuple_array = [
             (card_vectors[i], attr)
             for i, card in enumerate(combination)
-            for attr in get_card(*card)
+            for attr in get_card_attributes(*card)
         ]
 
         # Randomize the array
-        random.shuffle(array_of_20)
+        if random:
+            random.shuffle(tuple_array)
 
         # Flatten the array to 40 elements using the new flatten_tuple function
-        flattened_array = flatten_tuple(array_of_20)
+        flattened_array = flatten_tuple(tuple_array)
         flattened_array.append(">")
 
-        flattened_array.extend(find_sets_with_cards(combination))
-        # flattened_array.append(".")
-        curr_len = len(flattened_array)
-
-        # Padding with "." end sequence characters to pad the input
-        for i in range(curr_len, block_size):
-          flattened_array.append(pad_symbol)
-
+        flattened_array.extend(get_target_seq(combination, target_size, pad_symbol))
         yield flattened_array
-
 
 
 def separate_sets_non_sets(tokenized_combinations, no_set_token, expected_pos):
@@ -142,3 +130,58 @@ def separate_sets_non_sets(tokenized_combinations, no_set_token, expected_pos):
         else:
             set_sequences.append(tokenized_combo)
     return set_sequences, non_set_sequences
+
+
+def initialize_datasets(config):
+    optimized_combinations = generate_combinations(
+        config.target_size, config.pad_symbol, config.n_cards
+    )
+    
+    small_combinations = list(optimized_combinations)
+
+    # Create tokenizer and tokenize all sequences
+    tokenizer = Tokenizer()
+    tokenized_combinations = [tokenizer.encode(seq) for seq in small_combinations]
+    end_of_seq_token = tokenized_combinations[0][-1]
+    padding_token = -1
+    no_set_token = -1
+
+    for i in range(len(small_combinations)):
+        if config.pad_symbol in small_combinations[i]:
+            padding_token_pos = small_combinations[i].index(config.pad_symbol)
+            padding_token = tokenized_combinations[i][padding_token_pos]
+
+        if "*" in small_combinations[i]:
+            no_set_token_pos = small_combinations[i].index("*")
+            no_set_token = tokenized_combinations[i][no_set_token_pos]
+        
+        if no_set_token >= 0 and padding_token >= 0:
+            break
+
+    print("padding token: ", padding_token)
+    print("end of seq token: ", end_of_seq_token)
+    print("no set token: ", no_set_token)
+
+    config.end_of_seq_token = end_of_seq_token
+    config.padding_token = padding_token
+
+    # Separate out sets from non sets in the tokenized representation
+    set_sequences, non_set_sequences = separate_sets_non_sets(tokenized_combinations, no_set_token, -4)
+
+    # Create dataset and dataloaders
+    # dataset = SetDataset(tokenized_combinations)
+    # train_size = int(0.95 * len(dataset))
+    dataset = BalancedSetDataset(set_sequences, non_set_sequences)
+    train_size = int(0.9 * len(dataset))  # makes val size 1296
+
+    # make validation set a lot smaller TODO, revisit how large val set this leaves us with
+    val_size = len(dataset) - train_size
+    train_dataset, val_dataset = torch.utils.data.random_split(
+        dataset, [train_size, val_size]
+    )
+
+    train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False)
+
+    return train_loader, val_loader
+

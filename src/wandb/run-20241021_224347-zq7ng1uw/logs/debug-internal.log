@@ -1,0 +1,18 @@
+{"time":"2024-10-21T22:43:47.863037-04:00","level":"INFO","msg":"using version","core version":"0.18.5"}
+{"time":"2024-10-21T22:43:47.863124-04:00","level":"INFO","msg":"created symlink","path":"/Users/hannahzhou/Desktop/thesis/set-transformer/src/wandb/run-20241021_224347-zq7ng1uw/logs/debug-core.log"}
+{"time":"2024-10-21T22:43:48.283983-04:00","level":"INFO","msg":"created new stream","id":"zq7ng1uw"}
+{"time":"2024-10-21T22:43:48.284018-04:00","level":"INFO","msg":"stream: started","id":"zq7ng1uw"}
+{"time":"2024-10-21T22:43:48.284045-04:00","level":"INFO","msg":"sender: started","stream_id":"zq7ng1uw"}
+{"time":"2024-10-21T22:43:48.284064-04:00","level":"INFO","msg":"handler: started","stream_id":{"value":"zq7ng1uw"}}
+{"time":"2024-10-21T22:43:48.284089-04:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"zq7ng1uw"}}
+{"time":"2024-10-21T22:43:48.49597-04:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-10-21T22:43:48.496404-04:00","level":"ERROR","msg":"git repo not found","error":"repository does not exist"}
+{"time":"2024-10-21T22:43:48.523522-04:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-10-21T22:43:48.523847-04:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-10-21T22:43:49.529421-04:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"saving job artifact","runtime_seconds":0.790391958}],"total_operations":1}}
+{"time":"2024-10-21T22:43:50.370852-04:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2024-10-21T22:43:51.478877-04:00","level":"INFO","msg":"stream: closing","id":"zq7ng1uw"}
+{"time":"2024-10-21T22:43:51.479022-04:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"zq7ng1uw"}}
+{"time":"2024-10-21T22:43:51.479078-04:00","level":"INFO","msg":"sender: closed","stream_id":"zq7ng1uw"}
+{"time":"2024-10-21T22:43:51.479061-04:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"zq7ng1uw"}}
+{"time":"2024-10-21T22:43:51.479322-04:00","level":"INFO","msg":"stream: closed","id":"zq7ng1uw"}

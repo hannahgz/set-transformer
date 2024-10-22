@@ -14,52 +14,24 @@ from torch import optim
 from torch.utils.data import DataLoader
 import wandb
 from model import GPT, GPTConfig
-from tokenizer import Tokenizer
-from set_dataset import SetDataset, BalancedSetDataset
-from data_utils import generate_simple_combinations, separate_sets_non_sets
+from data_utils import initialize_datasets
 
-
-lr = 1e-3
-epochs = 2
-batch_size = 32
-n_layer = 4
-n_head = 4
-n_embd = 128
-patience = 3
-# eval_freq = 26
-eval_freq = 0
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-def wandb_log(
-    avg_train_loss, avg_val_loss, total_training_samples_seen=None, epoch=None
-):
-    if total_training_samples_seen is not None:
-        print(
-            f"Epoch {epoch+1}/{epochs}, Training Samples Seen {total_training_samples_seen}, 
-            Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}"
-        )
+def wandb_log(avg_train_loss, avg_val_loss, epoch=None):
+    print(
+        f"Epoch {epoch+1}/{GPTConfig.epochs}, Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}"
+    )
 
-        wandb.log(
-            {
-                "training_samples_seen": total_training_samples_seen,
-                "train_loss": avg_train_loss,
-                "val_loss": avg_val_loss,
-            }
-        )
-    else:
-        print(
-            f"Epoch {epoch+1}/{epochs}, Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}"
-        )
-
-        wandb.log(
-            {
-                "epoch": epoch + 1,
-                "train_loss": avg_train_loss,
-                "val_loss": avg_val_loss,
-            }
-        )
+    wandb.log(
+        {
+            "epoch": epoch + 1,
+            "train_loss": avg_train_loss,
+            "val_loss": avg_val_loss,
+        }
+    )
 
 
 # Update accuracy calculation
@@ -97,7 +69,7 @@ def evaluate_val_loss(
     counter,
     best_val_loss,
     val_losses,
-    total_training_samples_seen=None,
+    config,
     epoch=None,
 ):
     model.eval()
@@ -116,122 +88,61 @@ def evaluate_val_loss(
     if avg_val_loss < best_val_loss:
         counter = 0
         best_val_loss = avg_val_loss
-        if total_training_samples_seen is not None:
-            checkpoint = {
-                "model": model.state_dict(),
-                "optimizer": optimizer.state_dict(),
-                "training_samples_seen": total_training_samples_seen,
-                "best_val_loss": best_val_loss,
-                "config": config,
-            }
-        else:
-            checkpoint = {
-                "model": model.state_dict(),
-                "optimizer": optimizer.state_dict(),
-                "epoch_num": epoch,
-                "best_val_loss": best_val_loss,
-                "config": config,
-            }
-        print(f"saving checkpoint to {out_dir}")
-        torch.save(checkpoint, os.path.join(out_dir, "zxcv.pt"))
+        
+        checkpoint = {
+            "model": model.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "epoch_num": epoch,
+            "best_val_loss": best_val_loss,
+            "config": config,
+        }
+        print(f"saving checkpoint to {config.out_dir}")
+        torch.save(checkpoint, os.path.join(config.out_dir, config.filename))
     else:
         counter += 1
 
     return avg_val_loss, best_val_loss, counter
 
 
-def main():
+def run():
 
-    #wandb.init(
-    #    project="set-prediction-small",
-    #    config={
-    #        "learning_rate": lr,
-    #        "epochs": epochs,
-    #        "batch_size": batch_size,
-    #        "n_layer": n_layer,
-    #        "n_head": n_head,
-    #        "n_embd": n_embd,
-    #        "patience": patience,
-    #        "eval_freq": eval_freq,
-    #    },
-    #)
+    config = GPTConfig()
 
-    # # Use the generator instead of storing all combinations in memory
-    optimized_combinations = generate_simple_combinations(
-        GPTConfig().block_size, GPTConfig().pad_symbol
+    wandb.init(
+       project="set-prediction-small",
+       config={
+           "learning_rate": config.lr,
+           "epochs": config.epochs,
+           "batch_size": config.batch_size,
+           "n_layer": config.n_layer,
+           "n_head": config.n_head,
+           "n_embd": config.n_embd,
+           "patience": config.patience,
+           "eval_freq": config.eval_freq,
+       },
     )
 
-    small_combinations = list(optimized_combinations)
-    # Create tokenizer and tokenize all sequences
-    tokenizer = Tokenizer()
-    tokenized_combinations = [tokenizer.encode(seq) for seq in small_combinations]
-    end_of_seq_token = tokenized_combinations[0][-1]
-    padding_token = 0
-    no_set_token = 0
-
-    for i in range(len(small_combinations)):
-        if GPTConfig().pad_symbol in small_combinations[i]:
-            padding_token_pos = small_combinations[i].index(GPTConfig().pad_symbol)
-            padding_token = tokenized_combinations[i][padding_token_pos]
-
-            no_set_token_pos = small_combinations[i].index("*")
-            no_set_token = tokenized_combinations[i][no_set_token_pos]
-            break
-
-    print("padding token: ", padding_token)
-    print("end of seq token: ", end_of_seq_token)
-    print("no set token: ", no_set_token)
-
-    # Separate out sets from non sets in the tokenized representation
-    set_sequences, non_set_sequences = separate_sets_non_sets(tokenized_combinations, no_set_token, -4)
-
-    # Create dataset and dataloaders
-    # dataset = SetDataset(tokenized_combinations)
-    # train_size = int(0.95 * len(dataset))
-    dataset = BalancedSetDataset(set_sequences, non_set_sequences)
-    train_size = int(0.9 * len(dataset))  # makes val size 1296
-
-    # make validation set a lot smaller TODO, revisit how large val set this leaves us with
-    val_size = len(dataset) - train_size
-    train_dataset, val_dataset = torch.utils.data.random_split(
-        dataset, [train_size, val_size]
-    )
-
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    train_loader, val_loader = initialize_datasets(config)
 
     # Update model initialization
-    config = GPTConfig(
-        n_layer=n_layer,
-        n_head=n_head,
-        n_embd=n_embd,
-        vocab_size=len(tokenizer.token_to_id),
-    )
-
-    config.end_of_seq_token = end_of_seq_token
-    config.padding_token = padding_token
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
-    optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
+    optimizer = optim.AdamW(model.parameters(), lr=config.lr, weight_decay=0.01)
 
     # Training loop (remains mostly the same)
     train_losses = []
     val_losses = []
 
     best_val_loss = 1e9
-    out_dir = ""
 
     counter = 0
-    total_training_samples_seen = 0
-    break_flag = False
-    for epoch in range(epochs):
-        if break_flag or (not eval_freq and counter >= patience):
+
+    for epoch in range(config.epochs):
+        if counter >= config.patience:
             break
         model.train()
         total_train_loss = 0
-        for index, inputs in enumerate(
-            train_loader
-        ):  # train_loader, 364 batches (11664/32)
+        for index, inputs in enumerate(train_loader): #train_loader, 364 batches (11664/32)
             model.train()
             inputs = inputs.to(device)
             optimizer.zero_grad()
@@ -239,31 +150,7 @@ def main():
             loss.backward()
             optimizer.step()
             total_train_loss += loss.item()
-            total_training_samples_seen += len(inputs)
-            if not eval_freq or index % eval_freq != 0:
-                continue
-
-            if counter >= patience:
-                break_flag = True
-                break
-
-            epoch_seen_samples = (index * batch_size) + len(inputs)
-            avg_train_loss = total_train_loss / epoch_seen_samples
-            train_losses.append(avg_train_loss)
-
-            avg_val_loss, best_val_loss, counter = evaluate_val_loss(
-                model,
-                val_loader,
-                optimizer,
-                counter,
-                best_val_loss,
-                val_losses,
-                total_training_samples_seen,
-            )
-
-        if eval_freq:
-            continue
-
+            
         avg_train_loss = total_train_loss / len(train_loader)
         train_losses.append(avg_train_loss)
 
@@ -274,11 +161,15 @@ def main():
             counter,
             best_val_loss,
             val_losses,
+            config,
             epoch=epoch,
         )
+
+        wandb_log(avg_train_loss, avg_val_loss, epoch = epoch)
+
         
-    # Comment out if not loading already trained model
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # # Comment out if not loading already trained model
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # checkpoint_path = "zxcv.pt"
     # checkpoint_path = "ckpt_small_patience (1).pt"
     # config = GPTConfig(vocab_size=len(tokenizer.token_to_id))
@@ -293,11 +184,11 @@ def main():
     print(f"Train Accuracy: {train_accuracy:.4f}")
     print(f"Validation Accuracy: {val_accuracy:.4f}")
 
-    #wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
+    wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
 
-    #wandb.finish()
+    wandb.finish()
 
 
 if __name__ == "__main__":
-
-    main()
+    small_combinations = run()
+    # optimized_combinations = run()

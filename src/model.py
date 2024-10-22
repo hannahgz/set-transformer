@@ -5,19 +5,62 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 
+# @dataclass
+# class GPTConfig:
+#     block_size: int = 20
+#     vocab_size: int = 19
+#     n_layer: int = 4
+#     n_head: int = 4
+#     n_embd: int = 64
+#     dropout: float = 0.0
+#     bias: bool = False
+#     input_size: int = 16
+#     target_size: int = 4
+#     pad_symbol: str = "_"
+
+# @dataclass
+# class GPTConfigIndiv3:
+#     block_size: int = 29
+#     vocab_size: int = 19
+#     n_layer: int = n_layer
+#     n_head: int = n_head
+#     n_embd: int = n_embd
+#     dropout: float = 0.0
+#     bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+#     input_size: int = 25 # (3 cards, 4 attributes/card, 12 * 2 = 24, + 1 for predict = 25)
+#     target_size: int = 4
+#     pad_symbol: str = "_"
+
+lr = 1e-3
+epochs = 2
+batch_size = 32
+n_layer = 4
+n_head = 4
+n_embd = 128
+patience = 3
+# eval_freq = 26
+eval_freq = 0
+
 @dataclass
 class GPTConfig:
-    block_size: int = 20
-    vocab_size: int = 19
-    n_layer: int = 4
-    n_head: int = 4
+    lr: float = 1e-3
+    epochs: int = 50
+    batch_size: int = 32
+    n_layer: int = 2
+    n_head: int = 2
     n_embd: int = 64
+    patience: int = 3
+    eval_freq: int = 0
     dropout: float = 0.0
-    bias: bool = False
-    input_size: int = 16
-    target_size: int = 4
+    n_cards: int = 5
+    block_size: int = 49
+    vocab_size: int = 21
+    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
+    target_size: int = 8
     pad_symbol: str = "_"
-
+    out_dir: str = ""
+    filename: str = ""
 
 class LayerNorm(nn.Module):
     """LayerNorm but with an optional bias. PyTorch doesn't support simply bias=False"""

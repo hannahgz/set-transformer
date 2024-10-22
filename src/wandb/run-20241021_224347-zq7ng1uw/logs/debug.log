@@ -1,0 +1,32 @@
+2024-10-21 22:43:47,857 INFO    MainThread:16324 [wandb_setup.py:_flush():79] Current SDK version is 0.18.5
+2024-10-21 22:43:47,857 INFO    MainThread:16324 [wandb_setup.py:_flush():79] Configure stats pid to 16324
+2024-10-21 22:43:47,857 INFO    MainThread:16324 [wandb_setup.py:_flush():79] Loading settings from /Users/hannahzhou/.config/wandb/settings
+2024-10-21 22:43:47,857 INFO    MainThread:16324 [wandb_setup.py:_flush():79] Loading settings from /Users/hannahzhou/Desktop/thesis/set-transformer/src/wandb/settings
+2024-10-21 22:43:47,857 INFO    MainThread:16324 [wandb_setup.py:_flush():79] Loading settings from environment variables: {'api_key': '***REDACTED***'}
+2024-10-21 22:43:47,857 INFO    MainThread:16324 [wandb_setup.py:_flush():79] Applying setup settings: {'mode': None, '_disable_service': None}
+2024-10-21 22:43:47,858 INFO    MainThread:16324 [wandb_setup.py:_flush():79] Inferring run settings from compute environment: {'program_relpath': 'src/set_transformer_small.py', 'program_abspath': '/Users/hannahzhou/Desktop/thesis/set-transformer/src/set_transformer_small.py', 'program': '/Users/hannahzhou/Desktop/thesis/set-transformer/src/set_transformer_small.py'}
+2024-10-21 22:43:47,858 INFO    MainThread:16324 [wandb_setup.py:_flush():79] Applying login settings: {}
+2024-10-21 22:43:47,858 INFO    MainThread:16324 [wandb_init.py:_log_setup():534] Logging user logs to /Users/hannahzhou/Desktop/thesis/set-transformer/src/wandb/run-20241021_224347-zq7ng1uw/logs/debug.log
+2024-10-21 22:43:47,858 INFO    MainThread:16324 [wandb_init.py:_log_setup():535] Logging internal logs to /Users/hannahzhou/Desktop/thesis/set-transformer/src/wandb/run-20241021_224347-zq7ng1uw/logs/debug-internal.log
+2024-10-21 22:43:47,858 INFO    MainThread:16324 [wandb_init.py:init():621] calling init triggers
+2024-10-21 22:43:47,858 INFO    MainThread:16324 [wandb_init.py:init():628] wandb.init called with sweep_config: {}
+config: {'learning_rate': 0.001, 'epochs': 50, 'batch_size': 32, 'n_layer': 2, 'n_head': 2, 'n_embd': 64, 'patience': 3, 'eval_freq': 0}
+2024-10-21 22:43:47,858 INFO    MainThread:16324 [wandb_init.py:init():671] starting backend
+2024-10-21 22:43:47,858 INFO    MainThread:16324 [wandb_init.py:init():675] sending inform_init request
+2024-10-21 22:43:47,859 INFO    MainThread:16324 [backend.py:_multiprocessing_setup():104] multiprocessing start_methods=spawn,fork,forkserver, using: spawn
+2024-10-21 22:43:47,860 INFO    MainThread:16324 [wandb_init.py:init():688] backend started and connected
+2024-10-21 22:43:47,863 INFO    MainThread:16324 [wandb_init.py:init():783] updated telemetry
+2024-10-21 22:43:47,883 INFO    MainThread:16324 [wandb_init.py:init():816] communicating run to backend with 90.0 second timeout
+2024-10-21 22:43:48,493 INFO    MainThread:16324 [wandb_init.py:init():867] starting run threads in backend
+2024-10-21 22:43:48,521 INFO    MainThread:16324 [wandb_run.py:_console_start():2463] atexit reg
+2024-10-21 22:43:48,522 INFO    MainThread:16324 [wandb_run.py:_redirect():2311] redirect: wrap_raw
+2024-10-21 22:43:48,522 INFO    MainThread:16324 [wandb_run.py:_redirect():2376] Wrapping output streams.
+2024-10-21 22:43:48,522 INFO    MainThread:16324 [wandb_run.py:_redirect():2401] Redirects installed.
+2024-10-21 22:43:48,523 INFO    MainThread:16324 [wandb_init.py:init():911] run started, returning control to user process
+2024-10-21 22:43:48,523 INFO    MainThread:16324 [wandb_run.py:_finish():2158] finishing run hazhou-harvard/set-prediction-small/zq7ng1uw
+2024-10-21 22:43:48,523 INFO    MainThread:16324 [wandb_run.py:_atexit_cleanup():2426] got exitcode: 0
+2024-10-21 22:43:48,523 INFO    MainThread:16324 [wandb_run.py:_restore():2408] restore
+2024-10-21 22:43:48,523 INFO    MainThread:16324 [wandb_run.py:_restore():2414] restore done
+2024-10-21 22:43:51,470 INFO    MainThread:16324 [wandb_run.py:_footer_history_summary_info():3975] rendering history
+2024-10-21 22:43:51,470 INFO    MainThread:16324 [wandb_run.py:_footer_history_summary_info():4007] rendering summary
+2024-10-21 22:43:51,477 INFO    MainThread:16324 [wandb_run.py:_footer_sync_info():3934] logging synced files
