@@ -176,7 +176,7 @@ def initialize_datasets(config, save_dataset = False):
     # dataset = SetDataset(tokenized_combinations)
     # train_size = int(0.95 * len(dataset))
     dataset = BalancedSetDataset(set_sequences, non_set_sequences)
-    breakpoint()
+    
     if save_dataset:
         torch.save(dataset, '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset.pth')
     return dataset
