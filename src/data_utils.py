@@ -132,7 +132,7 @@ def separate_sets_non_sets(tokenized_combinations, no_set_token, expected_pos):
     return set_sequences, non_set_sequences
 
 
-def initialize_datasets(config):
+def initialize_datasets(config, save_dataset = False):
     optimized_combinations = generate_combinations(
         config.target_size, config.pad_symbol, config.n_cards
     )
@@ -172,18 +172,26 @@ def initialize_datasets(config):
     # Separate out sets from non sets in the tokenized representation
     set_sequences, non_set_sequences = separate_sets_non_sets(tokenized_combinations, no_set_token, -config.target_size)
 
-    breakpoint()
     # Create dataset and dataloaders
     # dataset = SetDataset(tokenized_combinations)
     # train_size = int(0.95 * len(dataset))
     dataset = BalancedSetDataset(set_sequences, non_set_sequences)
-    train_size = int(0.9 * len(dataset))  # makes val size 1296
+    if save_dataset:
+        torch.save(dataset, '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz/balanced_set_dataset.pth')
+    breakpoint()
+    return dataset
+
+
+def initialize_loaders(config, dataset):
+    train_size = int(0.95 * len(dataset))  # makes val size 1296
 
     # make validation set a lot smaller TODO, revisit how large val set this leaves us with
     val_size = len(dataset) - train_size
     train_dataset, val_dataset = torch.utils.data.random_split(
         dataset, [train_size, val_size]
     )
+
+    print("train_size: ", train_size, " val_size: ", val_size)
 
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False)

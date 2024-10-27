@@ -82,6 +82,8 @@ class GPTConfig:
     pad_symbol: str = "_"
     out_dir: str = ""
     filename: str = "test.pt"
+    end_of_seq_token: int = 13
+    padding_token: int = 14
 
 class LayerNorm(nn.Module):
     """LayerNorm but with an optional bias. PyTorch doesn't support simply bias=False"""
