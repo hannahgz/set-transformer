@@ -193,4 +193,4 @@ def run(load_model = False):
 
 if __name__ == "__main__":
     # small_combinations = run()
-    run()
+    run(load_model = True)

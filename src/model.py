@@ -207,6 +207,8 @@ class GPT(nn.Module):
         assert config.vocab_size is not None
         assert config.block_size is not None
         self.config = config
+
+        # TODO: probably manually put this in for now so don't have to reload the dataset everytime do the run
         end_of_seq_token = self.config.end_of_seq_token
 
         self.transformer = nn.ModuleDict(

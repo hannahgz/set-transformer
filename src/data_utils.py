@@ -142,7 +142,7 @@ def initialize_datasets(config):
     # Create tokenizer and tokenize all sequences
     tokenizer = Tokenizer()
     tokenized_combinations = [tokenizer.encode(seq) for seq in small_combinations]
-    end_of_seq_token = tokenized_combinations[0][-1]
+    end_of_seq_token = -1
     padding_token = -1
     no_set_token = -1
 
@@ -154,8 +154,12 @@ def initialize_datasets(config):
         if "*" in small_combinations[i]:
             no_set_token_pos = small_combinations[i].index("*")
             no_set_token = tokenized_combinations[i][no_set_token_pos]
+
+        if "." in small_combinations[i]:
+            end_of_seq_token_pos = small_combinations[i].index(".")
+            end_of_seq_token = tokenized_combinations[i][end_of_seq_token_pos]
         
-        if no_set_token >= 0 and padding_token >= 0:
+        if no_set_token >= 0 and padding_token >= 0 and end_of_seq_token >= 0:
             break
 
     print("padding token: ", padding_token)
@@ -166,7 +170,7 @@ def initialize_datasets(config):
     config.padding_token = padding_token
 
     # Separate out sets from non sets in the tokenized representation
-    set_sequences, non_set_sequences = separate_sets_non_sets(tokenized_combinations, no_set_token, -4)
+    set_sequences, non_set_sequences = separate_sets_non_sets(tokenized_combinations, no_set_token, -config.target_size)
 
     breakpoint()
     # Create dataset and dataloaders
@@ -183,6 +187,5 @@ def initialize_datasets(config):
 
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False)
-    breakpoint()
     return train_loader, val_loader
 
