@@ -169,7 +169,7 @@ def run(load_model = False):
 
             wandb_log(avg_train_loss, avg_val_loss, epoch = epoch)
 
-        
+    breakpoint()
     # # Comment out if not loading already trained model
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # checkpoint_path = "zxcv.pt"

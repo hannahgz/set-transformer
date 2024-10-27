@@ -145,9 +145,10 @@ class CausalSelfAttention(nn.Module):
         if self.flash:
             # Calculate raw attention scores
             att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
-            att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float("-inf"))
+            if self.bias is not None:
+                att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float("-inf"))
             self.att_weights = F.softmax(att, dim=-1)  # Store attention weights
-            
+
             # efficient attention using Flash Attention CUDA kernels
             y = torch.nn.functional.scaled_dot_product_attention(
                 q,
@@ -160,7 +161,8 @@ class CausalSelfAttention(nn.Module):
         else:
             # manual implementation of attention
             att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
-            att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float("-inf"))
+            if self.bias is not None:
+                att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float("-inf"))
             att = F.softmax(att, dim=-1)
             att = self.attn_dropout(att)
             y = att @ v  # (B, nh, T, T) x (B, nh, T, hs) -> (B, nh, T, hs)
