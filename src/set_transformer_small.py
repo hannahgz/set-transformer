@@ -61,6 +61,7 @@ def calculate_accuracy(model, dataloader, padding_token):
     return correct / total
 
 
+@torch.no_grad()
 def evaluate_val_loss(
     model,
     val_loader,
@@ -74,11 +75,11 @@ def evaluate_val_loss(
     model.eval()
     total_val_loss = 0
     avg_val_loss = 0
-    with torch.no_grad():
-        for inputs in val_loader:
-            inputs = inputs.to(device)
-            _, loss = model(inputs, True)
-            total_val_loss += loss.item()
+    
+    for inputs in val_loader:
+        inputs = inputs.to(device)
+        _, loss = model(inputs, True)
+        total_val_loss += loss.item()
 
     avg_val_loss = total_val_loss / len(val_loader)
     val_losses.append(avg_val_loss)
@@ -109,6 +110,8 @@ def run(load_model = False):
     config = GPTConfig()
     model = GPT(config).to(device)
 
+    breakpoint()
+
     if load_model:
 
         wandb.init(
@@ -126,7 +129,7 @@ def run(load_model = False):
         )
 
         train_loader, val_loader = initialize_datasets(config)
-
+        
         optimizer = optim.AdamW(model.parameters(), lr=config.lr, weight_decay=0.01)
 
         # Training loop (remains mostly the same)
@@ -190,5 +193,5 @@ def run(load_model = False):
 
 
 if __name__ == "__main__":
-    small_combinations = run()
-    # optimized_combinations = run()
+    # small_combinations = run()
+    run()

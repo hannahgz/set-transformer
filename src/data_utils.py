@@ -168,6 +168,7 @@ def initialize_datasets(config):
     # Separate out sets from non sets in the tokenized representation
     set_sequences, non_set_sequences = separate_sets_non_sets(tokenized_combinations, no_set_token, -4)
 
+    breakpoint()
     # Create dataset and dataloaders
     # dataset = SetDataset(tokenized_combinations)
     # train_size = int(0.95 * len(dataset))
@@ -182,6 +183,6 @@ def initialize_datasets(config):
 
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False)
-
+    breakpoint()
     return train_loader, val_loader
 
