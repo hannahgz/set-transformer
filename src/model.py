@@ -145,8 +145,7 @@ class CausalSelfAttention(nn.Module):
         if self.flash:
             # Calculate raw attention scores
             att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
-            if self.bias is not None:
-                att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float("-inf"))
+            # TODO: remember to add masking back in if using bias later
             self.att_weights = F.softmax(att, dim=-1)  # Store attention weights
 
             # efficient attention using Flash Attention CUDA kernels
@@ -161,8 +160,8 @@ class CausalSelfAttention(nn.Module):
         else:
             # manual implementation of attention
             att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
-            if self.bias is not None:
-                att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float("-inf"))
+            # TODO: might need to comment this out if not using bias
+            att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float("-inf"))
             att = F.softmax(att, dim=-1)
             att = self.attn_dropout(att)
             y = att @ v  # (B, nh, T, T) x (B, nh, T, hs) -> (B, nh, T, hs)
