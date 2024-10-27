@@ -50,8 +50,8 @@ def calculate_accuracy(model, dataloader, padding_token):
             inputs, max_new_tokens=GPTConfig().target_size)
         predictions = outputs[:, GPTConfig().input_size:]
 
-        print("targets: ", targets)
-        print("predictions: ", predictions)
+        # print("targets: ", targets)
+        # print("predictions: ", predictions)
 
         # breakpoint()
 
