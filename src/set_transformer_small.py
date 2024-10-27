@@ -35,7 +35,6 @@ def wandb_log(avg_train_loss, avg_val_loss, epoch=None):
 
 
 # Update accuracy calculation
-# TODO: check that this is implemented correctly
 # TODO: add alternate measure for computing accuracy (set prediction, but wrong order of cards)
 @torch.no_grad()
 def calculate_accuracy(model, dataloader, padding_token):
@@ -114,13 +113,10 @@ def run(load_model=False):
     dataset = torch.load(
         '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset.pth')
     train_loader, val_loader = initialize_loaders(config, dataset)
-    breakpoint()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
 
-    if not load_model:
-
-        wandb.init(
+    wandb.init(
             project="set-prediction-small",
             config={
                 "learning_rate": config.lr,
@@ -133,6 +129,8 @@ def run(load_model=False):
                 "eval_freq": config.eval_freq,
             },
         )
+    
+    if not load_model:
 
         optimizer = optim.AdamW(
             model.parameters(), lr=config.lr, weight_decay=0.01)
@@ -181,8 +179,8 @@ def run(load_model=False):
     checkpoint = torch.load(os.path.join(config.out_dir, config.filename))
     model.load_state_dict(checkpoint["model"])
 
-    train_accuracy = calculate_accuracy(model, train_loader)
-    val_accuracy = calculate_accuracy(model, val_loader)
+    train_accuracy = calculate_accuracy(model, train_loader, config.padding_token)
+    val_accuracy = calculate_accuracy(model, val_loader, config.padding_token)
 
     print(f"Train Accuracy: {train_accuracy:.4f}")
     print(f"Validation Accuracy: {val_accuracy:.4f}")
@@ -199,4 +197,4 @@ if __name__ == "__main__":
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
-    run()
+    run(load_model = True)
