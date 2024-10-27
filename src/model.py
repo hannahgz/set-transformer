@@ -65,12 +65,12 @@ eval_freq = 0
 @dataclass
 class GPTConfig:
     lr: float = 1e-3
-    epochs: int = 1
-    batch_size: int = 32
+    epochs: int = 100
+    batch_size: int = 64
     n_layer: int = 2
     n_head: int = 2
     n_embd: int = 64
-    patience: int = 3
+    patience: int = 5
     eval_freq: int = 0
     dropout: float = 0.0
     n_cards: int = 5
@@ -81,7 +81,7 @@ class GPTConfig:
     target_size: int = 8
     pad_symbol: str = "_"
     out_dir: str = ""
-    filename: str = "test.pt"
+    filename: str = "full_run.pt"
     end_of_seq_token: int = 13
     padding_token: int = 14
 
