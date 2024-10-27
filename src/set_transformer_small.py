@@ -173,10 +173,8 @@ def run(load_model=False):
 
             wandb_log(avg_train_loss, avg_val_loss, epoch=epoch)
 
-    breakpoint()
-
     # Restore the model state dict
-    checkpoint = torch.load(os.path.join(config.out_dir, config.filename))
+    checkpoint = torch.load(os.path.join(config.out_dir, config.filename), weights_only = False)
     model.load_state_dict(checkpoint["model"])
 
     train_accuracy = calculate_accuracy(model, train_loader, config.padding_token)
@@ -188,8 +186,6 @@ def run(load_model=False):
     wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
 
     wandb.finish()
-    breakpoint()
-
 
 if __name__ == "__main__":
     # small_combinations = run()
@@ -197,4 +193,4 @@ if __name__ == "__main__":
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
-    run(load_model = True)
+    run(load_model = False)
