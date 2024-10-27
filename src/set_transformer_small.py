@@ -109,7 +109,7 @@ def run(load_model = False):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     config = GPTConfig()
     model = GPT(config).to(device)
-
+    print("device: ", device)
     breakpoint()
 
     if load_model:
