@@ -75,7 +75,7 @@ class GPTConfig:
     dropout: float = 0.0
     n_cards: int = 5
     block_size: int = 49
-    vocab_size: int = 21
+    vocab_size: int = 22
     bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
     input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
     target_size: int = 8
@@ -143,6 +143,11 @@ class CausalSelfAttention(nn.Module):
 
         # causal self-attention; Self-attend: (B, nh, T, hs) x (B, nh, hs, T) -> (B, nh, T, T)
         if self.flash:
+            # Calculate raw attention scores
+            att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
+            att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float("-inf"))
+            self.att_weights = F.softmax(att, dim=-1)  # Store attention weights
+            
             # efficient attention using Flash Attention CUDA kernels
             y = torch.nn.functional.scaled_dot_product_attention(
                 q,
@@ -278,6 +283,7 @@ class GPT(nn.Module):
         pos_emb = self.transformer.wpe(pos)  # position embeddings of shape (t, n_embd)
 
         # ADDED
+        breakpoint()
         # x = self.transformer.drop(tok_emb + pos_emb)
         x = tok_emb + pos_emb
         for block in self.transformer.h:

@@ -113,7 +113,7 @@ def run(load_model = False):
     print("device: ", device)
     breakpoint()
 
-    if load_model:
+    if not load_model:
 
         wandb.init(
         project="set-prediction-small",
@@ -193,4 +193,4 @@ def run(load_model = False):
 
 if __name__ == "__main__":
     # small_combinations = run()
-    run(load_model = True)
+    run()
