@@ -108,6 +108,7 @@ def run(load_model = False):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     config = GPTConfig()
+    train_loader, val_loader = initialize_datasets(config)
     model = GPT(config).to(device)
     print("device: ", device)
     breakpoint()
@@ -127,8 +128,6 @@ def run(load_model = False):
             "eval_freq": config.eval_freq,
         },
         )
-
-        train_loader, val_loader = initialize_datasets(config)
         
         optimizer = optim.AdamW(model.parameters(), lr=config.lr, weight_decay=0.01)
 
