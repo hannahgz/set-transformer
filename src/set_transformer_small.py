@@ -111,28 +111,31 @@ def run(load_model=False):
     config = GPTConfig()
     dataset = initialize_datasets(config, save_dataset=True)
 
+    # dataset = torch.load(
+    #     '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz/balanced_set_dataset.pth')
+    # train_loader, val_loader = initialize_loaders(config, dataset)
+
     # device = "cuda" if torch.cuda.is_available() else "cpu"
     # model = GPT(config).to(device)
-    # print("device: ", device)
-    # breakpoint()
 
     # if not load_model:
 
     #     wandb.init(
-    #     project="set-prediction-small",
-    #     config={
-    #         "learning_rate": config.lr,
-    #         "epochs": config.epochs,
-    #         "batch_size": config.batch_size,
-    #         "n_layer": config.n_layer,
-    #         "n_head": config.n_head,
-    #         "n_embd": config.n_embd,
-    #         "patience": config.patience,
-    #         "eval_freq": config.eval_freq,
-    #     },
+    #         project="set-prediction-small",
+    #         config={
+    #             "learning_rate": config.lr,
+    #             "epochs": config.epochs,
+    #             "batch_size": config.batch_size,
+    #             "n_layer": config.n_layer,
+    #             "n_head": config.n_head,
+    #             "n_embd": config.n_embd,
+    #             "patience": config.patience,
+    #             "eval_freq": config.eval_freq,
+    #         },
     #     )
 
-    #     optimizer = optim.AdamW(model.parameters(), lr=config.lr, weight_decay=0.01)
+    #     optimizer = optim.AdamW(
+    #         model.parameters(), lr=config.lr, weight_decay=0.01)
 
     #     # Training loop (remains mostly the same)
     #     train_losses = []
@@ -147,7 +150,7 @@ def run(load_model=False):
     #             break
     #         model.train()
     #         total_train_loss = 0
-    #         for inputs in train_loader: #train_loader, 364 batches (11664/32)
+    #         for inputs in train_loader:  # train_loader, 364 batches (11664/32)
     #             model.train()
     #             inputs = inputs.to(device)
     #             optimizer.zero_grad()
@@ -170,15 +173,10 @@ def run(load_model=False):
     #             epoch=epoch,
     #         )
 
-    #         wandb_log(avg_train_loss, avg_val_loss, epoch = epoch)
+    #         wandb_log(avg_train_loss, avg_val_loss, epoch=epoch)
 
     # breakpoint()
-    # # # Comment out if not loading already trained model
-    # # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # # checkpoint_path = "zxcv.pt"
-    # # checkpoint_path = "ckpt_small_patience (1).pt"
-    # # config = GPTConfig(vocab_size=len(tokenizer.token_to_id))
-    # # model = GPT(config).to(device)
+
     # # Restore the model state dict
     # checkpoint = torch.load(os.path.join(config.out_dir, config.filename))
     # model.load_state_dict(checkpoint["model"])
@@ -192,6 +190,7 @@ def run(load_model=False):
     # wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
 
     # wandb.finish()
+    # breakpoint()
 
 
 if __name__ == "__main__":
