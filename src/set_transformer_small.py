@@ -66,10 +66,12 @@ def calculate_accuracy(model, dataloader, padding_token, print_incorrect=False):
                 # Print incorrect predictions and corresponding targets to file
                 for i in range(len(matches)):
                     if not matches[i].item():
-                        f.write(f"Incorrect Prediction, sequence {index}, batch {i}:\n")
+                        f.write(
+                            f"Incorrect Prediction, sequence {index}, batch {i}:\n")
                         f.write(f"  Inputs: {inputs[i].cpu().numpy()}\n")
                         f.write(f"  Target: {targets[i].cpu().numpy()}\n")
-                        f.write(f"  Prediction: {predictions[i].cpu().numpy()}\n\n")
+                        f.write(
+                            f"  Prediction: {predictions[i].cpu().numpy()}\n\n")
 
         correct += matches.sum().item()
         total += mask.any(dim=1).sum().item()
@@ -214,29 +216,30 @@ def generate_heatmap(dataset_index):
         '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth')
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
+    print(f"Loaded dataset for index {dataset_index}")
 
     # Restore the model state dict
     checkpoint = torch.load(os.path.join(
         config.out_dir, config.filename), weights_only=False)
     model.load_state_dict(checkpoint["model"])
+    print("Loaded model")
 
     _, _, attention_weights = model(
         dataset[dataset_index].unsqueeze(0).to(device), False)
+    print("Got attention weights")
 
     labels = dataset[dataset_index].tolist()
+    print("labels: ", labels)
 
-    # Layer 0, Batch 0 (always constant), Head 0
-    plot_attention_heatmap(
-        attention_weights[0][0][0], labels, title="Attention Weights: Layer 0, Head 0", savefig="attention_heatmap_0_0.png")
-    # Layer 0, Batch 0 (always constant), Head 1
-    plot_attention_heatmap(
-        attention_weights[0][0][1], labels, title="Attention Weights: Layer 0, Head 1", savefig="attention_heatmap_0_1.png")
-    # Layer 1, Batch 0 (always constant), Head 0
-    plot_attention_heatmap(
-        attention_weights[1][0][0], labels, title="Attention Weights: Layer 1, Head 0", savefig="attention_heatmap_1_0.png")
-    # Layer 1, Batch 0 (always constant), Head 1
-    plot_attention_heatmap(
-        attention_weights[1][0][1], labels, title="Attention Weights: Layer 1, Head 1", savefig="attention_heatmap_1_1.png")
+    layers = [0, 1]
+    heads = [0, 1]
+    for layer in layers:
+        for head in heads:
+            plot_attention_heatmap(
+                attention_weights[layer][0][head],
+                labels,
+                title=f"Attention Weights: Layer {layer}, Head {head}",
+                savefig=f"attention_heatmap_index_{dataset_index}_layer_{layer}_head_{head}.png")
 
 
 if __name__ == "__main__":
@@ -245,4 +248,8 @@ if __name__ == "__main__":
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
-    run(load_model=True)
+    generate_heatmap(0)
+    generate_heatmap(1)
+    generate_heatmap(2)
+
+    # run(load_model=True)
