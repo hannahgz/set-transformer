@@ -12,7 +12,8 @@ import os
 import torch
 from torch import optim
 import wandb
-from model import GPT, GPTConfig
+from model import GPT
+from model import GPTConfig24, GPTConfig42, GPTConfig44
 from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap
 import random
 import numpy as np
@@ -20,9 +21,9 @@ import numpy as np
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-def wandb_log(avg_train_loss, avg_val_loss, epoch=None):
+def wandb_log(config, avg_train_loss, avg_val_loss, epoch=None):
     print(
-        f"Epoch {epoch+1}/{GPTConfig.epochs}, Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}"
+        f"Epoch {epoch+1}/{config.epochs}, Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}"
     )
 
     wandb.log(
@@ -37,20 +38,20 @@ def wandb_log(avg_train_loss, avg_val_loss, epoch=None):
 # Update accuracy calculation
 # TODO: add alternate measure for computing accuracy (set prediction, but wrong order of cards)
 @torch.no_grad()
-def calculate_accuracy(model, dataloader, padding_token, save_incorrect=False):
+def calculate_accuracy(model, dataloader, config, save_incorrect=False):
     model.eval()
     correct = 0
     total = 0
 
     for index, sequences in enumerate(dataloader):
-        inputs = sequences[:, : GPTConfig().input_size].to(device)
-        targets = sequences[:, GPTConfig().input_size:].to(device)
+        inputs = sequences[:, : config.input_size].to(device)
+        targets = sequences[:, config.input_size:].to(device)
 
         outputs = model.generate(
-            inputs, max_new_tokens=GPTConfig().target_size)
-        predictions = outputs[:, GPTConfig().input_size:]
+            inputs, max_new_tokens=config.target_size)
+        predictions = outputs[:, config.input_size:]
 
-        mask = targets != padding_token  # Create a mask to ignore padding
+        mask = targets != config.padding_token  # Create a mask to ignore padding
         matches = ((predictions == targets) | ~mask).all(dim=1)
 
         # if print_incorrect:
@@ -122,9 +123,8 @@ def evaluate_val_loss(
     return avg_val_loss, best_val_loss, counter
 
 
-def run(load_model=False):
+def run(config, load_model=False):
 
-    config = GPTConfig()
     # dataset = initialize_datasets(config, save_dataset=True)
 
     dataset = torch.load(
@@ -133,19 +133,19 @@ def run(load_model=False):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
 
-    # wandb.init(
-    #         project="set-prediction-small",
-    #         config={
-    #             "learning_rate": config.lr,
-    #             "epochs": config.epochs,
-    #             "batch_size": config.batch_size,
-    #             "n_layer": config.n_layer,
-    #             "n_head": config.n_head,
-    #             "n_embd": config.n_embd,
-    #             "patience": config.patience,
-    #             "eval_freq": config.eval_freq,
-    #         },
-    #     )
+    wandb.init(
+        project="set-prediction-small",
+        config={
+                "learning_rate": config.lr,
+                "epochs": config.epochs,
+                "batch_size": config.batch_size,
+                "n_layer": config.n_layer,
+                "n_head": config.n_head,
+                "n_embd": config.n_embd,
+                "patience": config.patience,
+                "eval_freq": config.eval_freq,
+        },
+    )
 
     if not load_model:
 
@@ -188,7 +188,7 @@ def run(load_model=False):
                 epoch=epoch,
             )
 
-            wandb_log(avg_train_loss, avg_val_loss, epoch=epoch)
+            wandb_log(config, avg_train_loss, avg_val_loss, epoch=epoch)
 
     # Restore the model state dict
     checkpoint = torch.load(os.path.join(
@@ -196,21 +196,20 @@ def run(load_model=False):
     model.load_state_dict(checkpoint["model"])
 
     train_accuracy = calculate_accuracy(
-        model, train_loader, config.padding_token)
+        model, train_loader, config)
     val_accuracy = calculate_accuracy(
-        model, val_loader, config.padding_token, save_incorrect=True)
+        model, val_loader, config)
 
     print(f"Train Accuracy: {train_accuracy:.4f}")
     print(f"Validation Accuracy: {val_accuracy:.4f}")
 
-    # wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
+    wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
 
-    # wandb.finish()
+    wandb.finish()
 
 
-def generate_heatmap(dataset_index):
+def generate_heatmap(config, dataset_index):
     print(f"Generating heatmap for index {dataset_index}")
-    config = GPTConfig()
     # dataset = initialize_datasets(config, save_dataset=True)
 
     dataset = torch.load(
@@ -232,7 +231,7 @@ def generate_heatmap(dataset_index):
 
     labels = dataset[dataset_index].tolist()
     print("labels: ", labels)
-    
+
     layers = range(config.n_layer)
     heads = range(config.n_head)
     for layer in layers:
@@ -250,9 +249,12 @@ if __name__ == "__main__":
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
-    # generate_heatmap(0)
-    # generate_heatmap(1)
-    # generate_heatmap(2)
-    generate_heatmap(4)
+    # generate_heatmap(GPTConfig(), 0)
+    # generate_heatmap(GPTConfig(), 1)
+    # generate_heatmap(GPTConfig(), 2)
+    # generate_heatmap(GPTConfig(), 4)
+    # run(GPTConfig(), load_model=True)
 
-    # run(load_model=True)
+    run(GPTConfig24, load_model=False)
+    run(GPTConfig42, load_model=False)
+    run(GPTConfig44, load_model=False)
