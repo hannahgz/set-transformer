@@ -13,7 +13,7 @@ import torch
 from torch import optim
 import wandb
 from model import GPT, GPTConfig
-from data_utils import initialize_datasets, initialize_loaders
+from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap
 import random
 import numpy as np
 
@@ -37,7 +37,7 @@ def wandb_log(avg_train_loss, avg_val_loss, epoch=None):
 # Update accuracy calculation
 # TODO: add alternate measure for computing accuracy (set prediction, but wrong order of cards)
 @torch.no_grad()
-def calculate_accuracy(model, dataloader, padding_token, print_incorrect = False):
+def calculate_accuracy(model, dataloader, padding_token, print_incorrect=False):
     model.eval()
     correct = 0
     total = 0
@@ -60,7 +60,7 @@ def calculate_accuracy(model, dataloader, padding_token, print_incorrect = False
                     print(f"Incorrect Prediction {i}:")
                     print(f"  Target: {targets[i].cpu().numpy()}")
                     print(f"  Prediction: {predictions[i].cpu().numpy()}")
-    
+
         correct += matches.sum().item()
         total += mask.any(dim=1).sum().item()
 
@@ -134,7 +134,7 @@ def run(load_model=False):
     #             "eval_freq": config.eval_freq,
     #         },
     #     )
-    
+
     if not load_model:
 
         optimizer = optim.AdamW(
@@ -179,11 +179,14 @@ def run(load_model=False):
             wandb_log(avg_train_loss, avg_val_loss, epoch=epoch)
 
     # Restore the model state dict
-    checkpoint = torch.load(os.path.join(config.out_dir, config.filename), weights_only = False)
+    checkpoint = torch.load(os.path.join(
+        config.out_dir, config.filename), weights_only=False)
     model.load_state_dict(checkpoint["model"])
 
-    train_accuracy = calculate_accuracy(model, train_loader, config.padding_token)
-    val_accuracy = calculate_accuracy(model, val_loader, config.padding_token, print_incorrect=True)
+    train_accuracy = calculate_accuracy(
+        model, train_loader, config.padding_token)
+    val_accuracy = calculate_accuracy(
+        model, val_loader, config.padding_token, print_incorrect=True)
 
     print(f"Train Accuracy: {train_accuracy:.4f}")
     print(f"Validation Accuracy: {val_accuracy:.4f}")
@@ -192,10 +195,44 @@ def run(load_model=False):
 
     # wandb.finish()
 
+
+def generate_heatmap(dataset_index):
+    config = GPTConfig()
+    # dataset = initialize_datasets(config, save_dataset=True)
+
+    dataset = torch.load(
+        '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth')
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = GPT(config).to(device)
+
+    # Restore the model state dict
+    checkpoint = torch.load(os.path.join(
+        config.out_dir, config.filename), weights_only=False)
+    model.load_state_dict(checkpoint["model"])
+
+    _, _, attention_weights = model(
+        dataset[dataset_index].unsqueeze(0).to(device), False)
+
+    labels = dataset[dataset_index].tolist()
+
+    # Layer 0, Batch 0 (always constant), Head 0
+    plot_attention_heatmap(
+        attention_weights[0][0][0], labels, title="Attention Weights: Layer 0, Head 0", savefig="attention_heatmap_0_0.png")
+    # Layer 0, Batch 0 (always constant), Head 1
+    plot_attention_heatmap(
+        attention_weights[0][0][1], labels, title="Attention Weights: Layer 0, Head 1", savefig="attention_heatmap_0_1.png")
+    # Layer 1, Batch 0 (always constant), Head 0
+    plot_attention_heatmap(
+        attention_weights[1][0][0], labels, title="Attention Weights: Layer 1, Head 0", savefig="attention_heatmap_1_0.png")
+    # Layer 1, Batch 0 (always constant), Head 1
+    plot_attention_heatmap(
+        attention_weights[1][0][1], labels, title="Attention Weights: Layer 1, Head 1", savefig="attention_heatmap_1_1.png")
+
+
 if __name__ == "__main__":
     # small_combinations = run()
     seed = 42
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
-    run(load_model = True)
+    run(load_model=True)

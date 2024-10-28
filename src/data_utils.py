@@ -201,7 +201,7 @@ def initialize_loaders(config, dataset):
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def plot_attention_heatmap(att_weights, labels, savefig = None):
+def plot_attention_heatmap(att_weights, labels, title = "Attention Weights Heatmap", savefig = None):
     # Convert attention weights to numpy array
     att_weights_np = att_weights.detach().cpu().numpy()
 
@@ -215,7 +215,7 @@ def plot_attention_heatmap(att_weights, labels, savefig = None):
     ax.set_yticklabels(labels, rotation=0)
 
     # Set title and labels
-    ax.set_title('Attention Weights Heatmap')
+    ax.set_title(title)
     ax.set_xlabel('Key')
     ax.set_ylabel('Query')
 
@@ -223,6 +223,6 @@ def plot_attention_heatmap(att_weights, labels, savefig = None):
     plt.tight_layout()
 
     if savefig is not None:
-      plt.savefig('attention_heatmap.png')
+      plt.savefig(savefig)
     plt.show()
 
