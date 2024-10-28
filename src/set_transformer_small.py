@@ -37,7 +37,7 @@ def wandb_log(avg_train_loss, avg_val_loss, epoch=None):
 # Update accuracy calculation
 # TODO: add alternate measure for computing accuracy (set prediction, but wrong order of cards)
 @torch.no_grad()
-def calculate_accuracy(model, dataloader, padding_token, print_incorrect=False):
+def calculate_accuracy(model, dataloader, padding_token, save_incorrect=False):
     model.eval()
     correct = 0
     total = 0
@@ -61,7 +61,7 @@ def calculate_accuracy(model, dataloader, padding_token, print_incorrect=False):
         #             print(f"  Inputs: {inputs[i].cpu().numpy()}")
         #             print(f"  Target: {targets[i].cpu().numpy()}")
         #             print(f"  Prediction: {predictions[i].cpu().numpy()}")
-        if print_incorrect:
+        if save_incorrect:
             with open("incorrect_predictions.txt", "w") as f:
                 # Print incorrect predictions and corresponding targets to file
                 for i in range(len(matches)):
@@ -198,7 +198,7 @@ def run(load_model=False):
     train_accuracy = calculate_accuracy(
         model, train_loader, config.padding_token)
     val_accuracy = calculate_accuracy(
-        model, val_loader, config.padding_token, print_incorrect=True)
+        model, val_loader, config.padding_token, save_incorrect=True)
 
     print(f"Train Accuracy: {train_accuracy:.4f}")
     print(f"Validation Accuracy: {val_accuracy:.4f}")
@@ -219,6 +219,7 @@ def generate_heatmap(dataset_index):
     model = GPT(config).to(device)
     print("Loaded dataset")
 
+    breakpoint()
     # Restore the model state dict
     checkpoint = torch.load(os.path.join(
         config.out_dir, config.filename), weights_only=False)
@@ -232,8 +233,8 @@ def generate_heatmap(dataset_index):
     labels = dataset[dataset_index].tolist()
     print("labels: ", labels)
     
-    layers = [0, 1]
-    heads = [0, 1]
+    layers = range(config.n_layer)
+    heads = range(config.n_head)
     for layer in layers:
         for head in heads:
             plot_attention_heatmap(
@@ -249,8 +250,9 @@ if __name__ == "__main__":
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
-    generate_heatmap(0)
-    generate_heatmap(1)
-    generate_heatmap(2)
+    # generate_heatmap(0)
+    # generate_heatmap(1)
+    # generate_heatmap(2)
+    generate_heatmap(3)
 
     # run(load_model=True)
