@@ -222,9 +222,11 @@ def plot_attention_heatmap(att_weights, labels, title="Attention Weights Heatmap
     fig, ax = plt.subplots(figsize=(10, 8))
 
     # Plot the heatmap
-    sns.heatmap(att_weights_np, ax=ax, cmap='rocket', cbar_kws={
-                'label': 'Attention Weight'}, xticklabels=len(labels), yticklabels=len(labels))
+    sns.heatmap(att_weights_np, ax=ax, cmap='rocket',
+                cbar_kws={'label': 'Attention Weight'})
 
+    ax.set_xticks(range(len(labels)))  # Set x-ticks to match the number of labels
+    ax.set_yticks(range(len(labels)))  # Set y-ticks to match the number of labels
     ax.set_xticklabels(labels)
     ax.set_yticklabels(labels, rotation=0)
 
