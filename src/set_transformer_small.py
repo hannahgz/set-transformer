@@ -42,7 +42,7 @@ def calculate_accuracy(model, dataloader, padding_token, print_incorrect=False):
     correct = 0
     total = 0
 
-    for sequences in dataloader:
+    for index, sequences in enumerate(dataloader):
         inputs = sequences[:, : GPTConfig().input_size].to(device)
         targets = sequences[:, GPTConfig().input_size:].to(device)
 
@@ -53,13 +53,23 @@ def calculate_accuracy(model, dataloader, padding_token, print_incorrect=False):
         mask = targets != padding_token  # Create a mask to ignore padding
         matches = ((predictions == targets) | ~mask).all(dim=1)
 
+        # if print_incorrect:
+        #     # Print incorrect predictions and corresponding targets
+        #     for i in range(len(matches)):
+        #         if not matches[i].item():
+        #             print(f"Incorrect Prediction, sequence {index}, batch {i}:")
+        #             print(f"  Inputs: {inputs[i].cpu().numpy()}")
+        #             print(f"  Target: {targets[i].cpu().numpy()}")
+        #             print(f"  Prediction: {predictions[i].cpu().numpy()}")
         if print_incorrect:
-            # Print incorrect predictions and corresponding targets
-            for i in range(len(matches)):
-                if not matches[i].item():
-                    print(f"Incorrect Prediction {i}:")
-                    print(f"  Target: {targets[i].cpu().numpy()}")
-                    print(f"  Prediction: {predictions[i].cpu().numpy()}")
+            with open("incorrect_predictions.txt", "w") as f:
+                # Print incorrect predictions and corresponding targets to file
+                for i in range(len(matches)):
+                    if not matches[i].item():
+                        f.write(f"Incorrect Prediction, sequence {index}, batch {i}:\n")
+                        f.write(f"  Inputs: {inputs[i].cpu().numpy()}\n")
+                        f.write(f"  Target: {targets[i].cpu().numpy()}\n")
+                        f.write(f"  Prediction: {predictions[i].cpu().numpy()}\n\n")
 
         correct += matches.sum().item()
         total += mask.any(dim=1).sum().item()
