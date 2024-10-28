@@ -209,6 +209,7 @@ def run(load_model=False):
 
 
 def generate_heatmap(dataset_index):
+    print(f"Generating heatmap for index {dataset_index}")
     config = GPTConfig()
     # dataset = initialize_datasets(config, save_dataset=True)
 
@@ -216,7 +217,7 @@ def generate_heatmap(dataset_index):
         '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth')
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
-    print(f"Loaded dataset for index {dataset_index}")
+    print("Loaded dataset")
 
     # Restore the model state dict
     checkpoint = torch.load(os.path.join(
