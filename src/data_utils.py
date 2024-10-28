@@ -97,7 +97,7 @@ def generate_cont_combinations(block_size, pad_symbol, n_cards = 3):
 
         yield flattened_array
 
-def generate_combinations(target_size, pad_symbol, n_cards, random = False):
+def generate_combinations(target_size, pad_symbol, n_cards, random_order = False):
 
     cards = get_cards()
 
@@ -110,7 +110,7 @@ def generate_combinations(target_size, pad_symbol, n_cards, random = False):
         ]
 
         # Randomize the array
-        if random:
+        if random_order:
             random.shuffle(tuple_array)
 
         # Flatten the array to 40 elements using the new flatten_tuple function
@@ -134,7 +134,7 @@ def separate_sets_non_sets(tokenized_combinations, no_set_token, expected_pos):
 
 def initialize_datasets(config, save_dataset = False):
     optimized_combinations = generate_combinations(
-        config.target_size, config.pad_symbol, config.n_cards, random = True
+        config.target_size, config.pad_symbol, config.n_cards, random_order = True
     )
     
     small_combinations = list(optimized_combinations)
