@@ -197,3 +197,32 @@ def initialize_loaders(config, dataset):
     val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False)
     return train_loader, val_loader
 
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+def plot_attention_heatmap(att_weights, labels, savefig = None):
+    # Convert attention weights to numpy array
+    att_weights_np = att_weights.detach().cpu().numpy()
+
+    # Create a figure and axis
+    fig, ax = plt.subplots(figsize=(10, 8))
+
+    # Plot the heatmap
+    sns.heatmap(att_weights_np, ax=ax, cmap='rocket', cbar_kws={'label': 'Attention Weight'})
+
+    ax.set_xticklabels(labels)
+    ax.set_yticklabels(labels, rotation=0)
+
+    # Set title and labels
+    ax.set_title('Attention Weights Heatmap')
+    ax.set_xlabel('Key')
+    ax.set_ylabel('Query')
+
+    # Adjust layout and display
+    plt.tight_layout()
+
+    if savefig is not None:
+      plt.savefig('attention_heatmap.png')
+    plt.show()
+
