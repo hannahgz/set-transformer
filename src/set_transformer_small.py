@@ -253,6 +253,6 @@ if __name__ == "__main__":
     # generate_heatmap(0)
     # generate_heatmap(1)
     # generate_heatmap(2)
-    generate_heatmap(3)
+    generate_heatmap(4)
 
     # run(load_model=True)
