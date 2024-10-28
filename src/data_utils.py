@@ -1,3 +1,5 @@
+import seaborn as sns
+import matplotlib.pyplot as plt
 from typing import List, Tuple
 import itertools
 from itertools import chain
@@ -39,15 +41,17 @@ def find_sets_with_cards(combination: Tuple) -> List[Tuple]:
             for k in range(j + 1, n_cards):
                 if is_set(combination[i], combination[j], combination[k]):
                     # print("appending: ", (card_vectors[i], card_vectors[j], card_vectors[k]))
-                    sets.extend([card_vectors[i], card_vectors[j], card_vectors[k]])
+                    sets.extend(
+                        [card_vectors[i], card_vectors[j], card_vectors[k]])
 
     if len(sets) == 6:
-      sets.insert(3, "/")
+        sets.insert(3, "/")
 
     if len(sets) == 0:
-      sets.append("*")
+        sets.append("*")
 
     return sets
+
 
 def get_cards():
     # Define attribute categories
@@ -58,9 +62,11 @@ def get_cards():
 
     # Generate all possible cards
     cards = list(
-        itertools.product(shapes_range, colors_range, numbers_range, shadings_range)
+        itertools.product(shapes_range, colors_range,
+                          numbers_range, shadings_range)
     )
     return cards
+
 
 def get_target_seq(combination, target_size, pad_symbol):
     target_seq = find_sets_with_cards(combination)
@@ -69,11 +75,13 @@ def get_target_seq(combination, target_size, pad_symbol):
 
     for _ in range(target_size - len(target_seq)):
         target_seq.append(pad_symbol)
-    
+
     return target_seq
 
 # Generate continuous combinations (A x y z B i j k ...) where all attributes directly follow card
-def generate_cont_combinations(block_size, pad_symbol, n_cards = 3):
+
+
+def generate_cont_combinations(block_size, pad_symbol, n_cards=3):
 
     target_size = 4
 
@@ -87,17 +95,19 @@ def generate_cont_combinations(block_size, pad_symbol, n_cards = 3):
             (card_vectors[i], get_card_attributes(*card)) for i, card in enumerate(combination)
         ]
 
-        ## Randomize the array
+        # Randomize the array
         # random.shuffle(array_of_3)
 
         # Flatten the array to 40 elements using the new flatten_tuple function
         flattened_array = flatten_tuple(flatten_tuple(card_tuples))
         flattened_array.append(">")
-        flattened_array.extend(get_target_seq(combination, target_size, pad_symbol))
+        flattened_array.extend(get_target_seq(
+            combination, target_size, pad_symbol))
 
         yield flattened_array
 
-def generate_combinations(target_size, pad_symbol, n_cards, random_order = False):
+
+def generate_combinations(target_size, pad_symbol, n_cards, random_order=False):
 
     cards = get_cards()
 
@@ -117,7 +127,8 @@ def generate_combinations(target_size, pad_symbol, n_cards, random_order = False
         flattened_array = flatten_tuple(tuple_array)
         flattened_array.append(">")
 
-        flattened_array.extend(get_target_seq(combination, target_size, pad_symbol))
+        flattened_array.extend(get_target_seq(
+            combination, target_size, pad_symbol))
         yield flattened_array
 
 
@@ -132,16 +143,17 @@ def separate_sets_non_sets(tokenized_combinations, no_set_token, expected_pos):
     return set_sequences, non_set_sequences
 
 
-def initialize_datasets(config, save_dataset = False):
+def initialize_datasets(config, save_dataset=False):
     optimized_combinations = generate_combinations(
-        config.target_size, config.pad_symbol, config.n_cards, random_order = True
+        config.target_size, config.pad_symbol, config.n_cards, random_order=True
     )
-    
+
     small_combinations = list(optimized_combinations)
 
     # Create tokenizer and tokenize all sequences
     tokenizer = Tokenizer()
-    tokenized_combinations = [tokenizer.encode(seq) for seq in small_combinations]
+    tokenized_combinations = [tokenizer.encode(
+        seq) for seq in small_combinations]
     end_of_seq_token = -1
     padding_token = -1
     no_set_token = -1
@@ -158,7 +170,7 @@ def initialize_datasets(config, save_dataset = False):
         if "." in small_combinations[i]:
             end_of_seq_token_pos = small_combinations[i].index(".")
             end_of_seq_token = tokenized_combinations[i][end_of_seq_token_pos]
-        
+
         if no_set_token >= 0 and padding_token >= 0 and end_of_seq_token >= 0:
             break
 
@@ -170,15 +182,17 @@ def initialize_datasets(config, save_dataset = False):
     config.padding_token = padding_token
 
     # Separate out sets from non sets in the tokenized representation
-    set_sequences, non_set_sequences = separate_sets_non_sets(tokenized_combinations, no_set_token, -config.target_size)
+    set_sequences, non_set_sequences = separate_sets_non_sets(
+        tokenized_combinations, no_set_token, -config.target_size)
 
     # Create dataset and dataloaders
     # dataset = SetDataset(tokenized_combinations)
     # train_size = int(0.95 * len(dataset))
     dataset = BalancedSetDataset(set_sequences, non_set_sequences)
-    
+
     if save_dataset:
-        torch.save(dataset, '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth')
+        torch.save(
+            dataset, '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth')
     return dataset
 
 
@@ -193,15 +207,14 @@ def initialize_loaders(config, dataset):
 
     print("train_size: ", train_size, " val_size: ", val_size)
 
-    train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False)
+    train_loader = DataLoader(
+        train_dataset, batch_size=config.batch_size, shuffle=True)
+    val_loader = DataLoader(
+        val_dataset, batch_size=config.batch_size, shuffle=False)
     return train_loader, val_loader
 
 
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-def plot_attention_heatmap(att_weights, labels, title = "Attention Weights Heatmap", savefig = None):
+def plot_attention_heatmap(att_weights, labels, title="Attention Weights Heatmap", savefig=None):
     # Convert attention weights to numpy array
     att_weights_np = att_weights.detach().cpu().numpy()
 
@@ -209,7 +222,8 @@ def plot_attention_heatmap(att_weights, labels, title = "Attention Weights Heatm
     fig, ax = plt.subplots(figsize=(10, 8))
 
     # Plot the heatmap
-    sns.heatmap(att_weights_np, ax=ax, cmap='rocket', cbar_kws={'label': 'Attention Weight'})
+    sns.heatmap(att_weights_np, ax=ax, cmap='rocket', cbar_kws={
+                'label': 'Attention Weight'}, xticklabels=len(labels), yticklabels=len(labels))
 
     ax.set_xticklabels(labels)
     ax.set_yticklabels(labels, rotation=0)
@@ -223,6 +237,5 @@ def plot_attention_heatmap(att_weights, labels, title = "Attention Weights Heatm
     plt.tight_layout()
 
     if savefig is not None:
-      plt.savefig(savefig)
+        plt.savefig(savefig)
     plt.show()
-
