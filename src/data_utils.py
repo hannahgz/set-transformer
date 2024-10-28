@@ -134,7 +134,7 @@ def separate_sets_non_sets(tokenized_combinations, no_set_token, expected_pos):
 
 def initialize_datasets(config, save_dataset = False):
     optimized_combinations = generate_combinations(
-        config.target_size, config.pad_symbol, config.n_cards
+        config.target_size, config.pad_symbol, config.n_cards, random = True
     )
     
     small_combinations = list(optimized_combinations)
@@ -178,7 +178,7 @@ def initialize_datasets(config, save_dataset = False):
     dataset = BalancedSetDataset(set_sequences, non_set_sequences)
     
     if save_dataset:
-        torch.save(dataset, '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset.pth')
+        torch.save(dataset, '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth')
     return dataset
 
 

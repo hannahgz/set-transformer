@@ -108,10 +108,10 @@ def evaluate_val_loss(
 def run(load_model=False):
 
     config = GPTConfig()
-    # dataset = initialize_datasets(config, save_dataset=True)
+    dataset = initialize_datasets(config, save_dataset=True)
 
     dataset = torch.load(
-        '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset.pth')
+        '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth')
     train_loader, val_loader = initialize_loaders(config, dataset)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)

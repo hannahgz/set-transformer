@@ -81,7 +81,7 @@ class GPTConfig:
     target_size: int = 8
     pad_symbol: str = "_"
     out_dir: str = ""
-    filename: str = "full_run.pt"
+    filename: str = "full_run_random.pt"
     end_of_seq_token: int = 13
     padding_token: int = 14
 
