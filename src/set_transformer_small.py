@@ -79,7 +79,7 @@ def evaluate_val_loss(
 
     for inputs in val_loader:
         inputs = inputs.to(device)
-        _, loss = model(inputs, True)
+        _, loss, _ = model(inputs, True)
         total_val_loss += loss.item()
 
     avg_val_loss = total_val_loss / len(val_loader)
@@ -152,7 +152,7 @@ def run(load_model=False):
                 model.train()
                 inputs = inputs.to(device)
                 optimizer.zero_grad()
-                _, loss = model(inputs, True)
+                _, loss, _ = model(inputs, True)
                 loss.backward()
                 optimizer.step()
                 total_train_loss += loss.item()

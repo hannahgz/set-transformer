@@ -148,7 +148,7 @@ class CausalSelfAttention(nn.Module):
             # Calculate raw attention scores
             att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
             # TODO: remember to add masking back in if using bias later
-            self.att_weights = F.softmax(att, dim=-1)  # Store attention weights
+            att_weights = F.softmax(att, dim=-1)  # Store attention weights
 
             # efficient attention using Flash Attention CUDA kernels
             y = torch.nn.functional.scaled_dot_product_attention(
@@ -165,6 +165,7 @@ class CausalSelfAttention(nn.Module):
             # TODO: might need to comment this out if not using bias
             att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float("-inf"))
             att = F.softmax(att, dim=-1)
+            att_weights = F.softmax(att, dim=-1)
             att = self.attn_dropout(att)
             y = att @ v  # (B, nh, T, T) x (B, nh, T, hs) -> (B, nh, T, hs)
         y = (
@@ -173,7 +174,7 @@ class CausalSelfAttention(nn.Module):
 
         # output projection
         y = self.resid_dropout(self.c_proj(y))
-        return y
+        return y, att_weights
 
 
 class MLP(nn.Module):
@@ -203,9 +204,10 @@ class Block(nn.Module):
         self.mlp = MLP(config)
 
     def forward(self, x):
-        x = x + self.attn(self.ln_1(x))
+        attn_output, att_weights = self.attn(self.ln_1(x))
+        x = x + attn_output
         x = x + self.mlp(self.ln_2(x))
-        return x
+        return x, att_weights
 
 
 class GPT(nn.Module):
@@ -287,8 +289,10 @@ class GPT(nn.Module):
 
         # x = self.transformer.drop(tok_emb + pos_emb)
         x = tok_emb + pos_emb
+        attention_weights = []
         for block in self.transformer.h:
-            x = block(x)
+            x, att_weights = block(x)
+            attention_weights.append(att_weights)
         x = self.transformer.ln_f(x)
 
         if get_loss:
@@ -311,7 +315,7 @@ class GPT(nn.Module):
             )  # note: using list [-1] to preserve the time dim
             loss = None
 
-        return logits, loss
+        return logits, loss, attention_weights
 
     @torch.no_grad()
     def generate(self, idx, max_new_tokens, temperature=1.0, top_k=None):
@@ -329,7 +333,7 @@ class GPT(nn.Module):
                 else idx[:, -self.config.block_size :]
             )
             # forward the model to get the logits for the index in the sequence
-            logits, _ = self(idx_cond)
+            logits, _, _ = self(idx_cond)
             # pluck the logits at the final step and scale by desired temperature
             logits = logits[:, -1, :] / temperature
 
