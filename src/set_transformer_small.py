@@ -37,7 +37,7 @@ def wandb_log(avg_train_loss, avg_val_loss, epoch=None):
 # Update accuracy calculation
 # TODO: add alternate measure for computing accuracy (set prediction, but wrong order of cards)
 @torch.no_grad()
-def calculate_accuracy(model, dataloader, padding_token):
+def calculate_accuracy(model, dataloader, padding_token, print_incorrect = False):
     model.eval()
     correct = 0
     total = 0
@@ -50,13 +50,18 @@ def calculate_accuracy(model, dataloader, padding_token):
             inputs, max_new_tokens=GPTConfig().target_size)
         predictions = outputs[:, GPTConfig().input_size:]
 
-        # print("targets: ", targets)
-        # print("predictions: ", predictions)
-
-        # breakpoint()
-
         mask = targets != padding_token  # Create a mask to ignore padding
-        correct += ((predictions == targets) | ~mask).all(dim=1).sum().item()
+        matches = ((predictions == targets) | ~mask).all(dim=1)
+
+        if print_incorrect:
+            # Print incorrect predictions and corresponding targets
+            for i in range(len(matches)):
+                if not matches[i].item():
+                    print(f"Incorrect Prediction {i}:")
+                    print(f"  Target: {targets[i].cpu().numpy()}")
+                    print(f"  Prediction: {predictions[i].cpu().numpy()}")
+    
+        correct += matches.sum().item()
         total += mask.any(dim=1).sum().item()
 
     return correct / total
@@ -108,7 +113,7 @@ def evaluate_val_loss(
 def run(load_model=False):
 
     config = GPTConfig()
-    dataset = initialize_datasets(config, save_dataset=True)
+    # dataset = initialize_datasets(config, save_dataset=True)
 
     dataset = torch.load(
         '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth')
@@ -116,19 +121,19 @@ def run(load_model=False):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
 
-    wandb.init(
-            project="set-prediction-small",
-            config={
-                "learning_rate": config.lr,
-                "epochs": config.epochs,
-                "batch_size": config.batch_size,
-                "n_layer": config.n_layer,
-                "n_head": config.n_head,
-                "n_embd": config.n_embd,
-                "patience": config.patience,
-                "eval_freq": config.eval_freq,
-            },
-        )
+    # wandb.init(
+    #         project="set-prediction-small",
+    #         config={
+    #             "learning_rate": config.lr,
+    #             "epochs": config.epochs,
+    #             "batch_size": config.batch_size,
+    #             "n_layer": config.n_layer,
+    #             "n_head": config.n_head,
+    #             "n_embd": config.n_embd,
+    #             "patience": config.patience,
+    #             "eval_freq": config.eval_freq,
+    #         },
+    #     )
     
     if not load_model:
 
@@ -178,14 +183,14 @@ def run(load_model=False):
     model.load_state_dict(checkpoint["model"])
 
     train_accuracy = calculate_accuracy(model, train_loader, config.padding_token)
-    val_accuracy = calculate_accuracy(model, val_loader, config.padding_token)
+    val_accuracy = calculate_accuracy(model, val_loader, config.padding_token, print_incorrect=True)
 
     print(f"Train Accuracy: {train_accuracy:.4f}")
     print(f"Validation Accuracy: {val_accuracy:.4f}")
 
-    wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
+    # wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
 
-    wandb.finish()
+    # wandb.finish()
 
 if __name__ == "__main__":
     # small_combinations = run()
@@ -193,4 +198,4 @@ if __name__ == "__main__":
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
-    run(load_model = False)
+    run(load_model = True)
