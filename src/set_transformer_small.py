@@ -231,7 +231,7 @@ def generate_heatmap(dataset_index):
 
     labels = dataset[dataset_index].tolist()
     print("labels: ", labels)
-
+    breakpoint()
     layers = [0, 1]
     heads = [0, 1]
     for layer in layers:
