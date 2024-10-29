@@ -1,0 +1,50 @@
+Incorrect Prediction, sequence 4968, batch 2:
+  Inputs: ['E', 'blue', 'D', 'diamond', 'D', 'green', 'E', 'striped', 'B', 'pink', 'B', 'two', 'D', 'open', 'D', 'three', 'C', 'pink', 'E', 'diamond', 'E', 'two', 'C', 'squiggle', 'A', 'striped', 'B', 'striped', 'B', 'squiggle', 'A', 'oval', 'A', 'one', 'C', 'three', 'C', 'solid', 'A', 'green', '>']
+  Target: ['*', '.', '_', '_', '_', '_', '_', '_']
+  Prediction: ['A', 'C', 'E', '.', '.', '.', '.', '.']
+
+Incorrect Prediction, sequence 4968, batch 7:
+  Inputs: ['C', 'pink', 'E', 'diamond', 'A', 'open', 'A', 'oval', 'B', 'two', 'A', 'two', 'C', 'squiggle', 'E', 'striped', 'D', 'solid', 'D', 'two', 'E', 'blue', 'B', 'blue', 'D', 'diamond', 'D', 'blue', 'E', 'two', 'A', 'green', 'C', 'solid', 'C', 'two', 'B', 'oval', 'B', 'solid', '>']
+  Target: ['A', 'C', 'E', '.', '_', '_', '_', '_']
+  Prediction: ['A', 'C', 'D', '.', '.', '.', '.', '.']
+
+Incorrect Prediction, sequence 4968, batch 9:
+  Inputs: ['C', 'three', 'E', 'blue', 'D', 'green', 'E', 'diamond', 'D', 'solid', 'E', 'two', 'C', 'squiggle', 'A', 'oval', 'B', 'open', 'A', 'three', 'C', 'blue', 'E', 'striped', 'B', 'pink', 'B', 'oval', 'B', 'two', 'D', 'one', 'D', 'diamond', 'C', 'striped', 'A', 'solid', 'A', 'blue', '>']
+  Target: ['B', 'C', 'D', '.', '_', '_', '_', '_']
+  Prediction: ['A', 'C', 'E', '.', '.', '.', '.', '.']
+
+Incorrect Prediction, sequence 4968, batch 13:
+  Inputs: ['D', 'diamond', 'D', 'two', 'B', 'two', 'B', 'oval', 'C', 'open', 'A', 'oval', 'B', 'open', 'E', 'blue', 'D', 'solid', 'E', 'diamond', 'A', 'green', 'E', 'striped', 'B', 'green', 'E', 'three', 'C', 'three', 'D', 'blue', 'C', 'green', 'A', 'one', 'C', 'oval', 'A', 'open', '>']
+  Target: ['A', 'B', 'C', '.', '_', '_', '_', '_']
+  Prediction: ['*', '.', '.', '.', '.', '.', '.', '.']
+
+Incorrect Prediction, sequence 4968, batch 20:
+  Inputs: ['A', 'solid', 'D', 'squiggle', 'B', 'squiggle', 'A', 'oval', 'E', 'three', 'B', 'open', 'E', 'diamond', 'A', 'green', 'D', 'pink', 'D', 'open', 'C', 'two', 'B', 'one', 'C', 'squiggle', 'C', 'blue', 'B', 'green', 'A', 'one', 'E', 'solid', 'D', 'three', 'E', 'pink', 'C', 'solid', '>']
+  Target: ['A', 'C', 'E', '.', '_', '_', '_', '_']
+  Prediction: ['*', '.', '.', '.', '.', '.', '.', '.']
+
+Incorrect Prediction, sequence 4968, batch 26:
+  Inputs: ['B', 'solid', 'E', 'green', 'D', 'diamond', 'A', 'pink', 'E', 'three', 'A', 'one', 'D', 'solid', 'C', 'squiggle', 'A', 'oval', 'D', 'green', 'D', 'three', 'C', 'two', 'B', 'squiggle', 'B', 'three', 'A', 'open', 'C', 'solid', 'B', 'green', 'C', 'blue', 'E', 'diamond', 'E', 'striped', '>']
+  Target: ['A', 'C', 'E', '.', '_', '_', '_', '_']
+  Prediction: ['A', 'C', 'D', '.', '.', '.', '.', '.']
+
+Incorrect Prediction, sequence 4968, batch 30:
+  Inputs: ['C', 'squiggle', 'C', 'blue', 'A', 'oval', 'D', 'one', 'B', 'blue', 'B', 'solid', 'D', 'diamond', 'E', 'two', 'A', 'solid', 'B', 'oval', 'A', 'one', 'E', 'solid', 'C', 'three', 'D', 'open', 'D', 'blue', 'E', 'diamond', 'A', 'blue', 'B', 'two', 'E', 'blue', 'C', 'striped', '>']
+  Target: ['B', 'C', 'D', '.', '_', '_', '_', '_']
+  Prediction: ['A', 'C', 'E', '.', '.', '.', '.', '.']
+
+Incorrect Prediction, sequence 4968, batch 33:
+  Inputs: ['B', 'one', 'E', 'green', 'E', 'two', 'C', 'one', 'A', 'green', 'E', 'diamond', 'A', 'oval', 'D', 'squiggle', 'C', 'solid', 'B', 'pink', 'C', 'squiggle', 'D', 'solid', 'D', 'blue', 'C', 'green', 'B', 'oval', 'B', 'striped', 'E', 'solid', 'D', 'three', 'A', 'three', 'A', 'solid', '>']
+  Target: ['A', 'C', 'E', '.', '_', '_', '_', '_']
+  Prediction: ['B', 'D', 'E', '.', '.', '.', '.', '.']
+
+Incorrect Prediction, sequence 4968, batch 35:
+  Inputs: ['E', 'solid', 'A', 'one', 'A', 'oval', 'A', 'striped', 'C', 'one', 'E', 'one', 'D', 'pink', 'B', 'oval', 'C', 'striped', 'C', 'squiggle', 'E', 'blue', 'D', 'squiggle', 'B', 'solid', 'E', 'diamond', 'B', 'one', 'B', 'pink', 'C', 'pink', 'D', 'solid', 'D', 'two', 'A', 'green', '>']
+  Target: ['*', '.', '_', '_', '_', '_', '_', '_']
+  Prediction: ['A', 'C', 'E', '.', '.', '.', '.', '.']
+
+Incorrect Prediction, sequence 4968, batch 45:
+  Inputs: ['C', 'three', 'B', 'squiggle', 'A', 'green', 'A', 'solid', 'A', 'one', 'C', 'solid', 'E', 'green', 'C', 'blue', 'D', 'one', 'A', 'oval', 'B', 'green', 'E', 'open', 'B', 'one', 'D', 'green', 'E', 'diamond', 'E', 'one', 'D', 'solid', 'C', 'squiggle', 'B', 'solid', 'D', 'diamond', '>']
+  Target: ['A', 'B', 'D', '.', '_', '_', '_', '_']
+  Prediction: ['*', '.', 'E', '.', '.', '.', 'E', '.']
+
