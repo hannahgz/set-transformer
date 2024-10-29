@@ -4,7 +4,7 @@ from typing import List, Tuple
 import itertools
 from itertools import chain
 import random
-from tokenizer import Tokenizer
+from tokenizer import Tokenizer, save_tokenizer
 from set_dataset import SetDataset, BalancedSetDataset
 import torch
 from torch.utils.data import DataLoader
@@ -143,7 +143,7 @@ def separate_sets_non_sets(tokenized_combinations, no_set_token, expected_pos):
     return set_sequences, non_set_sequences
 
 
-def initialize_datasets(config, save_dataset=False):
+def initialize_datasets(config, save_dataset=False, save_tokenizer_path = None):
     optimized_combinations = generate_combinations(
         config.target_size, config.pad_symbol, config.n_cards, random_order=True
     )
@@ -154,6 +154,10 @@ def initialize_datasets(config, save_dataset=False):
     tokenizer = Tokenizer()
     tokenized_combinations = [tokenizer.encode(
         seq) for seq in small_combinations]
+    
+    if save_tokenizer_path:
+        save_tokenizer(tokenizer, save_tokenizer_path)
+
     end_of_seq_token = -1
     padding_token = -1
     no_set_token = -1
