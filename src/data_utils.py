@@ -158,6 +158,8 @@ def initialize_datasets(config, save_dataset=False, save_tokenizer_path = None):
     if save_tokenizer_path:
         save_tokenizer(tokenizer, save_tokenizer_path)
 
+    breakpoint()
+    
     end_of_seq_token = -1
     padding_token = -1
     no_set_token = -1

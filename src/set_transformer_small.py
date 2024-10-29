@@ -13,7 +13,7 @@ import torch
 from torch import optim
 import wandb
 from model import GPT
-from model import GPTConfig24, GPTConfig42, GPTConfig44
+from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig
 from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap
 import random
 import numpy as np
@@ -255,6 +255,8 @@ if __name__ == "__main__":
     # generate_heatmap(GPTConfig(), 4)
     # run(GPTConfig(), load_model=True)
 
-    run(GPTConfig24, load_model=False)
-    run(GPTConfig42, load_model=False)
-    run(GPTConfig44, load_model=False)
+    # run(GPTConfig24, load_model=False)
+    # run(GPTConfig42, load_model=False)
+    # run(GPTConfig44, load_model=False)
+
+    dataset = initialize_datasets(GPTConfig(), save_dataset=False, save_tokenizer_path = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
