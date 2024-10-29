@@ -17,6 +17,7 @@ from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig
 from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap
 import random
 import numpy as np
+from tokenizer import load_tokenizer
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -208,39 +209,45 @@ def run(config, load_model=False):
     wandb.finish()
 
 
-def generate_heatmap(config, dataset_index):
-    print(f"Generating heatmap for index {dataset_index}")
-    # dataset = initialize_datasets(config, save_dataset=True)
-
+def generate_heatmap(config, dataset_indices, use_labels=False):
     dataset = torch.load(
         '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth')
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
     print("Loaded dataset")
 
-    breakpoint()
     # Restore the model state dict
     checkpoint = torch.load(os.path.join(
         config.out_dir, config.filename), weights_only=False)
     model.load_state_dict(checkpoint["model"])
     print("Loaded model")
 
-    _, _, attention_weights = model(
-        dataset[dataset_index].unsqueeze(0).to(device), False)
-    print("Got attention weights")
+    if use_labels:
+        tokenizer = load_tokenizer(
+            '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
 
-    labels = dataset[dataset_index].tolist()
-    print("labels: ", labels)
+    for dataset_index in dataset_indices:
+        print(f"Generating heatmap for index {dataset_index}")
 
-    layers = range(config.n_layer)
-    heads = range(config.n_head)
-    for layer in layers:
-        for head in heads:
-            plot_attention_heatmap(
-                attention_weights[layer][0][head],
-                labels,
-                title=f"Attention Weights: Layer {layer}, Head {head}",
-                savefig=f"attention_heatmap_index_{dataset_index}_layer_{layer}_head_{head}.png")
+        _, _, attention_weights = model(
+            dataset[dataset_index].unsqueeze(0).to(device), False)
+        print("Got attention weights")
+
+        labels = dataset[dataset_index].tolist()
+        if use_labels:
+            labels = tokenizer.decode(labels)
+
+        print("labels: ", labels)
+
+        layers = range(config.n_layer)
+        heads = range(config.n_head)
+        for layer in layers:
+            for head in heads:
+                plot_attention_heatmap(
+                    attention_weights[layer][0][head],
+                    labels,
+                    title=f"Attention Weights: Layer {layer}, Head {head}",
+                    savefig=f"labels_attention_heatmap_index_{dataset_index}_layer_{layer}_head_{head}.png")
 
 
 if __name__ == "__main__":
@@ -249,6 +256,8 @@ if __name__ == "__main__":
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
+
+    generate_heatmap(GPTConfig(), [0, 1, 4], use_labels=True)
     # generate_heatmap(GPTConfig(), 0)
     # generate_heatmap(GPTConfig(), 1)
     # generate_heatmap(GPTConfig(), 2)
@@ -259,4 +268,4 @@ if __name__ == "__main__":
     # run(GPTConfig42, load_model=False)
     # run(GPTConfig44, load_model=False)
 
-    dataset = initialize_datasets(GPTConfig(), save_dataset=False, save_tokenizer_path = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
+    # dataset = initialize_datasets(GPTConfig(), save_dataset=False, save_tokenizer_path = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
