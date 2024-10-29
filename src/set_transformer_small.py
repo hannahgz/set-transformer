@@ -62,7 +62,7 @@ def calculate_accuracy(model, dataloader, config, save_incorrect_path=None):
         #             print(f"  Target: {targets[i].cpu().numpy()}")
         #             print(f"  Prediction: {predictions[i].cpu().numpy()}")
         if save_incorrect_path:
-            with open(save_incorrect_path, "w") as f:
+            with open(save_incorrect_path, "a") as f:
                 # Print incorrect predictions and corresponding targets to file
                 tokenizer = load_tokenizer(
                     '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
@@ -201,7 +201,7 @@ def run(config, load_model=False):
     # train_accuracy = calculate_accuracy(
     #     model, train_loader, config)
     val_accuracy = calculate_accuracy(
-        model, val_loader, config, save_incorrect_path="incorrect_predictions.txt")
+        model, val_loader, config, save_incorrect_path="incorrect_predictions_fixed.txt")
 
     # print(f"Train Accuracy: {train_accuracy:.4f}")
     print(f"Validation Accuracy: {val_accuracy:.4f}")
