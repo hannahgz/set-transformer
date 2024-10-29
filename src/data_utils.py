@@ -159,7 +159,7 @@ def initialize_datasets(config, save_dataset=False, save_tokenizer_path = None):
         save_tokenizer(tokenizer, save_tokenizer_path)
 
     breakpoint()
-    
+
     end_of_seq_token = -1
     padding_token = -1
     no_set_token = -1
@@ -233,7 +233,7 @@ def plot_attention_heatmap(att_weights, labels, title="Attention Weights Heatmap
 
     ax.set_xticks(range(len(labels)))  # Set x-ticks to match the number of labels
     ax.set_yticks(range(len(labels)))  # Set y-ticks to match the number of labels
-    ax.set_xticklabels(labels)
+    ax.set_xticklabels(labels, rotation=45, ha="right")
     ax.set_yticklabels(labels, rotation=0)
 
     # Set title and labels
