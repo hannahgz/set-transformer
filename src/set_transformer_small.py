@@ -11,7 +11,7 @@ import torch
 from torch import optim
 import wandb
 from model import GPT
-from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig
+from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking
 from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap
 import random
 import numpy as np
@@ -136,79 +136,79 @@ def run(config, load_model=False):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
 
-    # wandb.init(
-    #     project="set-prediction-small",
-    #     config={
-    #             "learning_rate": config.lr,
-    #             "epochs": config.epochs,
-    #             "batch_size": config.batch_size,
-    #             "n_layer": config.n_layer,
-    #             "n_head": config.n_head,
-    #             "n_embd": config.n_embd,
-    #             "patience": config.patience,
-    #             "eval_freq": config.eval_freq,
-    #     },
-    # )
+    wandb.init(
+        project="set-prediction-small",
+        config={
+                "learning_rate": config.lr,
+                "epochs": config.epochs,
+                "batch_size": config.batch_size,
+                "n_layer": config.n_layer,
+                "n_head": config.n_head,
+                "n_embd": config.n_embd,
+                "patience": config.patience,
+                "eval_freq": config.eval_freq,
+        },
+    )
 
-    # if not load_model:
+    if not load_model:
 
-    #     optimizer = optim.AdamW(
-    #         model.parameters(), lr=config.lr, weight_decay=0.01)
+        optimizer = optim.AdamW(
+            model.parameters(), lr=config.lr, weight_decay=0.01)
 
-    #     # Training loop (remains mostly the same)
-    #     train_losses = []
-    #     val_losses = []
+        # Training loop (remains mostly the same)
+        train_losses = []
+        val_losses = []
 
-    #     best_val_loss = 1e9
+        best_val_loss = 1e9
 
-    #     counter = 0
+        counter = 0
 
-    #     for epoch in range(config.epochs):
-    #         if counter >= config.patience:
-    #             break
-    #         model.train()
-    #         total_train_loss = 0
-    #         for inputs in train_loader:  # train_loader, 364 batches (11664/32)
-    #             model.train()
-    #             inputs = inputs.to(device)
-    #             optimizer.zero_grad()
-    #             _, loss, _ = model(inputs, True)
-    #             loss.backward()
-    #             optimizer.step()
-    #             total_train_loss += loss.item()
+        for epoch in range(config.epochs):
+            if counter >= config.patience:
+                break
+            model.train()
+            total_train_loss = 0
+            for inputs in train_loader:  # train_loader, 364 batches (11664/32)
+                model.train()
+                inputs = inputs.to(device)
+                optimizer.zero_grad()
+                _, loss, _ = model(inputs, True)
+                loss.backward()
+                optimizer.step()
+                total_train_loss += loss.item()
 
-    #         avg_train_loss = total_train_loss / len(train_loader)
-    #         train_losses.append(avg_train_loss)
+            avg_train_loss = total_train_loss / len(train_loader)
+            train_losses.append(avg_train_loss)
 
-    #         avg_val_loss, best_val_loss, counter = evaluate_val_loss(
-    #             model,
-    #             val_loader,
-    #             optimizer,
-    #             counter,
-    #             best_val_loss,
-    #             val_losses,
-    #             config,
-    #             epoch=epoch,
-    #         )
+            avg_val_loss, best_val_loss, counter = evaluate_val_loss(
+                model,
+                val_loader,
+                optimizer,
+                counter,
+                best_val_loss,
+                val_losses,
+                config,
+                epoch=epoch,
+            )
 
-    #         wandb_log(config, avg_train_loss, avg_val_loss, epoch=epoch)
+            wandb_log(config, avg_train_loss, avg_val_loss, epoch=epoch)
 
     # Restore the model state dict
     checkpoint = torch.load(os.path.join(
         config.out_dir, config.filename), weights_only=False)
     model.load_state_dict(checkpoint["model"])
 
-    # train_accuracy = calculate_accuracy(
-    #     model, train_loader, config)
+    train_accuracy = calculate_accuracy(
+        model, train_loader, config)
     val_accuracy = calculate_accuracy(
         model, val_loader, config, save_incorrect_path="incorrect_predictions_fixed.txt")
 
-    # print(f"Train Accuracy: {train_accuracy:.4f}")
+    print(f"Train Accuracy: {train_accuracy:.4f}")
     print(f"Validation Accuracy: {val_accuracy:.4f}")
 
-    # wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
+    wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
 
-    # wandb.finish()
+    wandb.finish()
 
 
 def generate_heatmap(config, dataset_indices, use_labels=False):
@@ -221,6 +221,7 @@ def generate_heatmap(config, dataset_indices, use_labels=False):
     # Restore the model state dict
     checkpoint = torch.load(os.path.join(
         config.out_dir, config.filename), weights_only=False)
+    
     model.load_state_dict(checkpoint["model"])
     print("Loaded model")
 
@@ -259,17 +260,20 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    # run(GPTConfig(), load_model=True)
-    generate_heatmap(GPTConfig(), [0, 1, 4], use_labels=True)
+    add_causal_masking(GPTConfig(), "causal_full_run_random.pt")
+    add_causal_masking(GPTConfig24(), "causal_full_run_random_layers_2_heads_4.pt")
+    add_causal_masking(GPTConfig42(), "causal_full_run_random_layers_4_heads_2.pt")
+    add_causal_masking(GPTConfig44(), "causal_full_run_random_layers_4_heads_4.pt")
+
+    # run(GPTConfig(), load_model=False)
+    # run(GPTConfig24, load_model=False)
+    # run(GPTConfig42, load_model=False)
+    # run(GPTConfig44, load_model=False)
+    # generate_heatmap(GPTConfig(), [0, 1, 4], use_labels=True)
     # generate_heatmap(GPTConfig(), 0)
     # generate_heatmap(GPTConfig(), 1)
     # generate_heatmap(GPTConfig(), 2)
     # generate_heatmap(GPTConfig(), 4)
-    # run(GPTConfig(), load_model=True)
-
-    # run(GPTConfig24, load_model=False)
-    # run(GPTConfig42, load_model=False)
-    # run(GPTConfig44, load_model=False)
 
     # dataset = initialize_datasets(GPTConfig(), save_dataset=False, save_tokenizer_path = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
 

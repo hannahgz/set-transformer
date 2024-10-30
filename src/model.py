@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
+import os
 
 
 # @dataclass
@@ -155,6 +156,7 @@ class GPTConfig44:
     end_of_seq_token: int = 13
     padding_token: int = 14
 
+
 class LayerNorm(nn.Module):
     """LayerNorm but with an optional bias. PyTorch doesn't support simply bias=False"""
 
@@ -189,14 +191,15 @@ class CausalSelfAttention(nn.Module):
         #         "WARNING: using slow attention. Flash Attention requires PyTorch >= 2.0"
         #     )
         
-        print("Using causal masking")
-            # causal mask to ensure that attention is only applied to the left in the input sequence
-        self.register_buffer(
-            "bias",
-            torch.tril(torch.ones(config.block_size, config.block_size)).view(
-                1, 1, config.block_size, config.block_size
-            ),
-        )
+        # UNCOMMENT
+        # print("Using causal masking")
+        #     # causal mask to ensure that attention is only applied to the left in the input sequence
+        # self.register_buffer(
+        #     "bias",
+        #     torch.tril(torch.ones(config.block_size, config.block_size)).view(
+        #         1, 1, config.block_size, config.block_size
+        #     ),
+        # )
 
     def forward(self, x):
         B, T, C = (
@@ -219,7 +222,8 @@ class CausalSelfAttention(nn.Module):
         if self.flash:
             # Calculate raw attention scores
             att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
-            att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float("-inf"))
+            # UNCOMMENT
+            # att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float("-inf"))
             att_weights = F.softmax(att, dim=-1)
 
             # efficient attention using Flash Attention CUDA kernels
@@ -418,3 +422,25 @@ class GPT(nn.Module):
             idx = torch.cat((idx, idx_next), dim=1)
 
         return idx
+    
+
+def add_causal_masking(config, modified_path):
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = GPT(config).to(device)
+    checkpoint = torch.load(os.path.join(
+        config.out_dir, config.filename), weights_only=False)
+    model.load_state_dict(checkpoint["model"], strict=False)
+
+    for block in model.transformer.h:
+        if not hasattr(block.attn, 'bias'):
+            block_size = model.config.block_size
+            block.attn.register_buffer(
+                "bias",
+                torch.tril(torch.ones(block_size, block_size))
+                    .view(1, 1, block_size, block_size)
+            )
+
+    torch.save({
+        'model': model.state_dict(),
+        'config': model.config,
+    }, modified_path)
