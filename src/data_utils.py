@@ -282,3 +282,35 @@ def plot_attention_heads_layer_horizontal(attention_weights, labels, layer, n_he
         plt.savefig(savefig)
     plt.show()
     plt.close(fig)
+
+
+def plot_attention_pattern_all(attention_weights, labels, n_layers, n_heads, title_prefix="Attention Pattern", savefig=None):
+    fig, axes = plt.subplots(
+        n_layers, n_heads, figsize=(n_heads * 10, n_layers * 10))
+
+    for layer in range(n_layers):
+        for head in range(n_heads):
+            ax = axes[layer, head]
+
+            # Extract attention weights for the current head
+            att_weights_np = attention_weights[layer][0][head].detach(
+            ).cpu().numpy()
+
+            # Plot the heatmap for this head in its respective subplot
+            sns.heatmap(att_weights_np, ax=ax, cmap='rocket', cbar=(head == n_heads - 1),
+                        cbar_kws={'label': 'Attention Weight'} if head == n_heads - 1 else None)
+            ax.set_title(f"Layer {layer} Head {head}")
+            ax.set_xticks(range(len(labels)))
+            ax.set_yticks(range(len(labels)))
+            ax.set_xticklabels(labels, rotation=45, ha="right")
+            ax.set_yticklabels(labels, rotation=0)
+
+    # Adjust layout and main title
+    fig.suptitle(f"{title_prefix} Layer {layer}", fontsize=16)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Leave space for main title
+
+    # Save or display the figure
+    if savefig is not None:
+        plt.savefig(savefig)
+    plt.show()
+    plt.close(fig)
