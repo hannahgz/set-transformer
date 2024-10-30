@@ -249,7 +249,7 @@ def generate_heatmap(config, dataset_indices, use_labels=False):
                     attention_weights[layer][0][head],
                     labels,
                     title=f"Attention Weights: Layer {layer}, Head {head}",
-                    savefig=f"labels_attention_heatmap_index_{dataset_index}_layer_{layer}_head_{head}.png")
+                    savefig=f"causal_masking/attention_heatmap_index_{dataset_index}_layer_{layer}_head_{head}.png")
 
 
 if __name__ == "__main__":
@@ -259,8 +259,8 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    run(GPTConfig(), load_model=True)
-    # generate_heatmap(GPTConfig(), [0, 1, 4], use_labels=True)
+    # run(GPTConfig(), load_model=True)
+    generate_heatmap(GPTConfig(), [0, 1, 4], use_labels=True)
     # generate_heatmap(GPTConfig(), 0)
     # generate_heatmap(GPTConfig(), 1)
     # generate_heatmap(GPTConfig(), 2)
