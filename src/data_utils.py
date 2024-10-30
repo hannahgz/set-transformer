@@ -306,7 +306,7 @@ def plot_attention_pattern_all(attention_weights, labels, n_layers, n_heads, tit
             ax.set_yticklabels(labels, rotation=0)
 
     # Adjust layout and main title
-    fig.suptitle(f"{title_prefix} Layer {layer}", fontsize=16)
+    fig.suptitle(f"{title_prefix}", fontsize=18)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Leave space for main title
 
     # Save or display the figure

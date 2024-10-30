@@ -256,7 +256,7 @@ def generate_heatmap(config, dataset_indices, use_labels=False):
             labels,
             config.n_layer,
             config.n_head,
-            title_prefix=f"Attention Pattern: {number_set.capitalize()} Sets",
+            title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
             savefig=f"{dir_path}/{filename}")
 
         # layers = range(config.n_layer)
@@ -293,7 +293,9 @@ if __name__ == "__main__":
     # run(GPTConfig24, load_model=False)
     # run(GPTConfig42, load_model=False)
     # run(GPTConfig44, load_model=False)
-    # generate_heatmap(GPTConfig(), [0, 1, 4], use_labels=True)
+    generate_heatmap(GPTConfig(), [1, 0, 4], use_labels=True)
     generate_heatmap(GPTConfig24(), [1, 0, 4], use_labels=True)
+    generate_heatmap(GPTConfig42(), [1, 0, 4], use_labels=True)
+    generate_heatmap(GPTConfig44(), [1, 0, 4], use_labels=True)
 
     # dataset = initialize_datasets(GPTConfig(), save_dataset=False, save_tokenizer_path = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
