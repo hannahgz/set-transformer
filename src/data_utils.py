@@ -252,7 +252,7 @@ def plot_attention_heatmap(att_weights, labels, title="Attention Pattern", savef
 
 def plot_attention_heads_layer_horizontal(attention_weights, labels, layer, n_heads, title_prefix="Attention Pattern", savefig=None):
     # Set up a single row of subplots
-    fig, axes = plt.subplots(1, n_heads, figsize=(n_heads * 5, 5))  # Adjust width to fit all heads horizontally
+    fig, axes = plt.subplots(1, n_heads, figsize=(n_heads * 10, 10))  # Adjust width to fit all heads horizontally
 
     for head in range(n_heads):
         ax = axes[head] if n_heads > 1 else axes  # In case there's only 1 head

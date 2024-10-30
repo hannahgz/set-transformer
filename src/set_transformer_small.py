@@ -261,7 +261,7 @@ def generate_heatmap(config, dataset_indices, use_labels=False):
             plot_attention_heads_layer_horizontal(
                 attention_weights,
                 labels,
-                title_prefix=f"Attention Pattern: {number_set.capitalize} Sets",
+                title_prefix=f"Attention Pattern: {number_set.capitalize()} Sets",
                 layer=layer,
                 n_heads=config.n_head,
                 savefig=f"causal_masking_layers_2_heads_4/layers/attention_pattern_sets_{number_set}_index_{dataset_index}_layer_{layer}.png")
