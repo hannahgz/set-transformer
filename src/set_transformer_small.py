@@ -237,8 +237,16 @@ def generate_heatmap(config, dataset_indices, use_labels=False):
         print("Got attention weights")
 
         labels = dataset[dataset_index].tolist()
+        
         if use_labels:
             labels = tokenizer.decode(labels)
+            if "/" in labels:
+                filename_set = "two_sets"
+            elif "*" in labels:
+                filename_set = "no_sets"
+            else:
+                filename_set = "one_set"
+
 
         print("labels: ", labels)
 
@@ -250,7 +258,7 @@ def generate_heatmap(config, dataset_indices, use_labels=False):
                     attention_weights[layer][0][head],
                     labels,
                     title=f"Attention Weights: Layer {layer}, Head {head}",
-                    savefig=f"causal_masking/attention_heatmap_index_{dataset_index}_layer_{layer}_head_{head}.png")
+                    savefig=f"causal_masking_layers_2_heads_4/attention_heatmap_{filename_set}_index_{dataset_index}_layer_{layer}_head_{head}.png")
 
 
 if __name__ == "__main__":
@@ -269,11 +277,9 @@ if __name__ == "__main__":
     # run(GPTConfig24, load_model=False)
     # run(GPTConfig42, load_model=False)
     # run(GPTConfig44, load_model=False)
-    generate_heatmap(GPTConfig(), [0, 1, 4], use_labels=True)
-    # generate_heatmap(GPTConfig(), 0)
-    # generate_heatmap(GPTConfig(), 1)
-    # generate_heatmap(GPTConfig(), 2)
-    # generate_heatmap(GPTConfig(), 4)
+    # generate_heatmap(GPTConfig(), [0, 1, 4], use_labels=True)
+    generate_heatmap(GPTConfig24(), [0, 1, 4], use_labels=True)
+
 
     # dataset = initialize_datasets(GPTConfig(), save_dataset=False, save_tokenizer_path = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
 
