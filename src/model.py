@@ -63,6 +63,99 @@ eval_freq = 0
 #     out_dir: str = ""
 #     filename: str = "test.pt"
 
+# @dataclass
+# class GPTConfig:
+#     lr: float = 1e-3
+#     epochs: int = 100
+#     batch_size: int = 64
+#     n_layer: int = 2
+#     n_head: int = 2
+#     n_embd: int = 64
+#     patience: int = 5
+#     eval_freq: int = 0
+#     dropout: float = 0.0
+#     n_cards: int = 5
+#     block_size: int = 49
+#     vocab_size: int = 22
+#     bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+#     input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
+#     target_size: int = 8
+#     pad_symbol: str = "_"
+#     out_dir: str = ""
+#     filename: str = "full_run_random.pt"
+#     end_of_seq_token: int = 13
+#     padding_token: int = 14
+
+# @dataclass
+# class GPTConfig24:
+#     lr: float = 1e-3
+#     epochs: int = 100
+#     batch_size: int = 64
+#     n_layer: int = 2
+#     n_head: int = 4
+#     n_embd: int = 64
+#     patience: int = 5
+#     eval_freq: int = 0
+#     dropout: float = 0.0
+#     n_cards: int = 5
+#     block_size: int = 49
+#     vocab_size: int = 22
+#     bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+#     input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
+#     target_size: int = 8
+#     pad_symbol: str = "_"
+#     out_dir: str = ""
+#     filename: str = "full_run_random_layers_2_heads_4.pt"
+#     end_of_seq_token: int = 13
+#     padding_token: int = 14
+
+# @dataclass
+# class GPTConfig42:
+#     lr: float = 1e-3
+#     epochs: int = 100
+#     batch_size: int = 64
+#     n_layer: int = 4
+#     n_head: int = 2
+#     n_embd: int = 64
+#     patience: int = 5
+#     eval_freq: int = 0
+#     dropout: float = 0.0
+#     n_cards: int = 5
+#     block_size: int = 49
+#     vocab_size: int = 22
+#     bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+#     input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
+#     target_size: int = 8
+#     pad_symbol: str = "_"
+#     out_dir: str = ""
+#     filename: str = "full_run_random_layers_4_heads_2.pt"
+#     end_of_seq_token: int = 13
+#     padding_token: int = 14
+
+
+# @dataclass
+# class GPTConfig44:
+#     lr: float = 1e-3
+#     epochs: int = 100
+#     batch_size: int = 64
+#     n_layer: int = 4
+#     n_head: int = 4
+#     n_embd: int = 64
+#     patience: int = 5
+#     eval_freq: int = 0
+#     dropout: float = 0.0
+#     n_cards: int = 5
+#     block_size: int = 49
+#     vocab_size: int = 22
+#     bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+#     input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
+#     target_size: int = 8
+#     pad_symbol: str = "_"
+#     out_dir: str = ""
+#     filename: str = "full_run_random_layers_4_heads_4.pt"
+#     end_of_seq_token: int = 13
+#     padding_token: int = 14
+
 @dataclass
 class GPTConfig:
     lr: float = 1e-3
@@ -82,7 +175,7 @@ class GPTConfig:
     target_size: int = 8
     pad_symbol: str = "_"
     out_dir: str = ""
-    filename: str = "full_run_random.pt"
+    filename: str = "causal_full_run_random.pt"
     end_of_seq_token: int = 13
     padding_token: int = 14
 
@@ -105,7 +198,7 @@ class GPTConfig24:
     target_size: int = 8
     pad_symbol: str = "_"
     out_dir: str = ""
-    filename: str = "full_run_random_layers_2_heads_4.pt"
+    filename: str = "causal_full_run_random_layers_2_heads_4.pt"
     end_of_seq_token: int = 13
     padding_token: int = 14
 
@@ -128,7 +221,7 @@ class GPTConfig42:
     target_size: int = 8
     pad_symbol: str = "_"
     out_dir: str = ""
-    filename: str = "full_run_random_layers_4_heads_2.pt"
+    filename: str = "causal_full_run_random_layers_4_heads_2.pt"
     end_of_seq_token: int = 13
     padding_token: int = 14
 
@@ -152,7 +245,7 @@ class GPTConfig44:
     target_size: int = 8
     pad_symbol: str = "_"
     out_dir: str = ""
-    filename: str = "full_run_random_layers_4_heads_4.pt"
+    filename: str = "causal_full_run_random_layers_4_heads_4.pt"
     end_of_seq_token: int = 13
     padding_token: int = 14
 
@@ -192,14 +285,14 @@ class CausalSelfAttention(nn.Module):
         #     )
         
         # UNCOMMENT
-        # print("Using causal masking")
-        #     # causal mask to ensure that attention is only applied to the left in the input sequence
-        # self.register_buffer(
-        #     "bias",
-        #     torch.tril(torch.ones(config.block_size, config.block_size)).view(
-        #         1, 1, config.block_size, config.block_size
-        #     ),
-        # )
+        print("Using causal masking")
+            # causal mask to ensure that attention is only applied to the left in the input sequence
+        self.register_buffer(
+            "bias",
+            torch.tril(torch.ones(config.block_size, config.block_size)).view(
+                1, 1, config.block_size, config.block_size
+            ),
+        )
 
     def forward(self, x):
         B, T, C = (
@@ -223,7 +316,7 @@ class CausalSelfAttention(nn.Module):
             # Calculate raw attention scores
             att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
             # UNCOMMENT
-            # att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float("-inf"))
+            att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float("-inf"))
             att_weights = F.softmax(att, dim=-1)
 
             # efficient attention using Flash Attention CUDA kernels
