@@ -220,7 +220,7 @@ def initialize_loaders(config, dataset):
     return train_loader, val_loader
 
 
-def plot_attention_heatmap(att_weights, labels, title="Attention Weights Heatmap", savefig=None):
+def plot_attention_heatmap(att_weights, labels, title="Attention Pattern", savefig=None):
     # Convert attention weights to numpy array
     att_weights_np = att_weights.detach().cpu().numpy()
 
@@ -247,3 +247,34 @@ def plot_attention_heatmap(att_weights, labels, title="Attention Weights Heatmap
     if savefig is not None:
         plt.savefig(savefig)
     plt.show()
+    plt.close(fig)
+
+
+def plot_attention_heads_layer_horizontal(attention_weights, labels, layer, n_heads, title_prefix="Attention Pattern", savefig=None):
+    # Set up a single row of subplots
+    fig, axes = plt.subplots(1, n_heads, figsize=(n_heads * 5, 5))  # Adjust width to fit all heads horizontally
+
+    for head in range(n_heads):
+        ax = axes[head] if n_heads > 1 else axes  # In case there's only 1 head
+
+        # Extract attention weights for the current head
+        att_weights_np = attention_weights[layer][0][head].detach().cpu().numpy()
+        
+        # Plot the heatmap for this head in its respective subplot
+        sns.heatmap(att_weights_np, ax=ax, cmap='rocket', cbar_kws={'label': 'Attention Weight'})
+        ax.set_title(f"Head {head}")
+        ax.set_xticks(range(len(labels)))
+        ax.set_yticks(range(len(labels)))
+        ax.set_xticklabels(labels, rotation=45, ha="right")
+        ax.set_yticklabels(labels, rotation=0)
+    
+    # Adjust layout and main title
+    fig.suptitle(f"{title_prefix} Layer {layer}", fontsize=16)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Leave space for main title
+
+    # Save or display the figure
+    if savefig is not None:
+        plt.savefig(savefig)
+    plt.show()
+    plt.close(fig)
+

@@ -12,7 +12,7 @@ from torch import optim
 import wandb
 from model import GPT
 from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking
-from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap
+from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap, plot_attention_heads_layer_horizontal
 import random
 import numpy as np
 from tokenizer import load_tokenizer
@@ -252,12 +252,19 @@ def generate_heatmap(config, dataset_indices, use_labels=False):
         layers = range(config.n_layer)
         heads = range(config.n_head)
         for layer in layers:
-            for head in heads:
-                plot_attention_heatmap(
-                    attention_weights[layer][0][head],
-                    labels,
-                    title=f"{number_set.capitalize()} Sets. Attention Weights: Layer {layer}, Head {head}",
-                    savefig=f"causal_masking_layers_2_heads_4/attention_heatmap_sets_{number_set}_index_{dataset_index}_layer_{layer}_head_{head}.png")
+            # for head in heads:
+            #     plot_attention_heatmap(
+            #         attention_weights[layer][0][head],
+            #         labels,
+            #         title=f"{number_set.capitalize()} Sets. Attention Weights: Layer {layer}, Head {head}",
+            #         savefig=f"causal_masking_layers_2_heads_4/attention_heatmap_sets_{number_set}_index_{dataset_index}_layer_{layer}_head_{head}.png")
+            plot_attention_heads_layer_horizontal(
+                attention_weights,
+                labels,
+                title_prefix=f"Attention Pattern: {number_set.capitalize} Sets",
+                layer=layer,
+                n_heads=heads,
+                savefig=f"causal_masking_layers_2_heads_4/layers/attention_pattern_sets_{number_set}_index_{dataset_index}_layer_{layer}.png")
 
 
 if __name__ == "__main__":
@@ -277,6 +284,6 @@ if __name__ == "__main__":
     # run(GPTConfig42, load_model=False)
     # run(GPTConfig44, load_model=False)
     # generate_heatmap(GPTConfig(), [0, 1, 4], use_labels=True)
-    generate_heatmap(GPTConfig24(), [0, 1, 4], use_labels=True)
+    generate_heatmap(GPTConfig24(), [1, 0, 4], use_labels=True)
 
     # dataset = initialize_datasets(GPTConfig(), save_dataset=False, save_tokenizer_path = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
