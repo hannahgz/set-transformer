@@ -143,7 +143,7 @@ def separate_sets_non_sets(tokenized_combinations, no_set_token, expected_pos):
     return set_sequences, non_set_sequences
 
 
-def initialize_datasets(config, save_dataset=False, save_tokenizer_path = None):
+def initialize_datasets(config, save_dataset=False, save_tokenizer_path=None):
     optimized_combinations = generate_combinations(
         config.target_size, config.pad_symbol, config.n_cards, random_order=True
     )
@@ -154,7 +154,7 @@ def initialize_datasets(config, save_dataset=False, save_tokenizer_path = None):
     tokenizer = Tokenizer()
     tokenized_combinations = [tokenizer.encode(
         seq) for seq in small_combinations]
-    
+
     if save_tokenizer_path:
         save_tokenizer(tokenizer, save_tokenizer_path)
 
@@ -231,8 +231,10 @@ def plot_attention_heatmap(att_weights, labels, title="Attention Pattern", savef
     sns.heatmap(att_weights_np, ax=ax, cmap='rocket',
                 cbar_kws={'label': 'Attention Weight'})
 
-    ax.set_xticks(range(len(labels)))  # Set x-ticks to match the number of labels
-    ax.set_yticks(range(len(labels)))  # Set y-ticks to match the number of labels
+    # Set x-ticks to match the number of labels
+    ax.set_xticks(range(len(labels)))
+    # Set y-ticks to match the number of labels
+    ax.set_yticks(range(len(labels)))
     ax.set_xticklabels(labels, rotation=45, ha="right")
     ax.set_yticklabels(labels, rotation=0)
 
@@ -252,22 +254,25 @@ def plot_attention_heatmap(att_weights, labels, title="Attention Pattern", savef
 
 def plot_attention_heads_layer_horizontal(attention_weights, labels, layer, n_heads, title_prefix="Attention Pattern", savefig=None):
     # Set up a single row of subplots
-    fig, axes = plt.subplots(1, n_heads, figsize=(n_heads * 10, 10))  # Adjust width to fit all heads horizontally
+    # Adjust width to fit all heads horizontally
+    fig, axes = plt.subplots(1, n_heads, figsize=(n_heads * 10, 10))
 
     for head in range(n_heads):
         ax = axes[head] if n_heads > 1 else axes  # In case there's only 1 head
 
         # Extract attention weights for the current head
-        att_weights_np = attention_weights[layer][0][head].detach().cpu().numpy()
-        
+        att_weights_np = attention_weights[layer][0][head].detach(
+        ).cpu().numpy()
+
         # Plot the heatmap for this head in its respective subplot
-        sns.heatmap(att_weights_np, ax=ax, cmap='rocket', cbar_kws={'label': 'Attention Weight'})
+        sns.heatmap(att_weights_np, ax=ax, cmap='rocket', cbar=(head == n_heads - 1),
+                    cbar_kws={'label': 'Attention Weight'} if head == n_heads - 1 else None)
         ax.set_title(f"Head {head}")
         ax.set_xticks(range(len(labels)))
         ax.set_yticks(range(len(labels)))
         ax.set_xticklabels(labels, rotation=45, ha="right")
         ax.set_yticklabels(labels, rotation=0)
-    
+
     # Adjust layout and main title
     fig.suptitle(f"{title_prefix} Layer {layer}", fontsize=16)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Leave space for main title
@@ -277,4 +282,3 @@ def plot_attention_heads_layer_horizontal(attention_weights, labels, layer, n_he
         plt.savefig(savefig)
     plt.show()
     plt.close(fig)
-
