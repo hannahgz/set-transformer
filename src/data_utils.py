@@ -351,3 +351,46 @@ def plot_attention_pattern_all(attention_weights, labels, n_layers, n_heads, tit
         plt.savefig(savefig)
     plt.show()
     plt.close(fig)
+
+def plot_attention_pattern_lines(attention_weights, labels, n_layers, n_heads, title_prefix="Attention Line Pattern", savefig=None):
+    fig, axes = plt.subplots(n_layers, n_heads, figsize=(n_heads * 8, n_layers * 8))
+    if n_layers == 1 and n_heads == 1:
+        axes = np.array([[axes]])
+
+    for layer in range(n_layers):
+        for head in range(n_heads):
+            ax = axes[layer, head]
+
+            # Extract attention weights for the current head
+            # att_weights_np = attention_weights[layer][0][head].detach().cpu().numpy()
+            att_weights_np = attention_weights[layer][0][head]
+
+            # Plot the attention lines
+            for i, label_start in enumerate(labels):
+                for j, label_end in enumerate(labels):
+                    weight = att_weights_np[i, j]
+                    # Define line thickness based on attention weight
+                    # linewidth = max(0.1, weight * 5)
+                    # linewidth = weight
+                    # ax.plot([0, 1], [i, j], linewidth=linewidth, color='blue', alpha=0.7)
+                    ax.plot([0, 1], [i, j], color='blue', alpha=weight)
+
+            # Set labels for the columns
+            ax.set_xlim(-0.1, 1.1)
+            ax.set_xticks([0, 1])
+            ax.set_xticklabels(["Query", "Key"])
+            ax.set_yticks(range(len(labels)))
+            ax.set_yticklabels(labels)
+            ax.invert_yaxis()
+
+            ax.set_title(f"Layer {layer} Head {head}")
+
+    # Adjust layout and main title
+    fig.suptitle(f"{title_prefix}: {n_layers} Layers, {n_heads} Heads", fontsize=18)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+
+    # Save or display the figure
+    if savefig is not None:
+        plt.savefig(savefig)
+    plt.show()
+    plt.close(fig)
