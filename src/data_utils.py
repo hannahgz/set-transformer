@@ -8,6 +8,7 @@ from tokenizer import Tokenizer, save_tokenizer
 from set_dataset import SetDataset, BalancedSetDataset
 import torch
 from torch.utils.data import DataLoader
+import matplotlib.gridspec as gridspec
 
 n_cards = 3
 card_vectors = ["A", "B", "C", "D", "E"]
@@ -284,21 +285,57 @@ def plot_attention_heads_layer_horizontal(attention_weights, labels, layer, n_he
     plt.close(fig)
 
 
+# def plot_attention_pattern_all(attention_weights, labels, n_layers, n_heads, title_prefix="Attention Pattern", savefig=None):
+#     fig, axes = plt.subplots(
+#         n_layers, n_heads, figsize=(n_heads * 10, n_layers * 10))
+
+#     for layer in range(n_layers):
+#         for head in range(n_heads):
+#             ax = axes[layer, head]
+
+#             # Extract attention weights for the current head
+#             att_weights_np = attention_weights[layer][0][head].detach(
+#             ).cpu().numpy()
+
+#             # Plot the heatmap for this head in its respective subplot
+#             sns.heatmap(att_weights_np, ax=ax, cmap='rocket', cbar=(head == n_heads - 1),
+#                         cbar_kws={'label': 'Attention Weight'} if head == n_heads - 1 else None)
+#             ax.set_title(f"Layer {layer} Head {head}")
+#             ax.set_xticks(range(len(labels)))
+#             ax.set_yticks(range(len(labels)))
+#             ax.set_xticklabels(labels, rotation=45, ha="right")
+#             ax.set_yticklabels(labels, rotation=0)
+
+#     # Adjust layout and main title
+#     fig.suptitle(f"{title_prefix}", fontsize=18)
+#     plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Leave space for main title
+
+#     # Save or display the figure
+#     if savefig is not None:
+#         plt.savefig(savefig)
+#     plt.show()
+#     plt.close(fig)
+
 def plot_attention_pattern_all(attention_weights, labels, n_layers, n_heads, title_prefix="Attention Pattern", savefig=None):
-    fig, axes = plt.subplots(
-        n_layers, n_heads, figsize=(n_heads * 10, n_layers * 10))
+    # Create grid layout with extra space for color bar
+    fig = plt.figure(figsize=(n_heads * 10, n_layers * 10))
+    gs = gridspec.GridSpec(n_layers, n_heads + 1, width_ratios=[1] * n_heads + [0.05], wspace=0.3)
+    
+    axes = [[fig.add_subplot(gs[layer, head]) for head in range(n_heads)] for layer in range(n_layers)]
+    cbar_ax = fig.add_subplot(gs[:, -1])  # Dedicated color bar axis spanning all rows
 
     for layer in range(n_layers):
         for head in range(n_heads):
-            ax = axes[layer, head]
+            ax = axes[layer][head]
 
             # Extract attention weights for the current head
-            att_weights_np = attention_weights[layer][0][head].detach(
-            ).cpu().numpy()
+            att_weights_np = attention_weights[layer][0][head].detach().cpu().numpy()
 
             # Plot the heatmap for this head in its respective subplot
-            sns.heatmap(att_weights_np, ax=ax, cmap='rocket', cbar=(head == n_heads - 1),
-                        cbar_kws={'label': 'Attention Weight'} if head == n_heads - 1 else None)
+            sns.heatmap(att_weights_np, ax=ax, cmap='rocket', cbar=(layer == 0 and head == n_heads - 1),
+                        cbar_ax=cbar_ax if (layer == 0 and head == n_heads - 1) else None,
+                        cbar_kws={'label': 'Attention Weight'} if (layer == 0 and head == n_heads - 1) else None)
+            
             ax.set_title(f"Layer {layer} Head {head}")
             ax.set_xticks(range(len(labels)))
             ax.set_yticks(range(len(labels)))
@@ -306,7 +343,7 @@ def plot_attention_pattern_all(attention_weights, labels, n_layers, n_heads, tit
             ax.set_yticklabels(labels, rotation=0)
 
     # Adjust layout and main title
-    fig.suptitle(f"{title_prefix}", fontsize=18)
+    fig.suptitle(f"{title_prefix}: {n_layers} Layers, {n_heads} Heads", fontsize=18)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Leave space for main title
 
     # Save or display the figure
