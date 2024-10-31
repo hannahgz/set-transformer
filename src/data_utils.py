@@ -352,10 +352,8 @@ def plot_attention_pattern_all(attention_weights, labels, n_layers, n_heads, tit
     plt.show()
     plt.close(fig)
 
-def plot_attention_pattern_lines(attention_weights, labels, n_layers, n_heads, title_prefix="Attention Line Pattern", savefig=None):
-    fig, axes = plt.subplots(n_layers, n_heads, figsize=(n_heads * 8, n_layers * 8))
-    if n_layers == 1 and n_heads == 1:
-        axes = np.array([[axes]])
+def plot_attention_pattern_lines(attention_weights, labels, n_layers, n_heads, title_prefix="Attention Line Pattern", savefig=None, threshold = None):
+    fig, axes = plt.subplots(n_layers, n_heads, figsize=(n_heads * 4, n_layers * 8))
 
     for layer in range(n_layers):
         for head in range(n_heads):
@@ -368,24 +366,30 @@ def plot_attention_pattern_lines(attention_weights, labels, n_layers, n_heads, t
             for i, label_start in enumerate(labels):
                 for j, label_end in enumerate(labels):
                     weight = att_weights_np[i, j]
-                    # Define line thickness based on attention weight
-                    # linewidth = max(0.1, weight * 5)
-                    # linewidth = weight
-                    # ax.plot([0, 1], [i, j], linewidth=linewidth, color='blue', alpha=0.7)
+                    if threshold:
+                        if weight < threshold:
+                            continue
+                    # Define line opacity based on attention weight
                     ax.plot([0, 1], [i, j], color='blue', alpha=weight)
 
             # Set labels for the columns
-            ax.set_xlim(-0.1, 1.1)
             ax.set_xticks([0, 1])
-            ax.set_xticklabels(["Query", "Key"])
+            ax.set_xticklabels(["Query", "Key"], fontsize=12, ha='center')
             ax.set_yticks(range(len(labels)))
-            ax.set_yticklabels(labels)
-            ax.invert_yaxis()
+            ax.set_yticklabels(labels, fontsize=10, va='center')  # Apply to left side
 
-            ax.set_title(f"Layer {layer} Head {head}")
+            # Mirror labels on the right side
+            ax.tick_params(axis='y', labelright=True, right=True, labelleft=True, left=True)
+            # ax.yaxis.set_tick_params(pad=-10)  # Adjust padding for both sides
+
+            ax.invert_yaxis()  # Keep labels top-to-bottom
+            ax.set_title(f"Layer {layer} Head {head}", fontsize=14)
 
     # Adjust layout and main title
-    fig.suptitle(f"{title_prefix}: {n_layers} Layers, {n_heads} Heads", fontsize=18)
+    if threshold:
+        fig.suptitle(f"{title_prefix}: {n_layers} Layers, {n_heads} Heads, weights ≥ {threshold} Threshold", fontsize=18)
+    else:
+        fig.suptitle(f"{title_prefix}: {n_layers} Layers, {n_heads} Heads", fontsize=18)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 
     # Save or display the figure
