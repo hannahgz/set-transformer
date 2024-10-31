@@ -362,8 +362,7 @@ def plot_attention_pattern_lines(attention_weights, labels, n_layers, n_heads, t
             ax = axes[layer, head]
 
             # Extract attention weights for the current head
-            # att_weights_np = attention_weights[layer][0][head].detach().cpu().numpy()
-            att_weights_np = attention_weights[layer][0][head]
+            att_weights_np = attention_weights[layer][0][head].detach().cpu().numpy()
 
             # Plot the attention lines
             for i, label_start in enumerate(labels):
