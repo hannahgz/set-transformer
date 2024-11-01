@@ -258,7 +258,7 @@ def generate_heatmap(config, dataset_indices, use_labels=False):
             config.n_head,
             title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
             savefig=f"{dir_path}/{filename}", 
-            threshold = 0.2)
+            threshold = 0.05)
         
         # plot_attention_pattern_all(
         #     attention_weights,

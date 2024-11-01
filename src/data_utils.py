@@ -387,9 +387,9 @@ def plot_attention_pattern_lines(attention_weights, labels, n_layers, n_heads, t
 
     # Adjust layout and main title
     if threshold:
-        fig.suptitle(f"{title_prefix}: {n_layers} Layers, {n_heads} Heads, weights ≥ {threshold} Threshold", fontsize=18)
+        fig.suptitle(f"{title_prefix}: {n_layers} Layers, {n_heads} Heads, weights ≥ {threshold} Threshold", fontsize=12)
     else:
-        fig.suptitle(f"{title_prefix}: {n_layers} Layers, {n_heads} Heads", fontsize=18)
+        fig.suptitle(f"{title_prefix}: {n_layers} Layers, {n_heads} Heads", fontsize=12)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 
     # Save or display the figure
