@@ -107,17 +107,25 @@ def generate_cont_combinations(block_size, pad_symbol, n_cards=3):
         yield flattened_array
 
 
-def generate_combinations(target_size, pad_symbol, n_cards, random_order=False):
+def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, attr_first = False):
 
     cards = get_cards()
 
     for combination in itertools.combinations(cards, n_cards):
         # Create the initial array of 20 tuples
-        tuple_array = [
-            (card_vectors[i], attr)
-            for i, card in enumerate(combination)
-            for attr in get_card_attributes(*card)
-        ]
+
+        if not attr_first:
+            tuple_array = [
+                (card_vectors[i], attr)
+                for i, card in enumerate(combination)
+                for attr in get_card_attributes(*card)
+            ]
+        else:
+            tuple_array = [
+                (attr, card_vectors[i])
+                for i, card in enumerate(combination)
+                for attr in get_card_attributes(*card)
+            ]
 
         # Randomize the array
         if random_order:
