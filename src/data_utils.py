@@ -10,7 +10,6 @@ import torch
 from torch.utils.data import DataLoader
 import matplotlib.gridspec as gridspec
 
-n_cards = 3
 card_vectors = ["A", "B", "C", "D", "E"]
 
 # Define attribute categories

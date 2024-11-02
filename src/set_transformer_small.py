@@ -11,7 +11,7 @@ import torch
 from torch import optim
 import wandb
 from model import GPT
-from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking
+from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig55
 from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap, plot_attention_heads_layer_horizontal, plot_attention_pattern_all, plot_attention_pattern_lines
 import random
 import numpy as np
@@ -155,7 +155,6 @@ def run(config, load_model=False):
         optimizer = optim.AdamW(
             model.parameters(), lr=config.lr, weight_decay=0.01)
 
-        # Training loop (remains mostly the same)
         train_losses = []
         val_losses = []
 
@@ -302,9 +301,11 @@ if __name__ == "__main__":
     # run(GPTConfig24, load_model=False)
     # run(GPTConfig42, load_model=False)
     # run(GPTConfig44, load_model=False)
-    generate_heatmap(GPTConfig(), [1, 0, 4], use_labels=True)
-    generate_heatmap(GPTConfig24(), [1, 0, 4], use_labels=True)
-    generate_heatmap(GPTConfig42(), [1, 0, 4], use_labels=True)
-    generate_heatmap(GPTConfig44(), [1, 0, 4], use_labels=True)
+    run(GPTConfig55, load_model=False)
+
+    # generate_heatmap(GPTConfig(), [1, 0, 4], use_labels=True)
+    # generate_heatmap(GPTConfig24(), [1, 0, 4], use_labels=True)
+    # generate_heatmap(GPTConfig42(), [1, 0, 4], use_labels=True)
+    # generate_heatmap(GPTConfig44(), [1, 0, 4], use_labels=True)
 
     # dataset = initialize_datasets(GPTConfig(), save_dataset=False, save_tokenizer_path = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
