@@ -107,7 +107,7 @@ def generate_cont_combinations(block_size, pad_symbol, n_cards=3):
         yield flattened_array
 
 
-def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, attr_first = False):
+def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, attr_first=False):
 
     cards = get_cards()
 
@@ -151,9 +151,9 @@ def separate_sets_non_sets(tokenized_combinations, no_set_token, expected_pos):
     return set_sequences, non_set_sequences
 
 
-def initialize_datasets(config, save_dataset=False, save_tokenizer_path=None):
+def initialize_datasets(config, save_dataset_path=None, save_tokenizer_path=None, attr_first = False):
     optimized_combinations = generate_combinations(
-        config.target_size, config.pad_symbol, config.n_cards, random_order=True
+        config.target_size, config.pad_symbol, config.n_cards, random_order=True, attr_first = attr_first
     )
 
     small_combinations = list(optimized_combinations)
@@ -204,9 +204,8 @@ def initialize_datasets(config, save_dataset=False, save_tokenizer_path=None):
     # train_size = int(0.95 * len(dataset))
     dataset = BalancedSetDataset(set_sequences, non_set_sequences)
 
-    if save_dataset:
-        torch.save(
-            dataset, '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth')
+    if save_dataset_path:
+        torch.save(dataset, save_dataset_path)
     return dataset
 
 
@@ -292,57 +291,31 @@ def plot_attention_heads_layer_horizontal(attention_weights, labels, layer, n_he
     plt.close(fig)
 
 
-# def plot_attention_pattern_all(attention_weights, labels, n_layers, n_heads, title_prefix="Attention Pattern", savefig=None):
-#     fig, axes = plt.subplots(
-#         n_layers, n_heads, figsize=(n_heads * 10, n_layers * 10))
-
-#     for layer in range(n_layers):
-#         for head in range(n_heads):
-#             ax = axes[layer, head]
-
-#             # Extract attention weights for the current head
-#             att_weights_np = attention_weights[layer][0][head].detach(
-#             ).cpu().numpy()
-
-#             # Plot the heatmap for this head in its respective subplot
-#             sns.heatmap(att_weights_np, ax=ax, cmap='rocket', cbar=(head == n_heads - 1),
-#                         cbar_kws={'label': 'Attention Weight'} if head == n_heads - 1 else None)
-#             ax.set_title(f"Layer {layer} Head {head}")
-#             ax.set_xticks(range(len(labels)))
-#             ax.set_yticks(range(len(labels)))
-#             ax.set_xticklabels(labels, rotation=45, ha="right")
-#             ax.set_yticklabels(labels, rotation=0)
-
-#     # Adjust layout and main title
-#     fig.suptitle(f"{title_prefix}", fontsize=18)
-#     plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Leave space for main title
-
-#     # Save or display the figure
-#     if savefig is not None:
-#         plt.savefig(savefig)
-#     plt.show()
-#     plt.close(fig)
-
 def plot_attention_pattern_all(attention_weights, labels, n_layers, n_heads, title_prefix="Attention Pattern", savefig=None):
     # Create grid layout with extra space for color bar
     fig = plt.figure(figsize=(n_heads * 10, n_layers * 10))
-    gs = gridspec.GridSpec(n_layers, n_heads + 1, width_ratios=[1] * n_heads + [0.05], wspace=0.3)
-    
-    axes = [[fig.add_subplot(gs[layer, head]) for head in range(n_heads)] for layer in range(n_layers)]
-    cbar_ax = fig.add_subplot(gs[:, -1])  # Dedicated color bar axis spanning all rows
+    gs = gridspec.GridSpec(n_layers, n_heads + 1,
+                           width_ratios=[1] * n_heads + [0.05], wspace=0.3)
+
+    axes = [[fig.add_subplot(gs[layer, head]) for head in range(
+        n_heads)] for layer in range(n_layers)]
+    # Dedicated color bar axis spanning all rows
+    cbar_ax = fig.add_subplot(gs[:, -1])
 
     for layer in range(n_layers):
         for head in range(n_heads):
             ax = axes[layer][head]
 
             # Extract attention weights for the current head
-            att_weights_np = attention_weights[layer][0][head].detach().cpu().numpy()
+            att_weights_np = attention_weights[layer][0][head].detach(
+            ).cpu().numpy()
 
             # Plot the heatmap for this head in its respective subplot
             sns.heatmap(att_weights_np, ax=ax, cmap='rocket', cbar=(layer == 0 and head == n_heads - 1),
-                        cbar_ax=cbar_ax if (layer == 0 and head == n_heads - 1) else None,
+                        cbar_ax=cbar_ax if (
+                            layer == 0 and head == n_heads - 1) else None,
                         cbar_kws={'label': 'Attention Weight'} if (layer == 0 and head == n_heads - 1) else None)
-            
+
             ax.set_title(f"Layer {layer} Head {head}")
             ax.set_xticks(range(len(labels)))
             ax.set_yticks(range(len(labels)))
@@ -350,7 +323,8 @@ def plot_attention_pattern_all(attention_weights, labels, n_layers, n_heads, tit
             ax.set_yticklabels(labels, rotation=0)
 
     # Adjust layout and main title
-    fig.suptitle(f"{title_prefix}: {n_layers} Layers, {n_heads} Heads", fontsize=18)
+    fig.suptitle(
+        f"{title_prefix}: {n_layers} Layers, {n_heads} Heads", fontsize=18)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Leave space for main title
 
     # Save or display the figure
@@ -359,15 +333,18 @@ def plot_attention_pattern_all(attention_weights, labels, n_layers, n_heads, tit
     plt.show()
     plt.close(fig)
 
-def plot_attention_pattern_lines(attention_weights, labels, n_layers, n_heads, title_prefix="Attention Line Pattern", savefig=None, threshold = None):
-    fig, axes = plt.subplots(n_layers, n_heads, figsize=(n_heads * 4, n_layers * 8))
+
+def plot_attention_pattern_lines(attention_weights, labels, n_layers, n_heads, title_prefix="Attention Line Pattern", savefig=None, threshold=None):
+    fig, axes = plt.subplots(
+        n_layers, n_heads, figsize=(n_heads * 4, n_layers * 8))
 
     for layer in range(n_layers):
         for head in range(n_heads):
             ax = axes[layer, head]
 
             # Extract attention weights for the current head
-            att_weights_np = attention_weights[layer][0][head].detach().cpu().numpy()
+            att_weights_np = attention_weights[layer][0][head].detach(
+            ).cpu().numpy()
 
             # Plot the attention lines
             for i, label_start in enumerate(labels):
@@ -383,10 +360,12 @@ def plot_attention_pattern_lines(attention_weights, labels, n_layers, n_heads, t
             ax.set_xticks([0, 1])
             ax.set_xticklabels(["Query", "Key"], fontsize=12, ha='center')
             ax.set_yticks(range(len(labels)))
-            ax.set_yticklabels(labels, fontsize=10, va='center')  # Apply to left side
+            # Apply to left side
+            ax.set_yticklabels(labels, fontsize=10, va='center')
 
             # Mirror labels on the right side
-            ax.tick_params(axis='y', labelright=True, right=True, labelleft=True, left=True)
+            ax.tick_params(axis='y', labelright=True,
+                           right=True, labelleft=True, left=True)
             # ax.yaxis.set_tick_params(pad=-10)  # Adjust padding for both sides
 
             ax.invert_yaxis()  # Keep labels top-to-bottom
@@ -394,9 +373,11 @@ def plot_attention_pattern_lines(attention_weights, labels, n_layers, n_heads, t
 
     # Adjust layout and main title
     if threshold:
-        fig.suptitle(f"{title_prefix}: {n_layers} Layers, {n_heads} Heads, weights ≥ {threshold} Threshold", fontsize=12)
+        fig.suptitle(
+            f"{title_prefix}: {n_layers} Layers, {n_heads} Heads, weights ≥ {threshold} Threshold", fontsize=12)
     else:
-        fig.suptitle(f"{title_prefix}: {n_layers} Layers, {n_heads} Heads", fontsize=12)
+        fig.suptitle(
+            f"{title_prefix}: {n_layers} Layers, {n_heads} Heads", fontsize=12)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 
     # Save or display the figure
