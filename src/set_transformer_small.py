@@ -11,7 +11,7 @@ import torch
 from torch import optim
 import wandb
 from model import GPT
-from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48
+from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20
 from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap, plot_attention_heads_layer_horizontal, plot_attention_pattern_all, plot_attention_pattern_lines
 import random
 import numpy as np
@@ -200,7 +200,7 @@ def run(config, load_model=False):
     train_accuracy = calculate_accuracy(
         model, train_loader, config)
     val_accuracy = calculate_accuracy(
-        model, val_loader, config, save_incorrect_path="incorrect_predictions_fixed.txt")
+        model, val_loader, config)
 
     print(f"Train Accuracy: {train_accuracy:.4f}")
     print(f"Validation Accuracy: {val_accuracy:.4f}")
@@ -302,6 +302,7 @@ if __name__ == "__main__":
     # run(GPTConfig42, load_model=False)
     # run(GPTConfig44, load_model=False)
     run(GPTConfig48, load_model=False)
+    run(GPTConfig44_Patience20, load_model=False)
 
     # generate_heatmap(GPTConfig(), [1, 0, 4], use_labels=True)
     # generate_heatmap(GPTConfig24(), [1, 0, 4], use_labels=True)
