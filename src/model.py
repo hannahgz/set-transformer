@@ -250,12 +250,12 @@ class GPTConfig44:
     padding_token: int = 14
 
 @dataclass
-class GPTConfig64:
+class GPTConfig48:
     lr: float = 1e-3
     epochs: int = 100
     batch_size: int = 64
-    n_layer: int = 6
-    n_head: int = 4
+    n_layer: int = 4
+    n_head: int = 8
     n_embd: int = 64
     patience: int = 5
     eval_freq: int = 0
@@ -268,7 +268,7 @@ class GPTConfig64:
     target_size: int = 8
     pad_symbol: str = "_"
     out_dir: str = ""
-    filename: str = "causal_full_run_random_layers_6_heads_4.pt"
+    filename: str = "causal_full_run_random_layers_4_heads_8.pt"
     end_of_seq_token: int = 13
     padding_token: int = 14
 

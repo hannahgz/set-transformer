@@ -11,7 +11,7 @@ import torch
 from torch import optim
 import wandb
 from model import GPT
-from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig64
+from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48
 from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap, plot_attention_heads_layer_horizontal, plot_attention_pattern_all, plot_attention_pattern_lines
 import random
 import numpy as np
@@ -301,7 +301,7 @@ if __name__ == "__main__":
     # run(GPTConfig24, load_model=False)
     # run(GPTConfig42, load_model=False)
     # run(GPTConfig44, load_model=False)
-    run(GPTConfig64, load_model=False)
+    run(GPTConfig48, load_model=False)
 
     # generate_heatmap(GPTConfig(), [1, 0, 4], use_labels=True)
     # generate_heatmap(GPTConfig24(), [1, 0, 4], use_labels=True)
