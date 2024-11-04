@@ -302,9 +302,9 @@ if __name__ == "__main__":
     # run(GPTConfig42, load_model=False)
     # run(GPTConfig44, load_model=False)
 
-    ## New model configs
-    # run(GPTConfig48, load_model=False)
-    # run(GPTConfig44_Patience20, load_model=False)
+    # New model configs
+    run(GPTConfig48, load_model=False)
+    run(GPTConfig44_Patience20, load_model=False)
 
     # generate_heatmap(GPTConfig(), [1, 0, 4], use_labels=True)
     # generate_heatmap(GPTConfig24(), [1, 0, 4], use_labels=True)
@@ -312,9 +312,9 @@ if __name__ == "__main__":
     # generate_heatmap(GPTConfig44(), [1, 0, 4], use_labels=True)
 
     # dataset = initialize_datasets(GPTConfig(), save_dataset=False, save_tokenizer_path = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
-    dataset = initialize_datasets(
-        GPTConfig(),
-        save_dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random.pth',
-        save_tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random_tokenizer.pkl',
-        attr_first=True
-    )
+    # dataset = initialize_datasets(
+    #     GPTConfig(),
+    #     save_dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random.pth',
+    #     save_tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random_tokenizer.pkl',
+    #     attr_first=True
+    # )
