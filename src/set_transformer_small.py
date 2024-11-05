@@ -11,7 +11,7 @@ import torch
 from torch import optim
 import wandb
 from model import GPT
-from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20
+from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20, GPTConfig44_AttrFirst
 from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap, plot_attention_heads_layer_horizontal, plot_attention_pattern_all, plot_attention_pattern_lines
 import random
 import numpy as np
@@ -126,12 +126,8 @@ def evaluate_val_loss(
     return avg_val_loss, best_val_loss, counter
 
 
-def run(config, load_model=False):
-
-    # dataset = initialize_datasets(config, save_dataset=True)
-
-    dataset = torch.load(
-        '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth')
+def run(config, dataset_path, load_model=False):
+    dataset = torch.load(dataset_path)
     train_loader, val_loader = initialize_loaders(config, dataset)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
@@ -210,9 +206,8 @@ def run(config, load_model=False):
     wandb.finish()
 
 
-def generate_heatmap(config, dataset_indices, use_labels=False, threshold=0.05):
-    dataset = torch.load(
-        '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth')
+def generate_heatmap(config, dataset_indices, dataset_path, tokenizer_path, use_labels=False, threshold=0.05):
+    dataset = torch.load(dataset_path)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
     print("Loaded dataset")
@@ -225,8 +220,7 @@ def generate_heatmap(config, dataset_indices, use_labels=False, threshold=0.05):
     print("Loaded model")
 
     if use_labels:
-        tokenizer = load_tokenizer(
-            '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
+        tokenizer = load_tokenizer(tokenizer_path)
 
     for dataset_index in dataset_indices:
         print(f"Generating heatmap for index {dataset_index}")
@@ -300,9 +294,12 @@ if __name__ == "__main__":
     # run(GPTConfig(), load_model=False)
     # run(GPTConfig24, load_model=False)
     # run(GPTConfig42, load_model=False)
-    # run(GPTConfig44, load_model=False)
+    run(
+        GPTConfig44_AttrFirst,
+        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random.pth',
+        load_model=False)
 
-    ## New model configs
+    # New model configs
     # run(GPTConfig48, load_model=False)
     # run(GPTConfig44_Patience20, load_model=False)
 
@@ -310,8 +307,8 @@ if __name__ == "__main__":
     # generate_heatmap(GPTConfig24(), [1, 0, 4], use_labels=True)
     # generate_heatmap(GPTConfig42(), [1, 0, 4], use_labels=True)
     # generate_heatmap(GPTConfig44(), [1, 0, 4], use_labels=True)
-    generate_heatmap(GPTConfig48, [1, 0, 4], use_labels=True, threshold=0.05)
-    generate_heatmap(GPTConfig48, [1, 0, 4], use_labels=True, threshold=0.1)
+    # generate_heatmap(GPTConfig48, [1, 0, 4], use_labels=True, threshold=0.05)
+    # generate_heatmap(GPTConfig48, [1, 0, 4], use_labels=True, threshold=0.1)
 
     # dataset = initialize_datasets(GPTConfig(), save_dataset=False, save_tokenizer_path = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
     # dataset = initialize_datasets(
