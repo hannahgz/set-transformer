@@ -208,12 +208,14 @@ def run(config, dataset_path, load_model=False):
 
 def generate_heatmap(config, dataset_indices, dataset_path, tokenizer_path, use_labels=False, threshold=0.05):
     dataset = torch.load(dataset_path)
+    for i in range(len(dataset)):
+        if dataset[i][-5] == "/":
+            print(i)
     breakpoint()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
     print("Loaded dataset")
 
-    breakpoint()
     # Restore the model state dict
     checkpoint = torch.load(os.path.join(
         config.out_dir, config.filename), weights_only=False)
