@@ -208,10 +208,12 @@ def run(config, dataset_path, load_model=False):
 
 def generate_heatmap(config, dataset_indices, dataset_path, tokenizer_path, use_labels=False, threshold=0.05):
     dataset = torch.load(dataset_path)
+    breakpoint()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
     print("Loaded dataset")
 
+    breakpoint()
     # Restore the model state dict
     checkpoint = torch.load(os.path.join(
         config.out_dir, config.filename), weights_only=False)
@@ -303,10 +305,10 @@ if __name__ == "__main__":
     # run(GPTConfig48, load_model=False)
     # run(GPTConfig44_Patience20, load_model=False)
 
-    run(
-        GPTConfig44, 
-        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth',
-        load_model=True)
+    # run(
+    #     GPTConfig44, 
+    #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth',
+    #     load_model=True)
 
     # generate_heatmap(GPTConfig(), [1, 0, 4], use_labels=True)
     # generate_heatmap(GPTConfig24(), [1, 0, 4], use_labels=True)
@@ -314,13 +316,13 @@ if __name__ == "__main__":
     # generate_heatmap(GPTConfig44(), [1, 0, 4], use_labels=True)
     # generate_heatmap(GPTConfig48, [1, 0, 4], use_labels=True, threshold=0.05)
     # generate_heatmap(GPTConfig48, [1, 0, 4], use_labels=True, threshold=0.1)
-    # generate_heatmap(
-    #     config=GPTConfig44_AttrFirst, 
-    #     dataset_indices=[1, 0, 4],
-    #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random.pth',
-    #     tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random_tokenizer.pkl',
-    #     use_labels=True, 
-    #     threshold=0.1)
+    generate_heatmap(
+        config=GPTConfig44_AttrFirst, 
+        dataset_indices=[1, 0, 4],
+        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random.pth',
+        tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random_tokenizer.pkl',
+        use_labels=True, 
+        threshold=0.1)
     
     # generate_heatmap(
     #     config=GPTConfig44_Patience20, 
