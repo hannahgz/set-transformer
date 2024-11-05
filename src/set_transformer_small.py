@@ -242,7 +242,7 @@ def generate_heatmap(config, dataset_indices, dataset_path, tokenizer_path, use_
 
         print("labels: ", labels)
 
-        dir_path = f"figs/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}_attr_first"
+        dir_path = f"figs/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}_patience20"
         filename = f"lineplot_sets_{number_set}_index_{dataset_index}_threshold_{threshold}.png"
         plot_attention_pattern_lines(
             attention_weights,
@@ -309,21 +309,21 @@ if __name__ == "__main__":
     # generate_heatmap(GPTConfig44(), [1, 0, 4], use_labels=True)
     # generate_heatmap(GPTConfig48, [1, 0, 4], use_labels=True, threshold=0.05)
     # generate_heatmap(GPTConfig48, [1, 0, 4], use_labels=True, threshold=0.1)
-    generate_heatmap(
-        config=GPTConfig44_AttrFirst, 
-        dataset_indices=[1, 0, 4],
-        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random.pth',
-        tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random_tokenizer.pkl',
-        use_labels=True, 
-        threshold=0.1)
-    
     # generate_heatmap(
-    #     config=GPTConfig44_Patience20, 
+    #     config=GPTConfig44_AttrFirst, 
     #     dataset_indices=[1, 0, 4],
-    #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth',
-    #     tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl',
+    #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random.pth',
+    #     tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random_tokenizer.pkl',
     #     use_labels=True, 
     #     threshold=0.1)
+    
+    generate_heatmap(
+        config=GPTConfig44_Patience20, 
+        dataset_indices=[1, 0, 4],
+        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth',
+        tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl',
+        use_labels=True, 
+        threshold=0.1)
 
     # dataset = initialize_datasets(GPTConfig(), save_dataset=False, save_tokenizer_path = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
     # dataset = initialize_datasets(
