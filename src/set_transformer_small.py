@@ -227,9 +227,10 @@ def lineplot_specific(
 
     tokenizer = load_tokenizer(tokenizer_path)
     input = torch.tensor(tokenizer.encode(input))
-
     sequences = input.unsqueeze(0)
 
+    breakpoint()
+    
     if get_prediction:
         inputs = sequences[:, : config.input_size].to(device)
         targets = sequences[:, config.input_size:].to(device)
