@@ -387,13 +387,13 @@ if __name__ == "__main__":
 
     lineplot_specific(
         config=GPTConfig44,
-        input=torch.tensor([
+        input=[
             "A", "squiggle", "B", "squiggle", "C", "squiggle", "D", "squiggle", "E", "squiggle",
             "A", "striped", "B", "striped", "C", "striped", "D", "striped", "E", "striped", 
             "A", "one",  "B", "two",  "C", "one",  "D", "three",  "E", "one",
             "A", "green", "B", "green", "C", "blue", "D", "green", "E", "red", 
             ">", "A", "B", "D", "/", "A", "C", "E", "."
-        ]),
+        ],
         get_prediction=True,
         filename_prefix="test"
     )
