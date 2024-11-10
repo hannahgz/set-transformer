@@ -230,7 +230,7 @@ def lineplot_specific(
     sequences = input.unsqueeze(0)
 
     breakpoint()
-    
+
     if get_prediction:
         inputs = sequences[:, : config.input_size].to(device)
         targets = sequences[:, config.input_size:].to(device)
@@ -301,7 +301,7 @@ def generate_heatmap(
         print(f"Generating heatmap for index {dataset_index}")
 
         sequences = dataset[dataset_index].unsqueeze(0)
-
+        breakpoint()
         if get_prediction:
             inputs = sequences[:, : config.input_size].to(device)
             targets = sequences[:, config.input_size:].to(device)
@@ -386,18 +386,27 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    lineplot_specific(
+    # lineplot_specific(
+    #     config=GPTConfig44,
+    #     input=[
+    #         "A", "squiggle", "B", "squiggle", "C", "squiggle", "D", "squiggle", "E", "squiggle",
+    #         "A", "striped", "B", "striped", "C", "striped", "D", "striped", "E", "striped", 
+    #         "A", "one",  "B", "two",  "C", "one",  "D", "three",  "E", "one",
+    #         "A", "green", "B", "green", "C", "blue", "D", "green", "E", "red", 
+    #         ">", "A", "B", "D", "/", "A", "C", "E", "."
+    #     ],
+    #     get_prediction=True,
+    #     filename_prefix="test"
+    # )
+
+    generate_heatmap(
         config=GPTConfig44,
-        input=[
-            "A", "squiggle", "B", "squiggle", "C", "squiggle", "D", "squiggle", "E", "squiggle",
-            "A", "striped", "B", "striped", "C", "striped", "D", "striped", "E", "striped", 
-            "A", "one",  "B", "two",  "C", "one",  "D", "three",  "E", "one",
-            "A", "green", "B", "green", "C", "blue", "D", "green", "E", "red", 
-            ">", "A", "B", "D", "/", "A", "C", "E", "."
-        ],
-        get_prediction=True,
-        filename_prefix="test"
-    )
+        dataset_indices=[1, 0, 4],
+        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth',
+        tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl',
+        use_labels=True,
+        threshold=0.1,
+        get_prediction=True)
 
 
 
