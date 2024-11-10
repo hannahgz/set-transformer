@@ -206,12 +206,15 @@ def run(config, dataset_path, load_model=False):
     # wandb.finish()
 
 
-def generate_heatmap(config, dataset_indices, dataset_path, tokenizer_path, use_labels=False, threshold=0.05):
+def generate_heatmap(
+        config,
+        dataset_indices,
+        dataset_path,
+        tokenizer_path,
+        use_labels=False,
+        threshold=0.05,
+        get_prediction=False):
     dataset = torch.load(dataset_path)
-    for i in range(len(dataset)):
-        if dataset[i][-5] == "/":
-            print(i)
-    breakpoint()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
     print("Loaded dataset")
@@ -229,8 +232,24 @@ def generate_heatmap(config, dataset_indices, dataset_path, tokenizer_path, use_
     for dataset_index in dataset_indices:
         print(f"Generating heatmap for index {dataset_index}")
 
+        sequences = dataset[dataset_index].unsqueeze(0)
+
+        if get_prediction:
+            inputs = sequences[:, : config.input_size].to(device)
+            targets = sequences[:, config.input_size:].to(device)
+
+            outputs = model.generate(
+                inputs,
+                max_new_tokens=config.target_size)
+
+            predictions = outputs[:, config.input_size:]
+
+            print("full output: ", outputs)
+            print("predictions: ", predictions)
+            print("target: ", targets)
+
         _, _, attention_weights = model(
-            dataset[dataset_index].unsqueeze(0).to(device), False)
+            sequences.to(device), False)
         print("Got attention weights")
 
         labels = dataset[dataset_index].tolist()
@@ -244,17 +263,26 @@ def generate_heatmap(config, dataset_indices, dataset_path, tokenizer_path, use_
             else:
                 number_set = "one"
 
-        print("labels: ", labels)
+        # print("labels: ", labels)
 
-        dir_path = f"figs/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}_patience20"
+        dir_path = f"figs/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}"
         filename = f"lineplot_sets_{number_set}_index_{dataset_index}_threshold_{threshold}.png"
+        # plot_attention_pattern_lines(
+        #     attention_weights,
+        #     labels,
+        #     config.n_layer,
+        #     config.n_head,
+        #     title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
+        #     savefig=f"{dir_path}/{filename}",
+        #     threshold=threshold)
+
         plot_attention_pattern_lines(
             attention_weights,
             labels,
             config.n_layer,
             config.n_head,
             title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
-            savefig=f"{dir_path}/{filename}",
+            savefig=None,
             threshold=threshold)
 
         # plot_attention_pattern_all(
@@ -308,7 +336,7 @@ if __name__ == "__main__":
     # run(GPTConfig44_Patience20, load_model=False)
 
     # run(
-    #     GPTConfig44, 
+    #     GPTConfig44,
     #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth',
     #     load_model=True)
 
@@ -318,21 +346,22 @@ if __name__ == "__main__":
     # generate_heatmap(GPTConfig44(), [1, 0, 4], use_labels=True)
     # generate_heatmap(GPTConfig48, [1, 0, 4], use_labels=True, threshold=0.05)
     # generate_heatmap(GPTConfig48, [1, 0, 4], use_labels=True, threshold=0.1)
-    generate_heatmap(
-        config=GPTConfig44_AttrFirst, 
-        dataset_indices=[1, 0, 4],
-        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random.pth',
-        tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random_tokenizer.pkl',
-        use_labels=True, 
-        threshold=0.1)
-    
     # generate_heatmap(
-    #     config=GPTConfig44_Patience20, 
+    #     config=GPTConfig44_AttrFirst,
     #     dataset_indices=[1, 0, 4],
-    #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth',
-    #     tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl',
-    #     use_labels=True, 
+    #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random.pth',
+    #     tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random_tokenizer.pkl',
+    #     use_labels=True,
     #     threshold=0.1)
+
+    generate_heatmap(
+        config=GPTConfig44,
+        dataset_indices=[1, 0, 4],
+        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth',
+        tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl',
+        use_labels=True,
+        threshold=0.1,
+        get_prediction=True)
 
     # dataset = initialize_datasets(GPTConfig(), save_dataset=False, save_tokenizer_path = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
     # dataset = initialize_datasets(
