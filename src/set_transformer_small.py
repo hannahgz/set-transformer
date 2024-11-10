@@ -19,6 +19,7 @@ from tokenizer import load_tokenizer
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
+PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 def wandb_log(config, avg_train_loss, avg_val_loss, epoch=None):
     print(
@@ -205,6 +206,72 @@ def run(config, dataset_path, load_model=False):
 
     # wandb.finish()
 
+def lineplot_specific(
+        config,
+        input,
+        tokenizer_path=f"{PATH_PREFIX}/balanced_set_dataset_random_tokenizer.pkl",
+        threshold=0.1,
+        get_prediction=False,
+        filename_prefix=""):
+   
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = GPT(config).to(device)
+    print("Loaded dataset")
+
+    # Restore the model state dict
+    checkpoint = torch.load(os.path.join(
+        config.out_dir, config.filename), weights_only=False)
+
+    model.load_state_dict(checkpoint["model"])
+    print("Loaded model")
+
+    tokenizer = load_tokenizer(tokenizer_path)
+    input = torch.tensor(tokenizer.encode(input))
+
+    sequences = input.unsqueeze(0)
+
+    if get_prediction:
+        inputs = sequences[:, : config.input_size].to(device)
+        targets = sequences[:, config.input_size:].to(device)
+
+        outputs = model.generate(
+            inputs,
+            max_new_tokens=config.target_size)
+
+        predictions = outputs[:, config.input_size:]
+
+        print("full output: ", outputs)
+        print("predictions: ", predictions)
+        print("target: ", targets)
+
+    _, _, attention_weights = model(
+        sequences.to(device), False)
+    print("Got attention weights")
+
+    labels = input.tolist()
+    labels = tokenizer.decode(labels)
+    if "/" in labels:
+        number_set = "two"
+    elif "*" in labels:
+        number_set = "zero"
+    else:
+        number_set = "one"
+
+    # print("labels: ", labels)
+
+    dir_path = f"figs/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}"
+    filename = f"{filename_prefix}_lineplot_sets_{number_set}_threshold_{threshold}.png"
+
+    plot_attention_pattern_lines(
+        attention_weights,
+        labels,
+        config.n_layer,
+        config.n_head,
+        title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
+        savefig=f"{dir_path}/{filename}",
+        threshold=threshold)
+
+
 
 def generate_heatmap(
         config,
@@ -318,6 +385,33 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
+    lineplot_specific(
+        config=GPTConfig44,
+        input=torch.tensor([
+            "A", "squiggle", "B", "squiggle", "C", "squiggle", "D", "squiggle", "E", "squiggle",
+            "A", "striped", "B", "striped", "C", "striped", "D", "striped", "E", "striped", 
+            "A", "one",  "B", "two",  "C", "one",  "D", "three",  "E", "one",
+            "A", "green", "B", "green", "C", "blue", "D", "green", "E", "red", 
+            ">", "A", "B", "D", "/", "A", "C", "E", "."
+        ]),
+        get_prediction=True,
+        filename_prefix="test"
+    )
+
+
+
+
+
+
+
+
+
+
+
+    # OLD RUNS - leaving in case want to reference later
+
+
+
     # add_causal_masking(GPTConfig(), "causal_full_run_random.pt")
     # add_causal_masking(GPTConfig24(), "causal_full_run_random_layers_2_heads_4.pt")
     # add_causal_masking(GPTConfig42(), "causal_full_run_random_layers_4_heads_2.pt")
@@ -354,14 +448,14 @@ if __name__ == "__main__":
     #     use_labels=True,
     #     threshold=0.1)
 
-    generate_heatmap(
-        config=GPTConfig44,
-        dataset_indices=[1, 0, 4],
-        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth',
-        tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl',
-        use_labels=True,
-        threshold=0.1,
-        get_prediction=True)
+    # generate_heatmap(
+    #     config=GPTConfig44,
+    #     dataset_indices=[1, 0, 4],
+    #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth',
+    #     tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl',
+    #     use_labels=True,
+    #     threshold=0.1,
+    #     get_prediction=True)
 
     # dataset = initialize_datasets(GPTConfig(), save_dataset=False, save_tokenizer_path = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
     # dataset = initialize_datasets(
