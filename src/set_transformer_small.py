@@ -13,14 +13,13 @@ import wandb
 from model import GPT
 # from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20, GPTConfig44_AttrFirst
 from model import GPTConfig44Triples, GPTConfig48Triples, GPTConfig88Triples, GPTConfig44TriplesEmbd, GPTConfig44TriplesLR
-from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap, plot_attention_heads_layer_horizontal, plot_attention_pattern_all, plot_attention_pattern_lines, initialize_triples_datasets
+from data_utils import initialize_datasets, initialize_loaders, initialize_triples_datasets
 import random
 import numpy as np
 from tokenizer import load_tokenizer
+from graph import lineplot_specific
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-
-PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 def wandb_log(config, avg_train_loss, avg_val_loss, epoch=None):
     print(
@@ -128,6 +127,23 @@ def evaluate_val_loss(
     return avg_val_loss, best_val_loss, counter
 
 
+
+def model_accuracy(config, model, train_loader, val_loader):
+     # Restore the model state dict
+    checkpoint = torch.load(os.path.join(
+        config.out_dir, config.filename), weights_only=False)
+    model.load_state_dict(checkpoint["model"])
+
+    train_accuracy = calculate_accuracy(
+        model, train_loader, config)
+    val_accuracy = calculate_accuracy(
+        model, val_loader, config)
+    
+    print(f"Train Accuracy: {train_accuracy:.4f}")
+    print(f"Validation Accuracy: {val_accuracy:.4f}")
+
+    return train_accuracy, val_accuracy
+
 def run(config, dataset_path, load_model=False, should_wandb_log=True):
     dataset = torch.load(dataset_path)
     train_loader, val_loader = initialize_loaders(config, dataset)
@@ -191,193 +207,12 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
 
             wandb_log(config, avg_train_loss, avg_val_loss, epoch=epoch)
 
-    # Restore the model state dict
-    checkpoint = torch.load(os.path.join(
-        config.out_dir, config.filename), weights_only=False)
-    model.load_state_dict(checkpoint["model"])
-
-    # train_accuracy = calculate_accuracy(
-    #     model, train_loader, config, save_incorrect_path="train_incorrect_predictions.txt")
-    train_accuracy = calculate_accuracy(
-        model, train_loader, config)
-    val_accuracy = calculate_accuracy(
-        model, val_loader, config)
-
-    print(f"Train Accuracy: {train_accuracy:.4f}")
-    print(f"Validation Accuracy: {val_accuracy:.4f}")
+    train_accuracy, val_accuracy = model_accuracy(config, model, train_loader, val_loader)
 
     if should_wandb_log:
         wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
         wandb.finish()
 
-def lineplot_specific(
-        config,
-        input,
-        tokenizer_path=f"{PATH_PREFIX}/balanced_set_dataset_random_tokenizer.pkl",
-        threshold=0.1,
-        get_prediction=False,
-        filename_prefix=""):
-   
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = GPT(config).to(device)
-    print("Loaded dataset")
-
-    # Restore the model state dict
-    checkpoint = torch.load(os.path.join(
-        config.out_dir, config.filename), weights_only=False)
-
-    model.load_state_dict(checkpoint["model"])
-    print("Loaded model")
-
-    tokenizer = load_tokenizer(tokenizer_path)
-    input = torch.tensor(tokenizer.encode(input))
-    sequences = input.unsqueeze(0)
-
-    if get_prediction:
-        inputs = sequences[:, : config.input_size].to(device)
-        targets = sequences[:, config.input_size:].to(device)
-
-        outputs = model.generate(
-            inputs,
-            max_new_tokens=config.target_size)
-
-        predictions = outputs[:, config.input_size:]
-
-        print("full output: ", tokenizer.decode(outputs[0].tolist()))
-        print("predictions: ", tokenizer.decode(predictions[0].tolist()))
-        print("target: ", tokenizer.decode(targets[0].tolist()))
-
-    _, _, attention_weights = model(
-        sequences.to(device), False)
-
-    labels = input.tolist()
-    labels = tokenizer.decode(labels)
-    if "/" in labels:
-        number_set = "two"
-    elif "*" in labels:
-        number_set = "zero"
-    else:
-        number_set = "one"
-
-    # print("labels: ", labels)
-
-    dir_path = f"figs/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}"
-    filename = f"{filename_prefix}_lineplot_sets_{number_set}_threshold_{threshold}.png"
-
-    plot_attention_pattern_lines(
-        attention_weights,
-        labels,
-        config.n_layer,
-        config.n_head,
-        title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
-        savefig=f"{dir_path}/{filename}",
-        threshold=threshold)
-
-
-
-def generate_heatmap(
-        config,
-        dataset_indices,
-        dataset_path,
-        tokenizer_path,
-        use_labels=False,
-        threshold=0.05,
-        get_prediction=False):
-    dataset = torch.load(dataset_path)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = GPT(config).to(device)
-    print("Loaded dataset")
-
-    # Restore the model state dict
-    checkpoint = torch.load(os.path.join(
-        config.out_dir, config.filename), weights_only=False)
-
-    model.load_state_dict(checkpoint["model"])
-    print("Loaded model")
-
-    if use_labels:
-        tokenizer = load_tokenizer(tokenizer_path)
-
-    for dataset_index in dataset_indices:
-        print(f"Generating heatmap for index {dataset_index}")
-
-        sequences = dataset[dataset_index].unsqueeze(0)
-        
-        if get_prediction:
-            inputs = sequences[:, : config.input_size].to(device)
-            targets = sequences[:, config.input_size:].to(device)
-
-            outputs = model.generate(
-                inputs,
-                max_new_tokens=config.target_size)
-
-            predictions = outputs[:, config.input_size:]
-
-            print("full output: ", tokenizer.decode(outputs[0].tolist()))
-            print("predictions: ", tokenizer.decode(predictions[0].tolist()))
-            print("target: ", tokenizer.decode(targets[0].tolist()))
-
-        _, _, attention_weights = model(
-            sequences.to(device), False)
-        print("Got attention weights")
-
-        labels = dataset[dataset_index].tolist()
-
-        if use_labels:
-            labels = tokenizer.decode(labels)
-            if "/" in labels:
-                number_set = "two"
-            elif "*" in labels:
-                number_set = "zero"
-            else:
-                number_set = "one"
-
-        # print("labels: ", labels)
-
-        dir_path = f"figs/triples_attention_pattern_layers_{config.n_layer}_heads_{config.n_head}"
-        filename = f"lineplot_sets_{number_set}_index_{dataset_index}_threshold_{threshold}.png"
-        plot_attention_pattern_lines(
-            attention_weights,
-            labels,
-            config.n_layer,
-            config.n_head,
-            title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
-            savefig=f"{dir_path}/{filename}",
-            threshold=threshold)
-
-        # plot_attention_pattern_lines(
-        #     attention_weights,
-        #     labels,
-        #     config.n_layer,
-        #     config.n_head,
-        #     title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
-        #     savefig=None,
-        #     threshold=threshold)
-
-        # plot_attention_pattern_all(
-        #     attention_weights,
-        #     labels,
-        #     config.n_layer,
-        #     config.n_head,
-        #     title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
-        #     savefig=f"{dir_path}/{filename}")
-
-        # layers = range(config.n_layer)
-        # heads = range(config.n_head)
-        # for layer in layers:
-        #     # for head in heads:
-        #     #     plot_attention_heatmap(
-        #     #         attention_weights[layer][0][head],
-        #     #         labels,
-        #     #         title=f"{number_set.capitalize()} Sets. Attention Weights: Layer {layer}, Head {head}",
-        #     #         savefig=f"causal_masking_layers_2_heads_4/attention_heatmap_sets_{number_set}_index_{dataset_index}_layer_{layer}_head_{head}.png")
-        #     plot_attention_heads_layer_horizontal(
-        #         attention_weights,
-        #         labels,
-        #         title_prefix=f"Attention Pattern: {number_set.capitalize()} Sets",
-        #         layer=layer,
-        #         n_heads=config.n_head,
-        #         savefig=f"causal_masking_layers_2_heads_4/layers/attention_pattern_sets_{number_set}_index_{dataset_index}_layer_{layer}.png")
 
 
 if __name__ == "__main__":
@@ -388,6 +223,17 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
 
+    # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth',
+    dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth',
+    config = GPTConfig44Triples
+
+    dataset = torch.load(dataset_path)
+    train_loader, val_loader = initialize_loaders(config, dataset)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = GPT(config).to(device)
+
+    model_accuracy(config, model, train_loader, val_loader)
+    
     # run(
     #     GPTConfig44Triples,
     #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth',
@@ -419,10 +265,10 @@ if __name__ == "__main__":
     #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
     # )
 
-    run(
-        GPTConfig44TriplesEmbd,
-        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
-    )
+    # run(
+    #     GPTConfig44TriplesEmbd,
+    #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
+    # )
 
 
     # dataset = initialize_triples_datasets(
