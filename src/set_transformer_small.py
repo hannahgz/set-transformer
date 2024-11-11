@@ -384,6 +384,34 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
+
+    lineplot_specific(
+        config=GPTConfig44,
+        input=[
+            "A", "green", "B", "green", "C", "blue", "D", "green", "E", "pink", 
+            "A", "one",  "B", "two",  "C", "one",  "D", "three",  "E", "one",
+            "A", "squiggle", "B", "squiggle", "C", "squiggle", "D", "squiggle", "E", "squiggle",
+            "A", "striped", "B", "striped", "C", "striped", "D", "striped", "E", "striped", 
+            ">", "A", "B", "D", "/", "A", "C", "E", "."
+        ],
+        get_prediction=True,
+        filename_prefix="test"
+    )
+
+    lineplot_specific(
+        config=GPTConfig44,
+        input=[
+            "A", "green", "B", "green", "C", "blue", "D", "green", "E", "pink", 
+            "A", "one",  "B", "two",  "C", "one",  "D", "three",  "E", "one",
+            "A", "diamond", "B", "diamond", "C", "diamond", "D", "diamond", "E", "diamond",
+            "A", "striped", "B", "striped", "C", "striped", "D", "striped", "E", "striped", 
+            ">", "A", "B", "D", "/", "A", "C", "E", "."
+        ],
+        get_prediction=True,
+        filename_prefix="test"
+    )
+
+
     # lineplot_specific(
     #     config=GPTConfig44,
     #     input=[
@@ -411,18 +439,18 @@ if __name__ == "__main__":
     #     filename_prefix="test2"
     # )
 
-    lineplot_specific(
-        config=GPTConfig44,
-        input=[
-            "A", "squiggle",  "D", "squiggle", "E", "squiggle",
-            "A", "striped", "B", "striped", "C", "solid", 
-            "A", "one",  "B", "two",  "C", "one",  "D", "three",  "E", "one",
-            "A", "green", "B", "green", "C", "blue", "D", "green", "E", "pink", "B", "squiggle", "C", "squiggle", "D", "striped", "E", "striped", 
-            ">", "A", "B", "D", ".", ".", ".", ".", "."
-        ],
-        get_prediction=True,
-        filename_prefix="test3"
-    )
+    # lineplot_specific(
+    #     config=GPTConfig44,
+    #     input=[
+    #         "A", "squiggle",  "D", "squiggle", "E", "squiggle",
+    #         "A", "striped", "B", "striped", "C", "solid", 
+    #         "A", "one",  "B", "two",  "C", "one",  "D", "three",  "E", "one",
+    #         "A", "green", "B", "green", "C", "blue", "D", "green", "E", "pink", "B", "squiggle", "C", "squiggle", "D", "striped", "E", "striped", 
+    #         ">", "A", "B", "D", ".", ".", ".", ".", "."
+    #     ],
+    #     get_prediction=True,
+    #     filename_prefix="test3"
+    # )
 
 
     # generate_heatmap(
