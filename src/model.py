@@ -679,6 +679,8 @@ class GPT(nn.Module):
                     # Extract embedding for the specified head
                     capture_embedding = head_embeddings[:, :, capture_head, :]
 
+                    capture_embedding = capture_embedding.cpu()
+
         x = self.transformer.ln_f(x)
 
         if get_loss:
