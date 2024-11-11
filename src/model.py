@@ -322,7 +322,7 @@ class GPTConfig44_Patience20:
 
 @dataclass
 class GPTConfig44TriplesEmbd:
-    lr: float = 1e-2
+    lr: float = 1e-3
     epochs: int = 500
     batch_size: int = 64
     n_layer: int = 4

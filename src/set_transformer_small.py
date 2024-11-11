@@ -389,21 +389,21 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
 
-    run(
-        GPTConfig44Triples,
-        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth',
-        load_model=True,
-        wandb_log=False
-    )
+    # run(
+    #     GPTConfig44Triples,
+    #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth',
+    #     load_model=True,
+    #     wandb_log=False
+    # )
 
-    generate_heatmap(
-        GPTConfig44Triples,
-        [0, 1, 2],
-        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth',
-        tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random_tokenizer.pkl',
-        use_labels=True,
-        threshold=0.05,
-        get_prediction=True)
+    # generate_heatmap(
+    #     GPTConfig44Triples,
+    #     [0, 1, 2],
+    #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth',
+    #     tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random_tokenizer.pkl',
+    #     use_labels=True,
+    #     threshold=0.05,
+    #     get_prediction=True)
 
     # run(
     #     GPTConfig48Triples,
@@ -420,10 +420,10 @@ if __name__ == "__main__":
     #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
     # )
 
-    # run(
-    #     GPTConfig44TriplesEmbd,
-    #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
-    # )
+    run(
+        GPTConfig44TriplesEmbd,
+        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
+    )
 
 
     # dataset = initialize_triples_datasets(
