@@ -216,16 +216,48 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
         wandb.finish()
 
 
-def analyze_embeddings(config, dataset_path):
+def analyze_embeddings(config, dataset_path, capture_layer, capture_head):
     dataset = torch.load(dataset_path)
     train_loader, val_loader = initialize_loaders(config, dataset)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
 
-    for inputs in val_loader:
-        inputs = inputs.to(device)
-        _, _, _, captured_embedding = model(inputs, True, 0, 3)
-        breakpoint()
+    all_flattened_input_embeddings = []
+    all_flattened_target_attributes = []
+
+    for batch in val_loader:
+        batch = batch.to(device)
+        _, _, _, captured_embedding = model(batch, True, capture_layer, capture_head)
+
+        # target_attributes = inputs[:, 1:40:2]
+
+        # Get every other element of the captured embedding at the given layer/head
+        input_embeddings = captured_embedding[:, :(config.input_size-1):2, :]
+        flattened_input_embeddings = input_embeddings.reshape(-1, 16)
+
+        # Get every other element in the input starting from index 1, representing all the attributes
+        target_attributes = batch[:, 1:(config.input_size - 1):2]
+        flattened_target_attributes = target_attributes.reshape(-1)
+
+        # Append the flattened tensors to the respective lists
+        all_flattened_input_embeddings.append(flattened_input_embeddings)
+        all_flattened_target_attributes.append(flattened_target_attributes)
+    
+    combined_input_embeddings = torch.cat(all_flattened_input_embeddings, dim=0)
+    combined_target_attributes = torch.cat(all_flattened_target_attributes, dim=0)
+
+    # Get the unique values in combined_target_attributes
+    unique_values = torch.unique(combined_target_attributes)
+
+    # Create a mapping from unique values to a continuous sequence
+    value_to_continuous = {v.item(): i for i, v in enumerate(unique_values)}
+
+    # Reverse the mapping: continuous values back to the original values
+    continuous_to_original = {v: k for k, v in value_to_continuous.items()}
+
+    # Map the values in combined_target_attributes to the continuous sequence
+    mapped_target_attributes = torch.tensor([value_to_continuous[val.item()] for val in combined_target_attributes])
+    breakpoint()
 
 
 if __name__ == "__main__":
@@ -239,7 +271,7 @@ if __name__ == "__main__":
     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
     config = GPTConfig44
 
-    analyze_embeddings(config, dataset_path)
+    analyze_embeddings(config, dataset_path, capture_layer=0, capture_head=3)
 
 
     # run(
