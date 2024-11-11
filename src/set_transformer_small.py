@@ -12,7 +12,7 @@ from torch import optim
 import wandb
 from model import GPT
 from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20, GPTConfig44_AttrFirst
-from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap, plot_attention_heads_layer_horizontal, plot_attention_pattern_all, plot_attention_pattern_lines
+from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap, plot_attention_heads_layer_horizontal, plot_attention_pattern_all, plot_attention_pattern_lines, initialize_triples_datasets
 import random
 import numpy as np
 from tokenizer import load_tokenizer
@@ -383,13 +383,20 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
+    dataset = initialize_triples_datasets(
+        GPTConfig44(),
+        save_dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth',
+        save_tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random_tokenizer.pkl'
+    )
 
-
-    dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
-    dataset = torch.load(dataset_path)
     train_loader, val_loader = initialize_loaders(GPTConfig44, dataset)
-    for input in train_loader:
-        breakpoint()
+
+
+    # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
+    # dataset = torch.load(dataset_path)
+    # train_loader, val_loader = initialize_loaders(GPTConfig44, dataset)
+    # for input in train_loader:
+    #     breakpoint()
 
     # lineplot_specific(
     #     config=GPTConfig48,
@@ -527,7 +534,6 @@ if __name__ == "__main__":
     #     threshold=0.1,
     #     get_prediction=True)
 
-    # dataset = initialize_datasets(GPTConfig(), save_dataset=False, save_tokenizer_path = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
     # dataset = initialize_datasets(
     #     GPTConfig(),
     #     save_dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random.pth',

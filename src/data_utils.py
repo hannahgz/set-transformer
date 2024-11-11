@@ -5,7 +5,7 @@ import itertools
 from itertools import chain
 import random
 from tokenizer import Tokenizer, save_tokenizer
-from set_dataset import SetDataset, BalancedSetDataset
+from set_dataset import SetDataset, BalancedSetDataset, BalancedTriplesSetDataset
 import torch
 from torch.utils.data import DataLoader
 import matplotlib.gridspec as gridspec
@@ -204,6 +204,74 @@ def initialize_datasets(config, save_dataset_path=None, save_tokenizer_path=None
     # train_size = int(0.95 * len(dataset))
     dataset = BalancedSetDataset(set_sequences, non_set_sequences)
 
+    if save_dataset_path:
+        torch.save(dataset, save_dataset_path)
+    return dataset
+
+
+def separate_all_sets(tokenized_combinations, no_set_token, separate_token):
+    no_set_sequences = []
+    one_set_sequences = []
+    two_set_sequences = []
+    for tokenized_combo in tokenized_combinations:
+        if no_set_token in tokenized_combo:
+            no_set_sequences.append(tokenized_combo)
+        elif separate_token in tokenized_combo:
+            two_set_sequences.append(tokenized_combo)
+        else:
+            one_set_sequences.append(tokenized_combo)
+
+    random.shuffle(no_set_sequences)
+    random.shuffle(one_set_sequences)
+    random.shuffle(two_set_sequences)
+    
+    return no_set_sequences, one_set_sequences, two_set_sequences
+
+
+def initialize_triples_datasets(config, save_dataset_path=None, save_tokenizer_path=None, attr_first = False):
+    optimized_combinations = generate_combinations(
+        config.target_size, config.pad_symbol, config.n_cards, random_order=True, attr_first = attr_first
+    )
+
+    small_combinations = list(optimized_combinations)
+
+    # Create tokenizer and tokenize all sequences
+    tokenizer = Tokenizer()
+    tokenized_combinations = [tokenizer.encode(
+        seq) for seq in small_combinations]
+
+    if save_tokenizer_path:
+        save_tokenizer(tokenizer, save_tokenizer_path)
+
+    separate_token = -1
+    no_set_token = -1
+
+    for i in range(len(small_combinations)):
+        if "/" in small_combinations[i]:
+            separate_token_pos = small_combinations[i].index("/")
+            separate_token = tokenized_combinations[i][separate_token_pos]
+
+        if "*" in small_combinations[i]:
+            no_set_token_pos = small_combinations[i].index("*")
+            no_set_token = tokenized_combinations[i][no_set_token_pos]
+
+        if no_set_token >= 0 and separate_token >= 0:
+            break
+
+    print("separate token: ", separate_token)
+    print("no set token: ", no_set_token)
+
+    # Separate out sets from non sets in the tokenized representation
+    no_set_sequences, one_set_sequences, two_set_sequences = separate_all_sets(
+        tokenized_combinations, no_set_token, separate_token
+    )
+
+    # Create dataset and dataloaders
+    # dataset = SetDataset(tokenized_combinations)
+    # train_size = int(0.95 * len(dataset))
+    dataset = BalancedTriplesSetDataset(no_set_sequences, one_set_sequences, two_set_sequences)
+    breakpoint()
+    
     if save_dataset_path:
         torch.save(dataset, save_dataset_path)
     return dataset
