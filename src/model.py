@@ -344,6 +344,29 @@ class GPTConfig44TriplesEmbd:
 
 
 @dataclass
+class GPTConfig44TriplesEmbdDrop:
+    lr: float = 1e-3
+    epochs: int = 500
+    batch_size: int = 64
+    n_layer: int = 4
+    n_head: int = 4
+    n_embd: int = 128
+    patience: int = 100
+    dropout: float = 0.2
+    n_cards: int = 5
+    block_size: int = 49
+    vocab_size: int = 22
+    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
+    target_size: int = 8
+    pad_symbol: str = "_"
+    out_dir: str = ""
+    filename: str = "triples_layers_4_heads_4_embd_dropout.pt"
+    end_of_seq_token: int = 13
+    padding_token: int = 14
+
+
+@dataclass
 class GPTConfig44TriplesLR:
     lr: float = 1e-2
     epochs: int = 500
@@ -575,7 +598,7 @@ class GPT(nn.Module):
             dict(
                 wte=nn.Embedding(config.vocab_size, config.n_embd, end_of_seq_token),
                 wpe=nn.Embedding(config.block_size, config.n_embd),
-                # drop = nn.Dropout(config.dropout), # commented out for now, can add back if find overfitting
+                drop = nn.Dropout(config.dropout), 
                 h=nn.ModuleList([Block(config) for _ in range(config.n_layer)]),
                 ln_f=LayerNorm(config.n_embd, bias=config.bias),
             )
@@ -637,8 +660,8 @@ class GPT(nn.Module):
         tok_emb = self.transformer.wte(idx)  # token embeddings of shape (b, t, n_embd)
         pos_emb = self.transformer.wpe(pos)  # position embeddings of shape (t, n_embd)
 
-        # x = self.transformer.drop(tok_emb + pos_emb)
-        x = tok_emb + pos_emb
+        x = self.transformer.drop(tok_emb + pos_emb)
+        # x = tok_emb + pos_emb
         attention_weights = []
         for block in self.transformer.h:
             x, att_weights = block(x)

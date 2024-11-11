@@ -12,7 +12,7 @@ from torch import optim
 import wandb
 from model import GPT
 # from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20, GPTConfig44_AttrFirst
-from model import GPTConfig44Triples, GPTConfig48Triples, GPTConfig88Triples, GPTConfig44TriplesEmbd, GPTConfig44TriplesLR
+from model import GPTConfig44, GPTConfig44TriplesEmbdDrop
 from data_utils import initialize_datasets, initialize_loaders, initialize_triples_datasets
 import random
 import numpy as np
@@ -20,6 +20,8 @@ from tokenizer import load_tokenizer
 from graph import lineplot_specific
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
+
+PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 def wandb_log(config, avg_train_loss, avg_val_loss, epoch=None):
     print(
@@ -222,17 +224,21 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
+    run(
+        GPTConfig44TriplesEmbdDrop,
+        dataset_path=f'{PATH_PREFIX}/triples_balanced_set_dataset_random.pth'
+    )
 
     # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth',
-    dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
-    config = GPTConfig44Triples
+    # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
+    # config = GPTConfig44Triples
 
-    dataset = torch.load(dataset_path)
-    train_loader, val_loader = initialize_loaders(config, dataset)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = GPT(config).to(device)
+    # dataset = torch.load(dataset_path)
+    # train_loader, val_loader = initialize_loaders(config, dataset)
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
+    # model = GPT(config).to(device)
 
-    model_accuracy(config, model, train_loader, val_loader)
+    # model_accuracy(config, model, train_loader, val_loader)
     
     # run(
     #     GPTConfig44Triples,
@@ -382,9 +388,6 @@ if __name__ == "__main__":
     # add_causal_masking(GPTConfig42(), "causal_full_run_random_layers_4_heads_2.pt")
     # add_causal_masking(GPTConfig44(), "causal_full_run_random_layers_4_heads_4.pt")
 
-    # run(GPTConfig(), load_model=False)
-    # run(GPTConfig24, load_model=False)
-    # run(GPTConfig42, load_model=False)
     # run(
     #     GPTConfig44_AttrFirst,
     #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random.pth',

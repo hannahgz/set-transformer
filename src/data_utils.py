@@ -137,7 +137,7 @@ def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, 
         yield flattened_array
 
 
-def separate_sets_non_sets(tokenized_combinations, no_set_token, expected_pos):
+def separate_sets_non_sets(tokenized_combinations, no_set_token, expected_pos, randomize=False):
     set_sequences = []
     non_set_sequences = []
     for tokenized_combo in tokenized_combinations:
@@ -145,12 +145,17 @@ def separate_sets_non_sets(tokenized_combinations, no_set_token, expected_pos):
             non_set_sequences.append(tokenized_combo)
         else:
             set_sequences.append(tokenized_combo)
+
+    if randomize:
+        random.shuffle(set_sequences)
+        random.shuffle(non_set_sequences)
+
     return set_sequences, non_set_sequences
 
 
-def initialize_datasets(config, save_dataset_path=None, save_tokenizer_path=None, attr_first = False):
+def initialize_datasets(config, save_dataset_path=None, save_tokenizer_path=None, attr_first=False, randomize_sequence_order=False):
     optimized_combinations = generate_combinations(
-        config.target_size, config.pad_symbol, config.n_cards, random_order=True, attr_first = attr_first
+        config.target_size, config.pad_symbol, config.n_cards, random_order=True, attr_first=attr_first
     )
 
     small_combinations = list(optimized_combinations)
@@ -162,8 +167,6 @@ def initialize_datasets(config, save_dataset_path=None, save_tokenizer_path=None
 
     if save_tokenizer_path:
         save_tokenizer(tokenizer, save_tokenizer_path)
-
-    breakpoint()
 
     end_of_seq_token = -1
     padding_token = -1
@@ -194,7 +197,7 @@ def initialize_datasets(config, save_dataset_path=None, save_tokenizer_path=None
 
     # Separate out sets from non sets in the tokenized representation
     set_sequences, non_set_sequences = separate_sets_non_sets(
-        tokenized_combinations, no_set_token, -config.target_size)
+        tokenized_combinations, no_set_token, -config.target_size, randomize_sequence_order)
 
     # Create dataset and dataloaders
     # dataset = SetDataset(tokenized_combinations)
@@ -221,13 +224,13 @@ def separate_all_sets(tokenized_combinations, no_set_token, separate_token):
     random.shuffle(no_set_sequences)
     random.shuffle(one_set_sequences)
     random.shuffle(two_set_sequences)
-    
+
     return no_set_sequences, one_set_sequences, two_set_sequences
 
 
-def initialize_triples_datasets(config, save_dataset_path=None, save_tokenizer_path=None, attr_first = False):
+def initialize_triples_datasets(config, save_dataset_path=None, save_tokenizer_path=None, attr_first=False):
     optimized_combinations = generate_combinations(
-        config.target_size, config.pad_symbol, config.n_cards, random_order=True, attr_first = attr_first
+        config.target_size, config.pad_symbol, config.n_cards, random_order=True, attr_first=attr_first
     )
 
     small_combinations = list(optimized_combinations)
@@ -266,7 +269,8 @@ def initialize_triples_datasets(config, save_dataset_path=None, save_tokenizer_p
     # Create dataset and dataloaders
     # dataset = SetDataset(tokenized_combinations)
     # train_size = int(0.95 * len(dataset))
-    dataset = BalancedTriplesSetDataset(no_set_sequences, one_set_sequences, two_set_sequences)
+    dataset = BalancedTriplesSetDataset(
+        no_set_sequences, one_set_sequences, two_set_sequences)
     breakpoint()
 
     if save_dataset_path:
@@ -275,7 +279,7 @@ def initialize_triples_datasets(config, save_dataset_path=None, save_tokenizer_p
 
 
 def initialize_loaders(config, dataset):
-    train_size = int(0.95 * len(dataset))  # makes val size 1296
+    train_size = int(0.95 * len(dataset))
 
     # make validation set a lot smaller TODO, revisit how large val set this leaves us with
     val_size = len(dataset) - train_size
