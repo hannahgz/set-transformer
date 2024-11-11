@@ -212,7 +212,7 @@ def generate_heatmap(
             print("predictions: ", tokenizer.decode(predictions[0].tolist()))
             print("target: ", tokenizer.decode(targets[0].tolist()))
 
-        _, _, attention_weights = model(
+        _, _, attention_weights, _ = model(
             sequences.to(device), False)
         print("Got attention weights")
 
@@ -287,7 +287,7 @@ def lineplot_specific(
         print("predictions: ", tokenizer.decode(predictions[0].tolist()))
         print("target: ", tokenizer.decode(targets[0].tolist()))
 
-    _, _, attention_weights = model(
+    _, _, attention_weights, _ = model(
         sequences.to(device), False)
 
     labels = input.tolist()

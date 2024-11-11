@@ -645,7 +645,7 @@ class GPT(nn.Module):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
     # def forward(self, idx, targets=None):
-    def forward(self, idx, get_loss=False):
+    def forward(self, idx, get_loss=False, capture_layer=None, capture_head=None):
         # device = idx.device
         # print("forward device: ", device)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -663,9 +663,22 @@ class GPT(nn.Module):
         x = self.transformer.drop(tok_emb + pos_emb)
         # x = tok_emb + pos_emb
         attention_weights = []
-        for block in self.transformer.h:
+        capture_embedding = None
+
+        for layer_idx, block in enumerate(self.transformer.h):
             x, att_weights = block(x)
             attention_weights.append(att_weights)
+
+            # Capture the embedding after the specific head in the second layer
+            if capture_layer and capture_head:
+                if layer_idx == capture_layer:
+                    # x has shape (B, T, C), split to access each head
+                    head_dim = x.size(-1) // self.config.n_head
+                    head_embeddings = x.view(b, t, self.config.n_head, head_dim)
+
+                    # Extract embedding for the specified head
+                    capture_embedding = head_embeddings[:, :, capture_head, :]
+
         x = self.transformer.ln_f(x)
 
         if get_loss:
@@ -688,7 +701,7 @@ class GPT(nn.Module):
             )  # note: using list [-1] to preserve the time dim
             loss = None
 
-        return logits, loss, attention_weights
+        return logits, loss, attention_weights, capture_embedding
 
     @torch.no_grad()
     def generate(self, idx, max_new_tokens, temperature=1.0, top_k=None):

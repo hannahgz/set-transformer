@@ -103,7 +103,7 @@ def evaluate_val_loss(
 
     for inputs in val_loader:
         inputs = inputs.to(device)
-        _, loss, _ = model(inputs, True)
+        _, loss, _, _ = model(inputs, True)
         total_val_loss += loss.item()
 
     avg_val_loss = total_val_loss / len(val_loader)
@@ -188,7 +188,7 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
                 model.train()
                 inputs = inputs.to(device)
                 optimizer.zero_grad()
-                _, loss, _ = model(inputs, True)
+                _, loss, _, _ = model(inputs, True)
                 loss.backward()
                 optimizer.step()
                 total_train_loss += loss.item()
@@ -216,6 +216,17 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
         wandb.finish()
 
 
+def analyze_embeddings(config, dataset_path):
+    dataset = torch.load(dataset_path)
+    train_loader, val_loader = initialize_loaders(config, dataset)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = GPT(config).to(device)
+
+    for inputs in val_loader:
+        inputs = inputs.to(device)
+        _, _, _, captured_embedding = model(inputs, True, 0, 3)
+        breakpoint()
+
 
 if __name__ == "__main__":
     # small_combinations = run()
@@ -224,10 +235,17 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    run(
-        GPTConfig44TriplesEmbdDrop,
-        dataset_path=f'{PATH_PREFIX}/triples_balanced_set_dataset_random.pth'
-    )
+
+    dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
+    config = GPTConfig44
+
+    analyze_embeddings(config, dataset_path)
+
+
+    # run(
+    #     GPTConfig44TriplesEmbdDrop,
+    #     dataset_path=f'{PATH_PREFIX}/triples_balanced_set_dataset_random.pth'
+    # )
 
     # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth',
     # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
