@@ -670,7 +670,7 @@ class GPT(nn.Module):
             attention_weights.append(att_weights)
 
             # Capture the embedding after the specific head in the second layer
-            if capture_layer and capture_head:
+            if capture_layer is not None and capture_head is not None:
                 if layer_idx == capture_layer:
                     # x has shape (B, T, C), split to access each head
                     head_dim = x.size(-1) // self.config.n_head
