@@ -12,7 +12,7 @@ from torch import optim
 import wandb
 from model import GPT
 # from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20, GPTConfig44_AttrFirst
-from model import GPTConfig44Triples, GPTConfig48Triples
+from model import GPTConfig44Triples, GPTConfig48Triples, GPTConfig88Triples, GPTConfig44TriplesEmbd, GPTConfig44TriplesLR
 from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap, plot_attention_heads_layer_horizontal, plot_attention_pattern_all, plot_attention_pattern_lines, initialize_triples_datasets
 import random
 import numpy as np
@@ -144,7 +144,6 @@ def run(config, dataset_path, load_model=False):
                 "n_head": config.n_head,
                 "n_embd": config.n_embd,
                 "patience": config.patience,
-                "eval_freq": config.eval_freq,
         },
         name=config.filename
     )
@@ -395,6 +394,21 @@ if __name__ == "__main__":
 
     run(
         GPTConfig48Triples,
+        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
+    )
+
+    run(
+        GPTConfig88Triples,
+        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
+    )
+
+    run(
+        GPTConfig44TriplesLR,
+        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
+    )
+
+    run(
+        GPTConfig44TriplesEmbd,
         dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
     )
 

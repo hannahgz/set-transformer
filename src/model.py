@@ -321,6 +321,51 @@ class GPTConfig44_Patience20:
 
 
 @dataclass
+class GPTConfig44TriplesEmbd:
+    lr: float = 1e-2
+    epochs: int = 500
+    batch_size: int = 64
+    n_layer: int = 4
+    n_head: int = 4
+    n_embd: int = 128
+    patience: int = 10
+    dropout: float = 0.0
+    n_cards: int = 5
+    block_size: int = 49
+    vocab_size: int = 22
+    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
+    target_size: int = 8
+    pad_symbol: str = "_"
+    out_dir: str = ""
+    filename: str = "triples_layers_4_heads_4_embd.pt"
+    end_of_seq_token: int = 13
+    padding_token: int = 14
+
+
+@dataclass
+class GPTConfig44TriplesLR:
+    lr: float = 1e-2
+    epochs: int = 500
+    batch_size: int = 64
+    n_layer: int = 4
+    n_head: int = 4
+    n_embd: int = 64
+    patience: int = 10
+    dropout: float = 0.0
+    n_cards: int = 5
+    block_size: int = 49
+    vocab_size: int = 22
+    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
+    target_size: int = 8
+    pad_symbol: str = "_"
+    out_dir: str = ""
+    filename: str = "triples_layers_4_heads_4_lr.pt"
+    end_of_seq_token: int = 13
+    padding_token: int = 14
+
+@dataclass
 class GPTConfig44Triples:
     lr: float = 1e-3
     epochs: int = 500
@@ -329,7 +374,6 @@ class GPTConfig44Triples:
     n_head: int = 4
     n_embd: int = 64
     patience: int = 10
-    eval_freq: int = 0
     dropout: float = 0.0
     n_cards: int = 5
     block_size: int = 49
@@ -352,7 +396,6 @@ class GPTConfig48Triples:
     n_head: int = 8
     n_embd: int = 64
     patience: int = 10
-    eval_freq: int = 0
     dropout: float = 0.0
     n_cards: int = 5
     block_size: int = 49
@@ -363,6 +406,28 @@ class GPTConfig48Triples:
     pad_symbol: str = "_"
     out_dir: str = ""
     filename: str = "triples_layers_4_heads_8.pt"
+    end_of_seq_token: int = 13
+    padding_token: int = 14
+
+@dataclass
+class GPTConfig88Triples:
+    lr: float = 1e-3
+    epochs: int = 500
+    batch_size: int = 64
+    n_layer: int = 8
+    n_head: int = 8
+    n_embd: int = 64
+    patience: int = 10
+    dropout: float = 0.0
+    n_cards: int = 5
+    block_size: int = 49
+    vocab_size: int = 22
+    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
+    target_size: int = 8
+    pad_symbol: str = "_"
+    out_dir: str = ""
+    filename: str = "triples_layers_8_heads_8.pt"
     end_of_seq_token: int = 13
     padding_token: int = 14
 
