@@ -229,8 +229,6 @@ def lineplot_specific(
     input = torch.tensor(tokenizer.encode(input))
     sequences = input.unsqueeze(0)
 
-    breakpoint()
-
     if get_prediction:
         inputs = sequences[:, : config.input_size].to(device)
         targets = sequences[:, config.input_size:].to(device)
@@ -241,9 +239,9 @@ def lineplot_specific(
 
         predictions = outputs[:, config.input_size:]
 
-        print("full output: ", outputs)
-        print("predictions: ", predictions)
-        print("target: ", targets)
+        print("full output: ", tokenizer.decode(outputs.tolist()))
+        print("predictions: ", tokenizer.decode(predictions.tolist()))
+        print("target: ", tokenizer.decode(targets.tolist()))
 
     _, _, attention_weights = model(
         sequences.to(device), False)
@@ -398,6 +396,21 @@ if __name__ == "__main__":
         get_prediction=True,
         filename_prefix="test"
     )
+
+
+    lineplot_specific(
+        config=GPTConfig44,
+        input=[
+            "A", "squiggle", "B", "squiggle", "C", "squiggle", "D", "squiggle", "E", "squiggle",
+            "A", "striped", "B", "striped", "C", "solid", "D", "striped", "E", "striped", 
+            "A", "one",  "B", "two",  "C", "one",  "D", "three",  "E", "one",
+            "A", "green", "B", "green", "C", "blue", "D", "green", "E", "pink", 
+            ">", "A", "B", "D", ".", ".", ".", ".", "."
+        ],
+        get_prediction=True,
+        filename_prefix="test2"
+    )
+
 
     # generate_heatmap(
     #     config=GPTConfig44,
