@@ -681,6 +681,8 @@ class GPT(nn.Module):
 
                     capture_embedding = capture_embedding.cpu()
 
+                    torch.cuda.empty_cache()
+
         x = self.transformer.ln_f(x)
 
         if get_loss:
