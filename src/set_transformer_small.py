@@ -128,25 +128,26 @@ def evaluate_val_loss(
     return avg_val_loss, best_val_loss, counter
 
 
-def run(config, dataset_path, load_model=False):
+def run(config, dataset_path, load_model=False, wandb_log=True):
     dataset = torch.load(dataset_path)
     train_loader, val_loader = initialize_loaders(config, dataset)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
 
-    wandb.init(
-        project="set-prediction-small",
-        config={
-                "learning_rate": config.lr,
-                "epochs": config.epochs,
-                "batch_size": config.batch_size,
-                "n_layer": config.n_layer,
-                "n_head": config.n_head,
-                "n_embd": config.n_embd,
-                "patience": config.patience,
-        },
-        name=config.filename
-    )
+    if wandb_log:
+        wandb.init(
+            project="set-prediction-small",
+            config={
+                    "learning_rate": config.lr,
+                    "epochs": config.epochs,
+                    "batch_size": config.batch_size,
+                    "n_layer": config.n_layer,
+                    "n_head": config.n_head,
+                    "n_embd": config.n_embd,
+                    "patience": config.patience,
+            },
+            name=config.filename
+        )
 
     if not load_model:
 
@@ -197,17 +198,18 @@ def run(config, dataset_path, load_model=False):
 
     # train_accuracy = calculate_accuracy(
     #     model, train_loader, config, save_incorrect_path="train_incorrect_predictions.txt")
-    train_accuracy = calculate_accuracy(
-        model, train_loader, config)
+    # train_accuracy = calculate_accuracy(
+    #     model, train_loader, config)
     val_accuracy = calculate_accuracy(
-        model, val_loader, config)
+        model, val_loader, config, save_incorrect_path="triples_val_incorrect_predictions.txt")
 
-    print(f"Train Accuracy: {train_accuracy:.4f}")
+    # print(f"Train Accuracy: {train_accuracy:.4f}")
     print(f"Validation Accuracy: {val_accuracy:.4f}")
 
-    wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
+    # if wandb_log:
+    #     wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
 
-    wandb.finish()
+    #     wandb.finish()
 
 def lineplot_specific(
         config,
@@ -301,7 +303,7 @@ def generate_heatmap(
         print(f"Generating heatmap for index {dataset_index}")
 
         sequences = dataset[dataset_index].unsqueeze(0)
-        breakpoint()
+        
         if get_prediction:
             inputs = sequences[:, : config.input_size].to(device)
             targets = sequences[:, config.input_size:].to(device)
@@ -312,9 +314,9 @@ def generate_heatmap(
 
             predictions = outputs[:, config.input_size:]
 
-            print("full output: ", outputs)
-            print("predictions: ", predictions)
-            print("target: ", targets)
+            print("full output: ", tokenizer.decode(outputs[0].tolist()))
+            print("predictions: ", tokenizer.decode(predictions[0].tolist()))
+            print("target: ", tokenizer.decode(targets[0].tolist()))
 
         _, _, attention_weights = model(
             sequences.to(device), False)
@@ -333,25 +335,25 @@ def generate_heatmap(
 
         # print("labels: ", labels)
 
-        dir_path = f"figs/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}"
+        dir_path = f"figs/triples_attention_pattern_layers_{config.n_layer}_heads_{config.n_head}"
         filename = f"lineplot_sets_{number_set}_index_{dataset_index}_threshold_{threshold}.png"
-        # plot_attention_pattern_lines(
-        #     attention_weights,
-        #     labels,
-        #     config.n_layer,
-        #     config.n_head,
-        #     title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
-        #     savefig=f"{dir_path}/{filename}",
-        #     threshold=threshold)
-
         plot_attention_pattern_lines(
             attention_weights,
             labels,
             config.n_layer,
             config.n_head,
             title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
-            savefig=None,
+            savefig=f"{dir_path}/{filename}",
             threshold=threshold)
+
+        # plot_attention_pattern_lines(
+        #     attention_weights,
+        #     labels,
+        #     config.n_layer,
+        #     config.n_head,
+        #     title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
+        #     savefig=None,
+        #     threshold=threshold)
 
         # plot_attention_pattern_all(
         #     attention_weights,
@@ -389,28 +391,39 @@ if __name__ == "__main__":
 
     run(
         GPTConfig44Triples,
-        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
+        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth',
+        load_model=True,
+        wandb_log=False
     )
 
-    run(
-        GPTConfig48Triples,
-        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
-    )
+    generate_heatmap(
+        GPTConfig44Triples,
+        [0, 1, 2],
+        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth',
+        tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random_tokenizer.pkl',
+        use_labels=True,
+        threshold=0.05,
+        get_prediction=True)
 
-    run(
-        GPTConfig88Triples,
-        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
-    )
+    # run(
+    #     GPTConfig48Triples,
+    #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
+    # )
 
-    run(
-        GPTConfig44TriplesLR,
-        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
-    )
+    # run(
+    #     GPTConfig88Triples,
+    #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
+    # )
 
-    run(
-        GPTConfig44TriplesEmbd,
-        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
-    )
+    # run(
+    #     GPTConfig44TriplesLR,
+    #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
+    # )
+
+    # run(
+    #     GPTConfig44TriplesEmbd,
+    #     dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
+    # )
 
 
     # dataset = initialize_triples_datasets(
