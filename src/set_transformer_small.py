@@ -245,7 +245,6 @@ def lineplot_specific(
 
     _, _, attention_weights = model(
         sequences.to(device), False)
-    print("Got attention weights")
 
     labels = input.tolist()
     labels = tokenizer.decode(labels)
@@ -385,31 +384,38 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
 
-    lineplot_specific(
-        config=GPTConfig48,
-        input=[
-            "A", "green", "B", "green", "C", "blue", "D", "green", "E", "pink", 
-            "A", "one",  "B", "two",  "C", "one",  "D", "three",  "E", "one",
-            "A", "squiggle", "B", "squiggle", "C", "squiggle", "D", "squiggle", "E", "squiggle",
-            "A", "striped", "B", "striped", "C", "striped", "D", "striped", "E", "striped", 
-            ">", "A", "B", "D", "/", "A", "C", "E", "."
-        ],
-        get_prediction=True,
-        filename_prefix="test"
-    )
 
-    lineplot_specific(
-        config=GPTConfig48,
-        input=[
-            "A", "green", "B", "green", "C", "blue", "D", "green", "E", "pink", 
-            "A", "one",  "B", "two",  "C", "one",  "D", "three",  "E", "one",
-            "A", "diamond", "B", "diamond", "C", "diamond", "D", "diamond", "E", "diamond",
-            "A", "striped", "B", "striped", "C", "striped", "D", "striped", "E", "striped", 
-            ">", "A", "B", "D", "/", "A", "C", "E", "."
-        ],
-        get_prediction=True,
-        filename_prefix="test"
-    )
+    dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
+    dataset = torch.load(dataset_path)
+    train_loader, val_loader = initialize_loaders(GPTConfig44, dataset)
+    for input in train_loader:
+        breakpoint()
+
+    # lineplot_specific(
+    #     config=GPTConfig48,
+    #     input=[
+    #         "A", "green", "B", "green", "C", "blue", "D", "green", "E", "pink", 
+    #         "A", "one",  "B", "two",  "C", "one",  "D", "three",  "E", "one",
+    #         "A", "squiggle", "B", "squiggle", "C", "squiggle", "D", "squiggle", "E", "squiggle",
+    #         "A", "striped", "B", "striped", "C", "striped", "D", "striped", "E", "striped", 
+    #         ">", "A", "B", "D", "/", "A", "C", "E", "."
+    #     ],
+    #     get_prediction=True,
+    #     filename_prefix="test"
+    # )
+
+    # lineplot_specific(
+    #     config=GPTConfig48,
+    #     input=[
+    #         "A", "green", "B", "green", "C", "blue", "D", "green", "E", "pink", 
+    #         "A", "one",  "B", "two",  "C", "one",  "D", "three",  "E", "one",
+    #         "A", "diamond", "B", "diamond", "C", "diamond", "D", "diamond", "E", "diamond",
+    #         "A", "striped", "B", "striped", "C", "striped", "D", "striped", "E", "striped", 
+    #         ">", "A", "B", "D", "/", "A", "C", "E", "."
+    #     ],
+    #     get_prediction=True,
+    #     filename_prefix="test"
+    # )
 
 
     # lineplot_specific(
