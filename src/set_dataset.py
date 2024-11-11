@@ -38,7 +38,7 @@ class BalancedTriplesSetDataset(Dataset):
         self.two_set_sequences = two_set_sequences
 
         self.length = (
-            min(no_set_sequences, min(len(one_set_sequences), len(two_set_sequences))) * 3
+            min(len(no_set_sequences), min(len(one_set_sequences), len(two_set_sequences))) * 3
         )  
 
     def __len__(self):
