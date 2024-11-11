@@ -386,7 +386,7 @@ if __name__ == "__main__":
 
 
     lineplot_specific(
-        config=GPTConfig44,
+        config=GPTConfig48,
         input=[
             "A", "green", "B", "green", "C", "blue", "D", "green", "E", "pink", 
             "A", "one",  "B", "two",  "C", "one",  "D", "three",  "E", "one",
@@ -399,7 +399,7 @@ if __name__ == "__main__":
     )
 
     lineplot_specific(
-        config=GPTConfig44,
+        config=GPTConfig48,
         input=[
             "A", "green", "B", "green", "C", "blue", "D", "green", "E", "pink", 
             "A", "one",  "B", "two",  "C", "one",  "D", "three",  "E", "one",
