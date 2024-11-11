@@ -323,7 +323,7 @@ class GPTConfig44_Patience20:
 @dataclass
 class GPTConfig44Triples:
     lr: float = 1e-3
-    epochs: int = 100
+    epochs: int = 500
     batch_size: int = 64
     n_layer: int = 4
     n_head: int = 4
@@ -346,7 +346,7 @@ class GPTConfig44Triples:
 @dataclass
 class GPTConfig48Triples:
     lr: float = 1e-3
-    epochs: int = 100
+    epochs: int = 500
     batch_size: int = 64
     n_layer: int = 4
     n_head: int = 8
