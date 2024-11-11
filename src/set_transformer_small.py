@@ -239,9 +239,9 @@ def lineplot_specific(
 
         predictions = outputs[:, config.input_size:]
 
-        print("full output: ", tokenizer.decode(outputs.tolist()))
-        print("predictions: ", tokenizer.decode(predictions.tolist()))
-        print("target: ", tokenizer.decode(targets.tolist()))
+        print("full output: ", tokenizer.decode(outputs[0].tolist()))
+        print("predictions: ", tokenizer.decode(predictions[0].tolist()))
+        print("target: ", tokenizer.decode(targets[0].tolist()))
 
     _, _, attention_weights = model(
         sequences.to(device), False)
