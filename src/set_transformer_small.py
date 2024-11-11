@@ -128,13 +128,13 @@ def evaluate_val_loss(
     return avg_val_loss, best_val_loss, counter
 
 
-def run(config, dataset_path, load_model=False, wandb_log=True):
+def run(config, dataset_path, load_model=False, should_wandb_log=True):
     dataset = torch.load(dataset_path)
     train_loader, val_loader = initialize_loaders(config, dataset)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
 
-    if wandb_log:
+    if should_wandb_log:
         wandb.init(
             project="set-prediction-small",
             config={
@@ -198,18 +198,17 @@ def run(config, dataset_path, load_model=False, wandb_log=True):
 
     # train_accuracy = calculate_accuracy(
     #     model, train_loader, config, save_incorrect_path="train_incorrect_predictions.txt")
-    # train_accuracy = calculate_accuracy(
-    #     model, train_loader, config)
+    train_accuracy = calculate_accuracy(
+        model, train_loader, config)
     val_accuracy = calculate_accuracy(
-        model, val_loader, config, save_incorrect_path="triples_val_incorrect_predictions.txt")
+        model, val_loader, config)
 
-    # print(f"Train Accuracy: {train_accuracy:.4f}")
+    print(f"Train Accuracy: {train_accuracy:.4f}")
     print(f"Validation Accuracy: {val_accuracy:.4f}")
 
-    # if wandb_log:
-    #     wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
-
-    #     wandb.finish()
+    if should_wandb_log:
+        wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
+        wandb.finish()
 
 def lineplot_specific(
         config,
