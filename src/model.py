@@ -352,7 +352,7 @@ class GPTConfig44TriplesEmbdDrop:
     n_head: int = 4
     n_embd: int = 128
     patience: int = 100
-    dropout: float = 0.2
+    dropout: float = 0.1
     n_cards: int = 5
     block_size: int = 49
     vocab_size: int = 22
@@ -361,7 +361,7 @@ class GPTConfig44TriplesEmbdDrop:
     target_size: int = 8
     pad_symbol: str = "_"
     out_dir: str = ""
-    filename: str = "triples_layers_4_heads_4_embd_dropout.pt"
+    filename: str = "triples_layers_4_heads_4_embd_dropout_0.1.pt"
     end_of_seq_token: int = 13
     padding_token: int = 14
 
