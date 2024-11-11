@@ -11,7 +11,8 @@ import torch
 from torch import optim
 import wandb
 from model import GPT
-from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20, GPTConfig44_AttrFirst
+# from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20, GPTConfig44_AttrFirst
+from model import GPTConfig44Triples, GPTConfig48Triples
 from data_utils import initialize_datasets, initialize_loaders, plot_attention_heatmap, plot_attention_heads_layer_horizontal, plot_attention_pattern_all, plot_attention_pattern_lines, initialize_triples_datasets
 import random
 import numpy as np
@@ -133,19 +134,20 @@ def run(config, dataset_path, load_model=False):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
 
-    # wandb.init(
-    #     project="set-prediction-small",
-    #     config={
-    #             "learning_rate": config.lr,
-    #             "epochs": config.epochs,
-    #             "batch_size": config.batch_size,
-    #             "n_layer": config.n_layer,
-    #             "n_head": config.n_head,
-    #             "n_embd": config.n_embd,
-    #             "patience": config.patience,
-    #             "eval_freq": config.eval_freq,
-    #     },
-    # )
+    wandb.init(
+        project="set-prediction-small",
+        config={
+                "learning_rate": config.lr,
+                "epochs": config.epochs,
+                "batch_size": config.batch_size,
+                "n_layer": config.n_layer,
+                "n_head": config.n_head,
+                "n_embd": config.n_embd,
+                "patience": config.patience,
+                "eval_freq": config.eval_freq,
+        },
+        name=config.filename
+    )
 
     if not load_model:
 
@@ -194,17 +196,19 @@ def run(config, dataset_path, load_model=False):
         config.out_dir, config.filename), weights_only=False)
     model.load_state_dict(checkpoint["model"])
 
+    # train_accuracy = calculate_accuracy(
+    #     model, train_loader, config, save_incorrect_path="train_incorrect_predictions.txt")
     train_accuracy = calculate_accuracy(
-        model, train_loader, config, save_incorrect_path="train_incorrect_predictions.txt")
-    # val_accuracy = calculate_accuracy(
-    #     model, val_loader, config)
+        model, train_loader, config)
+    val_accuracy = calculate_accuracy(
+        model, val_loader, config)
 
-    # print(f"Train Accuracy: {train_accuracy:.4f}")
-    # print(f"Validation Accuracy: {val_accuracy:.4f}")
+    print(f"Train Accuracy: {train_accuracy:.4f}")
+    print(f"Validation Accuracy: {val_accuracy:.4f}")
 
-    # wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
+    wandb.log({"train_accuracy": train_accuracy, "val_accuracy": val_accuracy})
 
-    # wandb.finish()
+    wandb.finish()
 
 def lineplot_specific(
         config,
@@ -383,13 +387,25 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    dataset = initialize_triples_datasets(
-        GPTConfig44(),
-        save_dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth',
-        save_tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random_tokenizer.pkl'
+
+    run(
+        GPTConfig44Triples,
+        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
     )
 
-    train_loader, val_loader = initialize_loaders(GPTConfig44, dataset)
+    run(
+        GPTConfig48Triples,
+        dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth'
+    )
+
+
+    # dataset = initialize_triples_datasets(
+    #     GPTConfig44(),
+    #     save_dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random.pth',
+    #     save_tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/triples_balanced_set_dataset_random_tokenizer.pkl'
+    # )
+
+    # train_loader, val_loader = initialize_loaders(GPTConfig44, dataset)
 
 
     # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
