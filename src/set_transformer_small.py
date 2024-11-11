@@ -229,6 +229,9 @@ def analyze_embeddings(config, dataset_path, capture_layer, capture_head):
         batch = batch.to(device)
         _, _, _, captured_embedding = model(batch, True, capture_layer, capture_head)
 
+        # Move the captured embedding to CPU to free up GPU memory
+        captured_embedding = captured_embedding.cpu()
+        
         # target_attributes = inputs[:, 1:40:2]
 
         # Get every other element of the captured embedding at the given layer/head
