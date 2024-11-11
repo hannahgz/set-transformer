@@ -328,7 +328,7 @@ class GPTConfig44TriplesEmbd:
     n_layer: int = 4
     n_head: int = 4
     n_embd: int = 128
-    patience: int = 10
+    patience: int = 100
     dropout: float = 0.0
     n_cards: int = 5
     block_size: int = 49
@@ -351,7 +351,7 @@ class GPTConfig44TriplesLR:
     n_layer: int = 4
     n_head: int = 4
     n_embd: int = 64
-    patience: int = 10
+    patience: int = 100
     dropout: float = 0.0
     n_cards: int = 5
     block_size: int = 49
@@ -373,7 +373,7 @@ class GPTConfig44Triples:
     n_layer: int = 4
     n_head: int = 4
     n_embd: int = 64
-    patience: int = 10
+    patience: int = 100
     dropout: float = 0.0
     n_cards: int = 5
     block_size: int = 49
@@ -395,7 +395,7 @@ class GPTConfig48Triples:
     n_layer: int = 4
     n_head: int = 8
     n_embd: int = 64
-    patience: int = 10
+    patience: int = 100
     dropout: float = 0.0
     n_cards: int = 5
     block_size: int = 49
@@ -417,7 +417,7 @@ class GPTConfig88Triples:
     n_layer: int = 8
     n_head: int = 8
     n_embd: int = 64
-    patience: int = 10
+    patience: int = 100
     dropout: float = 0.0
     n_cards: int = 5
     block_size: int = 49
