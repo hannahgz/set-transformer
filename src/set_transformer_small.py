@@ -229,7 +229,6 @@ def analyze_embeddings(config, dataset_path, capture_layer, capture_head):
     all_flattened_target_attributes = []
 
     for index, batch in enumerate(val_loader):
-        print("current index: ", index)
         batch = batch.to(device)
         _, _, _, captured_embedding = model(batch, True, capture_layer, capture_head)
 
@@ -291,8 +290,6 @@ def analyze_embeddings(config, dataset_path, capture_layer, capture_head):
     with open(continuous_to_original_path, "wb") as f:
         pickle.dump(continuous_to_original, f)
 
-    breakpoint()
-
     return combined_input_embeddings, mapped_target_attributes, continuous_to_original
 
 
@@ -303,28 +300,27 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
+    embeddings_path = f"{PATH_PREFIX}/classify/fixed_combined_input_embeddings.pt"
+    mapped_attributes_path = f"{PATH_PREFIX}/classify/fixed_mapped_target_attributes.pt"
+    continuous_to_original_path = f"{PATH_PREFIX}/classify/fixed_continuous_to_original.pkl"
 
-    # embeddings_path = f"{PATH_PREFIX}/classify/combined_input_embeddings.pt"
-    # mapped_attributes_path = f"{PATH_PREFIX}/classify/mapped_target_attributes.pt"
-    # continuous_to_original_path = f"{PATH_PREFIX}/classify/continuous_to_original.pkl"
+    X = torch.load(embeddings_path)
+    y = torch.load(mapped_attributes_path)
 
-    # X = torch.load(embeddings_path)
-    # y = torch.load(mapped_attributes_path)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    y = y.to(device)
 
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # y = y.to(device)
-
-    # run_classify(X, y)
+    run_classify(X, y, model_name="fixed_test.pt", input_dim=16, output_dim=5)
 
     # run_classify(X, y, model_name="mlp_adam.pt", model_type-"mlp")
     # run_classify(X, y, model_name="adam_lr_0.001.pt")
     # run_classify(X, y, batch_size=64, model_name="adam_batch_size_64.pt")
     # run_classify(X, y, lr=0.01, model_name="adam_reg.pt")
 
-    dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
-    config = GPTConfig44
+    # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
+    # config = GPTConfig44
 
-    analyze_embeddings(config, dataset_path, capture_layer=0, capture_head=3)
+    # analyze_embeddings(config, dataset_path, capture_layer=0, capture_head=3)
 
 
     # run(
