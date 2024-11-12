@@ -7,14 +7,36 @@ from sklearn.preprocessing import LabelEncoder
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
-class LogisticRegressionModel(nn.Module):
+class LinearModel(nn.Module):
     def __init__(self, input_dim, output_dim):
-        super(LogisticRegressionModel, self).__init__()
+        super(LinearModel, self).__init__()
         self.fc = nn.Linear(input_dim, output_dim)  # Linear layer (16 -> 12)
 
     def forward(self, x):
         return self.fc(x)  # No activation, as we will use CrossEntropyLoss which applies softmax internally
 
+class MLPModel(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim):
+        super(MLPModel, self).__init__()
+        # self.fc1 = nn.Linear(input_dim, hidden_dim)  # First hidden layer
+        # self.relu1 = nn.ReLU()
+        # self.fc2 = nn.Linear(hidden_dim, hidden_dim)  # Second hidden layer
+        # self.relu2 = nn.ReLU()
+        # self.fc3 = nn.Linear(hidden_dim, output_dim)  # Output layer
+
+        self.fc1 = nn.Linear(input_dim, hidden_dim)  # First hidden layer
+        self.relu1 = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_dim, output_dim)  # Second hidden layer
+
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu1(x)
+        x = self.fc2(x)
+        # x = self.relu2(x)
+        # x = self.fc3(x)
+        return x
+    
 def prepare_data(X, y, test_size=0.2, random_state=42):
     """Splits the data into train and test sets and converts to torch tensors."""
     # X_tensor = torch.tensor(X, dtype=torch.float32)
@@ -91,7 +113,7 @@ def evaluate_model(model, X_test, y_test):
         accuracy = (predicted == y_test).sum().item() / y_test.size(0)
     return accuracy
 
-def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, batch_size=32, lr=0.001):
+def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, batch_size=32, lr=0.001, model_type="linear"):
     """Main function to run the model training and evaluation."""
     # Prepare data
     X_train, X_test, y_train, y_test = prepare_data(X, y)
@@ -99,7 +121,11 @@ def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Initialize model, loss function, and optimizer
-    model = LogisticRegressionModel(input_dim, output_dim).to(device)
+
+    if model_type == "linear":
+        model = LinearModel(input_dim, output_dim).to(device)
+    elif model_type == "mlp":
+        model = MLPModel(input_dim=input_dim, hidden_dim=64, output_dim=output_dim)
     criterion = nn.CrossEntropyLoss()
     # optimizer = optim.SGD(model.parameters(), lr=lr)
     # Use Adam optimizer
@@ -148,9 +174,9 @@ def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, 
 # X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_tensor, test_size=0.1, random_state=42)
 
 # # Define the Logistic Regression Model
-# class LogisticRegressionModel(nn.Module):
+# class LinearModel(nn.Module):
 #     def __init__(self, input_dim, output_dim):
-#         super(LogisticRegressionModel, self).__init__()
+#         super(LinearModel, self).__init__()
 #         self.fc = nn.Linear(input_dim, output_dim)  # Linear layer (16 -> 12)
 
 #     def forward(self, x):
@@ -159,7 +185,7 @@ def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, 
 # # Initialize the model
 # input_dim = 16  # Number of features per input vector
 # output_dim = 12  # Number of classes
-# model = LogisticRegressionModel(input_dim, output_dim)
+# model = LinearModel(input_dim, output_dim)
 
 # # Define loss function and optimizer
 # criterion = nn.CrossEntropyLoss()  # This loss function applies softmax internally

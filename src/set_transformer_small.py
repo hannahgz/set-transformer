@@ -238,12 +238,21 @@ def analyze_embeddings(config, dataset_path, capture_layer, capture_head):
 
         # target_attributes = inputs[:, 1:40:2]
 
-        # Get every other element of the captured embedding at the given layer/head
-        input_embeddings = captured_embedding[:, :(config.input_size-1):2, :]
+        # # Get every other element of the captured embedding at the given layer/head
+        # input_embeddings = captured_embedding[:, :(config.input_size-1):2, :]
+        # flattened_input_embeddings = input_embeddings.reshape(-1, 16)
+
+        # # Get every other element in the input starting from index 1, representing all the attributes
+        # target_attributes = batch[:, 1:(config.input_size - 1):2]
+        # flattened_target_attributes = target_attributes.reshape(-1)
+
+         # Get every other element of the captured embedding at the given layer/head from index 1 representing
+         # embeddings that correspond to attributes
+        input_embeddings = captured_embedding[:, 1:(config.input_size-1):2, :]
         flattened_input_embeddings = input_embeddings.reshape(-1, 16)
 
-        # Get every other element in the input starting from index 1, representing all the attributes
-        target_attributes = batch[:, 1:(config.input_size - 1):2]
+        # Get every other element in the input starting from index 0, representing all the card tokens
+        target_attributes = batch[:, :(config.input_size - 1):2]
         flattened_target_attributes = target_attributes.reshape(-1)
 
         # Append the flattened tensors to the respective lists
@@ -253,21 +262,28 @@ def analyze_embeddings(config, dataset_path, capture_layer, capture_head):
     combined_input_embeddings = torch.cat(all_flattened_input_embeddings, dim=0)
     combined_target_attributes = torch.cat(all_flattened_target_attributes, dim=0)
 
-    # Get the unique values in combined_target_attributes
-    unique_values = torch.unique(combined_target_attributes)
+    # # Get the unique values in combined_target_attributes
+    # unique_values = torch.unique(combined_target_attributes)
 
-    # Create a mapping from unique values to a continuous sequence
-    value_to_continuous = {v.item(): i for i, v in enumerate(unique_values)}
+    # # Create a mapping from unique values to a continuous sequence
+    # value_to_continuous = {v.item(): i for i, v in enumerate(unique_values)}
 
-    # Reverse the mapping: continuous values back to the original values
-    continuous_to_original = {v: k for k, v in value_to_continuous.items()}
+    # # Reverse the mapping: continuous values back to the original values
+    # continuous_to_original = {v: k for k, v in value_to_continuous.items()}
+
+    value_to_continuous = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4}
+    continuous_to_original = {0: "A", 1: "B", 2: "C", 3: "D", 4: "E"}
 
     # Map the values in combined_target_attributes to the continuous sequence
     mapped_target_attributes = torch.tensor([value_to_continuous[val.item()] for val in combined_target_attributes])
     
-    embeddings_path = f"{PATH_PREFIX}/classify/combined_input_embeddings.pt"
-    mapped_attributes_path = f"{PATH_PREFIX}/classify/mapped_target_attributes.pt"
-    continuous_to_original_path = f"{PATH_PREFIX}/classify/continuous_to_original.pkl"
+    # embeddings_path = f"{PATH_PREFIX}/classify/combined_input_embeddings.pt"
+    # mapped_attributes_path = f"{PATH_PREFIX}/classify/mapped_target_attributes.pt"
+    # continuous_to_original_path = f"{PATH_PREFIX}/classify/continuous_to_original.pkl"
+
+    embeddings_path = f"{PATH_PREFIX}/classify/fixed_combined_input_embeddings.pt"
+    mapped_attributes_path = f"{PATH_PREFIX}/classify/fixed_mapped_target_attributes.pt"
+    continuous_to_original_path = f"{PATH_PREFIX}/classify/fixed_continuous_to_original.pkl"
 
     # Save the combined_input_embeddings tensor
     torch.save(combined_input_embeddings, embeddings_path)
@@ -291,26 +307,27 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
 
-    embeddings_path = f"{PATH_PREFIX}/classify/combined_input_embeddings.pt"
-    mapped_attributes_path = f"{PATH_PREFIX}/classify/mapped_target_attributes.pt"
-    continuous_to_original_path = f"{PATH_PREFIX}/classify/continuous_to_original.pkl"
+    # embeddings_path = f"{PATH_PREFIX}/classify/combined_input_embeddings.pt"
+    # mapped_attributes_path = f"{PATH_PREFIX}/classify/mapped_target_attributes.pt"
+    # continuous_to_original_path = f"{PATH_PREFIX}/classify/continuous_to_original.pkl"
 
-    X = torch.load(embeddings_path)
-    y = torch.load(mapped_attributes_path)
+    # X = torch.load(embeddings_path)
+    # y = torch.load(mapped_attributes_path)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    y = y.to(device)
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # y = y.to(device)
 
     # run_classify(X, y)
 
-    run_classify(X, y, model_name="adam_lr_0.001.pt")
-    run_classify(X, y, batch_size=64, model_name="adam_batch_size_64.pt")
-    run_classify(X, y, lr=0.01, model_name="adam_reg.pt")
+    # run_classify(X, y, model_name="mlp_adam.pt", model_type-"mlp")
+    # run_classify(X, y, model_name="adam_lr_0.001.pt")
+    # run_classify(X, y, batch_size=64, model_name="adam_batch_size_64.pt")
+    # run_classify(X, y, lr=0.01, model_name="adam_reg.pt")
 
-    # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
-    # config = GPTConfig44
+    dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
+    config = GPTConfig44
 
-    # analyze_embeddings(config, dataset_path, capture_layer=0, capture_head=3)
+    analyze_embeddings(config, dataset_path, capture_layer=0, capture_head=3)
 
 
     # run(
