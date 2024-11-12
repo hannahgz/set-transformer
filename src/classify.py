@@ -57,8 +57,10 @@ def run_classify(X, y, input_dim=16, output_dim=12, num_epochs=100, batch_size=3
     # Prepare data
     X_train, X_test, y_train, y_test = prepare_data(X, y)
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     # Initialize model, loss function, and optimizer
-    model = LogisticRegressionModel(input_dim, output_dim)
+    model = LogisticRegressionModel(input_dim, output_dim).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=lr)
 
