@@ -29,11 +29,10 @@ def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, b
         for i in range(0, X_train.size(0), batch_size):
             indices = permutation[i:i+batch_size]
             batch_X, batch_y = X_train[indices], y_train[indices]
-            breakpoint()
+        
+        
             # Forward pass
             outputs = model(batch_X)
-
-            breakpoint()
             loss = criterion(outputs, batch_y)
 
             # Backward pass and optimization
@@ -41,9 +40,8 @@ def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, b
             loss.backward()
             optimizer.step()
 
-        # Print loss every 10 epochs
-        if (epoch + 1) % 10 == 0:
-            print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}")
+        # Print loss every epoch
+        print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}")
 
 def evaluate_model(model, X_test, y_test):
     """Evaluates the model on the test data."""

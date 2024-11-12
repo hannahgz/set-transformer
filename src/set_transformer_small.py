@@ -300,7 +300,6 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     y = y.to(device)
-    breakpoint()
 
     run_classify(X, y)
 
