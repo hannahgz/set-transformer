@@ -104,14 +104,39 @@ def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, b
             counter += 1
 
 
+# def evaluate_model(model, X_test, y_test):
+#     """Evaluates the model on the test data."""
+#     model.eval()  # Set the model to evaluation mode
+#     with torch.no_grad():
+#         outputs = model(X_test)
+#         _, predicted = torch.max(outputs, 1)
+#         accuracy = (predicted == y_test).sum().item() / y_test.size(0)
+#     return accuracy
+
 def evaluate_model(model, X_test, y_test):
-    """Evaluates the model on the test data."""
+    """Evaluates the model on the test data and prints correct predictions."""
     model.eval()  # Set the model to evaluation mode
+    correct_predictions = []
+    
     with torch.no_grad():
         outputs = model(X_test)
         _, predicted = torch.max(outputs, 1)
-        accuracy = (predicted == y_test).sum().item() / y_test.size(0)
+        
+        for idx, (pred, true) in enumerate(zip(predicted, y_test)):
+            if pred == true:
+                correct_predictions.append((idx, pred.item()))
+        
+        accuracy = len(correct_predictions) / y_test.size(0)
+    
+    print("Correctly predicted values and their indices:")
+    for idx, value in correct_predictions:
+        print(f"Index: {idx}, mod {idx % 20}, Predicted Value: {value}")
+    
+    print(f"\nTotal correct predictions: {len(correct_predictions)}")
+    print(f"Accuracy: {accuracy:.4f}")
+    
     return accuracy
+
 
 def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, batch_size=32, lr=0.001, model_type="linear"):
     """Main function to run the model training and evaluation."""

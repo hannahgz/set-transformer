@@ -19,6 +19,8 @@ import numpy as np
 from tokenizer import load_tokenizer
 from graph import lineplot_specific
 import pickle
+from classify import LinearModel, evaluate_model
+from sklearn.model_selection import train_test_split
 
 from classify import run_classify
 
@@ -300,10 +302,6 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    # embeddings_path = f"{PATH_PREFIX}/classify/fixed_combined_input_embeddings.pt"
-    # mapped_attributes_path = f"{PATH_PREFIX}/classify/fixed_mapped_target_attributes.pt"
-    # continuous_to_original_path = f"{PATH_PREFIX}/classify/fixed_continuous_to_original.pkl"
-
     embeddings_path = f"{PATH_PREFIX}/classify/full_combined_input_embeddings.pt"
     mapped_attributes_path = f"{PATH_PREFIX}/classify/full_mapped_target_attributes.pt"
     continuous_to_original_path = f"{PATH_PREFIX}/classify/full_continuous_to_original.pkl"
@@ -311,11 +309,19 @@ if __name__ == "__main__":
     X = torch.load(embeddings_path)
     y = torch.load(mapped_attributes_path)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    y = y.to(device)
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # y = y.to(device)
 
-    # run_classify(X, y, model_name="full_test.pt", input_dim=64, output_dim=5)
-    run_classify(X, y, model_name="full_mlp.pt", input_dim=64, output_dim=5, model_type="mlp")
+    # # run_classify(X, y, model_name="full_test.pt", input_dim=64, output_dim=5)
+    # run_classify(X, y, model_name="full_mlp.pt", input_dim=64, output_dim=5, model_type="mlp")
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    model = LinearModel(input_dim=64, output_dim=5).to(device)
+    checkpoint = torch.load(f'{PATH_PREFIX}/classify/full_test.pt')
+    model.load_state_dict(checkpoint["model"])
+
+    evaluate_model(model, X_test, y_test)
+
 
     # run_classify(X, y, model_name="mlp_adam.pt", model_type-"mlp")
     # run_classify(X, y, model_name="adam_lr_0.001.pt")
