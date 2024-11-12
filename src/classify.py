@@ -117,7 +117,8 @@ def evaluate_model(model, X_test, y_test):
     """Evaluates the model on the test data and prints correct predictions."""
     model.eval()  # Set the model to evaluation mode
     correct_predictions = []
-    
+    mod_20_counts = {i: 0 for i in range(20)}
+
     with torch.no_grad():
         outputs = model(X_test)
         _, predicted = torch.max(outputs, 1)
@@ -125,13 +126,16 @@ def evaluate_model(model, X_test, y_test):
         for idx, (pred, true) in enumerate(zip(predicted, y_test)):
             if pred == true:
                 correct_predictions.append((idx, pred.item()))
-        
+                mod_20_value = idx % 20
+                mod_20_counts[mod_20_value] += 1
+
         accuracy = len(correct_predictions) / y_test.size(0)
     
     print("Correctly predicted values and their indices:")
     for idx, value in correct_predictions:
         print(f"Index: {idx}, mod {idx % 20}, Predicted Value: {value}")
     
+    print("mod 20 counts: ", mod_20_counts)
     print(f"\nTotal correct predictions: {len(correct_predictions)}")
     print(f"Accuracy: {accuracy:.4f}")
     
