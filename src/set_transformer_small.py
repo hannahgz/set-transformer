@@ -262,17 +262,14 @@ def analyze_embeddings(config, dataset_path, capture_layer, capture_head):
     combined_input_embeddings = torch.cat(all_flattened_input_embeddings, dim=0)
     combined_target_attributes = torch.cat(all_flattened_target_attributes, dim=0)
 
-    # # Get the unique values in combined_target_attributes
-    # unique_values = torch.unique(combined_target_attributes)
+    # Get the unique values in combined_target_attributes
+    unique_values = torch.unique(combined_target_attributes)
 
-    # # Create a mapping from unique values to a continuous sequence
-    # value_to_continuous = {v.item(): i for i, v in enumerate(unique_values)}
+    # Create a mapping from unique values to a continuous sequence
+    value_to_continuous = {v.item(): i for i, v in enumerate(unique_values)}
 
-    # # Reverse the mapping: continuous values back to the original values
-    # continuous_to_original = {v: k for k, v in value_to_continuous.items()}
-
-    value_to_continuous = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4}
-    continuous_to_original = {0: "A", 1: "B", 2: "C", 3: "D", 4: "E"}
+    # Reverse the mapping: continuous values back to the original values
+    continuous_to_original = {v: k for k, v in value_to_continuous.items()}
 
     # Map the values in combined_target_attributes to the continuous sequence
     mapped_target_attributes = torch.tensor([value_to_continuous[val.item()] for val in combined_target_attributes])

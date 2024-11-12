@@ -665,15 +665,9 @@ class GPT(nn.Module):
         attention_weights = []
         capture_embedding = None
 
-        print("Initial GPU memory usage:")
-        print(torch.cuda.memory_summary())
-
         for layer_idx, block in enumerate(self.transformer.h):
             x, att_weights = block(x)
             attention_weights.append(att_weights)
-
-            print("Memory usage for layer : ", layer_idx)
-            print(torch.cuda.memory_summary())
 
             with torch.no_grad():
                 if capture_layer is not None and capture_head is not None:
@@ -681,8 +675,6 @@ class GPT(nn.Module):
                         head_dim = x.size(-1) // self.config.n_head
                         capture_embedding = x.reshape(b, t, self.config.n_head, head_dim)[:, :, capture_head, :].detach()
 
-                        print("Memory usage after operations")
-                        print(torch.cuda.memory_summary())
                         # Process capture_embedding as needed
                         # Only move to CPU if absolutely necessary at this point
                         # capture_embedding = capture_embedding.cpu()
