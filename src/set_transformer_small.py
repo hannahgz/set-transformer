@@ -225,7 +225,8 @@ def analyze_embeddings(config, dataset_path, capture_layer, capture_head):
     all_flattened_input_embeddings = []
     all_flattened_target_attributes = []
 
-    for batch in val_loader:
+    for index, batch in enumerate(val_loader):
+        print("current index: ", index)
         batch = batch.to(device)
         _, _, _, captured_embedding = model(batch, True, capture_layer, capture_head)
 

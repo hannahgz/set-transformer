@@ -660,28 +660,47 @@ class GPT(nn.Module):
         tok_emb = self.transformer.wte(idx)  # token embeddings of shape (b, t, n_embd)
         pos_emb = self.transformer.wpe(pos)  # position embeddings of shape (t, n_embd)
 
-        x = self.transformer.drop(tok_emb + pos_emb)
-        # x = tok_emb + pos_emb
+        # x = self.transformer.drop(tok_emb + pos_emb)
+        x = tok_emb + pos_emb
         attention_weights = []
         capture_embedding = None
+
+        print("Initial GPU memory usage:")
+        print(torch.cuda.memory_summary())
 
         for layer_idx, block in enumerate(self.transformer.h):
             x, att_weights = block(x)
             attention_weights.append(att_weights)
 
-            # Capture the embedding after the specific head in the second layer
-            if capture_layer is not None and capture_head is not None:
-                if layer_idx == capture_layer:
-                    # x has shape (B, T, C), split to access each head
-                    head_dim = x.size(-1) // self.config.n_head
-                    head_embeddings = x.view(b, t, self.config.n_head, head_dim)
+            print("Memory usage for layer : ", layer_idx)
+            print(torch.cuda.memory_summary())
 
-                    # Extract embedding for the specified head
-                    capture_embedding = head_embeddings[:, :, capture_head, :]
+            with torch.no_grad():
+                if capture_layer is not None and capture_head is not None:
+                    if layer_idx == capture_layer:
+                        head_dim = x.size(-1) // self.config.n_head
+                        capture_embedding = x.reshape(b, t, self.config.n_head, head_dim)[:, :, capture_head, :].detach()
 
-                    capture_embedding = capture_embedding.cpu()
+                        print("Memory usage after operations")
+                        print(torch.cuda.memory_summary())
+                        # Process capture_embedding as needed
+                        # Only move to CPU if absolutely necessary at this point
+                        # capture_embedding = capture_embedding.cpu()
 
-                    torch.cuda.empty_cache()
+            torch.cuda.empty_cache()
+            # # Capture the embedding after the specific head in the second layer
+            # if capture_layer is not None and capture_head is not None:
+            #     if layer_idx == capture_layer:
+            #         # x has shape (B, T, C), split to access each head
+            #         head_dim = x.size(-1) // self.config.n_head
+            #         head_embeddings = x.view(b, t, self.config.n_head, head_dim)
+
+            #         # Extract embedding for the specified head
+            #         capture_embedding = head_embeddings[:, :, capture_head, :]
+
+            #         # capture_embedding = capture_embedding.cpu()
+
+            #         torch.cuda.empty_cache()
 
         x = self.transformer.ln_f(x)
 
