@@ -18,6 +18,9 @@ import random
 import numpy as np
 from tokenizer import load_tokenizer
 from graph import lineplot_specific
+import pickle
+
+from classify import run_classify
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -261,7 +264,23 @@ def analyze_embeddings(config, dataset_path, capture_layer, capture_head):
 
     # Map the values in combined_target_attributes to the continuous sequence
     mapped_target_attributes = torch.tensor([value_to_continuous[val.item()] for val in combined_target_attributes])
+    
+    embeddings_path = f"{PATH_PREFIX}/classify/combined_input_embeddings.pt"
+    mapped_attributes_path = f"{PATH_PREFIX}/classify/mapped_target_attributes.pt"
+    continuous_to_original_path = f"{PATH_PREFIX}/classify/continuous_to_original.pkl"
+
+    # Save the combined_input_embeddings tensor
+    torch.save(combined_input_embeddings, embeddings_path)
+
+    # Save the mapped_target_attributes tensor
+    torch.save(mapped_target_attributes, mapped_attributes_path)
+
+    with open(continuous_to_original_path, "wb") as f:
+        pickle.dump(continuous_to_original, f)
+
     breakpoint()
+
+    return combined_input_embeddings, mapped_target_attributes, continuous_to_original
 
 
 if __name__ == "__main__":
@@ -272,10 +291,19 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
 
-    dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
-    config = GPTConfig44
+    embeddings_path = f"{PATH_PREFIX}/classify/combined_input_embeddings.pt"
+    mapped_attributes_path = f"{PATH_PREFIX}/classify/mapped_target_attributes.pt"
+    continuous_to_original_path = f"{PATH_PREFIX}/classify/continuous_to_original.pkl"
 
-    analyze_embeddings(config, dataset_path, capture_layer=0, capture_head=3)
+    X = torch.load(embeddings_path)
+    y = torch.load(mapped_attributes_path)
+
+    run_classify(X, y)
+    
+    # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
+    # config = GPTConfig44
+
+    # analyze_embeddings(config, dataset_path, capture_layer=0, capture_head=3)
 
 
     # run(

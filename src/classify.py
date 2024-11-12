@@ -12,11 +12,12 @@ class LogisticRegressionModel(nn.Module):
     def forward(self, x):
         return self.fc(x)  # No activation, as we will use CrossEntropyLoss which applies softmax internally
 
-def prepare_data(X, y, test_size=0.1, random_state=42):
+def prepare_data(X, y, test_size=0.2, random_state=42):
     """Splits the data into train and test sets and converts to torch tensors."""
-    X_tensor = torch.tensor(X, dtype=torch.float32)
-    y_tensor = torch.tensor(y, dtype=torch.long)
-    X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_tensor, test_size=test_size, random_state=random_state)
+    # X_tensor = torch.tensor(X, dtype=torch.float32)
+    # y_tensor = torch.tensor(y, dtype=torch.long)
+    # X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_tensor, test_size=test_size, random_state=random_state)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
     return X_train, X_test, y_train, y_test
 
 def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, batch_size=32):
@@ -68,7 +69,7 @@ def run_classify(X, y, input_dim=16, output_dim=12, num_epochs=100, batch_size=3
     accuracy = evaluate_model(model, X_test, y_test)
     print(f"Test Accuracy: {accuracy * 100:.2f}%")
 
-    
+
 
 # Example usage:
 # X = [...]  # Your input data as a list of vectors (num_samples, 16)
