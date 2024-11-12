@@ -23,7 +23,7 @@ def prepare_data(X, y, test_size=0.2, random_state=42):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
     return X_train, X_test, y_train, y_test
 
-def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, batch_size=32, patience=10):
+def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, batch_size=32, patience=10, model_name=None):
     """Trains the model on the training data."""
 
     wandb.init(
@@ -77,7 +77,7 @@ def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, b
                 "epoch_num": epoch,
                 "best_loss": best_loss,
             }
-            torch.save(checkpoint, f'{PATH_PREFIX}/classify/test_model.pt')
+            torch.save(checkpoint, f'{PATH_PREFIX}/classify/{model_name}')
         else:
             counter += 1
 
@@ -91,7 +91,7 @@ def evaluate_model(model, X_test, y_test):
         accuracy = (predicted == y_test).sum().item() / y_test.size(0)
     return accuracy
 
-def run_classify(X, y, input_dim=16, output_dim=12, num_epochs=100, batch_size=32, lr=0.01):
+def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, batch_size=32, lr=0.001):
     """Main function to run the model training and evaluation."""
     # Prepare data
     X_train, X_test, y_train, y_test = prepare_data(X, y)
@@ -101,18 +101,22 @@ def run_classify(X, y, input_dim=16, output_dim=12, num_epochs=100, batch_size=3
     # Initialize model, loss function, and optimizer
     model = LogisticRegressionModel(input_dim, output_dim).to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=lr)
+    # optimizer = optim.SGD(model.parameters(), lr=lr)
+    # Use Adam optimizer
+    optimizer = optim.Adam(model.parameters(), lr=lr)
 
     # Train the model
-    train_model(model, X_train, y_train, criterion, optimizer, num_epochs, batch_size)
+    train_model(model, X_train, y_train, criterion, optimizer, num_epochs, batch_size, model_name=model_name)
 
     # Evaluate the model
-    accuracy = evaluate_model(model, X_test, y_test)
+    train_accuracy = evaluate_model(model, X_train, y_train)
+    test_accuracy = evaluate_model(model, X_test, y_test)
 
-    wandb.log({"test_accuracy": accuracy})
+    wandb.log({"train_accuracy": train_accuracy, "test_accuracy": test_accuracy})
     wandb.finish()
 
-    print(f"Test Accuracy: {accuracy * 100:.2f}%")
+    print(f"Train Accuracy: {train_accuracy * 100:.2f}%")
+    print(f"Test Accuracy: {test_accuracy * 100:.2f}%")
 
 
 
