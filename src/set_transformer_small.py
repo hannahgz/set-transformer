@@ -310,7 +310,8 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     y = y.to(device)
 
-    run_classify(X, y, model_name="fixed_test.pt", input_dim=16, output_dim=5)
+    # run_classify(X, y, model_name="fixed_test.pt", input_dim=16, output_dim=5)
+    run_classify(X, y, model_name="fixed_mlp.pt", input_dim=16, output_dim=5, model_type="mlp")
 
     # run_classify(X, y, model_name="mlp_adam.pt", model_type-"mlp")
     # run_classify(X, y, model_name="adam_lr_0.001.pt")
