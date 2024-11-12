@@ -1,8 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import wandb
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
+
+PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 class LogisticRegressionModel(nn.Module):
     def __init__(self, input_dim, output_dim):
@@ -20,17 +23,31 @@ def prepare_data(X, y, test_size=0.2, random_state=42):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
     return X_train, X_test, y_train, y_test
 
-def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, batch_size=32):
+def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, batch_size=32, patience=10):
     """Trains the model on the training data."""
+
+    wandb.init(
+        project="classify-card-attribute",
+        config={
+                "epochs": num_epochs,
+                "batch_size": batch_size,
+                "patience": patience,
+        }
+    )
+
     model.train()  # Set the model to training mode
 
+    counter = 0
+    best_loss = 1e9
     for epoch in range(num_epochs):
+        if counter > patience:
+            print("Exceeded patience: ", patience) 
+            break
         permutation = torch.randperm(X_train.size(0))
         for i in range(0, X_train.size(0), batch_size):
             indices = permutation[i:i+batch_size]
             batch_X, batch_y = X_train[indices], y_train[indices]
-        
-        
+    
             # Forward pass
             outputs = model(batch_X)
             loss = criterion(outputs, batch_y)
@@ -42,6 +59,28 @@ def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, b
 
         # Print loss every epoch
         print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}")
+
+        wandb.log(
+            {
+                "epoch": epoch + 1,
+                "train_loss": loss,
+            }
+        )
+        
+        if loss < best_loss:
+            counter = 0
+            best_loss = loss
+
+            checkpoint = {
+                "model": model.state_dict(),
+                "optimizer": optimizer.state_dict(),
+                "epoch_num": epoch,
+                "best_loss": best_loss,
+            }
+            torch.save(checkpoint, f'{PATH_PREFIX}/classify/test_model.pt')
+        else:
+            counter += 1
+
 
 def evaluate_model(model, X_test, y_test):
     """Evaluates the model on the test data."""
@@ -69,6 +108,10 @@ def run_classify(X, y, input_dim=16, output_dim=12, num_epochs=100, batch_size=3
 
     # Evaluate the model
     accuracy = evaluate_model(model, X_test, y_test)
+
+    wandb.log({"test_accuracy": accuracy})
+    wandb.finish()
+
     print(f"Test Accuracy: {accuracy * 100:.2f}%")
 
 
