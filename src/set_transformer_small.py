@@ -304,24 +304,30 @@ if __name__ == "__main__":
     # mapped_attributes_path = f"{PATH_PREFIX}/classify/fixed_mapped_target_attributes.pt"
     # continuous_to_original_path = f"{PATH_PREFIX}/classify/fixed_continuous_to_original.pkl"
 
-    # X = torch.load(embeddings_path)
-    # y = torch.load(mapped_attributes_path)
+    embeddings_path = f"{PATH_PREFIX}/classify/full_combined_input_embeddings.pt"
+    mapped_attributes_path = f"{PATH_PREFIX}/classify/full_mapped_target_attributes.pt"
+    continuous_to_original_path = f"{PATH_PREFIX}/classify/full_continuous_to_original.pkl"
 
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # y = y.to(device)
+    X = torch.load(embeddings_path)
+    y = torch.load(mapped_attributes_path)
 
-    # # run_classify(X, y, model_name="fixed_test.pt", input_dim=16, output_dim=5)
-    # run_classify(X, y, model_name="fixed_mlp.pt", input_dim=16, output_dim=5, model_type="mlp")
+    breakpoint()
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    y = y.to(device)
+
+    run_classify(X, y, model_name="full_test.pt", input_dim=64, output_dim=5)
+    run_classify(X, y, model_name="full_mlp.pt", input_dim=64, output_dim=5, model_type="mlp")
 
     # run_classify(X, y, model_name="mlp_adam.pt", model_type-"mlp")
     # run_classify(X, y, model_name="adam_lr_0.001.pt")
     # run_classify(X, y, batch_size=64, model_name="adam_batch_size_64.pt")
     # run_classify(X, y, lr=0.01, model_name="adam_reg.pt")
 
-    dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
-    config = GPTConfig44
+    # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
+    # config = GPTConfig44
 
-    analyze_embeddings(config, dataset_path, capture_layer=0, capture_head=3)
+    # analyze_embeddings(config, dataset_path, capture_layer=0, capture_head=3)
 
 
     # run(
