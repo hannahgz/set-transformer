@@ -297,9 +297,10 @@ if __name__ == "__main__":
 
     X = torch.load(embeddings_path)
     y = torch.load(mapped_attributes_path)
+    breakpoint()
 
     run_classify(X, y)
-    
+
     # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
     # config = GPTConfig44
 
