@@ -18,7 +18,6 @@ def prepare_data(X, y, test_size=0.2, random_state=42):
     # y_tensor = torch.tensor(y, dtype=torch.long)
     # X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_tensor, test_size=test_size, random_state=random_state)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
-    breakpoint()
     return X_train, X_test, y_train, y_test
 
 def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, batch_size=32):
@@ -30,9 +29,11 @@ def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, b
         for i in range(0, X_train.size(0), batch_size):
             indices = permutation[i:i+batch_size]
             batch_X, batch_y = X_train[indices], y_train[indices]
-
+            breakpoint()
             # Forward pass
             outputs = model(batch_X)
+
+            breakpoint()
             loss = criterion(outputs, batch_y)
 
             # Backward pass and optimization

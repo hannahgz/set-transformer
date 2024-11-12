@@ -297,7 +297,9 @@ if __name__ == "__main__":
 
     X = torch.load(embeddings_path)
     y = torch.load(mapped_attributes_path)
-    breakpoint()
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    y.to(device)
 
     run_classify(X, y)
 
