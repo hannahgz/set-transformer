@@ -309,8 +309,8 @@ if __name__ == "__main__":
     X = torch.load(embeddings_path)
     y = torch.load(mapped_attributes_path)
 
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # y = y.to(device)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    y = y.to(device)
 
     # # run_classify(X, y, model_name="full_test.pt", input_dim=64, output_dim=5)
     # run_classify(X, y, model_name="full_mlp.pt", input_dim=64, output_dim=5, model_type="mlp")
