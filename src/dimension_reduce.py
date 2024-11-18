@@ -5,6 +5,7 @@ import torch
 import umap
 from model import GPT
 from data_utils import initialize_loaders
+import os
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
@@ -29,7 +30,8 @@ PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 #     return torch.cat(all_flattened_input_embeddings)
 
-def run_pca_analysis(embeddings, labels, n_components=2):
+
+def run_pca_analysis(embeddings, labels, layer, n_components=2):
     """
     Run PCA on input embeddings and create visualization
     Args:
@@ -49,20 +51,27 @@ def run_pca_analysis(embeddings, labels, n_components=2):
 
     # Create scatter plot
     plt.figure(figsize=(10, 8))
-    scatter = plt.scatter(embeddings_pca[:, 0], embeddings_pca[:, 1], 
-                         c=labels, cmap='tab10', alpha=0.6)
+    scatter = plt.scatter(embeddings_pca[:, 0], embeddings_pca[:, 1],
+                          c=labels, cmap='tab10', alpha=0.6)
     plt.colorbar(scatter)
     plt.title('PCA visualization of embeddings')
-    plt.xlabel(f'PC1 (variance explained: {pca.explained_variance_ratio_[0]:.3f})')
-    plt.ylabel(f'PC2 (variance explained: {pca.explained_variance_ratio_[1]:.3f})')
-    
+    plt.xlabel(
+        f'PC1 (variance explained: {pca.explained_variance_ratio_[0]:.3f})')
+    plt.ylabel(
+        f'PC2 (variance explained: {pca.explained_variance_ratio_[1]:.3f})')
+
     # Save plot
-    plt.savefig(f'{PATH_PREFIX}/classify/pca_visualization.png')
+
+    base_dir = f"figs/classify/pca/components_{n_components}"
+    os.makedirs(base_dir, exist_ok=True)
+
+    plt.savefig(f'figs/classify/pca/components_{n_components}/layer_{layer}.png')
     plt.close()
 
     return embeddings_pca, pca.explained_variance_ratio_
 
-def run_umap_analysis(embeddings, labels, n_components=2):
+
+def run_umap_analysis(embeddings, labels, layer, n_components=2):
     """
     Run UMAP on input embeddings and create visualization
     Args:
@@ -83,15 +92,18 @@ def run_umap_analysis(embeddings, labels, n_components=2):
 
     # Create scatter plot
     plt.figure(figsize=(10, 8))
-    scatter = plt.scatter(embeddings_umap[:, 0], embeddings_umap[:, 1], 
-                         c=labels, cmap='tab10', alpha=0.6)
+    scatter = plt.scatter(embeddings_umap[:, 0], embeddings_umap[:, 1],
+                          c=labels, cmap='tab10', alpha=0.6)
     plt.colorbar(scatter)
     plt.title('UMAP visualization of embeddings')
     plt.xlabel('UMAP1')
     plt.ylabel('UMAP2')
-    
+
     # Save plot
-    plt.savefig(f'{PATH_PREFIX}/classify/umap_visualization.png')
+    base_dir = f"figs/classify/umap/components_{n_components}"
+    os.makedirs(base_dir, exist_ok=True)
+
+    plt.savefig(f'figs/classify/umap/components_{n_components}/layer_{layer}.png')
     plt.close()
 
     return embeddings_umap

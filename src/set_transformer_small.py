@@ -21,6 +21,7 @@ from graph import lineplot_specific
 import pickle
 from classify import LinearModel, evaluate_model
 from sklearn.model_selection import train_test_split
+from dimension_reduce import run_pca_analysis, run_umap_analysis
 
 from classify import run_classify
 
@@ -295,17 +296,34 @@ if __name__ == "__main__":
     # dataset_name = "balanced_set_dataset_random"
     # get_raw_input_embeddings(GPTConfig44, dataset_name, capture_layer=0)
 
-    dataset_name = "balanced_set_dataset_random"
-    for layer in range(2,4):
+    # dataset_name = "balanced_set_dataset_random"
+    # for layer in range(2,4):
+    #     embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
+    #     mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
+
+    #     X = torch.load(embeddings_path)
+    #     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #     y = torch.load(mapped_attributes_path).to(device)
+
+    #     run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5)
+        # run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5, model_type="mlp")
+
+
+    for layer in range(0, 4):
+        dataset_name = "balanced_set_dataset_random"
         embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
         mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
 
         X = torch.load(embeddings_path)
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        y = torch.load(mapped_attributes_path).to(device)
+        y = torch.load(mapped_attributes_path)
 
-        run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5)
-        # run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5, model_type="mlp")
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        y = y.to(device)
+
+        run_pca_analysis(X, y, layer)
+        run_umap_analysis(X, y, layer)
+
+
 
     # layer = 0
     # dataset_name = "balanced_set_dataset_random"
