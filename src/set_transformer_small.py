@@ -293,7 +293,7 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     dataset_name = "balanced_set_dataset_random"
-    for layer in range(0,4):
+    for layer in range(1,4):
         embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
         mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
 
@@ -302,7 +302,7 @@ if __name__ == "__main__":
         y = torch.load(mapped_attributes_path).to(device)
 
         run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5)
-        run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5, model_type="mlp")
+        # run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5, model_type="mlp")
 
     # embeddings_path = f"{PATH_PREFIX}/classify/full_combined_input_embeddings.pt"
     # mapped_attributes_path = f"{PATH_PREFIX}/classify/full_mapped_target_attributes.pt"
