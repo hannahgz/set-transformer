@@ -324,6 +324,7 @@ if __name__ == "__main__":
     config = GPTConfig44
 
     for layer in range(4):
+        print(f"Layer {layer}")
         analyze_embeddings(config, dataset_name, capture_layer=layer)
 
 
