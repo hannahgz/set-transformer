@@ -298,7 +298,8 @@ if __name__ == "__main__":
         mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
 
         X = torch.load(embeddings_path)
-        y = torch.load(mapped_attributes_path)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        y = torch.load(mapped_attributes_path).to(device)
 
         run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5)
         run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5, model_type="mlp")
