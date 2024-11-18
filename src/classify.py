@@ -142,7 +142,7 @@ def evaluate_model(model, X, y, model_name):
     
     print("mod 20 counts: ", mod_20_counts)
     print(f"\nTotal correct predictions: {len(correct_predictions)}")
-    # print(f"Accuracy: {accuracy:.4f}")
+    print(f"Accuracy: {accuracy:.4f}")
     
     return accuracy
 
