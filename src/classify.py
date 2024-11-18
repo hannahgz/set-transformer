@@ -45,7 +45,7 @@ def prepare_data(X, y, test_size=0.2, random_state=42):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
     return X_train, X_test, y_train, y_test
 
-def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, batch_size=32, patience=10, model_name=None):
+def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, batch_size=32, patience=20, model_name=None):
     """Trains the model on the training data."""
 
     wandb.init(
@@ -54,7 +54,8 @@ def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, b
                 "epochs": num_epochs,
                 "batch_size": batch_size,
                 "patience": patience,
-        }
+        },
+        name=model_name
     )
 
     model.train()  # Set the model to training mode
@@ -99,7 +100,7 @@ def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, b
                 "epoch_num": epoch,
                 "best_loss": best_loss,
             }
-            torch.save(checkpoint, f'{PATH_PREFIX}/classify/{model_name}')
+            torch.save(checkpoint, f'{PATH_PREFIX}/classify/{model_name}.pt')
         else:
             counter += 1
 
@@ -113,31 +114,31 @@ def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, b
 #         accuracy = (predicted == y_test).sum().item() / y_test.size(0)
 #     return accuracy
 
-def evaluate_model(model, X_test, y_test):
-    """Evaluates the model on the test data and prints correct predictions."""
+def evaluate_model(model, X, y):
+    """Evaluates the model on data and prints correct predictions."""
     model.eval()  # Set the model to evaluation mode
     correct_predictions = []
     mod_20_counts = {i: 0 for i in range(20)}
 
     with torch.no_grad():
-        outputs = model(X_test)
+        outputs = model(X)
         _, predicted = torch.max(outputs, 1)
         
-        for idx, (pred, true) in enumerate(zip(predicted, y_test)):
+        for idx, (pred, true) in enumerate(zip(predicted, y)):
             if pred == true:
                 correct_predictions.append((idx, pred.item()))
                 mod_20_value = idx % 20
                 mod_20_counts[mod_20_value] += 1
 
-        accuracy = len(correct_predictions) / y_test.size(0)
+        accuracy = len(correct_predictions) / y.size(0)
     
-    print("Correctly predicted values and their indices:")
-    for idx, value in correct_predictions:
-        print(f"Index: {idx}, mod {idx % 20}, Predicted Value: {value}")
+    # print("Correctly predicted values and their indices:")
+    # for idx, value in correct_predictions:
+    #     print(f"Index: {idx}, mod {idx % 20}, Predicted Value: {value}")
     
     print("mod 20 counts: ", mod_20_counts)
     print(f"\nTotal correct predictions: {len(correct_predictions)}")
-    print(f"Accuracy: {accuracy:.4f}")
+    # print(f"Accuracy: {accuracy:.4f}")
     
     return accuracy
 
@@ -150,7 +151,6 @@ def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Initialize model, loss function, and optimizer
-
     if model_type == "linear":
         model = LinearModel(input_dim, output_dim).to(device)
     elif model_type == "mlp":
@@ -161,7 +161,7 @@ def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, 
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     # Train the model
-    train_model(model, X_train, y_train, criterion, optimizer, num_epochs, batch_size, model_name=model_name)
+    train_model(model, X_train, y_train, criterion, optimizer, num_epochs, batch_size, model_name=f"{model_name}_{model_type}")
 
     # Evaluate the model
     train_accuracy = evaluate_model(model, X_train, y_train)

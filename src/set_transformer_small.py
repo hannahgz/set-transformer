@@ -12,7 +12,7 @@ from torch import optim
 import wandb
 from model import GPT
 # from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20, GPTConfig44_AttrFirst
-from model import GPTConfig44, GPTConfig44TriplesEmbdDrop
+from model import GPTConfig44, GPTConfig44TriplesEmbdDrop, GPTConfig44_AttrFirst
 from data_utils import initialize_datasets, initialize_loaders, initialize_triples_datasets
 import random
 import numpy as np
@@ -292,6 +292,17 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
+    dataset_name = "balanced_set_dataset_random"
+    for layer in range(0,4):
+        embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
+        mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
+
+        X = torch.load(embeddings_path)
+        y = torch.load(mapped_attributes_path)
+
+        run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5)
+        run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5, model_type="mlp")
+
     # embeddings_path = f"{PATH_PREFIX}/classify/full_combined_input_embeddings.pt"
     # mapped_attributes_path = f"{PATH_PREFIX}/classify/full_mapped_target_attributes.pt"
     # continuous_to_original_path = f"{PATH_PREFIX}/classify/full_continuous_to_original.pkl"
@@ -320,14 +331,23 @@ if __name__ == "__main__":
     # run_classify(X, y, lr=0.01, model_name="adam_reg.pt")
 
     # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
-    dataset_name = "balanced_set_dataset_random"
-    config = GPTConfig44
-
-    for layer in range(4):
-        print(f"Layer {layer}")
-        analyze_embeddings(config, dataset_name, capture_layer=layer)
 
 
+    # dataset_name = "balanced_set_dataset_random"
+    # config = GPTConfig44
+
+    # for layer in range(4):
+    #     print(f"Layer {layer}")
+    #     analyze_embeddings(config, dataset_name, capture_layer=layer)
+
+
+    # dataset_name = "attr_first_balanced_set_dataset_random"
+    # config = GPTConfig44_AttrFirst
+
+    # for layer in range(4):
+    #     print(f"Layer {layer}")
+    #     analyze_embeddings(config, dataset_name, capture_layer=layer)
+    
     # run(
     #     GPTConfig44TriplesEmbdDrop,
     #     dataset_path=f'{PATH_PREFIX}/triples_balanced_set_dataset_random.pth'
