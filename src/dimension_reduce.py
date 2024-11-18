@@ -39,6 +39,7 @@ def run_pca_analysis(embeddings, labels, layer, n_components=2):
         labels: torch.Tensor of shape (n_samples,) containing class labels
         n_components: Number of PCA components to keep
     """
+    print(f"Running PCA with {n_components} components for layer {layer}")
     # Convert embeddings to numpy if they're torch tensors
     if isinstance(embeddings, torch.Tensor):
         embeddings = embeddings.cpu().numpy()
@@ -79,7 +80,7 @@ def run_umap_analysis(embeddings, labels, layer, n_components=2):
         labels: torch.Tensor of shape (n_samples,) containing class labels
         n_components: Number of UMAP components
     """
-
+    print(f"Running UMAP with {n_components} components for layer {layer}")
     # Convert embeddings to numpy if they're torch tensors
     if isinstance(embeddings, torch.Tensor):
         embeddings = embeddings.cpu().numpy()
