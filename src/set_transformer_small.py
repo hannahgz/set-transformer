@@ -301,6 +301,84 @@ def get_raw_input_embeddings(config, dataset_name, capture_layer):
         flattened_input_embeddings = input_embeddings.reshape(-1, 64)
         breakpoint()
 
+        all_flattened_input_embeddings.append(flattened_input_embeddings.detach().cpu())
+
+    return torch.cat(all_flattened_input_embeddings)
+
+def run_pca_analysis(embeddings, labels, n_components=2):
+    """
+    Run PCA on input embeddings and create visualization
+    Args:
+        embeddings: torch.Tensor of shape (n_samples, n_features)
+        labels: torch.Tensor of shape (n_samples,) containing class labels
+        n_components: Number of PCA components to keep
+    """
+    from sklearn.decomposition import PCA
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+
+    # Convert embeddings to numpy if they're torch tensors
+    if isinstance(embeddings, torch.Tensor):
+        embeddings = embeddings.cpu().numpy()
+    if isinstance(labels, torch.Tensor):
+        labels = labels.cpu().numpy()
+
+    # Run PCA
+    pca = PCA(n_components=n_components)
+    embeddings_pca = pca.fit_transform(embeddings)
+
+    # Create scatter plot
+    plt.figure(figsize=(10, 8))
+    scatter = plt.scatter(embeddings_pca[:, 0], embeddings_pca[:, 1], 
+                         c=labels, cmap='tab10', alpha=0.6)
+    plt.colorbar(scatter)
+    plt.title('PCA visualization of embeddings')
+    plt.xlabel(f'PC1 (variance explained: {pca.explained_variance_ratio_[0]:.3f})')
+    plt.ylabel(f'PC2 (variance explained: {pca.explained_variance_ratio_[1]:.3f})')
+    
+    # Save plot
+    plt.savefig(f'{PATH_PREFIX}/classify/pca_visualization.png')
+    plt.close()
+
+    return embeddings_pca, pca.explained_variance_ratio_
+
+def run_umap_analysis(embeddings, labels, n_components=2):
+    """
+    Run UMAP on input embeddings and create visualization
+    Args:
+        embeddings: torch.Tensor of shape (n_samples, n_features)
+        labels: torch.Tensor of shape (n_samples,) containing class labels
+        n_components: Number of UMAP components
+    """
+    import umap
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+
+    # Convert embeddings to numpy if they're torch tensors
+    if isinstance(embeddings, torch.Tensor):
+        embeddings = embeddings.cpu().numpy()
+    if isinstance(labels, torch.Tensor):
+        labels = labels.cpu().numpy()
+
+    # Run UMAP
+    reducer = umap.UMAP(n_components=n_components, random_state=42)
+    embeddings_umap = reducer.fit_transform(embeddings)
+
+    # Create scatter plot
+    plt.figure(figsize=(10, 8))
+    scatter = plt.scatter(embeddings_umap[:, 0], embeddings_umap[:, 1], 
+                         c=labels, cmap='tab10', alpha=0.6)
+    plt.colorbar(scatter)
+    plt.title('UMAP visualization of embeddings')
+    plt.xlabel('UMAP1')
+    plt.ylabel('UMAP2')
+    
+    # Save plot
+    plt.savefig(f'{PATH_PREFIX}/classify/umap_visualization.png')
+    plt.close()
+
+    return embeddings_umap
+
 
     
 if __name__ == "__main__":
@@ -325,7 +403,7 @@ if __name__ == "__main__":
     #     run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5)
     #     # run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5, model_type="mlp")
 
-    layer = 0
+    layer = 1
     dataset_name = "balanced_set_dataset_random"
     embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
     mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
@@ -338,7 +416,7 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     model = LinearModel(input_dim=64, output_dim=5).to(device)
-    
+
     evaluate_model(model, X_train, y_train, model_name=f"{dataset_name}_layer{layer}")
     evaluate_model(model, X_test, y_test, model_name=f"{dataset_name}_layer{layer}")
 
