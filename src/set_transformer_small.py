@@ -284,7 +284,25 @@ def analyze_embeddings(config, dataset_name, capture_layer):
 
     return combined_input_embeddings, mapped_target_attributes, continuous_to_original
 
+def get_raw_input_embeddings(config, dataset_name, capture_layer):
+    dataset_path = f"{PATH_PREFIX}/{dataset_name}.pth"
+    dataset = torch.load(dataset_path)
+    train_loader, val_loader = initialize_loaders(config, dataset)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = GPT(config).to(device)
 
+    all_flattened_input_embeddings = []
+
+    for index, batch in enumerate(val_loader):
+        batch = batch.to(device)
+        _, _, _, captured_embedding = model(batch, True, capture_layer)
+
+        input_embeddings = captured_embedding[:, 1:(config.input_size-1):2, :]
+        flattened_input_embeddings = input_embeddings.reshape(-1, 64)
+        breakpoint()
+
+
+    
 if __name__ == "__main__":
     # small_combinations = run()
     seed = 42
@@ -292,17 +310,37 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
+    # dataset_name = "balanced_set_dataset_random"
+    # get_raw_input_embeddings(GPTConfig44, dataset_name, capture_layer=0)
+
+    # dataset_name = "balanced_set_dataset_random"
+    # for layer in range(1,4):
+    #     embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
+    #     mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
+
+    #     X = torch.load(embeddings_path)
+    #     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #     y = torch.load(mapped_attributes_path).to(device)
+
+    #     run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5)
+    #     # run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5, model_type="mlp")
+
+    layer = 0
     dataset_name = "balanced_set_dataset_random"
-    for layer in range(1,4):
-        embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
-        mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
+    embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
+    mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
+    X = torch.load(embeddings_path)
+    y = torch.load(mapped_attributes_path)
 
-        X = torch.load(embeddings_path)
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        y = torch.load(mapped_attributes_path).to(device)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    y = y.to(device)
 
-        run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5)
-        # run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5, model_type="mlp")
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    model = LinearModel(input_dim=64, output_dim=5).to(device)
+    
+    evaluate_model(model, X_train, y_train, model_name=f"{dataset_name}_layer{layer}")
+    evaluate_model(model, X_test, y_test, model_name=f"{dataset_name}_layer{layer}")
 
     # embeddings_path = f"{PATH_PREFIX}/classify/full_combined_input_embeddings.pt"
     # mapped_attributes_path = f"{PATH_PREFIX}/classify/full_mapped_target_attributes.pt"

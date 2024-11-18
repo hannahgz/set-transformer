@@ -114,8 +114,12 @@ def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, b
 #         accuracy = (predicted == y_test).sum().item() / y_test.size(0)
 #     return accuracy
 
-def evaluate_model(model, X, y):
+def evaluate_model(model, X, y, model_name):
     """Evaluates the model on data and prints correct predictions."""
+
+    checkpoint = torch.load(f'{PATH_PREFIX}/classify/{model_name}.pt', weights_only=False)
+    model.load_state_dict(checkpoint["model"])
+
     model.eval()  # Set the model to evaluation mode
     correct_predictions = []
     mod_20_counts = {i: 0 for i in range(20)}
