@@ -221,7 +221,8 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
         wandb.finish()
 
 
-def analyze_embeddings(config, dataset_path, capture_layer, capture_head):
+def analyze_embeddings(config, dataset_name, capture_layer):
+    dataset_path = f"{PATH_PREFIX}/{dataset_name}.pth"
     dataset = torch.load(dataset_path)
     train_loader, val_loader = initialize_loaders(config, dataset)
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -232,23 +233,8 @@ def analyze_embeddings(config, dataset_path, capture_layer, capture_head):
 
     for index, batch in enumerate(val_loader):
         batch = batch.to(device)
-        _, _, _, captured_embedding = model(batch, True, capture_layer, capture_head)
+        _, _, _, captured_embedding = model(batch, True, capture_layer)
 
-        # Move the captured embedding to CPU to free up GPU memory
-        # captured_embedding = captured_embedding.cpu()
-
-        # target_attributes = inputs[:, 1:40:2]
-
-        # # Get every other element of the captured embedding at the given layer/head
-        # input_embeddings = captured_embedding[:, :(config.input_size-1):2, :]
-        # flattened_input_embeddings = input_embeddings.reshape(-1, 16)
-
-        # # Get every other element in the input starting from index 1, representing all the attributes
-        # target_attributes = batch[:, 1:(config.input_size - 1):2]
-        # flattened_target_attributes = target_attributes.reshape(-1)
-
-         # Get every other element of the captured embedding at the given layer/head from index 1 representing
-         # embeddings that correspond to attributes
         input_embeddings = captured_embedding[:, 1:(config.input_size-1):2, :]
         flattened_input_embeddings = input_embeddings.reshape(-1, 64)
 
@@ -279,9 +265,13 @@ def analyze_embeddings(config, dataset_path, capture_layer, capture_head):
     # mapped_attributes_path = f"{PATH_PREFIX}/classify/mapped_target_attributes.pt"
     # continuous_to_original_path = f"{PATH_PREFIX}/classify/continuous_to_original.pkl"
 
-    embeddings_path = f"{PATH_PREFIX}/classify/full_combined_input_embeddings.pt"
-    mapped_attributes_path = f"{PATH_PREFIX}/classify/full_mapped_target_attributes.pt"
-    continuous_to_original_path = f"{PATH_PREFIX}/classify/full_continuous_to_original.pkl"
+    # Create the directory structure if it doesn't exist
+    base_dir = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}"
+    os.makedirs(base_dir, exist_ok=True)
+
+    embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}/input_embeddings.pt"
+    mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}/mapped_target_attributes.pt"
+    continuous_to_original_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}/continuous_to_original.pkl"
 
     # Save the combined_input_embeddings tensor
     torch.save(combined_input_embeddings, embeddings_path)
@@ -302,25 +292,26 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    embeddings_path = f"{PATH_PREFIX}/classify/full_combined_input_embeddings.pt"
-    mapped_attributes_path = f"{PATH_PREFIX}/classify/full_mapped_target_attributes.pt"
-    continuous_to_original_path = f"{PATH_PREFIX}/classify/full_continuous_to_original.pkl"
+    # embeddings_path = f"{PATH_PREFIX}/classify/full_combined_input_embeddings.pt"
+    # mapped_attributes_path = f"{PATH_PREFIX}/classify/full_mapped_target_attributes.pt"
+    # continuous_to_original_path = f"{PATH_PREFIX}/classify/full_continuous_to_original.pkl"
 
-    X = torch.load(embeddings_path)
-    y = torch.load(mapped_attributes_path)
+    # X = torch.load(embeddings_path)
+    # y = torch.load(mapped_attributes_path)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    y = y.to(device)
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # y = y.to(device)
 
-    # # run_classify(X, y, model_name="full_test.pt", input_dim=64, output_dim=5)
-    # run_classify(X, y, model_name="full_mlp.pt", input_dim=64, output_dim=5, model_type="mlp")
+    # # # run_classify(X, y, model_name="full_test.pt", input_dim=64, output_dim=5)
+    # # run_classify(X, y, model_name="full_mlp.pt", input_dim=64, output_dim=5, model_type="mlp")
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    model = LinearModel(input_dim=64, output_dim=5).to(device)
-    checkpoint = torch.load(f'{PATH_PREFIX}/classify/full_test.pt')
-    model.load_state_dict(checkpoint["model"])
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # model = LinearModel(input_dim=64, output_dim=5).to(device)
+    # checkpoint = torch.load(f'{PATH_PREFIX}/classify/full_test.pt')
+    # model.load_state_dict(checkpoint["model"])
 
-    evaluate_model(model, X_test, y_test)
+    # evaluate_model(model, X_test, y_test)
+
 
 
     # run_classify(X, y, model_name="mlp_adam.pt", model_type-"mlp")
@@ -329,9 +320,11 @@ if __name__ == "__main__":
     # run_classify(X, y, lr=0.01, model_name="adam_reg.pt")
 
     # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
-    # config = GPTConfig44
+    dataset_name = "balanced_set_dataset_random"
+    config = GPTConfig44
 
-    # analyze_embeddings(config, dataset_path, capture_layer=0, capture_head=3)
+    for layer in range(4):
+        analyze_embeddings(config, dataset_name, capture_layer=layer)
 
 
     # run(
