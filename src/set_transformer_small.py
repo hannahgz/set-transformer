@@ -417,8 +417,8 @@ if __name__ == "__main__":
 
     model = LinearModel(input_dim=64, output_dim=5).to(device)
 
-    evaluate_model(model, X_train, y_train, model_name=f"{dataset_name}_layer{layer}")
-    evaluate_model(model, X_test, y_test, model_name=f"{dataset_name}_layer{layer}")
+    evaluate_model(model, X_train, y_train, model_name=f"{dataset_name}_layer{layer}_linear")
+    evaluate_model(model, X_test, y_test, model_name=f"{dataset_name}_layer{layer}_linear")
 
     # embeddings_path = f"{PATH_PREFIX}/classify/full_combined_input_embeddings.pt"
     # mapped_attributes_path = f"{PATH_PREFIX}/classify/full_mapped_target_attributes.pt"
