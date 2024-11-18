@@ -307,7 +307,7 @@ if __name__ == "__main__":
     #     run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5)
     #     # run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5, model_type="mlp")
 
-    layer = 1
+    layer = 0
     dataset_name = "balanced_set_dataset_random"
     embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
     mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"

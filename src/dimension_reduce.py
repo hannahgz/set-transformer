@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
 import umap
+from model import GPT
 from data_utils import initialize_loaders
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'

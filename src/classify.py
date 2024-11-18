@@ -168,8 +168,8 @@ def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, 
     train_model(model, X_train, y_train, criterion, optimizer, num_epochs, batch_size, model_name=f"{model_name}_{model_type}")
 
     # Evaluate the model
-    train_accuracy = evaluate_model(model, X_train, y_train)
-    test_accuracy = evaluate_model(model, X_test, y_test)
+    train_accuracy = evaluate_model(model, X_train, y_train, model_name=f"{model_name}_{model_type}")
+    test_accuracy = evaluate_model(model, X_test, y_test, model_name=f"{model_name}_{model_type}")
 
     wandb.log({"train_accuracy": train_accuracy, "test_accuracy": test_accuracy})
     wandb.finish()
