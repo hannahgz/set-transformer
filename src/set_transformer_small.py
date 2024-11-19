@@ -424,12 +424,12 @@ if __name__ == "__main__":
     # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
 
 
-    dataset_name = "attr_first_balanced_set_dataset_random"
-    config = GPTConfig44_AttrFirst
+    # dataset_name = "attr_first_balanced_set_dataset_random"
+    # config = GPTConfig44_AttrFirst
 
-    for layer in range(4):
-        print(f"Layer {layer}")
-        analyze_embeddings(config, dataset_name, capture_layer=layer)
+    # for layer in range(4):
+    #     print(f"Layer {layer}")
+    #     analyze_embeddings(config, dataset_name, capture_layer=layer)
 
 
     # dataset_name = "attr_first_balanced_set_dataset_random"
