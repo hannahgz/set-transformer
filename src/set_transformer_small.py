@@ -281,6 +281,67 @@ def analyze_embeddings(config, dataset_name, capture_layer):
 
     return combined_input_embeddings, mapped_target_attributes, continuous_to_original
 
+
+def opp_analyze_embeddings(config, dataset_name, capture_layer):
+    dataset_path = f"{PATH_PREFIX}/{dataset_name}.pth"
+    dataset = torch.load(dataset_path)
+    train_loader, val_loader = initialize_loaders(config, dataset)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = GPT(config).to(device)
+
+    all_flattened_input_embeddings = []
+    all_flattened_target_attributes = []
+
+    for index, batch in enumerate(val_loader):
+        batch = batch.to(device)
+        _, _, _, captured_embedding = model(batch, True, capture_layer)
+
+        # input_embeddings = captured_embedding[:, 1:(config.input_size-1):2, :]
+        input_embeddings = captured_embedding[:, :(config.input_size-1):2, :]
+        flattened_input_embeddings = input_embeddings.reshape(-1, 64)
+
+        # Get every other element in the input starting from index 1, representing all the card tokens
+        target_attributes = batch[:, 1:(config.input_size - 1):2]
+        flattened_target_attributes = target_attributes.reshape(-1)
+
+        # Append the flattened tensors to the respective lists
+        all_flattened_input_embeddings.append(flattened_input_embeddings)
+        all_flattened_target_attributes.append(flattened_target_attributes)
+    
+    combined_input_embeddings = torch.cat(all_flattened_input_embeddings, dim=0)
+    combined_target_attributes = torch.cat(all_flattened_target_attributes, dim=0)
+
+    # Get the unique values in combined_target_attributes
+    unique_values = torch.unique(combined_target_attributes)
+
+    # Create a mapping from unique values to a continuous sequence
+    value_to_continuous = {v.item(): i for i, v in enumerate(unique_values)}
+
+    # Reverse the mapping: continuous values back to the original values
+    continuous_to_original = {v: k for k, v in value_to_continuous.items()}
+
+    # Map the values in combined_target_attributes to the continuous sequence
+    mapped_target_attributes = torch.tensor([value_to_continuous[val.item()] for val in combined_target_attributes])
+
+    # Create the directory structure if it doesn't exist
+    base_dir = f"{PATH_PREFIX}/classify/opp_{dataset_name}/layer{capture_layer}"
+    os.makedirs(base_dir, exist_ok=True)
+
+    embeddings_path = f"{PATH_PREFIX}/classify/opp_{dataset_name}/layer{capture_layer}/input_embeddings.pt"
+    mapped_attributes_path = f"{PATH_PREFIX}/classify/opp_{dataset_name}/layer{capture_layer}/mapped_target_attributes.pt"
+    continuous_to_original_path = f"{PATH_PREFIX}/classify/opp_{dataset_name}/layer{capture_layer}/continuous_to_original.pkl"
+
+    # Save the combined_input_embeddings tensor
+    torch.save(combined_input_embeddings, embeddings_path)
+
+    # Save the mapped_target_attributes tensor
+    torch.save(mapped_target_attributes, mapped_attributes_path)
+
+    with open(continuous_to_original_path, "wb") as f:
+        pickle.dump(continuous_to_original, f)
+
+    return combined_input_embeddings, mapped_target_attributes, continuous_to_original
+
     
 def get_raw_input_embeddings(config, dataset_name, capture_layer):
     dataset_path = f"{PATH_PREFIX}/{dataset_name}.pth"
@@ -337,7 +398,7 @@ if __name__ == "__main__":
     dataset_name = "balanced_set_dataset_random"
     config = GPTConfig44
 
-    for layer in range(4):
+    for layer in range(3, 4):
         embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
         mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
 

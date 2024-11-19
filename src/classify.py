@@ -47,17 +47,21 @@ def evaluate_model(model, X, y, model_name):
 
     model.eval()  # Set the model to evaluation mode
     correct_predictions = []
-    mod_20_counts = {i: 0 for i in range(20)}
+    
+    # Dictionary to count frequency of correct predictions for each class
+    class_correct_counts = {i: 0 for i in range(12)}
+    # Dictionary to count total occurrences of each class
+    class_total_counts = {i: 0 for i in range(12)}
+
+    # these mod 20 counts are not accurate because the order is changing for X so we don't actually know which position in the sequence corresponds to which attribute
 
     with torch.no_grad():
         outputs = model(X)
         _, predicted = torch.max(outputs, 1)
         
-        for idx, (pred, true) in enumerate(zip(predicted, y)):
-            if pred == true:
+        for idx, (pred, true_label) in enumerate(zip(predicted, y)):
+            if pred == true_label:
                 correct_predictions.append((idx, pred.item()))
-                mod_20_value = idx % 20
-                mod_20_counts[mod_20_value] += 1
 
         accuracy = len(correct_predictions) / y.size(0)
     
