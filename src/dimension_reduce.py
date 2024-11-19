@@ -7,6 +7,7 @@ from model import GPT
 from data_utils import initialize_loaders
 import os
 import numpy as np
+from matplotlib.colors import ListedColormap 
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
@@ -64,7 +65,7 @@ def run_pca_analysis(embeddings, labels, layer, n_components=2):
     scatter = plt.scatter(embeddings_pca[:, 0], 
                           embeddings_pca[:, 1],
                           c=mapped_labels, 
-                          cmap=plt.ListedColormap(distinct_colors[:len(unique_labels)]),
+                          cmap=ListedColormap(distinct_colors[:len(unique_labels)]),
                           alpha=0.3)
     
     # Create colorbar with integer ticks
