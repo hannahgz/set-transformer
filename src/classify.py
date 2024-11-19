@@ -160,8 +160,6 @@ def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, 
     elif model_type == "mlp":
         model = MLPModel(input_dim=input_dim, hidden_dim=32, output_dim=output_dim).to(device)
     criterion = nn.CrossEntropyLoss()
-    # optimizer = optim.SGD(model.parameters(), lr=lr)
-    # Use Adam optimizer
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     # Train the model
