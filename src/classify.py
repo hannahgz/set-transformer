@@ -135,7 +135,7 @@ def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=10
             "val_loss": val_loss,
         })
         
-        # Early stopping based on validation accuracy
+        # Early stopping based on validation loss
         if val_loss < best_val_loss:
             counter = 0
             best_val_loss = val_loss
