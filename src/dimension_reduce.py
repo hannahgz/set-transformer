@@ -6,6 +6,7 @@ import umap
 from model import GPT
 from data_utils import initialize_loaders
 import os
+import numpy as np
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
@@ -52,9 +53,24 @@ def run_pca_analysis(embeddings, labels, layer, n_components=2):
 
     # Create scatter plot
     plt.figure(figsize=(10, 8))
-    scatter = plt.scatter(embeddings_pca[:, 0], embeddings_pca[:, 1],
-                          c=labels, cmap='tab10', alpha=0.6)
-    plt.colorbar(scatter)
+
+    distinct_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']  # Default matplotlib colors
+    
+    # Ensure labels are 0-4
+    unique_labels = np.unique(labels)
+    label_map = {old: new for new, old in enumerate(unique_labels)}
+    mapped_labels = np.array([label_map[l] for l in labels])
+    
+    scatter = plt.scatter(embeddings_pca[:, 0], 
+                          embeddings_pca[:, 1],
+                          c=mapped_labels, 
+                          cmap=plt.ListedColormap(distinct_colors[:len(unique_labels)]),
+                          alpha=0.3)
+    
+    # Create colorbar with integer ticks
+    colorbar = plt.colorbar(scatter, ticks=range(len(unique_labels)))
+    colorbar.set_ticklabels([f'Class {i}' for i in range(len(unique_labels))])
+
     plt.title('PCA visualization of embeddings')
     plt.xlabel(
         f'PC1 (variance explained: {pca.explained_variance_ratio_[0]:.3f})')

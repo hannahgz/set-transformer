@@ -321,7 +321,7 @@ if __name__ == "__main__":
         y = y.to(device)
 
         run_pca_analysis(X, y, layer)
-        run_umap_analysis(X, y, layer)
+        # run_umap_analysis(X, y, layer)
 
 
 
