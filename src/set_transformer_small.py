@@ -401,6 +401,10 @@ if __name__ == "__main__":
     layer = 1
     embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
     mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
+    continuous_to_original_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/continuous_to_original.pkl"
+    tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random_tokenizer.pkl',
+    with open(continuous_to_original_path, 'rb') as f:
+        continuous_to_original = pickle.load(f)
 
     X = torch.load(embeddings_path)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -409,7 +413,8 @@ if __name__ == "__main__":
     X_train, X_val, X_test, y_train, y_val, y_test = prepare_data(X, y)
 
     model = LinearModel(input_dim=64, output_dim=12).to(device)
-    evaluate_model(model, X_test, y_test, model_name=f"{dataset_name}_layer{layer}_linear")
+    tokenizer = load_tokenizer(tokenizer_path)
+    evaluate_model(model, X_test, y_test, model_name=f"{dataset_name}_layer{layer}_linear", continuous_to_original=continuous_to_original, tokenizer=tokenizer)
 
     # dataset_name = "balanced_set_dataset_random"
     # config = GPTConfig44

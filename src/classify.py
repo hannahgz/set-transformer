@@ -39,7 +39,7 @@ class MLPModel(nn.Module):
     
 
 
-def evaluate_model(model, X, y, model_name, predict_dim=12, input_dim=5):
+def evaluate_model(model, X, y, model_name, predict_dim=12, input_dim=5, continuous_to_original=None, tokenizer=None):
     """Evaluates the model on data and prints correct predictions."""
 
     checkpoint = torch.load(f'{PATH_PREFIX}/classify/{model_name}.pt', weights_only=False)
@@ -53,7 +53,7 @@ def evaluate_model(model, X, y, model_name, predict_dim=12, input_dim=5):
     # Dictionary to count total occurrences of each class
     class_total_counts = {i: 0 for i in range(predict_dim)}
 
-
+    
     input_correct_counts = {i: 0 for i in range(input_dim)}
     # Dictionary to count total occurrences of each class
     input_total_counts = {i: 0 for i in range(input_dim)}
@@ -79,7 +79,8 @@ def evaluate_model(model, X, y, model_name, predict_dim=12, input_dim=5):
         total = class_total_counts[class_idx]
         correct = class_correct_counts[class_idx]
         accuracy_per_class = (correct / total) if total > 0 else 0
-        print(f"\nClass {class_idx}:")
+        original_token = continuous_to_original.get(class_idx, f"Unknown token {class_idx}")
+        print(f"\nClass {class_idx}, Original Token: ({original_token})/{tokenizer.decode([original_token])}:")
         print(f"  Accuracy: {accuracy_per_class:.4f} ({correct}/{total})")
 
     # print("Correctly predicted values and their indices:")
