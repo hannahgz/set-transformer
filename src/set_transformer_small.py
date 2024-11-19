@@ -298,9 +298,12 @@ def get_raw_input_embeddings(config, dataset_name, capture_layer):
     for index, batch in enumerate(val_loader):
         batch = batch.to(device)
         _, _, _, captured_embedding = model(batch, True, capture_layer)
+        # torch.Size([64, 49, 64])
+        # [batch_size, seq_len, embedding_dim]
 
         flattened_embeddings = captured_embedding.reshape(-1, 64)
-        breakpoint()
+        # torch.Size([3136, 64])
+
         all_flattened_embeddings.append(flattened_embeddings)
 
     base_dir = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}"
