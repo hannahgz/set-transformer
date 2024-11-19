@@ -39,7 +39,7 @@ class MLPModel(nn.Module):
     
 
 
-def evaluate_model(model, X, y, model_name):
+def evaluate_model(model, X, y, model_name, predict_dim=12, input_dim=5):
     """Evaluates the model on data and prints correct predictions."""
 
     checkpoint = torch.load(f'{PATH_PREFIX}/classify/{model_name}.pt', weights_only=False)
@@ -49,9 +49,14 @@ def evaluate_model(model, X, y, model_name):
     correct_predictions = []
     
     # Dictionary to count frequency of correct predictions for each class
-    class_correct_counts = {i: 0 for i in range(12)}
+    class_correct_counts = {i: 0 for i in range(predict_dim)}
     # Dictionary to count total occurrences of each class
-    class_total_counts = {i: 0 for i in range(12)}
+    class_total_counts = {i: 0 for i in range(predict_dim)}
+
+
+    input_correct_counts = {i: 0 for i in range(input_dim)}
+    # Dictionary to count total occurrences of each class
+    input_total_counts = {i: 0 for i in range(input_dim)}
 
     # these mod 20 counts are not accurate because the order is changing for X so we don't actually know which position in the sequence corresponds to which attribute
 
@@ -59,12 +64,24 @@ def evaluate_model(model, X, y, model_name):
         outputs = model(X)
         _, predicted = torch.max(outputs, 1)
         
-        for idx, (pred, true_label) in enumerate(zip(predicted, y)):
-            if pred == true_label:
+        for idx, (pred, true) in enumerate(zip(predicted, y)):
+            true_label = true.item()
+            class_total_counts[true_label] += 1
+
+            if pred == true:
                 correct_predictions.append((idx, pred.item()))
+                class_correct_counts[true_label] += 1
 
         accuracy = len(correct_predictions) / y.size(0)
     
+    print("\nPer-class statistics:")
+    for class_idx in range(predict_dim):
+        total = class_total_counts[class_idx]
+        correct = class_correct_counts[class_idx]
+        accuracy_per_class = (correct / total) if total > 0 else 0
+        print(f"\nClass {class_idx}:")
+        print(f"  Accuracy: {accuracy_per_class:.4f} ({correct}/{total})")
+
     # print("Correctly predicted values and their indices:")
     # for idx, value in correct_predictions:
     #     print(f"Index: {idx}, mod {idx % 20}, Predicted Value: {value}")
