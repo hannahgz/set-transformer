@@ -19,7 +19,7 @@ import numpy as np
 from tokenizer import load_tokenizer
 from graph import lineplot_specific
 import pickle
-from classify import LinearModel, evaluate_model
+from classify import LinearModel, evaluate_model, run_binary_classify
 from sklearn.model_selection import train_test_split
 from dimension_reduce import run_pca_analysis, run_umap_analysis
 
@@ -261,10 +261,6 @@ def analyze_embeddings(config, dataset_name, capture_layer):
 
     # Map the values in combined_target_attributes to the continuous sequence
     mapped_target_attributes = torch.tensor([value_to_continuous[val.item()] for val in combined_target_attributes])
-    
-    # embeddings_path = f"{PATH_PREFIX}/classify/combined_input_embeddings.pt"
-    # mapped_attributes_path = f"{PATH_PREFIX}/classify/mapped_target_attributes.pt"
-    # continuous_to_original_path = f"{PATH_PREFIX}/classify/continuous_to_original.pkl"
 
     # Create the directory structure if it doesn't exist
     base_dir = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}"
@@ -324,17 +320,22 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    dataset_name = "balanced_set_dataset_random"
-    for layer in range(4):
-        print(f"Layer {layer}")
-        get_raw_input_embeddings(GPTConfig44, dataset_name, capture_layer=layer)
+    # dataset_name = "balanced_set_dataset_random"
+    # for layer in range(4):
+    #     print(f"Layer {layer}")
+    #     get_raw_input_embeddings(GPTConfig44, dataset_name, capture_layer=layer)
+
+    # for layer in range(4):
+    #     embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/all_val_raw_embeddings.pt"
+    #     X = torch.load(embeddings_path)
+    #     for i in X:
 
 
     # dataset_name = "balanced_set_dataset_random"
     # get_raw_input_embeddings(GPTConfig44, dataset_name, capture_layer=0)
 
     # dataset_name = "balanced_set_dataset_random"
-    # for layer in range(2,4):
+    # for layer in range(4):
     #     embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
     #     mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
 
@@ -342,8 +343,8 @@ if __name__ == "__main__":
     #     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     #     y = torch.load(mapped_attributes_path).to(device)
 
-    #     run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5)
-        # run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5, model_type="mlp")
+    #     # run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5)
+    #     run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5, model_type="mlp")
 
 
     # for layer in range(0, 4):
@@ -409,12 +410,12 @@ if __name__ == "__main__":
     # dataset_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random.pth'
 
 
-    # dataset_name = "balanced_set_dataset_random"
-    # config = GPTConfig44
+    dataset_name = "attr_first_balanced_set_dataset_random"
+    config = GPTConfig44_AttrFirst
 
-    # for layer in range(4):
-    #     print(f"Layer {layer}")
-    #     analyze_embeddings(config, dataset_name, capture_layer=layer)
+    for layer in range(4):
+        print(f"Layer {layer}")
+        analyze_embeddings(config, dataset_name, capture_layer=layer)
 
 
     # dataset_name = "attr_first_balanced_set_dataset_random"
