@@ -331,8 +331,8 @@ if __name__ == "__main__":
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         y = torch.load(mapped_attributes_path).to(device)
 
-        run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=12)
-        run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=12, model_type="mlp")
+        run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=12, num_epochs=1)
+        run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=12, model_type="mlp", num_epochs=1)
 
     # dataset_name = "balanced_set_dataset_random"
     # for layer in range(4):
