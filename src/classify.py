@@ -69,7 +69,6 @@ def evaluate_model(model, X, y, model_name):
     # for idx, value in correct_predictions:
     #     print(f"Index: {idx}, mod {idx % 20}, Predicted Value: {value}")
     
-    print("mod 20 counts: ", mod_20_counts)
     print(f"\nTotal correct predictions: {len(correct_predictions)}")
     print(f"Accuracy: {accuracy:.4f}")
     
