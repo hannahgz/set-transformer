@@ -398,7 +398,7 @@ if __name__ == "__main__":
     dataset_name = "attr_first_balanced_set_dataset_random"
     config = GPTConfig44_AttrFirst
 
-    layer = 1
+    layer = 0
     embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
     mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
     continuous_to_original_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/continuous_to_original.pkl"
