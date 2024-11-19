@@ -49,7 +49,7 @@ def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, b
     """Trains the model on the training data."""
 
     wandb.init(
-        project="classify-card-attribute",
+        project="attr-first-classify-attribute",
         config={
                 "epochs": num_epochs,
                 "batch_size": batch_size,
