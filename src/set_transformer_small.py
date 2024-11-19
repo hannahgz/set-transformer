@@ -320,8 +320,8 @@ if __name__ == "__main__":
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         y = y.to(device)
 
-        run_pca_analysis(X, y, layer)
-        # run_umap_analysis(X, y, layer)
+        # run_pca_analysis(X, y, layer)
+        run_umap_analysis(X, y, layer)
 
 
 

@@ -104,15 +104,37 @@ def run_umap_analysis(embeddings, labels, layer, n_components=2):
     if isinstance(labels, torch.Tensor):
         labels = labels.cpu().numpy()
 
+    print("Applying PCA first...")
+    n_pca = min(50, embeddings.shape[1])  # Aggressive dimension reduction
+    pca = PCA(n_components=n_pca)
+    embeddings_pca = pca.fit_transform(embeddings)
+
     # Run UMAP
     reducer = umap.UMAP(n_components=n_components, random_state=42)
-    embeddings_umap = reducer.fit_transform(embeddings)
+    embeddings_umap = reducer.fit_transform(embeddings_pca)
 
     # Create scatter plot
     plt.figure(figsize=(10, 8))
-    scatter = plt.scatter(embeddings_umap[:, 0], embeddings_umap[:, 1],
-                          c=labels, cmap='tab10', alpha=0.6)
-    plt.colorbar(scatter)
+    # scatter = plt.scatter(embeddings_umap[:, 0], embeddings_umap[:, 1],
+    #                       c=labels, cmap='tab10', alpha=0.6)
+    
+    distinct_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']  # Default matplotlib colors
+    
+    # Ensure labels are 0-4
+    unique_labels = np.unique(labels)
+    label_map = {old: new for new, old in enumerate(unique_labels)}
+    mapped_labels = np.array([label_map[l] for l in labels])
+    
+    scatter = plt.scatter(embeddings_umap[:, 0], 
+                          embeddings_umap[:, 1],
+                          c=mapped_labels, 
+                          cmap=ListedColormap(distinct_colors[:len(unique_labels)]),
+                          alpha=0.3)
+    
+    # Create colorbar with integer ticks
+    colorbar = plt.colorbar(scatter, ticks=range(len(unique_labels)))
+    colorbar.set_ticklabels([f'Class {i}' for i in range(len(unique_labels))])
+
     plt.title('UMAP visualization of embeddings')
     plt.xlabel('UMAP1')
     plt.ylabel('UMAP2')
