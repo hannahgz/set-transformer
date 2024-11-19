@@ -402,7 +402,7 @@ if __name__ == "__main__":
     embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
     mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
     continuous_to_original_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/continuous_to_original.pkl"
-    tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random_tokenizer.pkl',
+    tokenizer_path='/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/attr_first_balanced_set_dataset_random_tokenizer.pkl'
     with open(continuous_to_original_path, 'rb') as f:
         continuous_to_original = pickle.load(f)
 
