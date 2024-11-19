@@ -37,82 +37,7 @@ class MLPModel(nn.Module):
         # x = self.fc3(x)
         return x
     
-def prepare_data(X, y, test_size=0.2, random_state=42):
-    """Splits the data into train and test sets and converts to torch tensors."""
-    # X_tensor = torch.tensor(X, dtype=torch.float32)
-    # y_tensor = torch.tensor(y, dtype=torch.long)
-    # X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_tensor, test_size=test_size, random_state=random_state)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
-    return X_train, X_test, y_train, y_test
 
-def train_model(model, X_train, y_train, criterion, optimizer, num_epochs=100, batch_size=32, patience=20, model_name=None):
-    """Trains the model on the training data."""
-
-    wandb.init(
-        project="attr-first-classify-attribute",
-        config={
-                "epochs": num_epochs,
-                "batch_size": batch_size,
-                "patience": patience,
-        },
-        name=model_name
-    )
-
-    model.train()  # Set the model to training mode
-
-    counter = 0
-    best_loss = 1e9
-    for epoch in range(num_epochs):
-        if counter > patience:
-            print("Exceeded patience: ", patience) 
-            break
-        permutation = torch.randperm(X_train.size(0))
-        for i in range(0, X_train.size(0), batch_size):
-            indices = permutation[i:i+batch_size]
-            batch_X, batch_y = X_train[indices], y_train[indices]
-    
-            # Forward pass
-            outputs = model(batch_X)
-            loss = criterion(outputs, batch_y)
-
-            # Backward pass and optimization
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-        # Print loss every epoch
-        print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}")
-
-        wandb.log(
-            {
-                "epoch": epoch + 1,
-                "train_loss": loss,
-            }
-        )
-        
-        if loss < best_loss:
-            counter = 0
-            best_loss = loss
-
-            checkpoint = {
-                "model": model.state_dict(),
-                "optimizer": optimizer.state_dict(),
-                "epoch_num": epoch,
-                "best_loss": best_loss,
-            }
-            torch.save(checkpoint, f'{PATH_PREFIX}/classify/{model_name}.pt')
-        else:
-            counter += 1
-
-
-# def evaluate_model(model, X_test, y_test):
-#     """Evaluates the model on the test data."""
-#     model.eval()  # Set the model to evaluation mode
-#     with torch.no_grad():
-#         outputs = model(X_test)
-#         _, predicted = torch.max(outputs, 1)
-#         accuracy = (predicted == y_test).sum().item() / y_test.size(0)
-#     return accuracy
 
 def evaluate_model(model, X, y, model_name):
     """Evaluates the model on data and prints correct predictions."""
@@ -146,11 +71,92 @@ def evaluate_model(model, X, y, model_name):
     
     return accuracy
 
+def prepare_data(X, y, test_size=0.2, val_size=0.2, random_state=42):
+    """Splits the data into train, validation and test sets."""
+    # First split into train+val and test
+    X_trainval, X_test, y_trainval, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+    
+    # Then split train+val into train and val
+    val_ratio = val_size / (1 - test_size)
+    X_train, X_val, y_train, y_val = train_test_split(X_trainval, y_trainval, test_size=val_ratio, random_state=random_state)
+    
+    return X_train, X_val, X_test, y_train, y_val, y_test
+
+def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=100, batch_size=32, patience=10, model_name=None):
+    """Trains the model using validation accuracy for early stopping."""
+    X_train, y_train = train_data
+    X_val, y_val = val_data
+
+    wandb.init(
+        project="attr-first-classify-attribute",
+        config={
+            "epochs": num_epochs,
+            "batch_size": batch_size,
+            "patience": patience,
+        },
+        name=model_name
+    )
+
+    counter = 0
+    best_val_loss = 1e10
+    
+    for epoch in range(num_epochs):
+        # Training phase
+        model.train()
+        permutation = torch.randperm(X_train.size(0))
+        train_loss = 0
+        
+        for i in range(0, X_train.size(0), batch_size):
+            indices = permutation[i:i+batch_size]
+            batch_X, batch_y = X_train[indices], y_train[indices]
+    
+            outputs = model(batch_X)
+            loss = criterion(outputs, batch_y)
+            
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            
+            train_loss += loss.item()
+        
+        avg_train_loss = train_loss / (X_train.size(0) // batch_size)
+        
+        # Validation phase
+        model.eval()
+        with torch.no_grad():
+            val_outputs = model(X_val)
+            val_loss = criterion(val_outputs, y_val)
+
+        print(f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {avg_train_loss:.4f}")
+
+        wandb.log({
+            "epoch": epoch + 1,
+            "train_loss": avg_train_loss,
+            "val_loss": val_loss,
+        })
+        
+        # Early stopping based on validation accuracy
+        if val_loss < best_val_loss:
+            counter = 0
+            best_val_loss = val_loss
+
+            checkpoint = {
+                "model": model.state_dict(),
+                "optimizer": optimizer.state_dict(),
+                "epoch_num": epoch,
+                "best_val_loss": best_val_loss,
+            }
+            torch.save(checkpoint, f'{PATH_PREFIX}/classify/{model_name}.pt')
+        else:
+            counter += 1
+            if counter >= patience:
+                print(f"Early stopping triggered after {epoch + 1} epochs")
+                break
 
 def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, batch_size=32, lr=0.001, model_type="linear"):
     """Main function to run the model training and evaluation."""
-    # Prepare data
-    X_train, X_test, y_train, y_test = prepare_data(X, y)
+    # Prepare data with validation split
+    X_train, X_val, X_test, y_train, y_val, y_test = prepare_data(X, y)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -162,17 +168,32 @@ def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
-    # Train the model
-    train_model(model, X_train, y_train, criterion, optimizer, num_epochs, batch_size, model_name=f"{model_name}_{model_type}")
+    # Train the model with validation data
+    train_model(
+        model, 
+        (X_train, y_train),
+        (X_val, y_val),
+        criterion, 
+        optimizer, 
+        num_epochs, 
+        batch_size, 
+        model_name=f"{model_name}_{model_type}"
+    )
 
     # Evaluate the model
     train_accuracy = evaluate_model(model, X_train, y_train, model_name=f"{model_name}_{model_type}")
+    val_accuracy = evaluate_model(model, X_val, y_val, model_name=f"{model_name}_{model_type}")
     test_accuracy = evaluate_model(model, X_test, y_test, model_name=f"{model_name}_{model_type}")
 
-    wandb.log({"train_accuracy": train_accuracy, "test_accuracy": test_accuracy})
+    wandb.log({
+        "final_train_accuracy": train_accuracy,
+        "final_val_accuracy": val_accuracy,
+        "final_test_accuracy": test_accuracy
+    })
     wandb.finish()
 
     print(f"Train Accuracy: {train_accuracy * 100:.2f}%")
+    print(f"Validation Accuracy: {val_accuracy * 100:.2f}%")
     print(f"Test Accuracy: {test_accuracy * 100:.2f}%")
 
 
