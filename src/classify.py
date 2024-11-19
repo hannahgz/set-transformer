@@ -178,6 +178,141 @@ def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, 
     print(f"Test Accuracy: {test_accuracy * 100:.2f}%")
 
 
+def prepare_paired_data(card_embeddings, attr_embeddings, labels):
+    """Prepare paired embeddings data for binary classification."""
+    # Convert to torch tensors if they aren't already
+    if not isinstance(card_embeddings, torch.Tensor):
+        card_embeddings = torch.tensor(card_embeddings, dtype=torch.float32)
+    if not isinstance(attr_embeddings, torch.Tensor):
+        attr_embeddings = torch.tensor(attr_embeddings, dtype=torch.float32)
+    if not isinstance(labels, torch.Tensor):
+        labels = torch.tensor(labels, dtype=torch.float32)
+
+    # Split into train and test sets
+    indices = torch.randperm(len(card_embeddings))
+    split = int(0.8 * len(card_embeddings))
+    train_indices = indices[:split]
+    test_indices = indices[split:]
+
+    X_train_cards = card_embeddings[train_indices]
+    X_train_attrs = attr_embeddings[train_indices]
+    y_train = labels[train_indices]
+
+    X_test_cards = card_embeddings[test_indices]
+    X_test_attrs = attr_embeddings[test_indices]
+    y_test = labels[test_indices]
+
+    return (X_train_cards, X_train_attrs, y_train), (X_test_cards, X_test_attrs, y_test)
+
+class BinaryPairClassifier(nn.Module):
+    def __init__(self, embedding_dim):
+        super(BinaryPairClassifier, self).__init__()
+        self.fc = nn.Linear(embedding_dim * 2, 1)  # Concatenate two embeddings
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, card_embedding, attr_embedding):
+        # Concatenate the two embeddings
+        combined = torch.cat((card_embedding, attr_embedding), dim=1)
+        output = self.fc(combined)
+        return self.sigmoid(output)
+
+def train_binary_model(model, train_data, criterion, optimizer, num_epochs, batch_size, model_name):
+    """Train the binary classifier."""
+    X_train_cards, X_train_attrs, y_train = train_data
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+    
+    n_samples = len(X_train_cards)
+    best_loss = float('inf')
+    patience = 5
+    patience_counter = 0
+    
+    for epoch in range(num_epochs):
+        model.train()
+        total_loss = 0
+        
+        # Process in batches
+        for i in range(0, n_samples, batch_size):
+            batch_cards = X_train_cards[i:i+batch_size].to(device)
+            batch_attrs = X_train_attrs[i:i+batch_size].to(device)
+            batch_y = y_train[i:i+batch_size].to(device)
+            
+            optimizer.zero_grad()
+            outputs = model(batch_cards, batch_attrs).squeeze()
+            loss = criterion(outputs, batch_y)
+            loss.backward()
+            optimizer.step()
+            
+            total_loss += loss.item()
+        
+        avg_loss = total_loss / (n_samples // batch_size)
+        print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {avg_loss:.4f}')
+        wandb.log({"train_loss": avg_loss})
+        
+        # Early stopping
+        if avg_loss < best_loss:
+            best_loss = avg_loss
+            patience_counter = 0
+            # Save the best model
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': avg_loss,
+            }, f'{PATH_PREFIX}/classify/{model_name}.pt')
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                print(f'Early stopping after {epoch+1} epochs')
+                break
+
+def evaluate_binary_model(model, test_data, model_name):
+    """Evaluate the binary classifier."""
+    X_test_cards, X_test_attrs, y_test = test_data
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+    model.eval()
+    
+    with torch.no_grad():
+        X_test_cards = X_test_cards.to(device)
+        X_test_attrs = X_test_attrs.to(device)
+        y_test = y_test.to(device)
+        
+        outputs = model(X_test_cards, X_test_attrs).squeeze()
+        predicted = (outputs >= 0.5).float()
+        
+        correct = (predicted == y_test).sum().item()
+        total = y_test.size(0)
+        accuracy = correct / total
+        
+        print(f'Test Accuracy: {accuracy:.4f}')
+        return accuracy
+
+def run_binary_classify(card_embeddings, attr_embeddings, labels, model_name, 
+                       embedding_dim=64, num_epochs=100, batch_size=32, lr=0.001):
+    """Main function to run binary classification training and evaluation."""
+    # Prepare data
+    train_data, test_data = prepare_paired_data(card_embeddings, attr_embeddings, labels)
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    # Initialize model, loss function, and optimizer
+    model = BinaryPairClassifier(embedding_dim).to(device)
+    criterion = nn.BCELoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    
+    # Train the model
+    train_binary_model(model, train_data, criterion, optimizer, num_epochs, batch_size, model_name)
+    
+    # Evaluate the model
+    train_accuracy = evaluate_binary_model(model, train_data, model_name)
+    test_accuracy = evaluate_binary_model(model, test_data, model_name)
+    
+    wandb.log({"train_accuracy": train_accuracy, "test_accuracy": test_accuracy})
+    wandb.finish()
+    
+    return train_accuracy, test_accuracy
+
 
 # Example usage:
 # X = [...]  # Your input data as a list of vectors (num_samples, 16)

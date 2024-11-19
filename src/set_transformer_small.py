@@ -286,12 +286,46 @@ def analyze_embeddings(config, dataset_name, capture_layer):
     return combined_input_embeddings, mapped_target_attributes, continuous_to_original
 
     
+def get_raw_input_embeddings(config, dataset_name, capture_layer):
+    dataset_path = f"{PATH_PREFIX}/{dataset_name}.pth"
+    dataset = torch.load(dataset_path)
+    train_loader, val_loader = initialize_loaders(config, dataset)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = GPT(config).to(device)
+
+    all_flattened_embeddings = []
+
+    for index, batch in enumerate(val_loader):
+        batch = batch.to(device)
+        _, _, _, captured_embedding = model(batch, True, capture_layer)
+
+        flattened_embeddings = captured_embedding.reshape(-1, 64)
+        breakpoint()
+        all_flattened_embeddings.append(flattened_embeddings)
+
+    base_dir = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}"
+    os.makedirs(base_dir, exist_ok=True)
+
+    embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}/all_val_raw_embeddings.pt"
+    
+    final_embeddings = torch.cat(all_flattened_embeddings)
+
+    torch.save(final_embeddings, embeddings_path)
+
+    return final_embeddings
+
 if __name__ == "__main__":
     # small_combinations = run()
     seed = 42
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
+
+    dataset_name = "balanced_set_dataset_random"
+    for layer in range(4):
+        print(f"Layer {layer}")
+        get_raw_input_embeddings(GPTConfig44, dataset_name, capture_layer=layer)
+
 
     # dataset_name = "balanced_set_dataset_random"
     # get_raw_input_embeddings(GPTConfig44, dataset_name, capture_layer=0)
@@ -309,19 +343,19 @@ if __name__ == "__main__":
         # run_classify(X, y, model_name=f"{dataset_name}_layer{layer}", input_dim=64, output_dim=5, model_type="mlp")
 
 
-    for layer in range(0, 4):
-        dataset_name = "balanced_set_dataset_random"
-        embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
-        mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
+    # for layer in range(0, 4):
+    #     dataset_name = "balanced_set_dataset_random"
+    #     embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/input_embeddings.pt"
+    #     mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/mapped_target_attributes.pt"
 
-        X = torch.load(embeddings_path)
-        y = torch.load(mapped_attributes_path)
+    #     X = torch.load(embeddings_path)
+    #     y = torch.load(mapped_attributes_path)
 
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        y = y.to(device)
+    #     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #     y = y.to(device)
 
-        # run_pca_analysis(X, y, layer)
-        run_umap_analysis(X, y, layer)
+    #     # run_pca_analysis(X, y, layer)
+    #     run_umap_analysis(X, y, layer)
 
 
 
