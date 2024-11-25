@@ -16,7 +16,6 @@ PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 def construct_binding_id_dataset(config, dataset_name, capture_layer):
 
     perms = list(permutations(range(20), 2))
-    breakpoint()
 
     dataset_path = f"{PATH_PREFIX}/{dataset_name}.pth"
     dataset = torch.load(dataset_path)
@@ -28,6 +27,7 @@ def construct_binding_id_dataset(config, dataset_name, capture_layer):
     y = []
 
     for index, batch in enumerate(val_loader):
+        print(f"Batch {index}/{len(val_loader)}")
         batch = batch.to(device)
         _, _, _, captured_embedding = model(batch, True, capture_layer)
         # torch.Size([64, 49, 64])
@@ -43,9 +43,9 @@ def construct_binding_id_dataset(config, dataset_name, capture_layer):
                 element1 = curr_embedding[element1_index * 2 + 1]
                 element2 = curr_embedding[element2_index * 2 + 1]
 
-                print("modified token index 1: ", element1_index * 2 - 1, "modified token index 2: ", element2_index * 2 - 1)
-                token1 = curr_tokens[element1_index * 2 - 1]
-                token2 = curr_tokens[element2_index * 2- 1]
+                print("modified token index 1: ", element1_index * 2, "modified token index 2: ", element2_index * 2)
+                token1 = curr_tokens[element1_index * 2]
+                token2 = curr_tokens[element2_index * 2]
 
                 X.append(torch.cat((element1, element2)))
                 if (token1 == token2):
