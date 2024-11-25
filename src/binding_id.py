@@ -37,11 +37,15 @@ def construct_binding_id_dataset(config, dataset_name, capture_layer):
             curr_embedding = indiv_embedding[:40]
             curr_tokens = batch[index][:40]
             for (element1_index, element2_index) in perms:
-                element1 = curr_embedding[element1_index]
-                element2 = curr_embedding[element2_index]
+                print("element1_index: ", element1_index, "element2_index: ", element2_index)
+                print("modified element1_index: ", element1_index * 2 + 1, "modified element2_index: ", element2_index * 2 + 1)
+                
+                element1 = curr_embedding[element1_index * 2 + 1]
+                element2 = curr_embedding[element2_index * 2 + 1]
 
-                token1 = curr_tokens[element1_index - 1]
-                token2 = curr_tokens[element2_index - 1]
+                print("modified token index 1: ", element1_index * 2 - 1, "modified token index 2: ", element2_index * 2 - 1)
+                token1 = curr_tokens[element1_index * 2 - 1]
+                token2 = curr_tokens[element2_index * 2- 1]
 
                 X.append(torch.cat((element1, element2)))
                 if (token1 == token2):
