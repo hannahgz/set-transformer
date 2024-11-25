@@ -37,8 +37,8 @@ def construct_binding_id_dataset(config, dataset_name, capture_layer):
             curr_embedding = indiv_embedding[:40]
             curr_tokens = batch[index][:40]
             for (element1_index, element2_index) in perms:
-                element1 = indiv_embedding[element1_index]
-                element2 = indiv_embedding[element2_index]
+                element1 = curr_embedding[element1_index]
+                element2 = curr_embedding[element2_index]
 
                 token1 = curr_tokens[element1_index - 1]
                 token2 = curr_tokens[element2_index - 1]
