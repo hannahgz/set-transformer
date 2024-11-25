@@ -34,7 +34,8 @@ def construct_binding_id_dataset(config, dataset_name, model_path, capture_layer
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
     model = GPT(config).to(device)  # adjust path as needed
-    model.load_state_dict(torch.load(model_path))
+    checkpoint = torch.load(model_path, weights_only=False)
+    model.load_state_dict(checkpoint["model"])
     model.eval()
 
     X = []
