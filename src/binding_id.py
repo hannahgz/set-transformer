@@ -28,6 +28,8 @@ def construct_binding_id_dataset(config, dataset_name, capture_layer):
 
     for index, batch in enumerate(val_loader):
         print(f"Batch {index}/{len(val_loader)}")
+        print("X len: ", len(X))
+        print("y len: ", len(y))
         batch = batch.to(device)
         _, _, _, captured_embedding = model(batch, True, capture_layer)
         # torch.Size([64, 49, 64])
@@ -52,8 +54,6 @@ def construct_binding_id_dataset(config, dataset_name, capture_layer):
                     y.append(1)
                 else:
                     y.append(0)
-                
-                breakpoint()
 
 
     base_dir = f"{PATH_PREFIX}/binding_id/{dataset_name}/layer{capture_layer}"
