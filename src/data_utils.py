@@ -6,6 +6,7 @@ from tokenizer import Tokenizer, save_tokenizer
 from set_dataset import SetDataset, BalancedSetDataset, BalancedTriplesSetDataset
 import torch
 from torch.utils.data import DataLoader
+from sklearn.model_selection import train_test_split
 
 card_vectors = ["A", "B", "C", "D", "E"]
 
@@ -294,3 +295,14 @@ def initialize_loaders(config, dataset):
     val_loader = DataLoader(
         val_dataset, batch_size=config.batch_size, shuffle=False)
     return train_loader, val_loader
+
+def split_data(X, y, test_size=0.2, val_size=0.2, random_state=42):
+    """Splits the data into train, validation and test sets."""
+    # First split into train+val and test
+    X_trainval, X_test, y_trainval, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+    
+    # Then split train+val into train and val
+    val_ratio = val_size / (1 - test_size)
+    X_train, X_val, y_train, y_val = train_test_split(X_trainval, y_trainval, test_size=val_ratio, random_state=random_state)
+    
+    return X_train, X_val, X_test, y_train, y_val, y_test

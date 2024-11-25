@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import wandb
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
+from data_utils import split_data
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
@@ -92,17 +92,6 @@ def evaluate_model(model, X, y, model_name, predict_dim=12, input_dim=5, continu
     
     return accuracy
 
-def prepare_data(X, y, test_size=0.2, val_size=0.2, random_state=42):
-    """Splits the data into train, validation and test sets."""
-    # First split into train+val and test
-    X_trainval, X_test, y_trainval, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
-    
-    # Then split train+val into train and val
-    val_ratio = val_size / (1 - test_size)
-    X_train, X_val, y_train, y_val = train_test_split(X_trainval, y_trainval, test_size=val_ratio, random_state=random_state)
-    
-    return X_train, X_val, X_test, y_train, y_val, y_test
-
 def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=100, batch_size=32, patience=10, model_name=None):
     """Trains the model using validation accuracy for early stopping."""
     X_train, y_train = train_data
@@ -177,7 +166,7 @@ def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=10
 def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, batch_size=32, lr=0.001, model_type="linear"):
     """Main function to run the model training and evaluation."""
     # Prepare data with validation split
-    X_train, X_val, X_test, y_train, y_val, y_test = prepare_data(X, y)
+    X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
