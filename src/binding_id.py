@@ -79,12 +79,18 @@ def train_binding_classifier(X, y, model_name, input_dim=128, num_epochs=100, ba
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Initialize model, loss function, and optimizer
+    # # Initialize model, loss function, and optimizer
+    # model = nn.Sequential(
+    #     nn.Linear(input_dim, 64),
+    #     nn.ReLU(),
+    #     nn.Linear(64, 1),
+    #     nn.Sigmoid()
+    # ).to(device)
+
+    # Initialize a simple linear model
     model = nn.Sequential(
-        nn.Linear(input_dim, 64),
-        nn.ReLU(),
-        nn.Linear(64, 1),
-        nn.Sigmoid()
+        nn.Linear(input_dim, 1),
+        nn.Sigmoid()  # Keep sigmoid at output for binary classification
     ).to(device)
     
     criterion = nn.BCELoss()
