@@ -383,7 +383,8 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     dataset_name = "balanced_set_dataset_random"
-    construct_binding_id_dataset(GPTConfig44, dataset_name, capture_layer=3)
+    model_name = "causal_full_run_random_layers_4_heads_4.pt"
+    construct_binding_id_dataset(GPTConfig44, dataset_name, model_name,capture_layer=3)
 
     # dataset_name = "attr_first_balanced_set_dataset_random"
     # config = GPTConfig44_AttrFirst
