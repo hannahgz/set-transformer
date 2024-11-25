@@ -19,7 +19,7 @@ import numpy as np
 from tokenizer import load_tokenizer
 from graph import lineplot_specific
 import pickle
-from classify import LinearModel, evaluate_model, run_binary_classify, prepare_data
+from classify import LinearModel, evaluate_model, prepare_data
 from sklearn.model_selection import train_test_split
 from dimension_reduce import run_pca_analysis, run_umap_analysis
 from binding_id import construct_binding_id_dataset
