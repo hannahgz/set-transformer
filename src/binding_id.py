@@ -40,8 +40,7 @@ def construct_binding_id_dataset(config, dataset_name, model_path, capture_layer
 
     X = []
     y = []
-    save_threshold = 1000000  # Save after accumulating 1M samples
-    # change this to 10M
+    save_threshold = 10000000  # Save after accumulating 10M samples
     chunk_counter = 0
 
     base_dir = f"{PATH_PREFIX}/binding_id/{dataset_name}/layer{capture_layer}"
@@ -110,7 +109,7 @@ def load_and_combine_chunks(base_dir, chunk_indices, device):
         y_combined.append(torch.load(os.path.join(base_dir, f"y_chunk_{chunk}.pt")))
     return torch.cat(X_combined).to(device), torch.cat(y_combined).to(device)
 
-def select_chunks(num_chunks, val_size=2, test_size=2):
+def select_chunks(num_chunks, val_size=1, test_size=1):
     """Randomly select chunks for validation, test, and training sets."""
     all_chunk_indices = list(range(num_chunks))
     val_chunks = sorted(random.sample(all_chunk_indices, val_size))
@@ -193,7 +192,8 @@ def train_binding_classifier(dataset_name, capture_layer, model_name, input_dim=
         total_train_loss = 0
         total_samples = 0
         
-        for chunk_idx in train_chunks:
+        for index, chunk_idx in enumerate(train_chunks):
+            print(f"Training chunk {index}/{len(train_chunks)} with id {chunk_idx}")
             chunk = {
                 'X_path': os.path.join(base_dir, f"X_chunk_{chunk_idx}.pt"),
                 'y_path': os.path.join(base_dir, f"y_chunk_{chunk_idx}.pt")
@@ -239,6 +239,124 @@ def train_binding_classifier(dataset_name, capture_layer, model_name, input_dim=
     
     # Final evaluation
     test_acc = get_binding_classifier_accuracy(X_test, y_test, f'{PATH_PREFIX}/binding_id/{model_name}_best.pt', input_dim)
+    wandb.log({'test_accuracy': test_acc})
+    wandb.finish()
+    
+    return model
+
+def train_binding_classifier_single_chunk(
+    dataset_name, 
+    capture_layer, 
+    chunk_id,
+    model_name, 
+    val_size=0.1,
+    test_size=0.1,
+    input_dim=128, 
+    num_epochs=100, 
+    batch_size=32, 
+    lr=0.001, 
+    patience=10
+):
+    """Train a binary classifier using a single chunk split into train/val/test sets."""
+    wandb.init(
+        project="binding-id-classifier", 
+        config={
+            "epochs": num_epochs,
+            "batch_size": batch_size,
+            "lr": lr,
+            "patience": patience,
+            "chunk_id": chunk_id,
+            "val_size": val_size,
+            "test_size": test_size
+        },
+        name=f"{model_name}_chunk{chunk_id}"
+    )
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    base_dir = f"{PATH_PREFIX}/binding_id/{dataset_name}/layer{capture_layer}"
+    
+    # Load the single chunk
+    X = torch.load(os.path.join(base_dir, f"X_chunk_{chunk_id}.pt")).to(device)
+    y = torch.load(os.path.join(base_dir, f"y_chunk_{chunk_id}.pt")).to(device)
+    
+    X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y, val_size, test_size)  
+    
+    print(f"Split sizes - Train: {len(X_train)}, Val: {len(X_val)}, Test: {len(X_test)}")
+    
+    # Initialize model and training components
+    model = nn.Sequential(nn.Linear(input_dim, 1), nn.Sigmoid()).to(device)
+    criterion = nn.BCELoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    
+    best_val_loss = float('inf')
+    counter = 0
+    
+    # Create DataLoader for training data
+    train_dataset = torch.utils.data.TensorDataset(X_train, y_train)
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset, 
+        batch_size=batch_size,
+        shuffle=True
+    )
+    
+    for epoch in range(num_epochs):
+        # Training phase
+        model.train()
+       
+        total_train_loss = 0
+        total_samples = 0
+        
+        for batch_X, batch_y in train_loader:
+            optimizer.zero_grad()
+            outputs = model(batch_X).squeeze()
+            loss = criterion(outputs, batch_y.float())
+            loss.backward()
+            optimizer.step()
+            
+            total_train_loss += loss.item() * len(batch_X)
+            total_samples += len(batch_X)
+        avg_train_loss = total_train_loss / total_samples
+        
+        # Validation phase
+        model.eval()
+        with torch.no_grad():
+            val_outputs = model(X_val).squeeze()
+            val_loss = criterion(val_outputs, y_val.float())
+            val_acc = ((val_outputs > 0.5).float() == y_val.float()).float().mean()
+        
+        # Logging
+        print(f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {avg_train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}")
+        wandb.log({
+            'epoch': epoch,
+            'train_loss': avg_train_loss,
+            'val_loss': val_loss.item(),
+            'val_acc': val_acc.item()
+        })
+        
+        # Early stopping
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            counter = 0
+            model_path = f'{PATH_PREFIX}/binding_id/{model_name}_chunk{chunk_id}_best.pt'
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'epoch': epoch,
+                'val_loss': val_loss,
+                'val_acc': val_acc,
+                'chunk_id': chunk_id,
+                'split_sizes': {
+                    'val': val_size,
+                    'test': test_size
+                }
+            }, model_path)
+        else:
+            counter += 1
+            if counter >= patience:
+                print(f"Early stopping triggered after {epoch + 1} epochs")
+                break
+    
+    # Final evaluation
+    test_acc = get_binding_classifier_accuracy(X_test, y_test, model_path, input_dim)
     wandb.log({'test_accuracy': test_acc})
     wandb.finish()
     

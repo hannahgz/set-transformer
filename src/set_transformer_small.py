@@ -389,8 +389,8 @@ if __name__ == "__main__":
     dataset_name = "balanced_set_dataset_random"
     model_name = "causal_full_run_random_layers_4_heads_4"
     capture_layer = 3
-    # construct_binding_id_dataset(GPTConfig44, dataset_name, model_path=f"{model_name}.pt",capture_layer=3)
-    train_binding_classifier(dataset_name, capture_layer, model_name, input_dim=128, num_epochs=1, batch_size=32, lr=0.001, patience=10)
+    construct_binding_id_dataset(GPTConfig44, dataset_name, model_path=f"{model_name}.pt",capture_layer=3)
+    # train_binding_classifier(dataset_name, capture_layer, model_name, input_dim=128, num_epochs=1, batch_size=32, lr=0.001, patience=10)
 
     # dataset_name = "attr_first_balanced_set_dataset_random"
     # config = GPTConfig44_AttrFirst
