@@ -288,8 +288,20 @@ def train_binding_classifier_single_chunk(
     print(f"Val   - Class 0: {(y_val == 0).sum()/len(y_val):.3f}, Class 1: {(y_val == 1).sum()/len(y_val):.3f}")
     print(f"Test  - Class 0: {(y_test == 0).sum()/len(y_test):.3f}, Class 1: {(y_test == 1).sum()/len(y_test):.3f}")
 
-    pos_weight = torch.tensor([(y_train == 0).sum() / (y_train == 1).sum()]).to(device)
+    # pos_weight = torch.tensor([(y_train == 0).sum() / (y_train == 1).sum()]).to(device)
+    pos_weight = torch.sqrt(torch.tensor([(y_train == 0).sum() / (y_train == 1).sum()])).to(device)
+# This would give ~2.3 instead of 5.3
     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+
+    # Try below next
+    # weights = torch.FloatTensor([1 if label == 0 else (y_train == 0).sum()/(y_train == 1).sum() for label in y_train])
+    # sampler = torch.utils.data.WeightedRandomSampler(weights, len(weights))
+
+    # train_loader = torch.utils.data.DataLoader(
+    #     train_dataset, 
+    #     batch_size=batch_size,
+    #     sampler=sampler  # Use sampler instead of shuffle=True
+    # )
 
     # Initialize model and training components
     model = nn.Sequential(nn.Linear(input_dim, 1)).to(device)
