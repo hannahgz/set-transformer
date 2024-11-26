@@ -283,9 +283,17 @@ def train_binding_classifier_single_chunk(
     
     print(f"Split sizes - Train: {len(X_train)}, Val: {len(X_val)}, Test: {len(X_test)}")
     
+    print("Class distribution:")
+    print(f"Train - Class 0: {(y_train == 0).sum()/len(y_train):.3f}, Class 1: {(y_train == 1).sum()/len(y_train):.3f}")
+    print(f"Val   - Class 0: {(y_val == 0).sum()/len(y_val):.3f}, Class 1: {(y_val == 1).sum()/len(y_val):.3f}")
+    print(f"Test  - Class 0: {(y_test == 0).sum()/len(y_test):.3f}, Class 1: {(y_test == 1).sum()/len(y_test):.3f}")
+
+    pos_weight = torch.tensor([(y_train == 0).sum() / (y_train == 1).sum()]).to(device)
+    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+
     # Initialize model and training components
-    model = nn.Sequential(nn.Linear(input_dim, 1), nn.Sigmoid()).to(device)
-    criterion = nn.BCELoss()
+    model = nn.Sequential(nn.Linear(input_dim, 1)).to(device)
+    # criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
     
     best_val_loss = float('inf')
@@ -322,7 +330,8 @@ def train_binding_classifier_single_chunk(
         with torch.no_grad():
             val_outputs = model(X_val).squeeze()
             val_loss = criterion(val_outputs, y_val.float())
-            val_acc = ((val_outputs > 0.5).float() == y_val.float()).float().mean()
+            val_preds = (torch.sigmoid(val_outputs) > 0.5).float()
+            val_acc = (val_preds == y_val.float()).float().mean()
         
         # Logging
         print(f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {avg_train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}")
@@ -370,8 +379,7 @@ def get_binding_classifier_accuracy(X, y, model_path, input_dim=128):
     
     # Initialize the same model architecture
     model = nn.Sequential(
-        nn.Linear(input_dim, 1),
-        nn.Sigmoid()
+        nn.Linear(input_dim, 1)
     ).to(device)
     
     # Load the best model weights
@@ -388,7 +396,7 @@ def get_binding_classifier_accuracy(X, y, model_path, input_dim=128):
     model.eval()
     with torch.no_grad():
         outputs = model(X).squeeze()
-        preds = (outputs > 0.5).float()
+        preds = (torch.sigmoid(outputs) > 0.5).float()  # Added sigmoid here
         acc = (preds == y.float()).float().mean()
         
     print(f"Accuracy: {acc.item()*100:.2f}%")

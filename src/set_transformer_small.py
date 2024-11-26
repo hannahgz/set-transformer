@@ -271,9 +271,9 @@ def analyze_embeddings(config, dataset_name, model_path, capture_layer):
     base_dir = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}"
     os.makedirs(base_dir, exist_ok=True)
 
-    embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}/input_embeddings.pt"
-    mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}/mapped_target_attributes.pt"
-    continuous_to_original_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}/continuous_to_original.pkl"
+    embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}/real_model_input_embeddings.pt"
+    mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}/real_model_mapped_target_attributes.pt"
+    continuous_to_original_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}/real_model_continuous_to_original.pkl"
 
     # Save the combined_input_embeddings tensor
     torch.save(combined_input_embeddings, embeddings_path)
@@ -385,6 +385,13 @@ if __name__ == "__main__":
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
+
+    # dataset_name = "balanced_set_dataset_random"
+    # config = GPTConfig44
+
+    # for layer in range(4):
+    #     print(f"Layer {layer}")
+    #     analyze_embeddings(config, dataset_name, capture_layer=layer)
 
     dataset_name = "balanced_set_dataset_random"
     model_name = "causal_full_run_random_layers_4_heads_4"
