@@ -40,12 +40,18 @@ def construct_binding_id_dataset(config, dataset_name, model_path, capture_layer
 
     X = []
     y = []
+    save_threshold = 1000000  # Save after accumulating 1M samples
+    chunk_counter = 0
+
+    base_dir = f"{PATH_PREFIX}/binding_id/{dataset_name}/layer{capture_layer}"
+    os.makedirs(base_dir, exist_ok=True)
 
     for index, batch in enumerate(val_loader):
         used, total = get_gpu_memory()
         print(f"Batch {index}/{len(val_loader)}")
         print(f"GPU Memory: {used/1024:.2f}GB used out of {total/1024:.2f}GB total")
-        print("y len: ", len(y))
+        print("Current chunk samples: ", len(y))
+        
         batch = batch.to(device)
         with torch.no_grad():  # Reduce memory usage during inference
             _, _, _, captured_embedding = model(batch, True, capture_layer)
@@ -66,26 +72,33 @@ def construct_binding_id_dataset(config, dataset_name, model_path, capture_layer
                 token2 = curr_tokens[element2_index * 2]
 
                 X.append(torch.cat((element1, element2)))
-                if (token1 == token2):
-                    y.append(1)
-                else:
-                    y.append(0)
+                y.append(1 if token1 == token2 else 0)
+
+                # Save intermediate results when threshold is reached
+                if len(y) >= save_threshold:
+                    X_tensor = torch.stack(X)
+                    y_tensor = torch.tensor(y)
+                    
+                    # Save current chunk
+                    torch.save(X_tensor, os.path.join(base_dir, f"X_chunk_{chunk_counter}.pt"))
+                    torch.save(y_tensor, os.path.join(base_dir, f"y_chunk_{chunk_counter}.pt"))
+                    
+                    # Clear lists and increment counter
+                    X = []
+                    y = []
+                    chunk_counter += 1
+                    print(f"Saved chunk {chunk_counter}")
 
 
-    base_dir = f"{PATH_PREFIX}/binding_id/{dataset_name}/layer{capture_layer}"
-    os.makedirs(base_dir, exist_ok=True)
+    # Save any remaining data
+    if len(y) > 0:
+        X_tensor = torch.stack(X)
+        y_tensor = torch.tensor(y)
+        torch.save(X_tensor, os.path.join(base_dir, f"X_chunk_{chunk_counter}.pt"))
+        torch.save(y_tensor, os.path.join(base_dir, f"y_chunk_{chunk_counter}.pt"))
 
-    X_path = os.path.join(base_dir, "X.pt")
-    y_path = os.path.join(base_dir, "y.pt")
-
-    X_tensor = torch.stack(X)
-    y_tensor = torch.tensor(y)
-
-    breakpoint()
-    torch.save(X_tensor, X_path)
-    torch.save(y_tensor, y_path)
-
-    return X_tensor, y_tensor
+    # Save metadata about chunks
+    torch.save({'num_chunks': chunk_counter + 1}, os.path.join(base_dir, "metadata.pt"))
 
 
 def train_binding_classifier(X, y, model_name, input_dim=128, num_epochs=100, batch_size=32, lr=0.001, patience=10):
