@@ -375,7 +375,8 @@ def get_binding_classifier_accuracy(X, y, model_path, input_dim=128):
     ).to(device)
     
     # Load the best model weights
-    model.load_state_dict(torch.load(model_path))
+    checkpoint = torch.load(model_path, weights_only=False)
+    model.load_state_dict(checkpoint["model"])
     
     if not X.is_cuda and device.type == "cuda":
         X = X.to(device)
