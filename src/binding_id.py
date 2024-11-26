@@ -339,7 +339,7 @@ def train_binding_classifier_single_chunk(
             counter = 0
             model_path = f'{PATH_PREFIX}/binding_id/{model_name}_chunk{chunk_id}_best.pt'
             torch.save({
-                'model_state_dict': model.state_dict(),
+                'model': model.state_dict(),
                 'epoch': epoch,
                 'val_loss': val_loss,
                 'val_acc': val_acc,
