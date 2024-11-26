@@ -398,7 +398,7 @@ if __name__ == "__main__":
         val_size=0.05,
         test_size=0.05,
         input_dim=128, 
-        num_epochs=1, 
+        num_epochs=100, 
         batch_size=32, 
         lr=0.001, 
         patience=10
