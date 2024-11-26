@@ -22,7 +22,7 @@ import pickle
 from classify import LinearModel, evaluate_model
 from sklearn.model_selection import train_test_split
 from dimension_reduce import run_pca_analysis, run_umap_analysis
-from binding_id import construct_binding_id_dataset, train_binding_classifier
+from binding_id import construct_binding_id_dataset, train_binding_classifier, train_binding_classifier_single_chunk
 
 from classify import run_classify
 
@@ -389,7 +389,22 @@ if __name__ == "__main__":
     dataset_name = "balanced_set_dataset_random"
     model_name = "causal_full_run_random_layers_4_heads_4"
     capture_layer = 3
-    construct_binding_id_dataset(GPTConfig44, dataset_name, model_path=f"{model_name}.pt",capture_layer=3)
+
+    train_binding_classifier_single_chunk(
+        dataset_name=dataset_name, 
+        capture_layer=capture_layer, 
+        chunk_id=0,
+        model_name=model_name, 
+        val_size=0.05,
+        test_size=0.05,
+        input_dim=128, 
+        num_epochs=1, 
+        batch_size=32, 
+        lr=0.001, 
+        patience=10
+    )
+    
+    # construct_binding_id_dataset(GPTConfig44, dataset_name, model_path=f"{model_name}.pt",capture_layer=3)
     # train_binding_classifier(dataset_name, capture_layer, model_name, input_dim=128, num_epochs=1, batch_size=32, lr=0.001, patience=10)
 
     # dataset_name = "attr_first_balanced_set_dataset_random"
