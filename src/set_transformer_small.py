@@ -22,7 +22,7 @@ import pickle
 from classify import LinearModel, evaluate_model
 from sklearn.model_selection import train_test_split
 from dimension_reduce import run_pca_analysis, run_umap_analysis
-from binding_id import construct_binding_id_dataset
+from binding_id import construct_binding_id_dataset, train_binding_classifier
 
 from classify import run_classify
 
@@ -223,12 +223,16 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
         wandb.finish()
 
 
-def analyze_embeddings(config, dataset_name, capture_layer):
+def analyze_embeddings(config, dataset_name, model_path, capture_layer):
     dataset_path = f"{PATH_PREFIX}/{dataset_name}.pth"
     dataset = torch.load(dataset_path)
     train_loader, val_loader = initialize_loaders(config, dataset)
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    
     model = GPT(config).to(device)
+    checkpoint = torch.load(model_path, weights_only=False)
+    model.load_state_dict(checkpoint["model"])
+    model.eval()
 
     all_flattened_input_embeddings = []
     all_flattened_target_attributes = []
@@ -383,8 +387,10 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     dataset_name = "balanced_set_dataset_random"
-    model_name = "causal_full_run_random_layers_4_heads_4.pt"
-    construct_binding_id_dataset(GPTConfig44, dataset_name, model_name,capture_layer=3)
+    model_name = "causal_full_run_random_layers_4_heads_4"
+    capture_layer = 3
+    # construct_binding_id_dataset(GPTConfig44, dataset_name, model_path=f"{model_name}.pt",capture_layer=3)
+    train_binding_classifier(dataset_name, capture_layer, model_name, input_dim=128, num_epochs=1, batch_size=32, lr=0.001, patience=10)
 
     # dataset_name = "attr_first_balanced_set_dataset_random"
     # config = GPTConfig44_AttrFirst
