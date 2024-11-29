@@ -393,6 +393,7 @@ if __name__ == "__main__":
     dataset_name = "balanced_set_dataset_random"
     config = GPTConfig44
     model_name = "causal_full_run_random_layers_4_heads_4"
+    tokenizer_path=f'{PATH_PREFIX}/{dataset_name}_tokenizer.pkl'
 
     # # Pull embeddings from model to analyze, iterate through all 4 layers of model
     # for layer in range(4):
@@ -404,12 +405,22 @@ if __name__ == "__main__":
         print(f"Layer {layer}")
         embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/real_model_input_embeddings.pt"
         mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/real_model_mapped_target_attributes.pt"
+        continuous_to_original_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/real_model_continuous_to_original.pkl"
 
         X = torch.load(embeddings_path)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         y = torch.load(mapped_attributes_path).to(device)
 
-        run_classify(X, y, model_name=f"real_{dataset_name}_layer{layer}", input_dim=64, output_dim=5, num_epochs=1)
+        run_classify(
+            X, 
+            y, 
+            model_name=f"real_{dataset_name}_layer{layer}", 
+            input_dim=64, 
+            output_dim=5, 
+            num_epochs=1,
+            continuous_to_original_path=continuous_to_original_path,
+            tokenizer_path=tokenizer_path
+        )
 
     # dataset_name = "balanced_set_dataset_random"
     # model_name = "causal_full_run_random_layers_4_heads_4"

@@ -2,8 +2,10 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import wandb
+import pickle
 from sklearn.preprocessing import LabelEncoder
 from data_utils import split_data
+from tokenizer import load_tokenizer
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
@@ -40,7 +42,7 @@ class MLPModel(nn.Module):
         return x
 
 
-def evaluate_model(model, X, y, model_name, predict_dim=12, input_dim=5, continuous_to_original=None, tokenizer=None):
+def evaluate_model(model, X, y, model_name, predict_dim=12, input_dim=5, continuous_to_original_path=None, tokenizer_path=None):
     """Evaluates the model on data and prints correct predictions."""
 
     checkpoint = torch.load(
@@ -76,15 +78,20 @@ def evaluate_model(model, X, y, model_name, predict_dim=12, input_dim=5, continu
         accuracy = len(correct_predictions) / y.size(0)
 
     print("\nPer-class statistics:")
-    for class_idx in range(predict_dim):
-        total = class_total_counts[class_idx]
-        correct = class_correct_counts[class_idx]
-        accuracy_per_class = (correct / total) if total > 0 else 0
-        original_token = continuous_to_original.get(
-            class_idx, f"Unknown token {class_idx}")
-        print(
-            f"\nClass {class_idx}, Original Token: ({original_token})/{tokenizer.decode([original_token])}:")
-        print(f"  Accuracy: {accuracy_per_class:.4f} ({correct}/{total})")
+
+    if continuous_to_original_path and tokenizer_path:
+        with open(continuous_to_original_path, 'rb') as f:
+            continuous_to_original = pickle.load(f)
+        tokenizer = load_tokenizer(tokenizer_path)
+        for class_idx in range(predict_dim):
+            total = class_total_counts[class_idx]
+            correct = class_correct_counts[class_idx]
+            accuracy_per_class = (correct / total) if total > 0 else 0
+            original_token = continuous_to_original.get(
+                class_idx, f"Unknown token {class_idx}")
+            print(
+                f"\nClass {class_idx}, Original Token: ({original_token})/{tokenizer.decode([original_token])}:")
+            print(f"  Accuracy: {accuracy_per_class:.4f} ({correct}/{total})")
 
     # print("Correctly predicted values and their indices:")
     # for idx, value in correct_predictions:
@@ -169,7 +176,7 @@ def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=10
                 break
 
 
-def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, batch_size=32, lr=0.001, model_type="linear"):
+def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, batch_size=32, lr=0.001, model_type="linear", continuous_to_original_path=None, tokenizer_path=None):
     """Main function to run the model training and evaluation."""
     # Prepare data with validation split
     X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y)
@@ -199,11 +206,26 @@ def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, 
 
     # Evaluate the model
     train_accuracy = evaluate_model(
-        model, X_train, y_train, model_name=f"{model_name}_{model_type}")
+        model, 
+        X_train, 
+        y_train, 
+        model_name=f"{model_name}_{model_type}", 
+        continuous_to_original_path=continuous_to_original_path,
+        tokenizer_path=tokenizer_path)
     val_accuracy = evaluate_model(
-        model, X_val, y_val, model_name=f"{model_name}_{model_type}")
+        model, 
+        X_val, 
+        y_val, 
+        model_name=f"{model_name}_{model_type}", 
+        continuous_to_original_path=continuous_to_original_path,
+        tokenizer_path=tokenizer_path)
     test_accuracy = evaluate_model(
-        model, X_test, y_test, model_name=f"{model_name}_{model_type}")
+        model, 
+        X_test,
+        y_test,
+        model_name=f"{model_name}_{model_type}",
+        continuous_to_original_path=continuous_to_original_path,
+        tokenizer_path=tokenizer_path)
 
     wandb.log({
         "final_train_accuracy": train_accuracy,
