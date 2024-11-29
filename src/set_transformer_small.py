@@ -235,10 +235,10 @@ def analyze_embeddings(config, dataset_name, model_path, capture_layer):
     model.eval()
 
     all_flattened_input_embeddings = []
-    all_flattened_target_attributes = []
+    all_flattened_target_cards = []
 
     for index, batch in enumerate(val_loader):
-        print(f"Batch {index}/{len(val_loader)}")
+        print(f"Batch {index + 1}/{len(val_loader)}")
         batch = batch.to(device)
         _, _, _, captured_embedding = model(batch, True, capture_layer)
 
@@ -246,18 +246,18 @@ def analyze_embeddings(config, dataset_name, model_path, capture_layer):
         flattened_input_embeddings = input_embeddings.reshape(-1, 64)
 
         # Get every other element in the input starting from index 0, representing all the card tokens
-        target_attributes = batch[:, :(config.input_size - 1):2]
-        flattened_target_attributes = target_attributes.reshape(-1)
+        target_cards = batch[:, :(config.input_size - 1):2]
+        flattened_target_cards = target_cards.reshape(-1)
 
         # Append the flattened tensors to the respective lists
         all_flattened_input_embeddings.append(flattened_input_embeddings)
-        all_flattened_target_attributes.append(flattened_target_attributes)
+        all_flattened_target_cards.append(flattened_target_cards)
     
     combined_input_embeddings = torch.cat(all_flattened_input_embeddings, dim=0)
-    combined_target_attributes = torch.cat(all_flattened_target_attributes, dim=0)
+    combined_target_cards = torch.cat(all_flattened_target_cards, dim=0)
 
     # Get the unique values in combined_target_attributes
-    unique_values = torch.unique(combined_target_attributes)
+    unique_values = torch.unique(combined_target_cards)
 
     # Create a mapping from unique values to a continuous sequence
     value_to_continuous = {v.item(): i for i, v in enumerate(unique_values)}
@@ -266,26 +266,26 @@ def analyze_embeddings(config, dataset_name, model_path, capture_layer):
     continuous_to_original = {v: k for k, v in value_to_continuous.items()}
 
     # Map the values in combined_target_attributes to the continuous sequence
-    mapped_target_attributes = torch.tensor([value_to_continuous[val.item()] for val in combined_target_attributes])
+    mapped_target_cards = torch.tensor([value_to_continuous[val.item()] for val in combined_target_cards])
 
     # Create the directory structure if it doesn't exist
     base_dir = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}"
     os.makedirs(base_dir, exist_ok=True)
 
     embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}/real_model_input_embeddings.pt"
-    mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}/real_model_mapped_target_attributes.pt"
+    mapped_cards_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}/real_model_mapped_target_attributes.pt"
     continuous_to_original_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}/real_model_continuous_to_original.pkl"
 
     # Save the combined_input_embeddings tensor
     torch.save(combined_input_embeddings, embeddings_path)
 
     # Save the mapped_target_attributes tensor
-    torch.save(mapped_target_attributes, mapped_attributes_path)
+    torch.save(mapped_target_cards, mapped_cards_path)
 
     with open(continuous_to_original_path, "wb") as f:
         pickle.dump(continuous_to_original, f)
 
-    return combined_input_embeddings, mapped_target_attributes, continuous_to_original
+    return combined_input_embeddings, mapped_target_cards, continuous_to_original
 
 
 def opp_analyze_embeddings(config, dataset_name, capture_layer):
@@ -388,13 +388,28 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
+
+    # PIPELINE: Classifying a card based on the attribute embedding
     dataset_name = "balanced_set_dataset_random"
     config = GPTConfig44
     model_name = "causal_full_run_random_layers_4_heads_4"
 
+    # # Pull embeddings from model to analyze, iterate through all 4 layers of model
+    # for layer in range(4):
+    #     print(f"Layer {layer}")
+    #     analyze_embeddings(config, dataset_name, model_path=f"{model_name}.pt", capture_layer=layer)
+
+    # Train a model to classify attribute embeddings into 5 different cards
     for layer in range(4):
         print(f"Layer {layer}")
-        analyze_embeddings(config, dataset_name, model_path=f"{model_name}.pt", capture_layer=layer)
+        embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/real_model_input_embeddings.pt"
+        mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/real_model_mapped_target_attributes.pt"
+
+        X = torch.load(embeddings_path)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        y = torch.load(mapped_attributes_path).to(device)
+
+        run_classify(X, y, model_name=f"real_{dataset_name}_layer{layer}", input_dim=64, output_dim=5, num_epochs=1)
 
     # dataset_name = "balanced_set_dataset_random"
     # model_name = "causal_full_run_random_layers_4_heads_4"
