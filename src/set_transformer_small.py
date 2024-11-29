@@ -19,7 +19,7 @@ import numpy as np
 from tokenizer import load_tokenizer
 from graph import lineplot_specific
 import pickle
-from classify import LinearModel, evaluate_model
+from classify import LinearModel, evaluate_model, analyze_weights
 from sklearn.model_selection import train_test_split
 from dimension_reduce import run_pca_analysis, run_umap_analysis
 from binding_id import construct_binding_id_dataset, train_binding_classifier, train_binding_classifier_single_chunk
@@ -389,42 +389,50 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
 
-    # PIPELINE: Classifying a card based on the attribute embedding
-    dataset_name = "balanced_set_dataset_random"
-    config = GPTConfig44
-    model_name = "causal_full_run_random_layers_4_heads_4"
-    tokenizer_path=f'{PATH_PREFIX}/{dataset_name}_tokenizer.pkl'
+    ## PIPELINE: Classifying a card based on the attribute embedding
+    # dataset_name = "balanced_set_dataset_random"
+    # config = GPTConfig44
+    # model_name = "causal_full_run_random_layers_4_heads_4"
+    # tokenizer_path=f'{PATH_PREFIX}/{dataset_name}_tokenizer.pkl'
 
     # # Pull embeddings from model to analyze, iterate through all 4 layers of model
     # for layer in range(4):
     #     print(f"Layer {layer}")
     #     analyze_embeddings(config, dataset_name, model_path=f"{model_name}.pt", capture_layer=layer)
 
-    # Train a model to classify attribute embeddings into 5 different cards
-    for layer in range(4):
-        print(f"Layer {layer}")
-        embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/real_model_input_embeddings.pt"
-        mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/real_model_mapped_target_attributes.pt"
-        continuous_to_original_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/real_model_continuous_to_original.pkl"
+    # # Train a model to classify attribute embeddings into 5 different cards
+    # for layer in range(4):
+    #     print(f"Layer {layer}")
+    #     embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/real_model_input_embeddings.pt"
+    #     mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/real_model_mapped_target_attributes.pt"
+    #     continuous_to_original_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/real_model_continuous_to_original.pkl"
 
-        X = torch.load(embeddings_path)
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        y = torch.load(mapped_attributes_path).to(device)
+    #     X = torch.load(embeddings_path)
+    #     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #     y = torch.load(mapped_attributes_path).to(device)
 
-        run_classify(
-            X, 
-            y, 
-            model_name=f"real_{dataset_name}_layer{layer}", 
-            input_dim=64, 
-            output_dim=5, 
-            num_epochs=100,
-            continuous_to_original_path=continuous_to_original_path,
-            tokenizer_path=tokenizer_path
-        )
+    #     run_classify(
+    #         X, 
+    #         y, 
+    #         model_name=f"real_{dataset_name}_layer{layer}", 
+    #         input_dim=64, 
+    #         output_dim=5, 
+    #         num_epochs=100,
+    #         continuous_to_original_path=continuous_to_original_path,
+    #         tokenizer_path=tokenizer_path
+    #     )
+
+    # Load the model and look at the weights
+    analyze_weights(
+        model_path="real_balanced_set_dataset_random_layer0_linear",
+    )
+
+
+    # # PIPELINE: Train a binary classifier for single chunk to model if two attributes are from the same card
 
     # dataset_name = "balanced_set_dataset_random"
     # model_name = "causal_full_run_random_layers_4_heads_4"
-    # capture_layer = 3
+    # capture_layer = 0
 
     # train_binding_classifier_single_chunk(
     #     dataset_name=dataset_name, 

@@ -244,6 +244,43 @@ def train_binding_classifier(dataset_name, capture_layer, model_name, input_dim=
     
     return model
 
+
+
+from torch.utils.data import Dataset, DataLoader
+
+class BalancedBindingDataset(Dataset):
+    def __init__(self, class_0_data, class_1_data):
+        """
+        Args:
+            class_0_data (Tensor): Data where y = 0.
+            class_1_data (Tensor): Data where y = 1.
+        """
+        self.class_0_data = class_0_data
+        self.class_1_data = class_1_data
+        self.length = min(len(class_0_data), len(class_1_data)) * 2  # Ensure 50/50 split
+
+    def __len__(self):
+        return self.length
+
+    def __getitem__(self, idx):
+        """
+        Alternate between class 0 and class 1 data.
+        Args:
+            idx (int): Index of the sample.
+        Returns:
+            A tuple (data, label) where label is 0 or 1.
+        """
+        if idx % 2 == 0:
+            # Even index: Pick from class 0
+            data = self.class_0_data[idx // 2]
+            label = 0
+        else:
+            # Odd index: Pick from class 1
+            data = self.class_1_data[idx // 2]
+            label = 1
+        return data, torch.tensor(label, dtype=torch.float32)
+
+
 def train_binding_classifier_single_chunk(
     dataset_name, 
     capture_layer, 
@@ -288,10 +325,10 @@ def train_binding_classifier_single_chunk(
     print(f"Val   - Class 0: {(y_val == 0).sum()/len(y_val):.3f}, Class 1: {(y_val == 1).sum()/len(y_val):.3f}")
     print(f"Test  - Class 0: {(y_test == 0).sum()/len(y_test):.3f}, Class 1: {(y_test == 1).sum()/len(y_test):.3f}")
 
-    # pos_weight = torch.tensor([(y_train == 0).sum() / (y_train == 1).sum()]).to(device)
-    pos_weight = torch.sqrt(torch.tensor([(y_train == 0).sum() / (y_train == 1).sum()])).to(device)
-# This would give ~2.3 instead of 5.3
-    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+#     # pos_weight = torch.tensor([(y_train == 0).sum() / (y_train == 1).sum()]).to(device)
+#     pos_weight = torch.sqrt(torch.tensor([(y_train == 0).sum() / (y_train == 1).sum()])).to(device)
+# # This would give ~2.3 instead of 5.3
+#     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 
     # Try below next
     # weights = torch.FloatTensor([1 if label == 0 else (y_train == 0).sum()/(y_train == 1).sum() for label in y_train])
@@ -304,20 +341,32 @@ def train_binding_classifier_single_chunk(
     # )
 
     # Initialize model and training components
-    model = nn.Sequential(nn.Linear(input_dim, 1)).to(device)
-    # criterion = nn.BCELoss()
+    # model = nn.Sequential(nn.Linear(input_dim, 1)).to(device)
+    model = nn.Sequential(nn.Linear(input_dim, 1), nn.Sigmoid()).to(device)
+    criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
     
     best_val_loss = float('inf')
     counter = 0
     
-    # Create DataLoader for training data
-    train_dataset = torch.utils.data.TensorDataset(X_train, y_train)
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset, 
-        batch_size=batch_size,
-        shuffle=True
-    )
+    # # Create DataLoader for training data
+    # train_dataset = torch.utils.data.TensorDataset(X_train, y_train)
+    # train_loader = torch.utils.data.DataLoader(
+    #     train_dataset, 
+    #     batch_size=batch_size,
+    #     shuffle=True
+    # )
+
+    # Separate data for class 0 and class 1
+    class_0_data = X_train[(y_train == 0).nonzero(as_tuple=True)[0]]
+    class_1_data = X_train[(y_train == 1).nonzero(as_tuple=True)[0]]
+
+    # Create the balanced dataset
+    balanced_dataset = BalancedBindingDataset(class_0_data, class_1_data)
+
+    # Create DataLoader for the balanced dataset
+    train_loader = DataLoader(balanced_dataset, batch_size=batch_size, shuffle=True)
+
     
     for epoch in range(num_epochs):
         # Training phase
@@ -342,7 +391,8 @@ def train_binding_classifier_single_chunk(
         with torch.no_grad():
             val_outputs = model(X_val).squeeze()
             val_loss = criterion(val_outputs, y_val.float())
-            val_preds = (torch.sigmoid(val_outputs) > 0.5).float()
+            # val_preds = (torch.sigmoid(val_outputs) > 0.5).float()
+            val_preds = (val_outputs > 0.5).float()
             val_acc = (val_preds == y_val.float()).float().mean()
         
         # Logging
@@ -408,7 +458,8 @@ def get_binding_classifier_accuracy(X, y, model_path, input_dim=128):
     model.eval()
     with torch.no_grad():
         outputs = model(X).squeeze()
-        preds = (torch.sigmoid(outputs) > 0.5).float()  # Added sigmoid here
+        # preds = (torch.sigmoid(outputs) > 0.5).float()  # Added sigmoid here
+        preds = (outputs > 0.5).float()  # Added sigmoid here
         acc = (preds == y.float()).float().mean()
         
     print(f"Accuracy: {acc.item()*100:.2f}%")

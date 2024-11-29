@@ -263,6 +263,28 @@ def run_classify(X, y, model_name, input_dim, output_dim, num_epochs=100, batch_
     print(f"Validation Accuracy: {val_accuracy * 100:.2f}%")
     print(f"Test Accuracy: {test_accuracy * 100:.2f}%")
 
+
+def analyze_weights(model_path, input_dim=64, output_dim=5):
+    model = LinearModel(input_dim, output_dim)
+
+    # Load the model's state_dict
+    model.load_state_dict(torch.load(f"{PATH_PREFIX}/classify/{model_path}.pt")["model"])
+    model.eval()
+
+    # Access weights and biases
+    weights = model.fc.weight.data
+    biases = model.fc.bias.data
+
+    print("Weights:\n", weights)
+    print("Biases:\n", biases)
+
+    # Iterate through the weight tensor and print the index and the value
+    for i in range(weights.size(0)):  # Iterate over the output_dim (rows)
+        for j in range(weights.size(1)):  # Iterate over the input_dim (columns)
+            print(f"Weight at index ({i}, {j}): {weights[i, j].item()}")
+
+
+
 # Example usage:
 # X = [...]  # Your input data as a list of vectors (num_samples, 16)
 # y = [...]  # Your target labels (num_samples,) where values are 0 to 11
