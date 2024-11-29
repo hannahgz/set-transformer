@@ -80,18 +80,19 @@ def evaluate_model(model, X, y, model_name, predict_dim, continuous_to_original_
     print("\nPer-class statistics:")
 
     if continuous_to_original_path and tokenizer_path:
-        with open(continuous_to_original_path, 'rb') as f:
-            continuous_to_original = pickle.load(f)
-        tokenizer = load_tokenizer(tokenizer_path)
-        for class_idx in range(predict_dim):
-            total = class_total_counts[class_idx]
-            correct = class_correct_counts[class_idx]
-            accuracy_per_class = (correct / total) if total > 0 else 0
-            original_token = continuous_to_original.get(
-                class_idx, f"Unknown token {class_idx}")
-            print(
-                f"\nClass {class_idx}, Original Token: ({original_token})/{tokenizer.decode([original_token])}:")
-            print(f"  Accuracy: {accuracy_per_class:.4f} ({correct}/{total})")
+        log_per_class_statistics(continuous_to_original_path, tokenizer_path, model_name, predict_dim, class_total_counts, class_correct_counts)
+        # with open(continuous_to_original_path, 'rb') as f:
+        #     continuous_to_original = pickle.load(f)
+        # tokenizer = load_tokenizer(tokenizer_path)
+        # for class_idx in range(predict_dim):
+        #     total = class_total_counts[class_idx]
+        #     correct = class_correct_counts[class_idx]
+        #     accuracy_per_class = (correct / total) if total > 0 else 0
+        #     original_token = continuous_to_original.get(
+        #         class_idx, f"Unknown token {class_idx}")
+        #     print(
+        #         f"\nClass {class_idx}, Original Token: ({original_token})/{tokenizer.decode([original_token])}:")
+        #     print(f"  Accuracy: {accuracy_per_class:.4f} ({correct}/{total})")
 
     # print("Correctly predicted values and their indices:")
     # for idx, value in correct_predictions:
@@ -102,6 +103,31 @@ def evaluate_model(model, X, y, model_name, predict_dim, continuous_to_original_
 
     return accuracy
 
+def log_per_class_statistics(continuous_to_original_path, tokenizer_path, model_name, predict_dim, class_total_counts, class_correct_counts):
+    with open(continuous_to_original_path, 'rb') as f:
+        continuous_to_original = pickle.load(f)
+    tokenizer = load_tokenizer(tokenizer_path)
+    # Save the printed logs into a txt file
+    log_file_path = f'{PATH_PREFIX}/classify/{model_name}_evaluation_log.txt'
+    print("log_file_path: ", log_file_path)
+    with open(log_file_path, 'w') as log_file:
+        log_file.write("\nPer-class statistics:\n")
+
+        if continuous_to_original_path and tokenizer_path:
+            for class_idx in range(predict_dim):
+                total = class_total_counts[class_idx]
+                correct = class_correct_counts[class_idx]
+                accuracy_per_class = (correct / total) if total > 0 else 0
+                original_token = continuous_to_original.get(
+                    class_idx, f"Unknown token {class_idx}")
+                
+                print(
+                    f"\nClass {class_idx}, Original Token: ({original_token})/{tokenizer.decode([original_token])}:")
+                print(f"  Accuracy: {accuracy_per_class:.4f} ({correct}/{total})")
+
+                log_file.write(
+                    f"\nClass {class_idx}, Original Token: ({original_token})/{tokenizer.decode([original_token])}:\n")
+                log_file.write(f"  Accuracy: {accuracy_per_class:.4f} ({correct}/{total})\n")
 
 def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=100, batch_size=32, patience=5, model_name=None):
     """Trains the model using validation accuracy for early stopping."""
@@ -209,17 +235,13 @@ def run_classify(X, y, model_name, input_dim, output_dim, num_epochs=100, batch_
         model, 
         X_train, 
         y_train, 
-        model_name=f"{model_name}_{model_type}", 
-        continuous_to_original_path=continuous_to_original_path,
-        tokenizer_path=tokenizer_path,
+        model_name=f"{model_name}_{model_type}",
         predict_dim=5)
     val_accuracy = evaluate_model(
         model, 
         X_val, 
         y_val, 
         model_name=f"{model_name}_{model_type}", 
-        continuous_to_original_path=continuous_to_original_path,
-        tokenizer_path=tokenizer_path,
         predict_dim=5)
     test_accuracy = evaluate_model(
         model, 
