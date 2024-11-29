@@ -390,10 +390,11 @@ if __name__ == "__main__":
 
     dataset_name = "balanced_set_dataset_random"
     config = GPTConfig44
+    model_name = "causal_full_run_random_layers_4_heads_4"
 
     for layer in range(4):
         print(f"Layer {layer}")
-        analyze_embeddings(config, dataset_name, capture_layer=layer)
+        analyze_embeddings(config, dataset_name, model_path=f"{model_name}.pt", capture_layer=layer)
 
     # dataset_name = "balanced_set_dataset_random"
     # model_name = "causal_full_run_random_layers_4_heads_4"
