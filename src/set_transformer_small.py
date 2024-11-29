@@ -238,6 +238,7 @@ def analyze_embeddings(config, dataset_name, model_path, capture_layer):
     all_flattened_target_attributes = []
 
     for index, batch in enumerate(val_loader):
+        print(f"Batch {index}/{len(val_loader)}")
         batch = batch.to(device)
         _, _, _, captured_embedding = model(batch, True, capture_layer)
 
@@ -288,6 +289,7 @@ def analyze_embeddings(config, dataset_name, model_path, capture_layer):
 
 
 def opp_analyze_embeddings(config, dataset_name, capture_layer):
+    # TODO: this needs to be fixed to load the actual model in
     dataset_path = f"{PATH_PREFIX}/{dataset_name}.pth"
     dataset = torch.load(dataset_path)
     train_loader, val_loader = initialize_loaders(config, dataset)
@@ -386,30 +388,30 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    # dataset_name = "balanced_set_dataset_random"
-    # config = GPTConfig44
-
-    # for layer in range(4):
-    #     print(f"Layer {layer}")
-    #     analyze_embeddings(config, dataset_name, capture_layer=layer)
-
     dataset_name = "balanced_set_dataset_random"
-    model_name = "causal_full_run_random_layers_4_heads_4"
-    capture_layer = 3
+    config = GPTConfig44
 
-    train_binding_classifier_single_chunk(
-        dataset_name=dataset_name, 
-        capture_layer=capture_layer, 
-        chunk_id=0,
-        model_name=model_name, 
-        val_size=0.05,
-        test_size=0.05,
-        input_dim=128, 
-        num_epochs=100, 
-        batch_size=32, 
-        lr=0.001, 
-        patience=10
-    )
+    for layer in range(4):
+        print(f"Layer {layer}")
+        analyze_embeddings(config, dataset_name, capture_layer=layer)
+
+    # dataset_name = "balanced_set_dataset_random"
+    # model_name = "causal_full_run_random_layers_4_heads_4"
+    # capture_layer = 3
+
+    # train_binding_classifier_single_chunk(
+    #     dataset_name=dataset_name, 
+    #     capture_layer=capture_layer, 
+    #     chunk_id=0,
+    #     model_name=model_name, 
+    #     val_size=0.05,
+    #     test_size=0.05,
+    #     input_dim=128, 
+    #     num_epochs=100, 
+    #     batch_size=32, 
+    #     lr=0.001, 
+    #     patience=10
+    # )
     
     # construct_binding_id_dataset(GPTConfig44, dataset_name, model_path=f"{model_name}.pt",capture_layer=3)
     # train_binding_classifier(dataset_name, capture_layer, model_name, input_dim=128, num_epochs=1, batch_size=32, lr=0.001, patience=10)
