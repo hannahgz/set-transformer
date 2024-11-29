@@ -417,7 +417,7 @@ if __name__ == "__main__":
             model_name=f"real_{dataset_name}_layer{layer}", 
             input_dim=64, 
             output_dim=5, 
-            num_epochs=1,
+            num_epochs=100,
             continuous_to_original_path=continuous_to_original_path,
             tokenizer_path=tokenizer_path
         )
