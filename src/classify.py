@@ -42,7 +42,7 @@ class MLPModel(nn.Module):
         return x
 
 
-def evaluate_model(model, X, y, model_name, predict_dim=12, input_dim=5, continuous_to_original_path=None, tokenizer_path=None):
+def evaluate_model(model, X, y, model_name, predict_dim, continuous_to_original_path=None, tokenizer_path=None):
     """Evaluates the model on data and prints correct predictions."""
 
     checkpoint = torch.load(
@@ -57,9 +57,9 @@ def evaluate_model(model, X, y, model_name, predict_dim=12, input_dim=5, continu
     # Dictionary to count total occurrences of each class
     class_total_counts = {i: 0 for i in range(predict_dim)}
 
-    input_correct_counts = {i: 0 for i in range(input_dim)}
-    # Dictionary to count total occurrences of each class
-    input_total_counts = {i: 0 for i in range(input_dim)}
+    # input_correct_counts = {i: 0 for i in range(input_dim)}
+    # # Dictionary to count total occurrences of each class
+    # input_total_counts = {i: 0 for i in range(input_dim)}
 
     # these mod 20 counts are not accurate because the order is changing for X so we don't actually know which position in the sequence corresponds to which attribute
 
@@ -103,7 +103,7 @@ def evaluate_model(model, X, y, model_name, predict_dim=12, input_dim=5, continu
     return accuracy
 
 
-def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=100, batch_size=32, patience=10, model_name=None):
+def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=100, batch_size=32, patience=5, model_name=None):
     """Trains the model using validation accuracy for early stopping."""
     X_train, y_train = train_data
     X_val, y_val = val_data
@@ -176,7 +176,7 @@ def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=10
                 break
 
 
-def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, batch_size=32, lr=0.001, model_type="linear", continuous_to_original_path=None, tokenizer_path=None):
+def run_classify(X, y, model_name, input_dim, output_dim, num_epochs=100, batch_size=32, lr=0.001, model_type="linear", continuous_to_original_path=None, tokenizer_path=None):
     """Main function to run the model training and evaluation."""
     # Prepare data with validation split
     X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y)
@@ -211,21 +211,24 @@ def run_classify(X, y, model_name, input_dim=16, output_dim=12, num_epochs=100, 
         y_train, 
         model_name=f"{model_name}_{model_type}", 
         continuous_to_original_path=continuous_to_original_path,
-        tokenizer_path=tokenizer_path)
+        tokenizer_path=tokenizer_path,
+        predict_dim=5)
     val_accuracy = evaluate_model(
         model, 
         X_val, 
         y_val, 
         model_name=f"{model_name}_{model_type}", 
         continuous_to_original_path=continuous_to_original_path,
-        tokenizer_path=tokenizer_path)
+        tokenizer_path=tokenizer_path,
+        predict_dim=5)
     test_accuracy = evaluate_model(
         model, 
         X_test,
         y_test,
         model_name=f"{model_name}_{model_type}",
         continuous_to_original_path=continuous_to_original_path,
-        tokenizer_path=tokenizer_path)
+        tokenizer_path=tokenizer_path,
+        predict_dim=5)
 
     wandb.log({
         "final_train_accuracy": train_accuracy,
