@@ -283,6 +283,28 @@ def analyze_weights(model_path, input_dim=64, output_dim=5):
         for j in range(weights.size(1)):  # Iterate over the input_dim (columns)
             print(f"Weight at index ({i}, {j}): {weights[i, j].item()}")
 
+    return weights, biases
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+def plot_weights_as_heatmap(weights, savefig_path=None):
+    """
+    Visualizes the weight matrix for a single layer as a heatmap.
+    
+    Parameters:
+    weights (torch.Tensor): The weight matrix of shape [output_dim, input_dim].
+    """
+    plt.figure(figsize=(12, 4))  # Adjust the aspect ratio to fit the wide matrix
+    sns.heatmap(weights.numpy(), annot=False, cmap='coolwarm', cbar=True, center=0)
+    plt.title("Weight Matrix Heatmap")
+    plt.xlabel("Input Features (64)")
+    plt.ylabel("Output Dimensions (5)")
+    plt.xticks(ticks=range(0, weights.size(1), 8), labels=range(0, weights.size(1), 8))  # Tick every 8th input
+    plt.yticks(ticks=range(weights.size(0)), labels=[f"Output {i}" for i in range(weights.size(0))])
+    if savefig_path:
+        plt.savefig(savefig_path, bbox_inches="tight")
+    plt.show()
 
 
 # Example usage:

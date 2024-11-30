@@ -19,7 +19,7 @@ import numpy as np
 from tokenizer import load_tokenizer
 from graph import lineplot_specific
 import pickle
-from classify import LinearModel, evaluate_model, analyze_weights
+from classify import LinearModel, evaluate_model, analyze_weights, plot_weights_as_heatmap
 from sklearn.model_selection import train_test_split
 from dimension_reduce import run_pca_analysis, run_umap_analysis
 from binding_id import construct_binding_id_dataset, train_binding_classifier, train_binding_classifier_single_chunk
@@ -423,9 +423,11 @@ if __name__ == "__main__":
     #     )
 
     # Load the model and look at the weights
-    analyze_weights(
+    weights, biases = analyze_weights(
         model_path="real_balanced_set_dataset_random_layer0_linear",
     )
+
+    plot_weights_as_heatmap(weights.data, "weights_heatmap.png")
 
 
     # # PIPELINE: Train a binary classifier for single chunk to model if two attributes are from the same card
