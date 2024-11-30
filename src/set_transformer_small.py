@@ -434,7 +434,7 @@ if __name__ == "__main__":
 
     dataset_name = "balanced_set_dataset_random"
     model_name = "causal_full_run_random_layers_4_heads_4"
-    capture_layer = 0
+    capture_layer = 3
 
     train_binding_classifier_single_chunk(
         dataset_name=dataset_name, 
