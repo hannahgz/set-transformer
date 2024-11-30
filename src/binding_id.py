@@ -432,6 +432,7 @@ def train_binding_classifier_single_chunk(
         total_samples = 0
         
         for batch_X, batch_y in train_loader:
+            batch_X, batch_y = batch_X.to(device), batch_y.to(device)
             optimizer.zero_grad()
             outputs = model(batch_X).squeeze()
             loss = criterion(outputs, batch_y.float())
@@ -452,8 +453,8 @@ def train_binding_classifier_single_chunk(
             correct_predictions = 0
             total_predictions = 0
             
-            for inputs in val_loader:
-                X_val, y_val = inputs
+            for X_val, y_val in val_loader:
+                X_val, y_val = X_val.to(device), y_val.to(device)
                 outputs = model(X_val).squeeze()  # Get model predictions (probabilities)
                 
                 # Compute the loss
