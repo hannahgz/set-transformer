@@ -300,7 +300,7 @@ def plot_weights_as_heatmap(weights, savefig_path=None):
     plt.title("Weight Matrix Heatmap")
     plt.xlabel("Input Features (64)")
     plt.ylabel("Output Dimensions (5)")
-    plt.xticks(ticks=range(0, weights.size(1), 8), labels=range(0, weights.size(1)))  # Tick every 8th input
+    plt.xticks(ticks=range(0, weights.size(1)), labels=range(0, weights.size(1)))  # Tick every 8th input
     plt.yticks(ticks=range(weights.size(0)), labels=[f"{i}" for i in range(weights.size(0))])
     if savefig_path:
         plt.savefig(savefig_path, bbox_inches="tight")
