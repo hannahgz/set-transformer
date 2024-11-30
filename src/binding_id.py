@@ -11,6 +11,8 @@ from itertools import permutations
 from data_utils import split_data
 import subprocess
 import random
+from torch.utils.data import DataLoader, Dataset, random_split, TensorDataset
+
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 
@@ -281,6 +283,59 @@ class BalancedBindingDataset(Dataset):
         return data, torch.tensor(label, dtype=torch.float32)
 
 
+def initialize_binding_dataset(X, y, val_size, test_size, batch_size):
+    # Combine X and y into a single dataset
+    full_dataset = TensorDataset(X, y)
+
+    # Split the combined dataset into training, validation, and test sets
+    train_size = int((1-val_size-test_size) * len(full_dataset)) 
+    val_size = int(val_size * len(full_dataset))  # 15% for validation
+    test_size = len(full_dataset) - train_size - val_size  # Remainder for test
+
+    train_dataset, val_dataset, test_dataset = random_split(
+        full_dataset,
+        [train_size, val_size, test_size],
+        generator=torch.Generator().manual_seed(42)  # Ensures reproducibility
+    )
+
+    # Separate training data into class 0 and class 1
+    X_train, y_train = zip(*train_dataset)  # Unpack into X_train and y_train
+    X_train = torch.stack(X_train)
+    y_train = torch.stack(y_train)
+
+    class_0_data_train = X_train[(y_train == 0).nonzero(as_tuple=True)[0]]
+    class_1_data_train = X_train[(y_train == 1).nonzero(as_tuple=True)[0]]
+
+    # Separate validation data into class 0 and class 1
+    X_val, y_val = zip(*val_dataset)  # Unpack into X_val and y_val
+    X_val = torch.stack(X_val)
+    y_val = torch.stack(y_val)
+
+    class_0_data_val = X_val[(y_val == 0).nonzero(as_tuple=True)[0]]
+    class_1_data_val = X_val[(y_val == 1).nonzero(as_tuple=True)[0]]
+
+    # Separate test data into class 0 and class 1
+    X_test, y_test = zip(*test_dataset)  # Unpack into X_test and y_test
+    X_test = torch.stack(X_test)
+    y_test = torch.stack(y_test)
+
+    class_0_data_test = X_test[(y_test == 0).nonzero(as_tuple=True)[0]]
+    class_1_data_test = X_test[(y_test == 1).nonzero(as_tuple=True)[0]]
+
+
+    # Create the balanced training dataset
+    balanced_train_dataset = BalancedBindingDataset(class_0_data_train, class_1_data_train)
+    balanced_val_dataset = BalancedBindingDataset(class_0_data_val, class_1_data_val)
+    balanced_test_dataset = BalancedBindingDataset(class_0_data_test, class_1_data_test)
+
+    # Create DataLoaders
+    train_loader = DataLoader(balanced_train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(balanced_val_dataset, batch_size=batch_size, shuffle=False)
+    test_loader = DataLoader(balanced_test_dataset, batch_size=batch_size, shuffle=False)
+
+    return train_loader, val_loader, test_loader
+
+
 def train_binding_classifier_single_chunk(
     dataset_name, 
     capture_layer, 
@@ -316,14 +371,14 @@ def train_binding_classifier_single_chunk(
     X = torch.load(os.path.join(base_dir, f"X_chunk_{chunk_id}.pt")).to(device)
     y = torch.load(os.path.join(base_dir, f"y_chunk_{chunk_id}.pt")).to(device)
     
-    X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y, val_size, test_size)  
+    # X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y, val_size, test_size)  
     
-    print(f"Split sizes - Train: {len(X_train)}, Val: {len(X_val)}, Test: {len(X_test)}")
+    # print(f"Split sizes - Train: {len(X_train)}, Val: {len(X_val)}, Test: {len(X_test)}")
     
-    print("Class distribution:")
-    print(f"Train - Class 0: {(y_train == 0).sum()/len(y_train):.3f}, Class 1: {(y_train == 1).sum()/len(y_train):.3f}")
-    print(f"Val   - Class 0: {(y_val == 0).sum()/len(y_val):.3f}, Class 1: {(y_val == 1).sum()/len(y_val):.3f}")
-    print(f"Test  - Class 0: {(y_test == 0).sum()/len(y_test):.3f}, Class 1: {(y_test == 1).sum()/len(y_test):.3f}")
+    # print("Class distribution:")
+    # print(f"Train - Class 0: {(y_train == 0).sum()/len(y_train):.3f}, Class 1: {(y_train == 1).sum()/len(y_train):.3f}")
+    # print(f"Val   - Class 0: {(y_val == 0).sum()/len(y_val):.3f}, Class 1: {(y_val == 1).sum()/len(y_val):.3f}")
+    # print(f"Test  - Class 0: {(y_test == 0).sum()/len(y_test):.3f}, Class 1: {(y_test == 1).sum()/len(y_test):.3f}")
 
 #     # pos_weight = torch.tensor([(y_train == 0).sum() / (y_train == 1).sum()]).to(device)
 #     pos_weight = torch.sqrt(torch.tensor([(y_train == 0).sum() / (y_train == 1).sum()])).to(device)
@@ -357,16 +412,17 @@ def train_binding_classifier_single_chunk(
     #     shuffle=True
     # )
 
-    # Separate data for class 0 and class 1
-    class_0_data = X_train[(y_train == 0).nonzero(as_tuple=True)[0]]
-    class_1_data = X_train[(y_train == 1).nonzero(as_tuple=True)[0]]
+    # # Separate data for class 0 and class 1
+    # class_0_data = X_train[(y_train == 0).nonzero(as_tuple=True)[0]]
+    # class_1_data = X_train[(y_train == 1).nonzero(as_tuple=True)[0]]
 
-    # Create the balanced dataset
-    balanced_dataset = BalancedBindingDataset(class_0_data, class_1_data)
+    # # Create the balanced dataset
+    # balanced_dataset = BalancedBindingDataset(class_0_data, class_1_data)
 
-    # Create DataLoader for the balanced dataset
-    train_loader = DataLoader(balanced_dataset, batch_size=batch_size, shuffle=True)
+    # # Create DataLoader for the balanced dataset
+    # train_loader = DataLoader(balanced_dataset, batch_size=batch_size, shuffle=True)
 
+    train_loader, val_loader, test_loader = initialize_binding_dataset(X, y, val_size, test_size, batch_size)
     
     for epoch in range(num_epochs):
         # Training phase
@@ -388,24 +444,49 @@ def train_binding_classifier_single_chunk(
         
         # Validation phase
         model.eval()
+        total_val_loss = 0
+        avg_val_loss = 0
+
         with torch.no_grad():
-            val_outputs = model(X_val).squeeze()
-            val_loss = criterion(val_outputs, y_val.float())
-            # val_preds = (torch.sigmoid(val_outputs) > 0.5).float()
-            val_preds = (val_outputs > 0.5).float()
-            val_acc = (val_preds == y_val.float()).float().mean()
+            total_val_loss = 0
+            correct_predictions = 0
+            total_predictions = 0
+            
+            for inputs in val_loader:
+                X_val, y_val = inputs
+                outputs = model(X_val).squeeze()  # Get model predictions (probabilities)
+                
+                # Compute the loss
+                val_loss = criterion(outputs, y_val.float())
+                total_val_loss += val_loss.item() * len(X_val)
+                
+                # Convert outputs to binary predictions (0 or 1)
+                predicted = (outputs >= 0.5).float()  # Apply 0.5 threshold
+                
+                # Count the number of correct predictions
+                correct_predictions += (predicted == y_val).sum().item()
+                total_predictions += len(y_val)
+            
+            # Calculate average validation loss
+            avg_val_loss = total_val_loss / len(val_loader.dataset)
+            
+            # Calculate validation accuracy
+            val_accuracy = correct_predictions / total_predictions * 100  # As percentage
+            
+            print(f"Validation Loss: {avg_val_loss:.4f}")
+            print(f"Validation Accuracy: {val_accuracy:.2f}%")
         
         # Logging
-        print(f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {avg_train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}")
+        print(f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {avg_train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {val_accuracy:.4f}")
         wandb.log({
             'epoch': epoch,
             'train_loss': avg_train_loss,
             'val_loss': val_loss.item(),
-            'val_acc': val_acc.item()
+            'val_acc': val_accuracy.item()
         })
         
         # Early stopping
-        if val_loss < best_val_loss:
+        if avg_val_loss < best_val_loss:
             best_val_loss = val_loss
             counter = 0
             model_path = f'{PATH_PREFIX}/binding_id/{model_name}_chunk{chunk_id}_best.pt'
@@ -413,7 +494,7 @@ def train_binding_classifier_single_chunk(
                 'model': model.state_dict(),
                 'epoch': epoch,
                 'val_loss': val_loss,
-                'val_acc': val_acc,
+                'val_acc': val_accuracy,
                 'chunk_id': chunk_id,
                 'split_sizes': {
                     'val': val_size,
@@ -427,8 +508,8 @@ def train_binding_classifier_single_chunk(
                 break
     
     # Final evaluation
-    test_acc = get_binding_classifier_accuracy(X_test, y_test, model_path, input_dim)
-    wandb.log({'test_accuracy': test_acc})
+    # test_acc = get_binding_classifier_accuracy(X_test, y_test, model_path, input_dim)
+    # wandb.log({'test_accuracy': test_acc})
     wandb.finish()
     
     return model
