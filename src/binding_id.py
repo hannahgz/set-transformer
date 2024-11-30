@@ -483,7 +483,7 @@ def train_binding_classifier_single_chunk(
             'epoch': epoch,
             'train_loss': avg_train_loss,
             'val_loss': val_loss.item(),
-            'val_acc': val_accuracy.item()
+            'val_acc': val_accuracy
         })
         
         # Early stopping
