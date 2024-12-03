@@ -441,7 +441,7 @@ if __name__ == "__main__":
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         y = y.to(device)
 
-        embeddings_pca, explained_variance_ratio = run_pca_analysis(X, y, layer)
+        embeddings_pca, explained_variance_ratio = run_pca_analysis(X, y, layer, n_components = 10)
         print("embeddings_pca", embeddings_pca)
         print("explained_variance_ratio", explained_variance_ratio)
 
