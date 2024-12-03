@@ -422,33 +422,35 @@ if __name__ == "__main__":
     #         tokenizer_path=tokenizer_path
     #     )
 
-    # # Load the model and look at the weights
-    # weights, biases = analyze_weights(
-    #     model_path="real_balanced_set_dataset_random_layer0_linear",
+    # Load the model and look at the weights
+    for layer in range(4):
+        weights, biases = analyze_weights(
+            model_path=f"real_balanced_set_dataset_random_layer{layer}_linear",
+        )
+        print("biases", biases)
+
+        plot_weights_as_heatmap(weights.data, f"classify_weights_heatmap_layer{layer}.png")
+
+
+    # # PIPELINE: Train a binary classifier for single chunk to model if two attributes are from the same card
+
+    # dataset_name = "balanced_set_dataset_random"
+    # model_name = "causal_full_run_random_layers_4_heads_4"
+    # capture_layer = 3
+
+    # train_binding_classifier_single_chunk(
+    #     dataset_name=dataset_name, 
+    #     capture_layer=capture_layer, 
+    #     chunk_id=0,
+    #     model_name=model_name, 
+    #     val_size=0.05,
+    #     test_size=0.05,
+    #     input_dim=128, 
+    #     num_epochs=100, 
+    #     batch_size=32, 
+    #     lr=0.001, 
+    #     patience=10
     # )
-
-    # plot_weights_as_heatmap(weights.data, "weights_heatmap.png")
-
-
-    # PIPELINE: Train a binary classifier for single chunk to model if two attributes are from the same card
-
-    dataset_name = "balanced_set_dataset_random"
-    model_name = "causal_full_run_random_layers_4_heads_4"
-    capture_layer = 3
-
-    train_binding_classifier_single_chunk(
-        dataset_name=dataset_name, 
-        capture_layer=capture_layer, 
-        chunk_id=0,
-        model_name=model_name, 
-        val_size=0.05,
-        test_size=0.05,
-        input_dim=128, 
-        num_epochs=100, 
-        batch_size=32, 
-        lr=0.001, 
-        patience=10
-    )
     
     # construct_binding_id_dataset(GPTConfig44, dataset_name, model_path=f"{model_name}.pt",capture_layer=3)
     # train_binding_classifier(dataset_name, capture_layer, model_name, input_dim=128, num_epochs=1, batch_size=32, lr=0.001, patience=10)

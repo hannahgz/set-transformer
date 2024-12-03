@@ -13,7 +13,7 @@ PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 class LinearModel(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(LinearModel, self).__init__()
-        self.fc = nn.Linear(input_dim, output_dim)  # Linear layer (16 -> 12)
+        self.fc = nn.Linear(input_dim, output_dim)  # Linear layer (64 -> 5)
 
     def forward(self, x):
         # No activation, as we will use CrossEntropyLoss which applies softmax internally
