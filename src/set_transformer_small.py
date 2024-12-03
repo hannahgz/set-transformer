@@ -429,7 +429,7 @@ if __name__ == "__main__":
         )
         print("biases", biases)
 
-        plot_weights_as_heatmap(weights.data, f"classify_weights_heatmap_layer{layer}.png")
+        plot_weights_as_heatmap(weights.data, f"figs/classify/weights_heatmap_layer{layer}.png")
 
 
     # # PIPELINE: Train a binary classifier for single chunk to model if two attributes are from the same card
