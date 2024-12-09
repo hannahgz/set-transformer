@@ -13,6 +13,7 @@ import wandb
 from model import GPT
 # from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20, GPTConfig44_AttrFirst
 from model import GPTConfig44, GPTConfig44TriplesEmbdDrop, GPTConfig44_AttrFirst
+from model import add_causal_masking
 from data_utils import initialize_datasets, initialize_loaders, initialize_triples_datasets
 import random
 import numpy as np
@@ -388,12 +389,13 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
+    add_causal_masking(GPTConfig44(), "causal_full_run_random_layers_4_heads_4.pt")
 
     # PIPELINE: Classifying a card based on the attribute embedding
-    dataset_name = "balanced_set_dataset_random"
-    config = GPTConfig44
-    model_name = "causal_full_run_random_layers_4_heads_4"
-    tokenizer_path=f'{PATH_PREFIX}/{dataset_name}_tokenizer.pkl'
+    # dataset_name = "balanced_set_dataset_random"
+    # config = GPTConfig44
+    # model_name = "causal_full_run_random_layers_4_heads_4"
+    # tokenizer_path=f'{PATH_PREFIX}/{dataset_name}_tokenizer.pkl'
 
     # # Pull embeddings from model to analyze, iterate through all 4 layers of model
     # for layer in range(4):
@@ -431,19 +433,19 @@ if __name__ == "__main__":
 
     #     plot_weights_as_heatmap(weights.data, f"figs/classify/weights_heatmap_layer{layer}.png")
 
-    # PCA Analysis
-    for layer in range(0, 4):
-        embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/real_model_input_embeddings.pt"
-        mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/real_model_mapped_target_attributes.pt"
-        X = torch.load(embeddings_path)
-        y = torch.load(mapped_attributes_path)
+    # # PCA Analysis
+    # for layer in range(0, 4):
+    #     embeddings_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/real_model_input_embeddings.pt"
+    #     mapped_attributes_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{layer}/real_model_mapped_target_attributes.pt"
+    #     X = torch.load(embeddings_path)
+    #     y = torch.load(mapped_attributes_path)
 
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        y = y.to(device)
+    #     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #     y = y.to(device)
 
-        embeddings_pca, explained_variance_ratio = run_pca_analysis(X, y, layer, n_components = 10)
-        print("embeddings_pca", embeddings_pca)
-        print("explained_variance_ratio", explained_variance_ratio)
+    #     embeddings_pca, explained_variance_ratio = run_pca_analysis(X, y, layer, n_components = 10)
+    #     print("embeddings_pca", embeddings_pca)
+    #     print("explained_variance_ratio", explained_variance_ratio)
 
 
     # # PIPELINE: Train a binary classifier for single chunk to model if two attributes are from the same card
