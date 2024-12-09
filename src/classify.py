@@ -61,8 +61,6 @@ def evaluate_model(model, X, y, model_name, predict_dim, continuous_to_original_
     # # Dictionary to count total occurrences of each class
     # input_total_counts = {i: 0 for i in range(input_dim)}
 
-    # these mod 20 counts are not accurate because the order is changing for X so we don't actually know which position in the sequence corresponds to which attribute
-
     with torch.no_grad():
         outputs = model(X)
         _, predicted = torch.max(outputs, 1)

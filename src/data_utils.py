@@ -306,3 +306,41 @@ def split_data(X, y, test_size=0.2, val_size=0.2, random_state=42):
     X_train, X_val, y_train, y_val = train_test_split(X_trainval, y_trainval, test_size=val_ratio, random_state=random_state)
     
     return X_train, X_val, X_test, y_train, y_val, y_test
+
+
+def pretty_print_input(input):
+    grid = [["" for _ in range(4)] for _ in range(5)]
+    card_indices = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4}
+    
+    # Create a mapping from attribute values to their types
+    attr_mapping = {}
+    for shape in shapes:
+        attr_mapping[shape] = "shape"
+    for color in colors:
+        attr_mapping[color] = "color"
+    for number in numbers:
+        attr_mapping[number] = "number"
+    for shading in shadings:
+        attr_mapping[shading] = "shading"
+    
+    i = 0
+    while i < 40:
+        card = input[i]
+        attr = input[i+1]
+
+        attr_type = attr_mapping[attr]
+
+        if attr_type == "shape":
+            grid[card_indices[card]][0] = attr
+        elif attr_type == "shading":
+            grid[card_indices[card]][1] = attr
+        elif attr_type == "number":
+            grid[card_indices[card]][2] = attr
+        elif attr_type == "color":
+            grid[card_indices[card]][3] = attr
+
+        i += 2
+        
+    print("Card\tShape\tShading\tNumber\tColor")
+    for card, attrs in zip(card_indices.keys(), grid):
+        print(f"{card}\t" + "\t".join(attrs))

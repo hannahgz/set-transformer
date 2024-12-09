@@ -170,7 +170,7 @@ def plot_attention_pattern_lines(attention_weights, labels, n_layers, n_heads, t
     plt.close(fig)
 
 
-def generate_heatmap(
+def generate_lineplot(
         config,
         dataset_indices,
         dataset_path,
@@ -301,9 +301,11 @@ def lineplot_specific(
 
     # print("labels: ", labels)
 
-    dir_path = f"figs/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}"
+    dir_path = f"figs/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}/synthetic"
     filename = f"{filename_prefix}_lineplot_sets_{number_set}_threshold_{threshold}.png"
-
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+        
     plot_attention_pattern_lines(
         attention_weights,
         labels,
