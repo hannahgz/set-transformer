@@ -165,7 +165,7 @@ def plot_attention_pattern_lines(attention_weights, labels, n_layers, n_heads, t
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 
     formatted_labels = pretty_print_input(labels)
-    plt.figtext(0.1, 0.9, formatted_labels, ha="center", fontsize=10, family="monospace")
+    plt.figtext(0.15, 0.99, formatted_labels, ha="center", fontsize=10, family="monospace")
 
     # Save or display the figure
     if savefig is not None:
