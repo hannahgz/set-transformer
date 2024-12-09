@@ -264,7 +264,7 @@ def lineplot_specific(
 
     # Restore the model state dict
     checkpoint = torch.load(os.path.join(
-        config.out_dir, config.filename), weights_only=False)
+        PATH_PREFIX, config.filename), weights_only=False)
 
     model.load_state_dict(checkpoint["model"])
     print("Loaded model")
@@ -305,7 +305,7 @@ def lineplot_specific(
     filename = f"{filename_prefix}_lineplot_sets_{number_set}_threshold_{threshold}.png"
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
-        
+
     plot_attention_pattern_lines(
         attention_weights,
         labels,

@@ -341,6 +341,20 @@ def pretty_print_input(input):
 
         i += 2
         
-    print("Card\tShape\tShading\tNumber\tColor")
+    # print("Card\tShape\tShading\tNumber\tColor")
+    # for card, attrs in zip(card_indices.keys(), grid):
+    #     print(f"{card}\t" + "\t".join(attrs))
+
+    # Define column widths
+    col_widths = [5, 10, 10, 10, 10]
+
+    # Print header
+    headers = ["Card", "Shape", "Shading", "Number", "Color"]
+    header_line = "".join(header.ljust(col_widths[i]) for i, header in enumerate(headers))
+    print(header_line)
+
+    # Print rows
     for card, attrs in zip(card_indices.keys(), grid):
-        print(f"{card}\t" + "\t".join(attrs))
+        row = [card] + attrs
+        row_line = "".join(attr.ljust(col_widths[i]) for i, attr in enumerate(row))
+        print(row_line)
