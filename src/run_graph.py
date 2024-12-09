@@ -18,7 +18,7 @@ if __name__ == "__main__":
         config=GPTConfig44,
         input=test_input,
         get_prediction=True,
-        filename_prefix="test"
+        filename_prefix="test1"
     )
 
     # lineplot_specific(
