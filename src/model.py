@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.nn import functional as F
 import os
 
+PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 # @dataclass
 # class GPTConfig:
@@ -740,8 +741,10 @@ class GPT(nn.Module):
 def add_causal_masking(config, modified_path):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
+    # checkpoint = torch.load(os.path.join(
+    #     config.out_dir, config.filename), weights_only=False)
     checkpoint = torch.load(os.path.join(
-        config.out_dir, config.filename), weights_only=False)
+        PATH_PREFIX, "full_run_random_layers_4_heads_4.pt"), weights_only=False)
     model.load_state_dict(checkpoint["model"], strict=False)
 
     for block in model.transformer.h:

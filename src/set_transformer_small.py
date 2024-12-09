@@ -389,7 +389,7 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    add_causal_masking(GPTConfig44(), "causal_full_run_random_layers_4_heads_4.pt")
+    add_causal_masking(GPTConfig44(), f"{PATH_PREFIX}/causal_full_run_random_layers_4_heads_4.pt")
 
     # PIPELINE: Classifying a card based on the attribute embedding
     # dataset_name = "balanced_set_dataset_random"
