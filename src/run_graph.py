@@ -14,12 +14,12 @@ if __name__ == "__main__":
 
     pretty_print_input(test_input)
     
-    # lineplot_specific(
-    #     config=GPTConfig44,
-    #     input=test_input,
-    #     get_prediction=True,
-    #     filename_prefix="test"
-    # )
+    lineplot_specific(
+        config=GPTConfig44,
+        input=test_input,
+        get_prediction=True,
+        filename_prefix="test"
+    )
 
     # lineplot_specific(
     #     config=GPTConfig44,

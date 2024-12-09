@@ -3,6 +3,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 import torch
+from data_utils import pretty_print_input
 from model import GPT
 from tokenizer import load_tokenizer
 
@@ -162,6 +163,9 @@ def plot_attention_pattern_lines(attention_weights, labels, n_layers, n_heads, t
         fig.suptitle(
             f"{title_prefix}: {n_layers} Layers, {n_heads} Heads", fontsize=12)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+
+    formatted_labels = pretty_print_input(labels)
+    plt.figtext(0.01, 0.01, formatted_labels, ha="center", fontsize=10, family="monospace")
 
     # Save or display the figure
     if savefig is not None:
