@@ -20,6 +20,37 @@ if __name__ == "__main__":
     # )
 
     test_input = [
+        "A", "diamond",      "B", "diamond",      "C", "diamond",   "D", "oval",    "E", "oval",
+        "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
+        "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
+        "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", 
+        ">", "A", "B", "C", ".", ".", ".", ".", "."
+    ]
+
+    lineplot_specific(
+        config=GPTConfig44,
+        input=test_input,
+        get_prediction=True,
+        filename_prefix="synthetic1"
+    )
+
+    test_input = [
+        "A", "diamond",      "B", "diamond",      "C", "diamond",   "D", "oval",    "E", "oval",
+        "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
+        "A", "one",          "B", "two",          "C", "three",       "D", "three",   "E", "three",
+        "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", 
+        ">", "A", "B", "C", ".", ".", ".", ".", "."
+    ]
+
+    lineplot_specific(
+        config=GPTConfig44,
+        input=test_input,
+        get_prediction=True,
+        filename_prefix="synthetic1"
+    )
+
+
+    test_input = [
         "A", "squiggle",     "B", "squiggle",     "C", "squiggle",  "D", "oval",    "E", "oval",
         "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
         "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
