@@ -31,6 +31,30 @@ if __name__ == "__main__":
         filename_prefix="input0"
     )
 
+    test_input = [
+        "E", "striped", "B", "pink", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+        ">", "A", "B", "C", ".", ".", "_", "_", "_"
+    ]
+
+    lineplot_specific(
+        config=GPTConfig44,
+        input=test_input,
+        get_prediction=True,
+        filename_prefix="input0_modified_color"
+    )
+
+    test_input = [
+        "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "three", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+        ">", "A", "B", "C", ".", ".", "_", "_", "_"
+    ]
+
+    lineplot_specific(
+        config=GPTConfig44,
+        input=test_input,
+        get_prediction=True,
+        filename_prefix="input0_number"
+    )
+
 
     # test_input = [
     #     "A", "diamond",      "B", "diamond",      "C", "diamond",   
