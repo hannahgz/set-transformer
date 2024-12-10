@@ -32,8 +32,20 @@ if __name__ == "__main__":
     )
 
     test_input = [
+        "E", "striped", "B", "green", "D", "two", "B", "squiggle", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+        ">", "*", "_", "_", "_", "_", "_", "_", "_"
+    ]
+
+    lineplot_specific(
+        config=GPTConfig44,
+        input=test_input,
+        get_prediction=True,
+        filename_prefix="input0_modified_shape"
+    )
+
+    test_input = [
         "E", "striped", "B", "pink", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
-        ">", "A", "B", "C", ".", ".", "_", "_", "_"
+        ">", "*", "_", "_", "_", "_", "_", "_", "_"
     ]
 
     lineplot_specific(
@@ -45,7 +57,7 @@ if __name__ == "__main__":
 
     test_input = [
         "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "three", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
-        ">", "A", "B", "C", ".", ".", "_", "_", "_"
+        ">", "A", "B", "C", "/", "C", "D", "E", "."
     ]
 
     lineplot_specific(
