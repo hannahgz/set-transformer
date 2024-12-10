@@ -20,125 +20,138 @@ if __name__ == "__main__":
     # )
 
     test_input = [
-        "A", "diamond",      "B", "diamond",      "C", "diamond",   
-        "A", "striped",      "B", "striped",      "C", "striped",   
-        "A", "one",          "B", "one",          "C", "one",   
-        "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", "D", "oval",    "E", "oval", "D", "open",    "E", "open", "D", "three",   "E", "three",
-        ">", "A", "B", "C", ".", ".", ".", ".", "."
+        "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+        ">", "A", "B", "C", ".", ".", "_", "_", "_"
     ]
 
     lineplot_specific(
         config=GPTConfig44,
         input=test_input,
         get_prediction=True,
-        filename_prefix="synthetic1"
-    )
-
-    test_input = [
-        "A", "diamond",      "B", "diamond",      "C", "diamond",   "D", "oval",    "E", "oval",
-        "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
-        "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
-        "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", 
-        ">", "A", "B", "C", ".", ".", ".", ".", "."
-    ]
-
-    lineplot_specific(
-        config=GPTConfig44,
-        input=test_input,
-        get_prediction=True,
-        filename_prefix="synthetic1"
-    )
-
-    test_input = [
-        "A", "diamond",      "B", "diamond",      "C", "diamond",   "D", "oval",    "E", "oval",
-        "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
-        "A", "one",          "B", "two",          "C", "three",       "D", "three",   "E", "three",
-        "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", 
-        ">", "A", "B", "C", ".", ".", ".", ".", "."
-    ]
-
-    lineplot_specific(
-        config=GPTConfig44,
-        input=test_input,
-        get_prediction=True,
-        filename_prefix="synthetic1"
+        filename_prefix="input0"
     )
 
 
-    test_input = [
-        "A", "squiggle",     "B", "squiggle",     "C", "squiggle",  "D", "oval",    "E", "oval",
-        "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
-        "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
-        "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", 
-        ">", "A", "B", "C", ".", ".", ".", ".", "."
-    ]
+    # test_input = [
+    #     "A", "diamond",      "B", "diamond",      "C", "diamond",   
+    #     "A", "striped",      "B", "striped",      "C", "striped",   
+    #     "A", "one",          "B", "one",          "C", "one",   
+    #     "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", "D", "oval",    "E", "oval", "D", "open",    "E", "open", "D", "three",   "E", "three",
+    #     ">", "A", "B", "C", ".", ".", ".", ".", "."
+    # ]
 
-    lineplot_specific(
-        config=GPTConfig44,
-        input=test_input,
-        get_prediction=True,
-        filename_prefix="synthetic1"
-    )
+    # lineplot_specific(
+    #     config=GPTConfig44,
+    #     input=test_input,
+    #     get_prediction=True,
+    #     filename_prefix="synthetic1"
+    # )
 
-    test_input = [
-        "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
-        "A", "squiggle",     "B", "squiggle",     "C", "squiggle",  "D", "oval",    "E", "oval",
-        "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
-        "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", 
-        ">", "A", "B", "C", ".", ".", ".", ".", "."
-    ]
+    # test_input = [
+    #     "A", "diamond",      "B", "diamond",      "C", "diamond",   "D", "oval",    "E", "oval",
+    #     "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
+    #     "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
+    #     "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", 
+    #     ">", "A", "B", "C", ".", ".", ".", ".", "."
+    # ]
 
-    lineplot_specific(
-        config=GPTConfig44,
-        input=test_input,
-        get_prediction=True,
-        filename_prefix="synthetic1"
-    )
+    # lineplot_specific(
+    #     config=GPTConfig44,
+    #     input=test_input,
+    #     get_prediction=True,
+    #     filename_prefix="synthetic1"
+    # )
 
-    test_input = [
-        "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
-        "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
-        "A", "squiggle",     "B", "squiggle",     "C", "squiggle",  "D", "oval",    "E", "oval",
-        "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", 
-        ">", "A", "B", "C", ".", ".", ".", ".", "."
-    ]
+    # test_input = [
+    #     "A", "diamond",      "B", "diamond",      "C", "diamond",   "D", "oval",    "E", "oval",
+    #     "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
+    #     "A", "one",          "B", "two",          "C", "three",       "D", "three",   "E", "three",
+    #     "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", 
+    #     ">", "A", "B", "C", ".", ".", ".", ".", "."
+    # ]
 
-    lineplot_specific(
-        config=GPTConfig44,
-        input=test_input,
-        get_prediction=True,
-        filename_prefix="synthetic1"
-    )
+    # lineplot_specific(
+    #     config=GPTConfig44,
+    #     input=test_input,
+    #     get_prediction=True,
+    #     filename_prefix="synthetic1"
+    # )
 
-    test_input = [
-        "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", 
-        "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
-        "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
-        "A", "squiggle",     "B", "squiggle",     "C", "squiggle",  "D", "oval",    "E", "oval",
-        ">", "A", "B", "C", ".", ".", ".", ".", "."
-    ]
 
-    lineplot_specific(
-        config=GPTConfig44,
-        input=test_input,
-        get_prediction=True,
-        filename_prefix="synthetic1"
-    )
+    # test_input = [
+    #     "A", "squiggle",     "B", "squiggle",     "C", "squiggle",  "D", "oval",    "E", "oval",
+    #     "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
+    #     "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
+    #     "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", 
+    #     ">", "A", "B", "C", ".", ".", ".", ".", "."
+    # ]
 
-    test_input = [
-        "A", "squiggle",     "B", "squiggle",     "C", "squiggle",  "D", "oval",    "E", "oval",
-        "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
-        "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
-        "A", "green",        "B", "blue",         "C", "green",     "D", "green",   "E", "pink", 
-        ">", "*", ".", ".", ".", ".", ".", ".", "."
-    ]
+    # lineplot_specific(
+    #     config=GPTConfig44,
+    #     input=test_input,
+    #     get_prediction=True,
+    #     filename_prefix="synthetic1"
+    # )
 
-    lineplot_specific(
-        config=GPTConfig44,
-        input=test_input,
-        get_prediction=True,
-        filename_prefix="synthetic2"
-    )
+    # test_input = [
+    #     "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
+    #     "A", "squiggle",     "B", "squiggle",     "C", "squiggle",  "D", "oval",    "E", "oval",
+    #     "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
+    #     "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", 
+    #     ">", "A", "B", "C", ".", ".", ".", ".", "."
+    # ]
+
+    # lineplot_specific(
+    #     config=GPTConfig44,
+    #     input=test_input,
+    #     get_prediction=True,
+    #     filename_prefix="synthetic1"
+    # )
+
+    # test_input = [
+    #     "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
+    #     "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
+    #     "A", "squiggle",     "B", "squiggle",     "C", "squiggle",  "D", "oval",    "E", "oval",
+    #     "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", 
+    #     ">", "A", "B", "C", ".", ".", ".", ".", "."
+    # ]
+
+    # lineplot_specific(
+    #     config=GPTConfig44,
+    #     input=test_input,
+    #     get_prediction=True,
+    #     filename_prefix="synthetic1"
+    # )
+
+    # test_input = [
+    #     "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", 
+    #     "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
+    #     "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
+    #     "A", "squiggle",     "B", "squiggle",     "C", "squiggle",  "D", "oval",    "E", "oval",
+    #     ">", "A", "B", "C", ".", ".", ".", ".", "."
+    # ]
+
+    # lineplot_specific(
+    #     config=GPTConfig44,
+    #     input=test_input,
+    #     get_prediction=True,
+    #     filename_prefix="synthetic1"
+    # )
+
+    # test_input = [
+    #     "A", "squiggle",     "B", "squiggle",     "C", "squiggle",  "D", "oval",    "E", "oval",
+    #     "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
+    #     "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
+    #     "A", "green",        "B", "blue",         "C", "green",     "D", "green",   "E", "pink", 
+    #     ">", "*", ".", ".", ".", ".", ".", ".", "."
+    # ]
+
+    # lineplot_specific(
+    #     config=GPTConfig44,
+    #     input=test_input,
+    #     get_prediction=True,
+    #     filename_prefix="synthetic2"
+    # )
 
     # lineplot_specific(
     #     config=GPTConfig44,
