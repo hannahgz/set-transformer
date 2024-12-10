@@ -20,6 +20,21 @@ if __name__ == "__main__":
     # )
 
     test_input = [
+        "A", "diamond",      "B", "diamond",      "C", "diamond",   
+        "A", "striped",      "B", "striped",      "C", "striped",   
+        "A", "one",          "B", "one",          "C", "one",   
+        "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink", "D", "oval",    "E", "oval", "D", "open",    "E", "open", "D", "three",   "E", "three",
+        ">", "A", "B", "C", ".", ".", ".", ".", "."
+    ]
+
+    lineplot_specific(
+        config=GPTConfig44,
+        input=test_input,
+        get_prediction=True,
+        filename_prefix="synthetic1"
+    )
+
+    test_input = [
         "A", "diamond",      "B", "diamond",      "C", "diamond",   "D", "oval",    "E", "oval",
         "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open", 
         "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
