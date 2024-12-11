@@ -12,7 +12,7 @@ from torch import optim
 import wandb
 from model import GPT
 # from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20, GPTConfig44_AttrFirst
-from model import GPTConfig44, GPTConfig44TriplesEmbdDrop, GPTConfig44_AttrFirst
+from model import GPTConfig44, GPTConfig44TriplesEmbdDrop, GPTConfig44_AttrFirst, GPTConfig44_BalancedSets
 from model import add_causal_masking
 from data_utils import initialize_datasets, initialize_loaders, initialize_triples_datasets
 import random
@@ -389,7 +389,15 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    add_causal_masking(GPTConfig44(), f"{PATH_PREFIX}/causal_full_run_random_layers_4_heads_4.pt")
+
+    dataset = initialize_datasets(
+        GPTConfig44_BalancedSets(),
+        save_dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth',
+        save_tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+        randomize_sequence_order=True
+    )
+
+    # add_causal_masking(GPTConfig44(), f"{PATH_PREFIX}/causal_full_run_random_layers_4_heads_4.pt")
 
     # PIPELINE: Classifying a card based on the attribute embedding
     # dataset_name = "balanced_set_dataset_random"
