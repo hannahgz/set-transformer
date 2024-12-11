@@ -49,11 +49,13 @@ def wandb_log(config, avg_train_loss, avg_val_loss, epoch=None):
 # TODO: add alternate measure for computing accuracy (set prediction, but wrong order of cards)
 @torch.no_grad()
 def calculate_accuracy(model, dataloader, config, save_incorrect_path=None):
+    print("Calculating accuracy")
     model.eval()
     correct = 0
     total = 0
 
     for index, sequences in enumerate(dataloader):
+        print(f"Batch: {index}/{len(dataloader)}")
         inputs = sequences[:, : config.input_size].to(device)
         targets = sequences[:, config.input_size:].to(device)
 
@@ -406,7 +408,10 @@ if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
 
-    model_accuracy(config, model, train_loader, val_loader)
+    val_accuracy = calculate_accuracy(model, val_loader, config)
+    print("Val accuracy: ", val_accuracy)
+    
+    # model_accuracy(config, model, train_loader, val_loader)
     # run(
     #     GPTConfig44_BalancedSets(),
     #     dataset_path=dataset_path
