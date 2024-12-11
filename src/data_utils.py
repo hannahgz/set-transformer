@@ -345,7 +345,7 @@ def initialize_triples_datasets(config, save_dataset_path=None, save_tokenizer_p
 
 
 def initialize_loaders(config, dataset):
-    train_size = int(0.99 * len(dataset))
+    train_size = int(0.95 * len(dataset))
 
     # make validation set a lot smaller TODO, revisit how large val set this leaves us with
     val_size = len(dataset) - train_size

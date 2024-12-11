@@ -140,8 +140,7 @@ def evaluate_val_loss(
 
 def model_accuracy(config, model, train_loader, val_loader):
      # Restore the model state dict
-    checkpoint = torch.load(os.path.join(
-        config.out_dir, config.filename), weights_only=False)
+    checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
     model.load_state_dict(checkpoint["model"])
 
     train_accuracy = calculate_accuracy(
@@ -188,13 +187,13 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
         counter = 0
 
         for epoch in range(config.epochs):
-            print("Epoch", epoch)
             if counter >= config.patience:
                 break
             model.train()
             total_train_loss = 0
             for index, inputs in enumerate(train_loader):
-                print(f"Batch: {index}/{len(train_loader)}")
+                if index % 10000 == 0:
+                    print(f"Epoch: {epoch}/{config.epochs}, Batch: {index}/{len(train_loader)}")
                 model.train()
                 inputs = inputs.to(device)
                 optimizer.zero_grad()
@@ -400,10 +399,18 @@ if __name__ == "__main__":
     #     randomize_sequence_order=True
     # )
 
-    run(
-        GPTConfig44_BalancedSets(),
-        dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth'
-    )
+    config = GPTConfig44_BalancedSets()
+    dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth'
+    dataset = torch.load(dataset_path)
+    train_loader, val_loader = initialize_loaders(config, dataset)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = GPT(config).to(device)
+
+    model_accuracy(config, model, train_loader, val_loader)
+    # run(
+    #     GPTConfig44_BalancedSets(),
+    #     dataset_path=dataset_path
+    # )
 
     # with open(f'{PATH_PREFIX}/small_combo.pkl', 'rb') as f:
     #     data = pickle.load(f)
