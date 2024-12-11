@@ -459,7 +459,7 @@ class GPTConfig88Triples:
 @dataclass
 class GPTConfig44_BalancedSets:
     lr: float = 1e-3
-    epochs: int = 100
+    epochs: int = 1
     batch_size: int = 64
     n_layer: int = 4
     n_head: int = 4
