@@ -188,11 +188,13 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
         counter = 0
 
         for epoch in range(config.epochs):
+            print("Epoch", epoch)
             if counter >= config.patience:
                 break
             model.train()
             total_train_loss = 0
-            for inputs in train_loader:  # train_loader, 364 batches (11664/32)
+            for index, inputs in enumerate(train_loader):
+                print(f"Batch: {index}/{len(train_loader)}")
                 model.train()
                 inputs = inputs.to(device)
                 optimizer.zero_grad()
@@ -204,6 +206,7 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
             avg_train_loss = total_train_loss / len(train_loader)
             train_losses.append(avg_train_loss)
 
+            print("Evaluating validation loss")
             avg_val_loss, best_val_loss, counter = evaluate_val_loss(
                 model,
                 val_loader,
@@ -217,6 +220,7 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
 
             wandb_log(config, avg_train_loss, avg_val_loss, epoch=epoch)
 
+    print("Calculating accuracy")
     train_accuracy, val_accuracy = model_accuracy(config, model, train_loader, val_loader)
 
     if should_wandb_log:
