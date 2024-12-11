@@ -216,15 +216,14 @@ def initialize_datasets(config, save_dataset_path=None, save_tokenizer_path=None
 
     start_time = time.time()
     small_combinations = list(optimized_combinations)
-    
-    with open(f'{PATH_PREFIX}/small_combo.pkl', 'wb') as f:
-        pickle.dump(small_combinations, f)
-
+    print("Len small_combinations: ", len(small_combinations))
     end_time = time.time()
 
     print("Time taken to construct small_combinations: ", end_time - start_time, "seconds")
-    print("Len small_combinations: ", len(small_combinations))
-    # breakpoint()
+
+    with open(f'{PATH_PREFIX}/small_combo.pkl', 'wb') as f:
+        print("Saving small_combinations to pickle file")
+        pickle.dump(small_combinations, f)
 
     # Create tokenizer and tokenize all sequences
     tokenizer = Tokenizer()
