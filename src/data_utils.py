@@ -176,7 +176,7 @@ def initialize_datasets(config, save_dataset_path=None, save_tokenizer_path=None
     # )
 
     optimized_combinations = generate_combinations(
-        config.target_size, config.pad_symbol, config.n_cards, random_order=True, attr_first=attr_first, balance_sets=True
+        config.target_size, config.pad_symbol, config.n_cards, random_order=True, attr_first=attr_first
     )
 
     breakpoint()
