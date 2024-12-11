@@ -129,8 +129,8 @@ def evaluate_val_loss(
             "best_val_loss": best_val_loss,
             "config": config,
         }
-        print(f"saving checkpoint to {config.out_dir}")
-        torch.save(checkpoint, os.path.join(config.out_dir, config.filename))
+        print(f"saving checkpoint to {PATH_PREFIX}")
+        torch.save(checkpoint, f"{PATH_PREFIX}/{config.filename}")
     else:
         counter += 1
 
@@ -162,7 +162,7 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
 
     if should_wandb_log:
         wandb.init(
-            project="set-prediction-small",
+            project="set-prediction-large",
             config={
                     "learning_rate": config.lr,
                     "epochs": config.epochs,
@@ -389,11 +389,16 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    dataset = initialize_datasets(
+    # dataset = initialize_datasets(
+    #     GPTConfig44_BalancedSets(),
+    #     save_dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth',
+    #     save_tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+    #     randomize_sequence_order=True
+    # )
+
+    run(
         GPTConfig44_BalancedSets(),
-        save_dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth',
-        save_tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
-        randomize_sequence_order=True
+        dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth'
     )
 
     # with open(f'{PATH_PREFIX}/small_combo.pkl', 'rb') as f:

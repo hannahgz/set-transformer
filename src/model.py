@@ -475,9 +475,9 @@ class GPTConfig44_BalancedSets:
     target_size: int = 8
     pad_symbol: str = "_"
     out_dir: str = ""
-    filename: str = "causal_balanced_random_layers_4_heads_4.pt"
-    end_of_seq_token: int = -1
-    padding_token: int = -1
+    filename: str = "larger_causal_balanced_random_layers_4_heads_4.pt"
+    end_of_seq_token: int = 13
+    padding_token: int = 14
 
 
 class LayerNorm(nn.Module):
