@@ -65,7 +65,7 @@ def calculate_accuracy(model, dataloader, config, save_incorrect_path=None):
 
         mask = targets != config.padding_token  # Create a mask to ignore padding
         matches = ((predictions == targets) | ~mask).all(dim=1)
-
+        breakpoint()
         # if print_incorrect:
         #     # Print incorrect predictions and corresponding targets
         #     for i in range(len(matches)):
@@ -410,7 +410,7 @@ if __name__ == "__main__":
 
     val_accuracy = calculate_accuracy(model, val_loader, config)
     print("Val accuracy: ", val_accuracy)
-    
+
     # model_accuracy(config, model, train_loader, val_loader)
     # run(
     #     GPTConfig44_BalancedSets(),
