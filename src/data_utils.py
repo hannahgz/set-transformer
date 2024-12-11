@@ -139,8 +139,10 @@ def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, 
 
         random_iterations = 1
         if contains_set(combination) and balance_sets:
-            random_iterations = 19
+            random_iterations = 7
 
+        target_seq = get_target_seq(
+                combination, target_size, pad_symbol)
         random.seed(42)
         for i in range(random_iterations):
             random.seed(42 + i)
@@ -152,8 +154,7 @@ def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, 
             flattened_array = flatten_tuple(tuple_array)
             flattened_array.append(">")
 
-            flattened_array.extend(get_target_seq(
-                combination, target_size, pad_symbol))
+            flattened_array.extend(target_seq)
             
             yield flattened_array
 

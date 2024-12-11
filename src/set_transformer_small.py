@@ -389,9 +389,16 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    with open(f'{PATH_PREFIX}/small_combo.pkl', 'rb') as f:
-        data = pickle.load(f)
-        breakpoint()
+    dataset = initialize_datasets(
+        GPTConfig44_BalancedSets(),
+        save_dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth',
+        save_tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+        randomize_sequence_order=True
+    )
+
+    # with open(f'{PATH_PREFIX}/small_combo.pkl', 'rb') as f:
+    #     data = pickle.load(f)
+    #     breakpoint()
 
     # dataset = initialize_datasets(
     #     GPTConfig44_BalancedSets(),
