@@ -8,6 +8,9 @@ import torch
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 import time
+import pickle
+
+PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 card_vectors = ["A", "B", "C", "D", "E"]
 
@@ -213,11 +216,15 @@ def initialize_datasets(config, save_dataset_path=None, save_tokenizer_path=None
 
     start_time = time.time()
     small_combinations = list(optimized_combinations)
+    
+    with open(f'{PATH_PREFIX}/small_combo.pkl', 'wb') as f:
+        pickle.dump(small_combinations, f)
+
     end_time = time.time()
 
     print("Time taken to construct small_combinations: ", end_time - start_time, "seconds")
     print("Len small_combinations: ", len(small_combinations))
-    breakpoint()
+    # breakpoint()
 
     # Create tokenizer and tokenize all sequences
     tokenizer = Tokenizer()
