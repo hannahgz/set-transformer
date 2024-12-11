@@ -113,7 +113,47 @@ def generate_cont_combinations(block_size, pad_symbol, n_cards=3):
         yield flattened_array
 
 
-def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, attr_first=False, balance_sets=False):
+# def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, attr_first=False, balance_sets=False):
+
+#     cards = get_cards()
+
+#     for combination in itertools.combinations(cards, n_cards):
+#         # Create the initial array of 20 tuples
+
+#         if not attr_first:
+#             tuple_array = [
+#                 (card_vectors[i], attr)
+#                 for i, card in enumerate(combination)
+#                 for attr in get_card_attributes(*card)
+#             ]
+#         else:
+#             tuple_array = [
+#                 (attr, card_vectors[i])
+#                 for i, card in enumerate(combination)
+#                 for attr in get_card_attributes(*card)
+#             ]
+
+#         random_iterations = 1
+#         if contains_set(combination) and balance_sets:
+#             random_iterations = 19
+
+#         random.seed(42)
+#         for i in range(random_iterations):
+#             random.seed(42 + i)
+#             # Randomize the array
+#             if random_order:
+#                 random.shuffle(tuple_array)
+
+#             # Flatten the array to 40 elements using the new flatten_tuple function
+#             flattened_array = flatten_tuple(tuple_array)
+#             flattened_array.append(">")
+
+#             flattened_array.extend(get_target_seq(
+#                 combination, target_size, pad_symbol))
+            
+#             yield flattened_array
+
+def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, attr_first=False):
 
     cards = get_cards()
 
@@ -133,26 +173,17 @@ def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, 
                 for attr in get_card_attributes(*card)
             ]
 
-        random_iterations = 1
-        if contains_set(combination) and balance_sets:
-            random_iterations = 19
+        # Randomize the array
+        if random_order:
+            random.shuffle(tuple_array)
 
-        random.seed(42)
-        for i in range(random_iterations):
-            random.seed(42 + i)
-            # Randomize the array
-            if random_order:
-                random.shuffle(tuple_array)
+        # Flatten the array to 40 elements using the new flatten_tuple function
+        flattened_array = flatten_tuple(tuple_array)
+        flattened_array.append(">")
 
-            # Flatten the array to 40 elements using the new flatten_tuple function
-            flattened_array = flatten_tuple(tuple_array)
-            flattened_array.append(">")
-
-            flattened_array.extend(get_target_seq(
-                combination, target_size, pad_symbol))
-            
-            yield flattened_array
-
+        flattened_array.extend(get_target_seq(
+            combination, target_size, pad_symbol))
+        yield flattened_array
 
 def separate_sets_non_sets(tokenized_combinations, no_set_token, expected_pos, randomize=False):
     set_sequences = []
