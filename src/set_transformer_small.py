@@ -403,20 +403,20 @@ if __name__ == "__main__":
 
     config = GPTConfig44_BalancedSets()
     dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth'
-    # dataset = torch.load(dataset_path)
-    # train_loader, val_loader = initialize_loaders(config, dataset)
-    # device = "cuda" if torch.cuda.is_available() else "cpu"
-    # model = GPT(config).to(device)
-    # checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
-    # model.load_state_dict(checkpoint["model"])
+    dataset = torch.load(dataset_path)
+    train_loader, val_loader = initialize_loaders(config, dataset)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = GPT(config).to(device)
+    checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
+    model.load_state_dict(checkpoint["model"])
 
-    # val_accuracy = calculate_accuracy(model, val_loader, config)
-    # print("Val accuracy: ", val_accuracy)
+    val_accuracy = calculate_accuracy(model, val_loader, config)
+    print("Val accuracy: ", val_accuracy)
 
-    run(
-        config,
-        dataset_path=dataset_path
-    )
+    # run(
+    #     config,
+    #     dataset_path=dataset_path
+    # )
 
     # with open(f'{PATH_PREFIX}/small_combo.pkl', 'rb') as f:
     #     data = pickle.load(f)
