@@ -233,8 +233,8 @@ def generate_lineplot(
 
         # print("labels: ", labels)
 
-        dir_path = f"figs/triples_attention_pattern_layers_{config.n_layer}_heads_{config.n_head}"
-        filename = f"lineplot_sets_{number_set}_index_{dataset_index}_threshold_{threshold}.png"
+        dir_path = f"figs/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}"
+        filename = f"larger_lineplot_sets_{number_set}_index_{dataset_index}_threshold_{threshold}.png"
         plot_attention_pattern_lines(
             attention_weights,
             labels,
