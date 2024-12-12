@@ -188,8 +188,11 @@ def generate_lineplot(
     print("Loaded dataset")
 
     # Restore the model state dict
+    # checkpoint = torch.load(os.path.join(
+    #     config.out_dir, config.filename), weights_only=False)
+    # Restore the model state dict
     checkpoint = torch.load(os.path.join(
-        config.out_dir, config.filename), weights_only=False)
+        PATH_PREFIX, config.filename), weights_only=False)
 
     model.load_state_dict(checkpoint["model"])
     print("Loaded model")
