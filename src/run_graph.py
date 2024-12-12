@@ -8,7 +8,7 @@ if __name__ == "__main__":
 
     generate_lineplot(
         GPTConfig44_BalancedSets,
-        [0, 1, 2, 3, 4, 5],
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth',
         tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
         use_labels=True,

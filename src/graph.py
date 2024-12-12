@@ -215,6 +215,12 @@ def generate_lineplot(
 
             predictions = outputs[:, config.input_size:]
 
+            mask = targets != config.padding_token  # Create a mask to ignore padding
+            matches = ((predictions == targets) | ~mask).all(dim=1)
+
+            print("matches: ", matches)
+            print("correct: ", matches.sum().item())
+
             print("full output: ", tokenizer.decode(outputs[0].tolist()))
             print("predictions: ", tokenizer.decode(predictions[0].tolist()))
             print("target: ", tokenizer.decode(targets[0].tolist()))
