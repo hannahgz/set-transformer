@@ -405,16 +405,18 @@ def plot_attention_pattern_lines_comparison(
             ax.set_xticks([0, 1])
             ax.set_xticklabels(["Query", "Key"], fontsize=12, ha='center')
             ax.set_yticks(range(len(labels1)))
+            ax.set_yticklabels([])
+            ax.tick_params(axis='y', right=True, left=True)
             
             for index in range(len(labels1)):
                 label1 = labels1[index]
                 label2 = labels2[index]
 
-                ax.text(-0.3, i, f"{label1}", fontsize=10, va='center_baseline', ha='right', transform=ax.transData)
-                ax.text(-0.2, i, f"{label2}", fontsize=10, va='center_baseline', ha='right', transform=ax.transData)
+                ax.text(-0.3, index, f"{label1}", fontsize=10, va='center_baseline', ha='right', transform=ax.transData)
+                ax.text(-0.2, index, f"{label2}", fontsize=10, va='center_baseline', ha='right', transform=ax.transData)
 
-                ax.text(1.2, i, f"{label1}", fontsize=10, va='center_baseline', ha='left', transform=ax.transData)
-                ax.text(1.3, i, f"{label2}", fontsize=10, va='center_baseline', ha='left', transform=ax.transData)
+                ax.text(1.2, index, f"{label1}", fontsize=10, va='center_baseline', ha='left', transform=ax.transData)
+                ax.text(1.3, index, f"{label2}", fontsize=10, va='center_baseline', ha='left', transform=ax.transData)
 
             # ax.yaxis.set_tick_params(pad=-10)  # Adjust padding for both sides
 

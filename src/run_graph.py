@@ -28,8 +28,8 @@ if __name__ == "__main__":
     ]
 
     input2 = [
-        "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
-        ">", "A", "B", "C", ".", "_", "_", "_", "_"
+        "E", "striped", "B", "pink", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+        ">", "*", ".", "_", "_", "_", "_", "_", "_"
     ]
 
     lineplot_difference_inputs(
