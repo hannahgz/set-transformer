@@ -1,4 +1,4 @@
-from graph import lineplot_specific, generate_lineplot
+from graph import lineplot_specific, generate_lineplot, lineplot_difference_inputs
 from model import GPTConfig44_BalancedSets
 from data_utils import pretty_print_input
 
@@ -6,6 +6,30 @@ PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 if __name__ == "__main__":
 
+    input1 = [
+        "A", "diamond",      "B", "diamond",      "C", "diamond",   "D", "oval",    "E", "oval",
+        "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open",
+        "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
+        "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink",
+        ">", "A", "B", "C", ".", "_", "_", "_", "_"
+    ]
+
+    input2 = [
+        "A", "diamond",      "B", "diamond",      "C", "diamond",   "D", "oval",    "E", "oval",
+        "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open",
+        "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
+        "A", "green",        "B", "green",        "C", "pink",     "D", "green",   "E", "pink",
+        ">", "*", ".", "_", "_", "_", "_", "_", "_"
+    ]
+
+    lineplot_difference_inputs(
+        GPTConfig44_BalancedSets,
+        input1,
+        input2,
+        get_prediction=True,
+        filename_prefix="input1_input2"
+    )
+    
     # generate_lineplot(
     #     GPTConfig44_BalancedSets,
     #     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -15,58 +39,59 @@ if __name__ == "__main__":
     #     threshold=0.05,
     #     get_prediction=True)
 
+    # # PREVIOUS CODE BEFORE 1/6/2025
 
-    test_input = [
-        "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
-        ">", "A", "B", "C", ".", "_", "_", "_", "_"
-    ]
+    # test_input = [
+    #     "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+    #     ">", "A", "B", "C", ".", "_", "_", "_", "_"
+    # ]
 
-    lineplot_specific(
-        config=GPTConfig44_BalancedSets,
-        input=test_input,
-        tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
-        get_prediction=True,
-        filename_prefix="input0"
-    )
+    # lineplot_specific(
+    #     config=GPTConfig44_BalancedSets,
+    #     input=test_input,
+    #     tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+    #     get_prediction=True,
+    #     filename_prefix="input0"
+    # )
 
-    test_input = [
-        "E", "striped", "B", "green", "D", "two", "B", "squiggle", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
-        ">", "*", ".", "_", "_", "_", "_", "_", "_"
-    ]
+    # test_input = [
+    #     "E", "striped", "B", "green", "D", "two", "B", "squiggle", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+    #     ">", "*", ".", "_", "_", "_", "_", "_", "_"
+    # ]
 
-    lineplot_specific(
-        config=GPTConfig44_BalancedSets,
-        input=test_input,
-        tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
-        get_prediction=True,
-        filename_prefix="input0_modified_shape"
-    )
+    # lineplot_specific(
+    #     config=GPTConfig44_BalancedSets,
+    #     input=test_input,
+    #     tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+    #     get_prediction=True,
+    #     filename_prefix="input0_modified_shape"
+    # )
 
-    test_input = [
-        "E", "striped", "B", "pink", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
-        ">", "*", ".", "_", "_", "_", "_", "_", "_"
-    ]
+    # test_input = [
+    #     "E", "striped", "B", "pink", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+    #     ">", "*", ".", "_", "_", "_", "_", "_", "_"
+    # ]
 
-    lineplot_specific(
-        config=GPTConfig44_BalancedSets,
-        input=test_input,
-        tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
-        get_prediction=True,
-        filename_prefix="input0_modified_color"
-    )
+    # lineplot_specific(
+    #     config=GPTConfig44_BalancedSets,
+    #     input=test_input,
+    #     tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+    #     get_prediction=True,
+    #     filename_prefix="input0_modified_color"
+    # )
 
-    test_input = [
-        "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "three", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
-        ">", "A", "B", "C", "/", "C", "D", "E", "."
-    ]
+    # test_input = [
+    #     "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "three", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+    #     ">", "A", "B", "C", "/", "C", "D", "E", "."
+    # ]
 
-    lineplot_specific(
-        config=GPTConfig44_BalancedSets,
-        input=test_input,
-        tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
-        get_prediction=True,
-        filename_prefix="input0_number"
-    )
+    # lineplot_specific(
+    #     config=GPTConfig44_BalancedSets,
+    #     input=test_input,
+    #     tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+    #     get_prediction=True,
+    #     filename_prefix="input0_number"
+    # )
 
 
 
