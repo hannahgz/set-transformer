@@ -6,20 +6,30 @@ PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 if __name__ == "__main__":
 
+    # input1 = [
+    #     "A", "diamond",      "B", "diamond",      "C", "diamond",   "D", "oval",    "E", "oval",
+    #     "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open",
+    #     "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
+    #     "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink",
+    #     ">", "A", "B", "C", ".", "_", "_", "_", "_"
+    # ]
+
+    # input2 = [
+    #     "A", "diamond",      "B", "diamond",      "C", "diamond",   "D", "oval",    "E", "oval",
+    #     "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open",
+    #     "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
+    #     "A", "green",        "B", "green",        "C", "pink",     "D", "green",   "E", "pink",
+    #     ">", "*", ".", "_", "_", "_", "_", "_", "_"
+    # ]
+
     input1 = [
-        "A", "diamond",      "B", "diamond",      "C", "diamond",   "D", "oval",    "E", "oval",
-        "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open",
-        "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
-        "A", "green",        "B", "green",        "C", "green",     "D", "green",   "E", "pink",
+        "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
         ">", "A", "B", "C", ".", "_", "_", "_", "_"
     ]
 
     input2 = [
-        "A", "diamond",      "B", "diamond",      "C", "diamond",   "D", "oval",    "E", "oval",
-        "A", "striped",      "B", "striped",      "C", "striped",   "D", "open",    "E", "open",
-        "A", "one",          "B", "one",          "C", "one",       "D", "three",   "E", "three",
-        "A", "green",        "B", "green",        "C", "pink",     "D", "green",   "E", "pink",
-        ">", "*", ".", "_", "_", "_", "_", "_", "_"
+        "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+        ">", "A", "B", "C", ".", "_", "_", "_", "_"
     ]
 
     lineplot_difference_inputs(
@@ -28,7 +38,7 @@ if __name__ == "__main__":
         input2,
         tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
         get_prediction=True,
-        filename_prefix="input1_input2"
+        filename_prefix="input1_input2_allsame_"
     )
 
     # generate_lineplot(

@@ -387,7 +387,7 @@ def plot_attention_pattern_lines_comparison(
 
             attention_weights_diff = attention_weights1[layer][0][head] - attention_weights2[layer][0][head]
 
-            breakpoint()
+            # breakpoint()
             # Extract attention weights for the current head
             att_weights_np = attention_weights_diff.detach().cpu().numpy()
 
