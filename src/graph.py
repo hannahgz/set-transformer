@@ -172,79 +172,6 @@ def plot_attention_pattern_lines(attention_weights, labels, n_layers, n_heads, t
     plt.show()
     plt.close(fig)
 
-def plot_attention_pattern_lines_comparison(
-        attention_weights1,
-        attention_weights2,
-        labels1,
-        labels2,
-        n_layers=4, 
-        n_heads=4, 
-        title_prefix="Attention Line Pattern Differences", 
-        savefig=None, 
-        threshold=None
-    ):
-    fig, axes = plt.subplots(
-        n_layers, n_heads, figsize=(n_heads * 4, n_layers * 8))
-
-    attention_weights_diff = attention_weights1 - attention_weights2
-    for layer in range(n_layers):
-        for head in range(n_heads):
-            ax = axes[layer, head]
-
-            # Extract attention weights for the current head
-            att_weights_np = attention_weights_diff[layer][0][head].detach(
-            ).cpu().numpy()
-
-            # Plot the attention lines
-            for i in range(len(labels1)):
-                for j in range(len(labels1)):
-                    weight = att_weights_np[i, j]
-                    if threshold:
-                        if weight < threshold:
-                            continue
-                    # Define line opacity based on attention weight
-                    ax.plot([0, 1], [i, j], color='blue', alpha=weight)
-            
-            # Set labels for the columns
-            ax.set_xticks([0, 1])
-            ax.set_xticklabels(["Query", "Key"], fontsize=12, ha='center')
-            ax.set_yticks(range(len(labels1)))
-            
-            for index in range(len(labels1)):
-                label1 = labels1[index]
-                label2 = labels2[index]
-
-                ax.text(-0.3, i, f"{label1}", fontsize=10, va='center_baseline', ha='right', transform=ax.transData)
-                ax.text(-0.2, i, f"{label2}", fontsize=10, va='center_baseline', ha='right', transform=ax.transData)
-
-                ax.text(1.2, i, f"{label1}", fontsize=10, va='center_baseline', ha='left', transform=ax.transData)
-                ax.text(1.3, i, f"{label2}", fontsize=10, va='center_baseline', ha='left', transform=ax.transData)
-
-            # ax.yaxis.set_tick_params(pad=-10)  # Adjust padding for both sides
-
-            ax.invert_yaxis()  # Keep labels top-to-bottom
-            ax.set_title(f"Layer {layer} Head {head}", fontsize=14)
-
-    # Adjust layout and main title
-    if threshold:
-        fig.suptitle(
-            f"{title_prefix}: {n_layers} Layers, {n_heads} Heads, weights ≥ {threshold} Threshold", fontsize=12)
-    else:
-        fig.suptitle(
-            f"{title_prefix}: {n_layers} Layers, {n_heads} Heads", fontsize=12)
-        
-    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-
-    formatted_labels = pretty_print_input(labels1)
-    plt.figtext(0.15, 0.95, formatted_labels, ha="center", fontsize=10, family="monospace")
-
-    # Save or display the figure
-    if savefig is not None:
-        plt.savefig(savefig)
-
-    plt.show()
-    plt.close(fig)
-
 
 def generate_lineplot(
         config,
@@ -439,6 +366,82 @@ def lineplot_specific(
         threshold=threshold)
     
 
+def plot_attention_pattern_lines_comparison(
+        attention_weights1,
+        attention_weights2,
+        labels1,
+        labels2,
+        n_layers=4, 
+        n_heads=4, 
+        title_prefix="Attention Line Pattern Differences", 
+        savefig=None, 
+        threshold=None
+    ):
+    fig, axes = plt.subplots(
+        n_layers, n_heads, figsize=(n_heads * 4, n_layers * 8))
+
+    
+    for layer in range(n_layers):
+        for head in range(n_heads):
+            ax = axes[layer, head]
+
+            attention_weights_diff = attention_weights1[layer][0][head] - attention_weights2[layer][0][head]
+
+            breakpoint()
+            # Extract attention weights for the current head
+            att_weights_np = attention_weights_diff.detach().cpu().numpy()
+
+            # Plot the attention lines
+            for i in range(len(labels1)):
+                for j in range(len(labels1)):
+                    weight = att_weights_np[i, j]
+                    if threshold:
+                        if weight < threshold:
+                            continue
+                    # Define line opacity based on attention weight
+                    ax.plot([0, 1], [i, j], color='blue', alpha=weight)
+            
+            # Set labels for the columns
+            ax.set_xticks([0, 1])
+            ax.set_xticklabels(["Query", "Key"], fontsize=12, ha='center')
+            ax.set_yticks(range(len(labels1)))
+            
+            for index in range(len(labels1)):
+                label1 = labels1[index]
+                label2 = labels2[index]
+
+                ax.text(-0.3, i, f"{label1}", fontsize=10, va='center_baseline', ha='right', transform=ax.transData)
+                ax.text(-0.2, i, f"{label2}", fontsize=10, va='center_baseline', ha='right', transform=ax.transData)
+
+                ax.text(1.2, i, f"{label1}", fontsize=10, va='center_baseline', ha='left', transform=ax.transData)
+                ax.text(1.3, i, f"{label2}", fontsize=10, va='center_baseline', ha='left', transform=ax.transData)
+
+            # ax.yaxis.set_tick_params(pad=-10)  # Adjust padding for both sides
+
+            ax.invert_yaxis()  # Keep labels top-to-bottom
+            ax.set_title(f"Layer {layer} Head {head}", fontsize=14)
+
+    # Adjust layout and main title
+    if threshold:
+        fig.suptitle(
+            f"{title_prefix}: {n_layers} Layers, {n_heads} Heads, weights ≥ {threshold} Threshold", fontsize=12)
+    else:
+        fig.suptitle(
+            f"{title_prefix}: {n_layers} Layers, {n_heads} Heads", fontsize=12)
+        
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+
+    formatted_labels = pretty_print_input(labels1)
+    plt.figtext(0.15, 0.95, formatted_labels, ha="center", fontsize=10, family="monospace")
+
+    # Save or display the figure
+    if savefig is not None:
+        plt.savefig(savefig)
+
+    plt.show()
+    plt.close(fig)
+
+
 def lineplot_difference_inputs(
         config,
         input1,
@@ -447,18 +450,20 @@ def lineplot_difference_inputs(
         threshold=0.1,
         get_prediction=False,
         filename_prefix=""):
+    print("Generating lineplot for difference in attention weights")
     
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
-    print("Loaded dataset")
 
     # Restore the model state dict
     checkpoint = torch.load(os.path.join(
         PATH_PREFIX, config.filename), weights_only=False)
 
     model.load_state_dict(checkpoint["model"])
+    print("Loaded model")
 
     tokenizer = load_tokenizer(tokenizer_path)
+    print("Loaded tokenizer")
 
     attention_weights1 = make_prediction_given_input(
         config=config,
@@ -466,6 +471,7 @@ def lineplot_difference_inputs(
         tokenizer=tokenizer,
         model=model,
         get_prediction=get_prediction)
+    print("Got attention weights for input 1")
     
     attention_weights2 = make_prediction_given_input(
         config=config,
@@ -473,6 +479,7 @@ def lineplot_difference_inputs(
         tokenizer=tokenizer,
         model=model,
         get_prediction=get_prediction)
+    print("Got attention weights for input 2")
 
 
     dir_path = f"figs/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}/differences"
@@ -480,6 +487,7 @@ def lineplot_difference_inputs(
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
+    print("Plotting attention weights")
     plot_attention_pattern_lines_comparison(
         attention_weights1,
         attention_weights2,
