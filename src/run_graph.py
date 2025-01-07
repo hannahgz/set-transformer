@@ -38,7 +38,7 @@ if __name__ == "__main__":
         input2,
         tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
         get_prediction=True,
-        filename_prefix="input1_input2_allsame_"
+        filename_prefix="input1_input2_allsame"
     )
 
     # generate_lineplot(

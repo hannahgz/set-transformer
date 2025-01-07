@@ -48,7 +48,7 @@ def wandb_log(config, avg_train_loss, avg_val_loss, epoch=None):
 # Update accuracy calculation
 # TODO: add alternate measure for computing accuracy (set prediction, but wrong order of cards)
 @torch.no_grad()
-def calculate_accuracy(model, dataloader, config, save_incorrect_path=None):
+def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_incorrect_path=None):
     print("Calculating accuracy")
     model.eval()
     correct = 0
@@ -66,19 +66,10 @@ def calculate_accuracy(model, dataloader, config, save_incorrect_path=None):
         mask = targets != config.padding_token  # Create a mask to ignore padding
         matches = ((predictions == targets) | ~mask).all(dim=1)
 
-        # if print_incorrect:
-        #     # Print incorrect predictions and corresponding targets
-        #     for i in range(len(matches)):
-        #         if not matches[i].item():
-        #             print(f"Incorrect Prediction, sequence {index}, batch {i}:")
-        #             print(f"  Inputs: {inputs[i].cpu().numpy()}")
-        #             print(f"  Target: {targets[i].cpu().numpy()}")
-        #             print(f"  Prediction: {predictions[i].cpu().numpy()}")
         if save_incorrect_path:
             with open(save_incorrect_path, "a") as f:
                 # Print incorrect predictions and corresponding targets to file
-                tokenizer = load_tokenizer(
-                    '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp/balanced_set_dataset_random_tokenizer.pkl')
+                tokenizer = load_tokenizer(tokenizer_path)
                 for i in range(len(matches)):
                     if not matches[i].item():
                         f.write(
@@ -92,6 +83,7 @@ def calculate_accuracy(model, dataloader, config, save_incorrect_path=None):
 
         correct += matches.sum().item()
         total += mask.any(dim=1).sum().item()
+        print("Accuracy: ", correct / total)
 
     return correct / total
 
@@ -406,12 +398,13 @@ if __name__ == "__main__":
     dataset = torch.load(dataset_path)
     train_loader, val_loader = initialize_loaders(config, dataset)
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    # model = GPT(config).to(device)
-    # checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
-    # model.load_state_dict(checkpoint["model"])
 
-    # val_accuracy = calculate_accuracy(model, val_loader, config)
-    # print("Val accuracy: ", val_accuracy)
+    model = GPT(config).to(device)
+    checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
+    model.load_state_dict(checkpoint["model"])
+
+    val_accuracy = calculate_accuracy(model, val_loader, config, tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl', save_incorrect_path="larger_incorrect_predictions.txt")
+    print("Val accuracy: ", val_accuracy)
 
     # run(
     #     config,
