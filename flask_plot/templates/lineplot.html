@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attention Line Pattern Differences</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Attention Line Pattern Differences</h1>
+    <div id="lineplot"></div>
+    <script>
+        var plotData = JSON.parse('{{ plot_json | safe }}');
+        Plotly.newPlot('lineplot', plotData.data, plotData.layout);
+    </script>
+</body>
+</html>
