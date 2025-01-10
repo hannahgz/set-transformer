@@ -59,52 +59,111 @@
 <body>
     <div class="container">
         <h2>Card Attribute Selector</h2>
-        <div class="card-container">
+
+        <!-- Section for the First Set of Cards -->
+        <div class="card-container" id="group1">
+            <!-- <h3>Set 1</h3> -->
             {% for i in range(5) %}
             <div class="card">
                 <h3>Card {{i + 1}} ({{chr(65 + i)}})</h3>
-                <select class="attribute-select" id="shape{{i}}">
+                <select class="attribute-select" id="group1-shape{{i}}">
                     <option value="">Select Shape</option>
                     {% for shape in shapes %}
-                    <option value="{{shape}}">{{shape|title}}</option>
+                    <option value="{{shape}}" {% if loop.first %}selected{% endif %}>{{shape|title}}</option>
                     {% endfor %}
                 </select>
-                
-                <select class="attribute-select" id="color{{i}}">
+
+                <select class="attribute-select" id="group1-color{{i}}">
                     <option value="">Select Color</option>
                     {% for color in colors %}
-                    <option value="{{color}}">{{color|title}}</option>
+                    <option value="{{color}}" {% if loop.first %}selected{% endif %}>{{color|title}}</option>
                     {% endfor %}
                 </select>
-                
-                <select class="attribute-select" id="number{{i}}">
+
+                <select class="attribute-select" id="group1-number{{i}}">
                     <option value="">Select Number</option>
                     {% for number in numbers %}
-                    <option value="{{number}}">{{number|title}}</option>
+                    <option value="{{number}}" {% if loop.first %}selected{% endif %}>{{number|title}}</option>
                     {% endfor %}
                 </select>
-                
-                <select class="attribute-select" id="shading{{i}}">
+
+                <select class="attribute-select" id="group1-shading{{i}}">
                     <option value="">Select Shading</option>
                     {% for shading in shadings %}
-                    <option value="{{shading}}">{{shading|title}}</option>
+                    <option value="{{shading}}" {% if loop.first %}selected{% endif %}>{{shading|title}}</option>
                     {% endfor %}
                 </select>
             </div>
             {% endfor %}
         </div>
+
+        <!-- Section for the Second Set of Cards -->
+        <div class="card-container" id="group2">
+            <!-- <h3>Set 1</h3> -->
+            {% for i in range(5) %}
+            <div class="card">
+                <h3>Card {{i + 1}} ({{chr(65 + i)}})</h3>
+                <select class="attribute-select" id="group2-shape{{i}}">
+                    <option value="">Select Shape</option>
+                    {% for shape in shapes %}
+                    <option value="{{shape}}" {% if loop.first %}selected{% endif %}>{{shape|title}}</option>
+                    {% endfor %}
+                </select>
+
+                <select class="attribute-select" id="group2-color{{i}}">
+                    <option value="">Select Color</option>
+                    {% for color in colors %}
+                    <option value="{{color}}" {% if loop.first %}selected{% endif %}>{{color|title}}</option>
+                    {% endfor %}
+                </select>
+
+                <select class="attribute-select" id="group2-number{{i}}">
+                    <option value="">Select Number</option>
+                    {% for number in numbers %}
+                    <option value="{{number}}" {% if loop.first %}selected{% endif %}>{{number|title}}</option>
+                    {% endfor %}
+                </select>
+
+                <select class="attribute-select" id="group2-shading{{i}}">
+                    <option value="">Select Shading</option>
+                    {% for shading in shadings %}
+                    <option value="{{shading}}" {% if loop.first %}selected{% endif %}>{{shading|title}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endfor %}
+        </div>
+
         
         <button class="save-button" onclick="saveCards()">Save Cards</button>
+        <button class="duplicate-button" onclick="duplicateGroup1To2()">Duplicate Group 1 to 2</button>
 
         <div class="mappings-container">
             <h3>Saved Card Mappings</h3>
-            <div id="mappings-list">
-                {% for mapping in saved_mappings %}
-                <div class="mapping-item">
-                    <strong>Card {{mapping.letter}}:</strong> 
-                    {{mapping.attributes.shape}} {{mapping.attributes.color}} {{mapping.attributes.number}} {{mapping.attributes.shading}}
+            <!-- Section for Set 1 -->
+            <div class="set-mappings" id="group1-mappings">
+                <h4>Set 1</h4>
+                <div id="group1-list">
+                    {% for mapping in saved_mappings.group1 %}
+                    <div class="mapping-item">
+                        <strong>Card {{mapping.letter}}:</strong> 
+                        {{mapping.attributes.shape}} {{mapping.attributes.color}} {{mapping.attributes.number}} {{mapping.attributes.shading}}
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
+            </div>
+
+            <!-- Section for Set 2 -->
+            <div class="set-mappings" id="group2-mappings">
+                <h4>Set 2</h4>
+                <div id="group2-list">
+                    {% for mapping in saved_mappings.group2 %}
+                    <div class="mapping-item">
+                        <strong>Card {{mapping.letter}}:</strong> 
+                        {{mapping.attributes.shape}} {{mapping.attributes.color}} {{mapping.attributes.number}} {{mapping.attributes.shading}}
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
 
@@ -120,36 +179,142 @@
         Plotly.newPlot('plotly-div', graphs.data, graphs.layout);
 
         function saveCards() {
-            let cards = [];
-            
+            let group1Cards = [];
+            let group2Cards = [];
+
+            // Process Set 1
             for (let i = 0; i < 5; i++) {
-                const card = {
-                    shape: document.getElementById(`shape${i}`).value,
-                    color: document.getElementById(`color${i}`).value,
-                    number: document.getElementById(`number${i}`).value,
-                    shading: document.getElementById(`shading${i}`).value
+                const cardGroup1 = {
+                    shape: document.getElementById(`group1-shape${i}`).value,
+                    color: document.getElementById(`group1-color${i}`).value,
+                    number: document.getElementById(`group1-number${i}`).value,
+                    shading: document.getElementById(`group1-shading${i}`).value
                 };
-                cards.push(card);
+                group1Cards.push(cardGroup1);
             }
 
+            // Process Set 2
+            for (let i = 0; i < 5; i++) {
+                const cardGroup2 = {
+                    shape: document.getElementById(`group2-shape${i}`).value,
+                    color: document.getElementById(`group2-color${i}`).value,
+                    number: document.getElementById(`group2-number${i}`).value,
+                    shading: document.getElementById(`group2-shading${i}`).value
+                };
+                group2Cards.push(cardGroup2);
+            }
+
+            // Combine into an object to send to the server
+            const cardData = {
+                group1: group1Cards,
+                group2: group2Cards
+            };
+
+            // Send the data to the server
             fetch('/save_cards', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(cards)
+                body: JSON.stringify(cardData)
             })
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
+                console.log("Input1: ", data.input1);
+                console.log("Input2: ", data.input2);
                 // Refresh the page to show updated mappings
-                location.reload();
+                // location.reload();
+                // console.log('Server Response:', data);
+                updateSavedMappings(data.cards);
             })
             .catch((error) => {
                 console.error('Error:', error);
                 alert('Error saving cards!');
             });
         }
+
+        function duplicateGroup1To2() {
+            for (let i = 0; i < 5; i++) {
+                // Get selected values from Set 1
+                const shape = document.getElementById(`group1-shape${i}`).value;
+                const color = document.getElementById(`group1-color${i}`).value;
+                const number = document.getElementById(`group1-number${i}`).value;
+                const shading = document.getElementById(`group1-shading${i}`).value;
+
+                // Set those values in Set 2
+                document.getElementById(`group2-shape${i}`).value = shape;
+                document.getElementById(`group2-color${i}`).value = color;
+                document.getElementById(`group2-number${i}`).value = number;
+                document.getElementById(`group2-shading${i}`).value = shading;
+            }
+            // alert('Set 1 values have been duplicated to Set 2!');
+        }
+
+        function updateSavedMappings(savedMappings) {
+            // Clear the existing mappings
+            const group1List = document.getElementById('group1-list');
+            const group2List = document.getElementById('group2-list');
+
+            group1List.innerHTML = '';
+            group2List.innerHTML = '';
+
+            // Update Set 1 mappings
+            savedMappings.group1.forEach((mapping) => {
+                const mappingItem = document.createElement('div');
+                mappingItem.className = 'mapping-item';
+                mappingItem.innerHTML = `
+                    <strong>Card ${mapping.letter}:</strong>
+                    ${mapping.attributes.shape} ${mapping.attributes.color} ${mapping.attributes.number} ${mapping.attributes.shading}
+                `;
+                group1List.appendChild(mappingItem);
+            });
+
+            // Update Set 2 mappings
+            savedMappings.group2.forEach((mapping) => {
+                const mappingItem = document.createElement('div');
+                mappingItem.className = 'mapping-item';
+                mappingItem.innerHTML = `
+                    <strong>Card ${mapping.letter}:</strong>
+                    ${mapping.attributes.shape} ${mapping.attributes.color} ${mapping.attributes.number} ${mapping.attributes.shading}
+                `;
+                group2List.appendChild(mappingItem);
+            });
+        }
+
+        // function updateSavedMappings(savedMappings) {
+        //     // Clear the existing mappings
+        //     const group1List = document.getElementById('group1-list');
+        //     const group2List = document.getElementById('group2-list');
+
+        //     group1List.innerHTML = '';
+        //     group2List.innerHTML = '';
+
+        //     // Update Set 1 mappings
+        //     savedMappings.group1.forEach((mapping, index) => {
+        //         const mappingItem = document.createElement('div');
+        //         mappingItem.className = 'mapping-item';
+        //         mappingItem.innerHTML = `
+        //             <strong>Card ${index + 1}:</strong>
+        //             ${mapping.shape} ${mapping.color} ${mapping.number} ${mapping.shading}
+        //         `;
+        //         group1List.appendChild(mappingItem);
+        //     });
+
+        //     // Update Set 2 mappings
+        //     savedMappings.group2.forEach((mapping, index) => {
+        //         const mappingItem = document.createElement('div');
+        //         mappingItem.className = 'mapping-item';
+        //         mappingItem.innerHTML = `
+        //             <strong>Card ${index + 1}:</strong>
+        //             ${mapping.shape} ${mapping.color} ${mapping.number} ${mapping.shading}
+        //         `;
+        //         group2List.appendChild(mappingItem);
+        //     });
+
+        //     // alert('Card mappings have been updated!');
+        // }
+
     </script>
 </body>
 </html>
