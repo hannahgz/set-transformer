@@ -187,55 +187,16 @@ def create_attention_weight_fig(attention_weights, labels1, n_layers=4, n_heads=
                         mode='lines',
                         line=dict(
                             color='blue',
-                            width=max(1, conn['weight'] * 3)
+                            width=max(1.0, conn['weight'] * 5)
                         ),
-                        opacity=min(1.0, conn['weight'] * 2),
+                        opacity=conn['weight'],
                         showlegend=False,
                         hovertemplate=f"Weight: {conn['weight']:.3f}<br>From: {labels1[conn['from_idx']]}<br>To: {labels1[conn['to_idx']]}"
                     ),
                     row=layer+1, col=head+1,
                     secondary_y=False
                 )
-            
-
-    # for layer in range(n_layers):
-    #     for head in range(n_heads):
-    #         attention_weights_diff = attention_weights[0][layer][head] - attention_weights[1][layer][head]
-            
-    #         # Vectorize the line creation by creating arrays for all lines at once
-    #         n_points = len(labels1)
-            
-    #         # Create coordinate arrays for all lines
-    #         x_all = np.tile(x_coords, (n_points * n_points, 1))
-    #         y_source = np.repeat(np.arange(n_points), n_points)
-    #         y_target = np.tile(np.arange(n_points), n_points)
-            
-    #         # Calculate weights for all lines
-    #         weights = np.abs(attention_weights_diff.flatten())
-            
-    #         # Filter out insignificant connections to reduce visual noise and improve performance
-    #         mask = weights > threshold  # Adjust threshold as needed
-    #         breakpoint()
-    #         if np.any(mask):
-    #             # Create separate traces for each weight value to maintain proper opacity
-    #             for idx in np.where(mask)[0]:
-    #                 weight = weights[idx]
-    #                 x_coords = x_all[idx]
-    #                 y_coords = [y_source[idx], y_target[idx]]
-                    
-    #                 fig.add_trace(
-    #                     go.Scatter(
-    #                         x=x_coords,
-    #                         y=y_coords,
-    #                         mode='lines',
-    #                         line=dict(color='blue', width=1),
-    #                         opacity=weight,  # Each line's opacity matches its exact weight
-    #                         showlegend=False,
-    #                         hoverinfo='x+y'
-    #                     ),
-    #                     row=layer+1, col=head+1,
-    #                     secondary_y=False
-    #                 )
+        
             if len(all_connections) == 0:
                 fig.add_trace(
                     go.Scatter(
@@ -265,18 +226,6 @@ def create_attention_weight_fig(attention_weights, labels1, n_layers=4, n_heads=
                 row=layer+1, col=head+1,
                 secondary_y=True
             )
-            # fig.add_trace(
-            #     go.Scatter(
-            #         x=[None],
-            #         y=[None],
-            #         mode='markers',
-            #         marker=dict(opacity=0),
-            #         showlegend=False,
-            #         hoverinfo='skip'
-            #     ),
-            #     row=layer+1, col=head+1,
-            #     secondary_y=True
-            # )
             
             # Update axes (doing this only once per subplot)
             fig.update_xaxes(
@@ -323,18 +272,6 @@ def create_attention_weight_fig(attention_weights, labels1, n_layers=4, n_heads=
                 showgrid=False,
                 side='right'
             )
-
-            # # Update secondary y-axis
-            # fig.update_yaxes(
-            #     ticktext=labels1,
-            #     tickvals=list(range(len(labels1))),
-            #     secondary_y=True,
-            #     row=layer+1,
-            #     col=head+1,
-            #     showgrid=False,
-            #     side='right'
-            # )
-            
 
     # Optimize layout
     fig.update_layout(
