@@ -34,6 +34,15 @@
             border-radius: 4px;
             cursor: pointer;
         }
+        .duplicate-button {
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
         .save-button:hover {
             background-color: #45a049;
         }
@@ -229,6 +238,7 @@
                 updateSavedMappings(data.cards);
                 const updatedPlot = JSON.parse(data.plot_json);
 
+                console.log('Updated Plot:', updatedPlot);
                 // Re-render the plot with the updated data
                 Plotly.react('plotly-div', updatedPlot.data, updatedPlot.layout);
             })
