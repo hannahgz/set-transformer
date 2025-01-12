@@ -62,10 +62,11 @@ def map_card_to_letter(card_num):
     return chr(65 + card_num)  # 0->A, 1->B, 2->C, etc.
 
 def get_attention_weights():
-    return [np.random.rand(10, 10) for _ in range(2)]
+    # return [[[np.random.rand(10, 10) for _ in range(4)] for _ in range(4)] for _ in range(2)]
+    return np.random.rand(2, 4, 4, 49, 49)
 
 def get_labels():
-    return ['Label' + str(i) for i in range(10)], ['Label' + str(i) for i in range(10, 20)]
+    return ['Label' + str(i) for i in range(49)], ['Label' + str(i) for i in range(49)]
 
 def generate_input(card_groups, group):
     input = []
@@ -133,67 +134,204 @@ def attention_weights_from_sequence(
     
     all_att_weights_np = []
     for layer in range(4):
+        layer_weights = []  # Create a sublist for each layer
         for head in range(4):
-            all_att_weights_np.append(attention_weights[layer][0][head].detach().cpu().numpy())
-    
+            # Append the attention weights for the current head to the layer sublist
+            layer_weights.append(attention_weights[layer][0][head].detach().cpu().numpy())
+        all_att_weights_np.append(layer_weights)  # Append the layer sublist to the main list
+
     return all_att_weights_np
+
+def create_attention_weight_fig(attention_weights, labels1, n_layers=4, n_heads=4, threshold=0.8):
+    fig = make_subplots(rows=n_layers, cols=n_heads, 
+                        subplot_titles=[f"Layer {l+1} Head {h+1}" for l in range(n_layers) for h in range(n_heads)],
+                        specs=[[{"secondary_y": True} for _ in range(n_heads)] for _ in range(n_layers)],
+                        vertical_spacing=0.03)
+    
+    # Pre-calculate x coordinates
+    x_coords = [0, 1]
+    
+    for layer in range(n_layers):
+        for head in range(n_heads):
+            attention_weights_diff = attention_weights[0][layer][head] - attention_weights[1][layer][head]
+            
+            # Vectorize the line creation by creating arrays for all lines at once
+            n_points = len(labels1)
+            
+            # Create coordinate arrays for all lines
+            x_all = np.tile(x_coords, (n_points * n_points, 1))
+            y_source = np.repeat(np.arange(n_points), n_points)
+            y_target = np.tile(np.arange(n_points), n_points)
+            
+            # Calculate weights for all lines
+            weights = np.abs(attention_weights_diff.flatten())
+            
+            # Filter out insignificant connections to reduce visual noise and improve performance
+            mask = weights > threshold  # Adjust threshold as needed
+            
+            if np.any(mask):
+                # Create separate traces for each weight value to maintain proper opacity
+                for idx in np.where(mask)[0]:
+                    weight = weights[idx]
+                    x_coords = x_all[idx]
+                    y_coords = [y_source[idx], y_target[idx]]
+                    
+                    fig.add_trace(
+                        go.Scatter(
+                            x=x_coords,
+                            y=y_coords,
+                            mode='lines',
+                            line=dict(color='blue', width=1),
+                            opacity=weight,  # Each line's opacity matches its exact weight
+                            showlegend=False,
+                            hoverinfo='x+y'
+                        ),
+                        row=layer+1, col=head+1,
+                        secondary_y=False
+                    )
+
+            # Add dummy trace for secondary y-axis to ensure labels are shown
+            fig.add_trace(
+                go.Scatter(
+                    x=[None],
+                    y=[None],
+                    mode='markers',
+                    marker=dict(opacity=0),
+                    showlegend=False,
+                    hoverinfo='skip'
+                ),
+                row=layer+1, col=head+1,
+                secondary_y=True
+            )
+            
+            # Update axes (doing this only once per subplot)
+            fig.update_xaxes(
+                ticktext=["Query", "Key"],
+                tickvals=[0, 1],
+                row=layer+1,
+                col=head+1,
+                showgrid=False  # Disable grid to reduce rendering overhead
+            )
+
+            # Set range for both axes
+            y_min = -0.5  # Add some padding
+            y_max = len(labels1) - 0.5  # Add some padding
+            
+            # Update primary y-axis
+            fig.update_yaxes(
+                ticktext=labels1,
+                tickvals=list(range(len(labels1))),
+                range=[y_min, y_max],
+                secondary_y=False,
+                row=layer+1,
+                col=head+1,
+                showgrid=False,
+                side='left'
+            )
+            
+
+            # Update secondary y-axis with same range
+            fig.update_yaxes(
+                ticktext=labels1,
+                tickvals=list(range(len(labels1))),
+                range=[y_min, y_max],
+                secondary_y=True,
+                row=layer+1,
+                col=head+1,
+                showgrid=False,
+                side='right'
+            )
+
+            # # Update secondary y-axis
+            # fig.update_yaxes(
+            #     ticktext=labels1,
+            #     tickvals=list(range(len(labels1))),
+            #     secondary_y=True,
+            #     row=layer+1,
+            #     col=head+1,
+            #     showgrid=False,
+            #     side='right'
+            # )
+            
+
+    # Optimize layout
+    fig.update_layout(
+        height=n_layers*600,
+        width=n_heads*300,
+        title_text="Attention Line Pattern Differences",
+        showlegend=False,
+    )
+
+    return fig
+
+# def create_attention_weight_fig(attention_weights, labels1, n_layers=4, n_heads=4):
+#     fig = make_subplots(rows=n_layers, cols=n_heads, 
+#                         subplot_titles=[f"Layer {l+1} Head {h+1}" for l in range(n_layers) for h in range(n_heads)],
+#                         specs=[[{"secondary_y": True} for _ in range(n_heads)] for _ in range(n_layers)])
+    
+#     for layer in range(n_layers):
+#         for head in range(n_heads):
+#             # attention_weights_diff = attention_weights[0] - attention_weights[1]
+#             attention_weights_diff = attention_weights[0][layer][head] - attention_weights[1][layer][head]
+            
+#             print(f"Shape of attention_weights_diff: {attention_weights_diff.shape}")
+#             print(f"Shape of attention_weights[0][{layer}][{head}]: {attention_weights[0][layer][head].shape}")
+#             print(f"Shape of attention_weights[1][{layer}][{head}]: {attention_weights[1][layer][head].shape}")
+
+#             for i in range(len(labels1)):
+#                 for j in range(len(labels1)):
+#                     # weight = attention_weights_diff[i, j]
+#                     weight = attention_weights_diff[i][j]
+#                     fig.add_trace(
+#                         go.Scatter(x=[0, 1], y=[i, j], mode='lines', line=dict(color='blue', width=1), 
+#                                    opacity=abs(weight), showlegend=False, hoverinfo='x+y'),
+#                         row=layer+1, col=head+1,
+#                         secondary_y=False,
+#                     )
+#                     fig.add_trace(
+#                         go.Scatter(x=[0, 1], y=[i, j], mode='lines', line=dict(color='blue', width=1), 
+#                                    opacity=0, showlegend=False, hoverinfo='x+y'),
+#                         row=layer+1, col=head+1,
+#                         secondary_y=True,
+#                     )
+            
+#             fig.update_xaxes(ticktext=["Query", "Key"], tickvals=[0, 1], row=layer+1, col=head+1)
+            
+#             fig.update_yaxes(
+#                 ticktext=labels1, 
+#                 tickvals=list(range(len(labels1))), 
+#                 secondary_y=False,
+#                 row=layer+1, 
+#                 col=head+1
+#             )
+            
+#             fig.update_yaxes(
+#                 ticktext=labels1,
+#                 tickvals=list(range(len(labels1))),
+#                 secondary_y=True,
+#                 row=layer+1, 
+#                 col=head+1,
+#             )
+
+#     print("Updating layout")
+#     fig.update_layout(
+#         height=n_layers*400, 
+#         width=n_heads*300, 
+#         title_text="Attention Line Pattern Differences",
+#     )
+
+#     return fig
 
 
 @app.route('/')
 def index():
     # Get data for the heatmap
-    attention_weights = get_attention_weights()
     labels1, labels2 = get_labels()
-    n_layers, n_heads = 4, 4
-    
-    fig = make_subplots(rows=n_layers, cols=n_heads, 
-                        subplot_titles=[f"Layer {l+1} Head {h+1}" for l in range(n_layers) for h in range(n_heads)],
-                        specs=[[{"secondary_y": True} for _ in range(n_heads)] for _ in range(n_layers)])
-    
-    for layer in range(n_layers):
-        for head in range(n_heads):
-            attention_weights_diff = attention_weights[0] - attention_weights[1]
-            
-            for i in range(len(labels1)):
-                for j in range(len(labels1)):
-                    weight = attention_weights_diff[i, j]
-                    fig.add_trace(
-                        go.Scatter(x=[0, 1], y=[i, j], mode='lines', line=dict(color='blue', width=1), 
-                                   opacity=abs(weight), showlegend=False, hoverinfo='x+y'),
-                        row=layer+1, col=head+1,
-                        secondary_y=False,
-                    )
-                    fig.add_trace(
-                        go.Scatter(x=[0, 1], y=[i, j], mode='lines', line=dict(color='blue', width=1), 
-                                   opacity=0, showlegend=False, hoverinfo='x+y'),
-                        row=layer+1, col=head+1,
-                        secondary_y=True,
-                    )
-            
-            fig.update_xaxes(ticktext=["Query", "Key"], tickvals=[0, 1], row=layer+1, col=head+1)
-            
-            fig.update_yaxes(
-                ticktext=labels1, 
-                tickvals=list(range(len(labels1))), 
-                secondary_y=False,
-                row=layer+1, 
-                col=head+1
-            )
-            
-            fig.update_yaxes(
-                ticktext=labels2,
-                tickvals=list(range(len(labels2))),
-                secondary_y=True,
-                row=layer+1, 
-                col=head+1,
-            )
-
-    fig.update_layout(
-        height=n_layers*400, 
-        width=n_heads*300, 
-        title_text="Attention Line Pattern Differences",
+    fig = create_attention_weight_fig(
+        attention_weights=get_attention_weights(),
+        labels1=labels1
     )
-    
+
     plot_json = plotly.utils.PlotlyJSONEncoder().encode(fig)
     
     return render_template('index.html', 
@@ -204,6 +342,7 @@ def index():
                             plot_json=plot_json,
                             saved_mappings=saved_card_mappings,
                             chr=chr)
+
 @app.route('/save_cards', methods=['POST'])
 def save_cards():
     card_groups = request.json  # Expecting data in the format {'group1': [...], 'group2': [...]}
@@ -238,13 +377,28 @@ def save_cards():
 
     attention_weights1 = attention_weights_from_sequence(
         GPTConfig44_BalancedSets, sequence1, get_prediction=True)
-    
+    print("Got attention weights 1")
+
+    attention_weights2 = attention_weights_from_sequence(
+        GPTConfig44_BalancedSets, sequence2, get_prediction=True)
+    print("Got attention weights 2")
+
+    fig = create_attention_weight_fig(
+        attention_weights=[attention_weights1, attention_weights2],
+        labels1=sequence1
+    )
+    print("Created attention weight fig")
+
+    plot_json = plotly.utils.PlotlyJSONEncoder().encode(fig)
+    print(("Constructed plot JSON"))
+
+    print("returning sucess json")
     return jsonify({
         "status": "success",
         "cards": mapping,
         "input1": sequence1,
         "input2": sequence2,
-        "attention_weights1": attention_weights1
+        "plot_json": plot_json
     })
 
 
