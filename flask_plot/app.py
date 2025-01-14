@@ -108,16 +108,18 @@ def generate_input(card_groups, group):
 def attention_weights_from_sequence(
         config,
         input,
-        tokenizer_path=f"{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl",
+        tokenizer_path=f"larger_balanced_set_dataset_random_tokenizer.pkl",
         get_prediction=False):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
     print("Loaded dataset")
 
-    # Restore the model state dict
-    checkpoint = torch.load(os.path.join(
-        PATH_PREFIX, config.filename), weights_only=False, map_location=torch.device('cpu'))
+    # # Restore the model state dict
+    # checkpoint = torch.load(os.path.join(
+    #     PATH_PREFIX, config.filename), weights_only=False, map_location=torch.device('cpu'))
+    
+    checkpoint = torch.load(config.filename, weights_only=False, map_location=torch.device('cpu'))
 
     model.load_state_dict(checkpoint["model"])
     print("Loaded model")
