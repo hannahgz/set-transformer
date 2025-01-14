@@ -1,0 +1,44 @@
+<!-- macros.html -->
+{% macro render_group(group_id, card_labels, num_cards=5) %}
+
+    {% set shapes = ["oval", "squiggle", "diamond"] %}
+    {% set colors = ["green", "blue", "pink"] %}
+    {% set numbers = ["one", "two", "three"] %}
+    {% set shadings = ["solid", "striped", "open"] %}
+
+    <h3 class="group-header">{{ group_id | title }}</h3>
+    <div class="card-container" id="{{group_id}}">
+        {% for i in range(num_cards) %}
+        <div class="card">
+            <h3>Card {{i + 1}} ({{ card_labels[i] }})</h3>
+            <select class="attribute-select" id="{{group_id}}-shape{{i}}">
+                <option value="">Select Shape</option>
+                {% for shape in shapes %}
+                <option value="{{shape}}" {% if loop.first %}selected{% endif %}>{{shape|title}}</option>
+                {% endfor %}
+            </select>
+
+            <select class="attribute-select" id="{{group_id}}-color{{i}}">
+                <option value="">Select Color</option>
+                {% for color in colors %}
+                <option value="{{color}}" {% if loop.first %}selected{% endif %}>{{color|title}}</option>
+                {% endfor %}
+            </select>
+
+            <select class="attribute-select" id="{{group_id}}-number{{i}}">
+                <option value="">Select Number</option>
+                {% for number in numbers %}
+                <option value="{{number}}" {% if loop.first %}selected{% endif %}>{{number|title}}</option>
+                {% endfor %}
+            </select>
+
+            <select class="attribute-select" id="{{group_id}}-shading{{i}}">
+                <option value="">Select Shading</option>
+                {% for shading in shadings %}
+                <option value="{{shading}}" {% if loop.first %}selected{% endif %}>{{shading|title}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endfor %}
+    </div>
+{% endmacro %}

@@ -9,8 +9,11 @@ import torch
 import os
 from model import GPT, GPTConfig44_BalancedSets
 from tokenizer import load_tokenizer
+import random
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 PATH_PREFIX = "/Users/I835284/Desktop/thesis/set-transformer/src"
 
@@ -69,6 +72,17 @@ def get_attention_weights():
 def get_labels():
     return ['Label' + str(i) for i in range(49)], ['Label' + str(i) for i in range(49)]
 
+def shuffle_input(input):
+    # Step 1: Group elements into pairs
+    pairs = [(input[i], input[i + 1]) for i in range(0, len(input), 2)]
+
+    # Step 2: Shuffle the pairs
+    random.shuffle(pairs)
+
+    # Step 3: Flatten the shuffled pairs back into a sequence
+    shuffled_input = [item for pair in pairs for item in pair]
+    return shuffled_input
+
 def generate_input(card_groups, group):
     input = []
     combination = []
@@ -83,6 +97,7 @@ def generate_input(card_groups, group):
         combination.append((shapes.index(card['shape']), colors.index(card['color']), numbers.index(card['number']), shadings.index(card['shading'])))
     
     combination = tuple(combination)
+    # input = shuffle_input(input)
     input.append(">")
     input.extend(
         get_target_seq(combination, target_size=8, pad_symbol="_")
@@ -94,8 +109,7 @@ def attention_weights_from_sequence(
         config,
         input,
         tokenizer_path=f"{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl",
-        get_prediction=False,
-        filename_prefix=""):
+        get_prediction=False):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
@@ -124,11 +138,15 @@ def attention_weights_from_sequence(
 
         mask = targets != config.padding_token  # Create a mask to ignore padding
         matches = ((predictions == targets) | ~mask).all(dim=1)
-        print("correct: ", matches.sum().item())
+        is_correct = bool(matches.sum().item())
 
-        print("full output: ", tokenizer.decode(outputs[0].tolist()))
-        print("predictions: ", tokenizer.decode(predictions[0].tolist()))
-        print("target: ", tokenizer.decode(targets[0].tolist()))
+        decoded_predictions = tokenizer.decode(predictions[0].tolist())
+        decoded_targets = tokenizer.decode(targets[0].tolist())
+        print("correct: ", is_correct)
+
+        # print("full output: ", tokenizer.decode(outputs[0].tolist()))
+        print("predictions: ", decoded_predictions)
+        print("target: ", decoded_targets)
 
     _, _, attention_weights, _ = model(
         sequences.to(device), False)
@@ -141,6 +159,9 @@ def attention_weights_from_sequence(
             layer_weights.append(attention_weights[layer][0][head].detach().cpu().numpy())
         all_att_weights_np.append(layer_weights)  # Append the layer sublist to the main list
 
+    if get_prediction:
+        return all_att_weights_np, is_correct, decoded_predictions, decoded_targets
+    
     return all_att_weights_np
 
 def create_attention_weight_fig(attention_weights, labels1, n_layers=4, n_heads=4, threshold=0.01):
@@ -292,6 +313,8 @@ def index():
         labels1=labels1
     )
 
+    card_labels = [chr(65 + i) for i in range(5)]  # ['A', 'B', 'C', 'D', 'E']
+
     plot_json = plotly.utils.PlotlyJSONEncoder().encode(fig)
     
     return render_template('index.html', 
@@ -301,6 +324,7 @@ def index():
                             shadings=shadings,
                             plot_json=plot_json,
                             saved_mappings=saved_card_mappings,
+                            card_labels=card_labels,
                             chr=chr)
 
 @app.route('/save_cards', methods=['POST'])
@@ -333,13 +357,17 @@ def save_cards():
     saved_card_mappings = mapping
     
     sequence1 = generate_input(card_groups, "group1")
+    # sequence1 = [
+    #     "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+    #     ">", "A", "B", "C", ".", "_", "_", "_", "_"
+    # ]
     sequence2 = generate_input(card_groups, "group2")
 
-    attention_weights1 = attention_weights_from_sequence(
+    attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
         GPTConfig44_BalancedSets, sequence1, get_prediction=True)
     print("Got attention weights 1")
 
-    attention_weights2 = attention_weights_from_sequence(
+    attention_weights2, is_correct2, decoded_predictions2, decoded_targets2 = attention_weights_from_sequence(
         GPTConfig44_BalancedSets, sequence2, get_prediction=True)
     print("Got attention weights 2")
 
@@ -358,6 +386,9 @@ def save_cards():
         "cards": mapping,
         "input1": sequence1,
         "input2": sequence2,
+        "is_correct1": is_correct1,
+        "decoded_predictions1": decoded_predictions1,
+        "decoded_targets1": decoded_targets1,
         "plot_json": plot_json
     })
 

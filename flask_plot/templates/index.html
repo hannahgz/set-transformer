@@ -1,3 +1,5 @@
+{% import 'macros.html' as macros %}
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -63,89 +65,70 @@
             border-radius: 4px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
+        .prediction-info {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+        .correct {
+            color: #28a745;
+        }
+        .incorrect {
+            color: #dc3545;
+        }
+        .sequence-comparison {
+            font-family: 'Courier New', monospace;
+            white-space: pre;
+            background-color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .sequence-label {
+            font-weight: bold;
+            display: inline-block;
+            width: 100px;
+        }
+        .group-header {
+            text-align: left;
+            margin-bottom: 20px; /* Space between header and cards */
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s ease infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Card Attribute Selector</h2>
 
-        <!-- Section for the First Set of Cards -->
-        <div class="card-container" id="group1">
-            <!-- <h3>Set 1</h3> -->
-            {% for i in range(5) %}
-            <div class="card">
-                <h3>Card {{i + 1}} ({{chr(65 + i)}})</h3>
-                <select class="attribute-select" id="group1-shape{{i}}">
-                    <option value="">Select Shape</option>
-                    {% for shape in shapes %}
-                    <option value="{{shape}}" {% if loop.first %}selected{% endif %}>{{shape|title}}</option>
-                    {% endfor %}
-                </select>
-
-                <select class="attribute-select" id="group1-color{{i}}">
-                    <option value="">Select Color</option>
-                    {% for color in colors %}
-                    <option value="{{color}}" {% if loop.first %}selected{% endif %}>{{color|title}}</option>
-                    {% endfor %}
-                </select>
-
-                <select class="attribute-select" id="group1-number{{i}}">
-                    <option value="">Select Number</option>
-                    {% for number in numbers %}
-                    <option value="{{number}}" {% if loop.first %}selected{% endif %}>{{number|title}}</option>
-                    {% endfor %}
-                </select>
-
-                <select class="attribute-select" id="group1-shading{{i}}">
-                    <option value="">Select Shading</option>
-                    {% for shading in shadings %}
-                    <option value="{{shading}}" {% if loop.first %}selected{% endif %}>{{shading|title}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            {% endfor %}
-        </div>
-
-        <!-- Section for the Second Set of Cards -->
-        <div class="card-container" id="group2">
-            <!-- <h3>Set 1</h3> -->
-            {% for i in range(5) %}
-            <div class="card">
-                <h3>Card {{i + 1}} ({{chr(65 + i)}})</h3>
-                <select class="attribute-select" id="group2-shape{{i}}">
-                    <option value="">Select Shape</option>
-                    {% for shape in shapes %}
-                    <option value="{{shape}}" {% if loop.first %}selected{% endif %}>{{shape|title}}</option>
-                    {% endfor %}
-                </select>
-
-                <select class="attribute-select" id="group2-color{{i}}">
-                    <option value="">Select Color</option>
-                    {% for color in colors %}
-                    <option value="{{color}}" {% if loop.first %}selected{% endif %}>{{color|title}}</option>
-                    {% endfor %}
-                </select>
-
-                <select class="attribute-select" id="group2-number{{i}}">
-                    <option value="">Select Number</option>
-                    {% for number in numbers %}
-                    <option value="{{number}}" {% if loop.first %}selected{% endif %}>{{number|title}}</option>
-                    {% endfor %}
-                </select>
-
-                <select class="attribute-select" id="group2-shading{{i}}">
-                    <option value="">Select Shading</option>
-                    {% for shading in shadings %}
-                    <option value="{{shading}}" {% if loop.first %}selected{% endif %}>{{shading|title}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            {% endfor %}
-        </div>
-
+        {{ macros.render_group('group1', card_labels) }}
+        {{ macros.render_group('group2', card_labels) }}
         
         <button class="save-button" onclick="saveCards()">Save Cards</button>
         <button class="duplicate-button" onclick="duplicateGroup1To2()">Duplicate Group 1 to 2</button>
+        <div id="loading-indicator" style="display: none;">
+            <div class="spinner"></div>
+        </div>
+
+        <label for="threshold-input">Threshold for Weights:</label>
+        <input type="number" id="threshold-input" value="0.1" min="0" max="1" step="0.01">
+
 
         <div class="mappings-container">
             <h3>Saved Card Mappings</h3>
@@ -160,6 +143,9 @@
                     </div>
                     {% endfor %}
                 </div>
+                <div class="prediction-info" id="group1-prediction">
+                    <!-- Prediction info will be inserted here -->
+                </div>
             </div>
 
             <!-- Section for Set 2 -->
@@ -172,6 +158,9 @@
                         {{mapping.attributes.shape}} {{mapping.attributes.color}} {{mapping.attributes.number}} {{mapping.attributes.shading}}
                     </div>
                     {% endfor %}
+                </div>
+                <div class="prediction-info" id="group2-prediction">
+                    <!-- Prediction info will be inserted here -->
                 </div>
             </div>
         </div>
@@ -187,9 +176,28 @@
         var graphs = {{ plot_json | safe }};
         Plotly.newPlot('plotly-div', graphs.data, graphs.layout);
 
+        function updatePredictionInfo(data) {
+            const group1Prediction = document.getElementById('group1-prediction');
+            
+            // Create a formattedComparison that aligns the sequences
+            const formattedComparison = `
+                <h3>Prediction Results:</h3>
+                <p><strong>Status:</strong> <span class="${data.is_correct1 ? 'correct' : 'incorrect'}">${data.is_correct1 ? 'Correct' : 'Incorrect'}</span></p>
+                <div class="sequence-comparison">
+                    <div><span class="sequence-label">Input:</span>${data.input1.join(' ')}</div>
+                    <div><span class="sequence-label">Prediction: </span>${data.decoded_predictions1}</div>
+                    <div><span class="sequence-label">Target: </span>${data.decoded_targets1}</div>
+                </div>`;
+            
+            group1Prediction.innerHTML = formattedComparison;
+        }
+        
         function saveCards() {
             let group1Cards = [];
             let group2Cards = [];
+
+            const loadingIndicator = document.getElementById('loading-indicator');
+            loadingIndicator.style.display = 'block';
 
             // Process Set 1
             for (let i = 0; i < 5; i++) {
@@ -211,6 +219,15 @@
                     shading: document.getElementById(`group2-shading${i}`).value
                 };
                 group2Cards.push(cardGroup2);
+            }
+
+            // Get the threshold value from the input box
+            const threshold = parseFloat(document.getElementById('threshold-input').value);
+
+            // Ensure the threshold value is within [0, 1]
+            if (threshold < 0 || threshold > 1 || isNaN(threshold)) {
+                alert('Please enter a valid threshold between 0 and 1.');
+                return;
             }
 
             // Combine into an object to send to the server
@@ -235,6 +252,9 @@
                 // Refresh the page to show updated mappings
                 // location.reload();
                 // console.log('Server Response:', data);
+                // Update prediction information
+                updatePredictionInfo(data);
+
                 updateSavedMappings(data.cards);
                 const updatedPlot = JSON.parse(data.plot_json);
 
@@ -245,6 +265,9 @@
             .catch((error) => {
                 console.error('Error:', error);
                 alert('Error saving cards!');
+            }).finally(() => {
+                // Hide loading indicator
+                loadingIndicator.style.display = 'none';
             });
         }
 
