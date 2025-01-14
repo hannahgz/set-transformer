@@ -166,7 +166,7 @@ def attention_weights_from_sequence(
     
     return all_att_weights_np
 
-def create_attention_weight_fig(attention_weights, labels1, n_layers=4, n_heads=4, threshold=0.01):
+def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4, n_heads=4, threshold=0.01):
     fig = make_subplots(rows=n_layers, cols=n_heads, 
                         subplot_titles=[f"Layer {l+1} Head {h+1}" for l in range(n_layers) for h in range(n_heads)],
                         specs=[[{"secondary_y": True} for _ in range(n_heads)] for _ in range(n_layers)],
@@ -174,6 +174,23 @@ def create_attention_weight_fig(attention_weights, labels1, n_layers=4, n_heads=
     
     # Pre-calculate x coordinates
     x_coords = [0, 1]
+
+    # Set range for both axes
+    y_min = -0.5  # Add some padding
+    y_max = len(labels1) - 0.5  # Add some padding
+    
+
+    reversed_labels = labels1[::-1]
+
+    highlight_indices = {len(labels1) - i - 1: 'green' for i, (label1, label2) in enumerate(zip(labels1, labels2)) if label1 != label2}
+
+    custom_ticktext = []
+    for i, label in enumerate(reversed_labels):
+        if i in highlight_indices and i > 8:
+            # Use HTML color tag
+            custom_ticktext.append(f'<span style="color: {highlight_indices[i]}">{label}</span>')
+        else:
+            custom_ticktext.append(label)
     
     for layer in range(n_layers):
         for head in range(n_heads):
@@ -214,7 +231,9 @@ def create_attention_weight_fig(attention_weights, labels1, n_layers=4, n_heads=
                         ),
                         opacity=conn['weight'],
                         showlegend=False,
-                        hovertemplate=f"Weight: {conn['weight']:.3f}<br>From: {labels1[conn['from_idx']]}<br>To: {labels1[conn['to_idx']]}"
+                        hovertemplate=f"Weight: {conn['weight']:.3f}<br>From: {labels1[conn['from_idx']]}<br>To: {labels1[conn['to_idx']]}",
+                        name="",
+                        hoveron='points+fills',
                     ),
                     row=layer+1, col=head+1,
                     secondary_y=False
@@ -261,46 +280,38 @@ def create_attention_weight_fig(attention_weights, labels1, n_layers=4, n_heads=
                 showgrid=False  # Disable grid to reduce rendering overhead
             )
 
-            # Set range for both axes
-            y_min = -0.5  # Add some padding
-            y_max = len(labels1) - 0.5  # Add some padding
-            
+            # for secondary_y in [False, True]:
+            #     fig.update_yaxes(
+            #         # ticktext=reversed_labels,
+            #         ticktext=custom_ticktext,
+            #         tickvals=list(range(len(labels1))),
+            #         range=[y_min, y_max],
+            #         secondary_y=secondary_y,
+            #         row=layer+1,
+            #         col=head+1,
+            #         showline=False,
+            #         showgrid=False,
+            #         side='left' if not secondary_y else 'right'
+            #     )
 
-            reversed_labels = labels1[::-1]
-            # Update primary y-axis
-            fig.update_yaxes(
-                # ticktext=labels1,
-                ticktext=reversed_labels,
-                tickvals=list(range(len(labels1))),
-                range=[y_min, y_max],
-                secondary_y=False,
-                row=layer+1,
-                col=head+1,
-                showline=False,
-                showgrid=False,
-                side='left'
-            )
-            
-
-            # Update secondary y-axis with same range
-            fig.update_yaxes(
-                # ticktext=labels1,
-                ticktext=reversed_labels,
-                tickvals=list(range(len(labels1))),
-                range=[y_min, y_max],
-                secondary_y=True,
-                row=layer+1,
-                col=head+1,
-                showline=False,
-                showgrid=False,
-                side='right'
-            )
+            for secondary_y in [False, True]:
+                fig.update_yaxes(
+                    ticktext=custom_ticktext,
+                    tickvals=list(range(len(labels1))),
+                    range=[y_min, y_max],
+                    secondary_y=secondary_y,
+                    row=layer+1,
+                    col=head+1,
+                    showline=False,
+                    showgrid=False,
+                    side='left' if not secondary_y else 'right',
+    )
 
     # Optimize layout
     fig.update_layout(
         height=n_layers*600,
         width=n_heads*300,
-        title_text="Attention Line Pattern Differences",
+        title_text="Attention Line Pattern Differences (Group 1 minus Group 2)",
         showlegend=False,
     )
 
@@ -312,7 +323,8 @@ def index():
     labels1, labels2 = get_labels()
     fig = create_attention_weight_fig(
         attention_weights=get_attention_weights(),
-        labels1=labels1
+        labels1=labels1,
+        labels2=labels2
     )
 
     card_labels = [chr(65 + i) for i in range(5)]  # ['A', 'B', 'C', 'D', 'E']
@@ -373,9 +385,15 @@ def save_cards():
         GPTConfig44_BalancedSets, sequence2, get_prediction=True)
     print("Got attention weights 2")
 
+    prediction_results = {
+        1: (sequence1, is_correct1, decoded_predictions1, decoded_targets1),
+        2: (sequence2, is_correct2, decoded_predictions2, decoded_targets2)
+    }
+
     fig = create_attention_weight_fig(
         attention_weights=[attention_weights1, attention_weights2],
-        labels1=sequence1
+        labels1=sequence1,
+        labels2=sequence2
     )
     print("Created attention weight fig")
 
@@ -386,13 +404,10 @@ def save_cards():
     return jsonify({
         "status": "success",
         "cards": mapping,
-        "input1": sequence1,
-        "input2": sequence2,
-        "is_correct1": is_correct1,
-        "decoded_predictions1": decoded_predictions1,
-        "decoded_targets1": decoded_targets1,
+        "prediction_results": prediction_results,
         "plot_json": plot_json
     })
+
 
 
 if __name__ == '__main__':
