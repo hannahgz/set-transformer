@@ -216,7 +216,7 @@ def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4,
                         })
             
             # Sort connections by weight to draw strongest connections last
-            all_connections.sort(key=lambda x: x['weight'])
+            # all_connections.sort(key=lambda x: x['weight'])
             
             # Add traces for each significant connection
             for conn in all_connections:
@@ -393,7 +393,8 @@ def save_cards():
     fig = create_attention_weight_fig(
         attention_weights=[attention_weights1, attention_weights2],
         labels1=sequence1,
-        labels2=sequence2
+        labels2=sequence2,
+        threshold=card_groups.get('threshold', 0.1)
     )
     print("Created attention weight fig")
 
