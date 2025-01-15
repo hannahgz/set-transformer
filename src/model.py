@@ -515,7 +515,7 @@ class CausalSelfAttention(nn.Module):
         #     )
         
         # UNCOMMENT
-        print("Using causal masking")
+        # print("Using causal masking")
             # causal mask to ensure that attention is only applied to the left in the input sequence
         self.register_buffer(
             "bias",

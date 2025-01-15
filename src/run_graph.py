@@ -1,9 +1,11 @@
 from graph import lineplot_specific, generate_lineplot, lineplot_difference_inputs
 from model import GPTConfig44_BalancedSets
 from data_utils import pretty_print_input
+import random
 
-PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
-
+# PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
+# PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
+PATH_PREFIX = ''
 if __name__ == "__main__":
 
     # input1 = [
@@ -22,24 +24,25 @@ if __name__ == "__main__":
     #     ">", "*", ".", "_", "_", "_", "_", "_", "_"
     # ]
 
-    input1 = [
-        "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
-        ">", "A", "B", "C", ".", "_", "_", "_", "_"
-    ]
+    # input1 = [
+    #     "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+    #     ">", "A", "B", "C", ".", "_", "_", "_", "_"
+    # ]
 
-    input2 = [
-        "E", "striped", "B", "pink", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
-        ">", "*", ".", "_", "_", "_", "_", "_", "_"
-    ]
+    # input2 = [
+    #     "E", "striped", "B", "pink", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+    #     ">", "*", ".", "_", "_", "_", "_", "_", "_"
+    # ]
 
-    lineplot_difference_inputs(
-        GPTConfig44_BalancedSets,
-        input1,
-        input2,
-        tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
-        get_prediction=True,
-        filename_prefix="input1_input2_allsame"
-    )
+    # lineplot_difference_inputs(
+    #     GPTConfig44_BalancedSets,
+    #     input1,
+    #     input2,
+    #     # tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+    #     tokenizer_path=f'larger_balanced_set_dataset_random_tokenizer.pkl',
+    #     get_prediction=True,
+    #     filename_prefix="NEW_input1_input2_allsame"
+    # )
 
     # generate_lineplot(
     #     GPTConfig44_BalancedSets,
@@ -52,31 +55,135 @@ if __name__ == "__main__":
 
     # # PREVIOUS CODE BEFORE 1/6/2025
 
-    # test_input = [
-    #     "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
-    #     ">", "A", "B", "C", ".", "_", "_", "_", "_"
-    # ]
+    test_input = [
+        "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+        ">", "A", "B", "C", ".", "_", "_", "_", "_"
+    ]
 
-    # lineplot_specific(
-    #     config=GPTConfig44_BalancedSets,
-    #     input=test_input,
-    #     tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
-    #     get_prediction=True,
-    #     filename_prefix="input0"
-    # )
+    lineplot_specific(
+        config=GPTConfig44_BalancedSets,
+        input=test_input,
+        # tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+        tokenizer_path=f'larger_balanced_set_dataset_random_tokenizer.pkl',
+        get_prediction=True,
+        filename_prefix="input0"
+    )
+
+    # Step 1: Extract the first 40 elements and group into pairs
+    pairs = [(test_input[i], test_input[i + 1]) for i in range(0, 40, 2)]
+
+    # Step 2: Sort the pairs alphabetically by the first element of each pair
+    pairs = sorted(pairs, key=lambda x: x[0])
+    random.shuffle(pairs)
+
+    # Step 3: Flatten the sorted pairs back into a single list
+    sorted_flattened = [item for pair in pairs for item in pair]
+
+    # Step 4: Replace the first 40 elements with the sorted sequence
+    test_input[:40] = sorted_flattened
+
+    print("Sorted test input")
 
     # test_input = [
-    #     "E", "striped", "B", "green", "D", "two", "B", "squiggle", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+    #     "E", "striped", "B", "pink", "D", "one", "B", "squiggle", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "two", "A", "pink", "C", "solid", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
     #     ">", "*", ".", "_", "_", "_", "_", "_", "_"
     # ]
 
-    # lineplot_specific(
-    #     config=GPTConfig44_BalancedSets,
-    #     input=test_input,
-    #     tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
-    #     get_prediction=True,
-    #     filename_prefix="input0_modified_shape"
-    # )
+    lineplot_specific(
+        config=GPTConfig44_BalancedSets,
+        input=test_input,
+        # tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+        tokenizer_path=f'larger_balanced_set_dataset_random_tokenizer.pkl',
+        get_prediction=True,
+        filename_prefix="input0_modified_shape"
+    )
+
+    # Step 1: Extract the first 40 elements and group into pairs
+    pairs = [(test_input[i], test_input[i + 1]) for i in range(0, 40, 2)]
+
+    # Step 2: Sort the pairs alphabetically by the first element of each pair
+    pairs = sorted(pairs, key=lambda x: x[0])
+    random.shuffle(pairs)
+
+    # Step 3: Flatten the sorted pairs back into a single list
+    sorted_flattened = [item for pair in pairs for item in pair]
+
+    # Step 4: Replace the first 40 elements with the sorted sequence
+    test_input[:40] = sorted_flattened
+
+    print("Sorted test input")
+
+    # test_input = [
+    #     "E", "striped", "B", "pink", "D", "one", "B", "squiggle", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "two", "A", "pink", "C", "solid", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+    #     ">", "*", ".", "_", "_", "_", "_", "_", "_"
+    # ]
+
+    lineplot_specific(
+        config=GPTConfig44_BalancedSets,
+        input=test_input,
+        # tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+        tokenizer_path=f'larger_balanced_set_dataset_random_tokenizer.pkl',
+        get_prediction=True,
+        filename_prefix="input0_modified_shape"
+    )
+
+    # Step 1: Extract the first 40 elements and group into pairs
+    pairs = [(test_input[i], test_input[i + 1]) for i in range(0, 40, 2)]
+
+    # Step 2: Sort the pairs alphabetically by the first element of each pair
+    pairs = sorted(pairs, key=lambda x: x[0])
+    random.shuffle(pairs)
+
+    # Step 3: Flatten the sorted pairs back into a single list
+    sorted_flattened = [item for pair in pairs for item in pair]
+
+    # Step 4: Replace the first 40 elements with the sorted sequence
+    test_input[:40] = sorted_flattened
+
+    print("Sorted test input")
+
+    # test_input = [
+    #     "E", "striped", "B", "pink", "D", "one", "B", "squiggle", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "two", "A", "pink", "C", "solid", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+    #     ">", "*", ".", "_", "_", "_", "_", "_", "_"
+    # ]
+
+    lineplot_specific(
+        config=GPTConfig44_BalancedSets,
+        input=test_input,
+        # tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+        tokenizer_path=f'larger_balanced_set_dataset_random_tokenizer.pkl',
+        get_prediction=True,
+        filename_prefix="input0_modified_shape"
+    )
+
+    # Step 1: Extract the first 40 elements and group into pairs
+    pairs = [(test_input[i], test_input[i + 1]) for i in range(0, 40, 2)]
+
+    # Step 2: Sort the pairs alphabetically by the first element of each pair
+    pairs = sorted(pairs, key=lambda x: x[0])
+    random.shuffle(pairs)
+
+    # Step 3: Flatten the sorted pairs back into a single list
+    sorted_flattened = [item for pair in pairs for item in pair]
+
+    # Step 4: Replace the first 40 elements with the sorted sequence
+    test_input[:40] = sorted_flattened
+
+    print("Sorted test input")
+
+    # test_input = [
+    #     "E", "striped", "B", "pink", "D", "one", "B", "squiggle", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "two", "A", "pink", "C", "solid", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+    #     ">", "*", ".", "_", "_", "_", "_", "_", "_"
+    # ]
+
+    lineplot_specific(
+        config=GPTConfig44_BalancedSets,
+        input=test_input,
+        # tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+        tokenizer_path=f'larger_balanced_set_dataset_random_tokenizer.pkl',
+        get_prediction=True,
+        filename_prefix="input0_modified_shape"
+    )
 
     # test_input = [
     #     "E", "striped", "B", "pink", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",

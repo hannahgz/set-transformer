@@ -439,3 +439,11 @@ def pretty_print_input(input):
     #     row = [card] + attrs
     #     row_line = "".join(attr.ljust(col_widths[i]) for i, attr in enumerate(row))
     #     print(row_line)
+
+
+if __name__ == "__main__":
+    cards = get_cards()
+
+    for combination in itertools.combinations(cards, 5):
+        breakpoint()
+

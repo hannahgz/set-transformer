@@ -6,6 +6,8 @@ import torch
 from data_utils import pretty_print_input
 from model import GPT
 from tokenizer import load_tokenizer
+import tkinter as tk
+from tkinter import simpledialog
 
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
@@ -299,7 +301,8 @@ def make_prediction_given_input(
 def lineplot_specific(
         config,
         input,
-        tokenizer_path=f"{PATH_PREFIX}/balanced_set_dataset_random_tokenizer.pkl",
+        # tokenizer_path=f"{PATH_PREFIX}/balanced_set_dataset_random_tokenizer.pkl",
+        tokenizer_path=f"balanced_set_dataset_random_tokenizer.pkl",
         threshold=0.1,
         get_prediction=False,
         filename_prefix=""):
@@ -309,8 +312,11 @@ def lineplot_specific(
     print("Loaded dataset")
 
     # Restore the model state dict
+    # checkpoint = torch.load(os.path.join(
+    #     PATH_PREFIX, config.filename), weights_only=False)
+    
     checkpoint = torch.load(os.path.join(
-        PATH_PREFIX, config.filename), weights_only=False)
+        config.filename), weights_only=False, map_location=torch.device('cpu'))
 
     model.load_state_dict(checkpoint["model"])
     print("Loaded model")
@@ -337,33 +343,33 @@ def lineplot_specific(
         print("predictions: ", tokenizer.decode(predictions[0].tolist()))
         print("target: ", tokenizer.decode(targets[0].tolist()))
 
-    _, _, attention_weights, _ = model(
-        sequences.to(device), False)
+    # _, _, attention_weights, _ = model(
+    #     sequences.to(device), False)
 
-    labels = input.tolist()
-    labels = tokenizer.decode(labels)
-    if "/" in labels:
-        number_set = "two"
-    elif "*" in labels:
-        number_set = "zero"
-    else:
-        number_set = "one"
+    # labels = input.tolist()
+    # labels = tokenizer.decode(labels)
+    # if "/" in labels:
+    #     number_set = "two"
+    # elif "*" in labels:
+    #     number_set = "zero"
+    # else:
+    #     number_set = "one"
 
-    # print("labels: ", labels)
+    # # print("labels: ", labels)
 
-    dir_path = f"figs/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}/synthetic_larger"
-    filename = f"{filename_prefix}_lineplot_sets_{number_set}_threshold_{threshold}.png"
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
+    # dir_path = f"figs/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}/synthetic_larger"
+    # filename = f"{filename_prefix}_lineplot_sets_{number_set}_threshold_{threshold}.png"
+    # if not os.path.exists(dir_path):
+    #     os.makedirs(dir_path)
 
-    plot_attention_pattern_lines(
-        attention_weights,
-        labels,
-        config.n_layer,
-        config.n_head,
-        title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
-        savefig=f"{dir_path}/{filename}",
-        threshold=threshold)
+    # plot_attention_pattern_lines(
+    #     attention_weights,
+    #     labels,
+    #     config.n_layer,
+    #     config.n_head,
+    #     title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
+    #     savefig=f"{dir_path}/{filename}",
+    #     threshold=threshold)
     
 
 def plot_attention_pattern_lines_comparison(
@@ -390,6 +396,7 @@ def plot_attention_pattern_lines_comparison(
             # breakpoint()
             # Extract attention weights for the current head
             att_weights_np = attention_weights_diff.detach().cpu().numpy()
+            # att_weights_np = attention_weights_diff.numpy()
 
             # Plot the attention lines
             for i in range(len(labels1)):
@@ -448,7 +455,8 @@ def lineplot_difference_inputs(
         config,
         input1,
         input2,
-        tokenizer_path=f"{PATH_PREFIX}/balanced_set_dataset_random_tokenizer.pkl",
+        # tokenizer_path=f"{PATH_PREFIX}/balanced_set_dataset_random_tokenizer.pkl",
+        tokenizer_path=f"balanced_set_dataset_random_tokenizer.pkl",
         threshold=0.1,
         get_prediction=False,
         filename_prefix=""):
@@ -458,8 +466,9 @@ def lineplot_difference_inputs(
     model = GPT(config).to(device)
 
     # Restore the model state dict
-    checkpoint = torch.load(os.path.join(
-        PATH_PREFIX, config.filename), weights_only=False)
+    # checkpoint = torch.load(os.path.join(
+    #     PATH_PREFIX, config.filename), weights_only=False)
+    checkpoint = torch.load(config.filename, weights_only=False, map_location=torch.device('cpu'))
 
     model.load_state_dict(checkpoint["model"])
     print("Loaded model")
@@ -501,4 +510,32 @@ def lineplot_difference_inputs(
         savefig=f"{dir_path}/{filename}",
         threshold=threshold
     )
+
+def interactive_lineplot_difference_inputs(config, tokenizer_path=f"{PATH_PREFIX}/balanced_set_dataset_random_tokenizer.pkl", threshold=0.1, get_prediction=False, filename_prefix=""):
+    def get_input(prompt):
+        return simpledialog.askstring("Input", prompt)
+
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+
+    input1 = get_input("Enter the first sequence (comma-separated):")
+    input2 = get_input("Enter the second sequence (comma-separated):")
+
+    if input1 and input2:
+        input1 = input1.split(",")
+        input2 = input2.split(",")
+
+        lineplot_difference_inputs(
+            config,
+            input1,
+            input2,
+            tokenizer_path=tokenizer_path,
+            threshold=threshold,
+            get_prediction=get_prediction,
+            filename_prefix=filename_prefix
+        )
+    else:
+        print("Inputs cannot be empty.")
+
+    root.destroy()
 

@@ -386,25 +386,41 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    # dataset = initialize_datasets(
-    #     GPTConfig44_BalancedSets(),
-    #     save_dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth',
-    #     save_tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
-    #     randomize_sequence_order=True
-    # )
+    # Attempt to improve model accuracy
 
-    config = GPTConfig44_BalancedSets()
-    dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth'
-    dataset = torch.load(dataset_path)
-    train_loader, val_loader = initialize_loaders(config, dataset)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    dataset = initialize_datasets(
+        GPTConfig44_BalancedSets(),
+        save_dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth',
+        save_tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+        randomize_sequence_order=True
+    )
 
-    model = GPT(config).to(device)
-    checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
-    model.load_state_dict(checkpoint["model"])
+    run(
+        config,
+        dataset_path=dataset_path
+    )
 
-    val_accuracy = calculate_accuracy(model, val_loader, config, tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl', save_incorrect_path="larger_incorrect_predictions.txt")
-    print("Val accuracy: ", val_accuracy)
+    # # OLD - before Jan 15th
+
+    # # dataset = initialize_datasets(
+    # #     GPTConfig44_BalancedSets(),
+    # #     save_dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth',
+    # #     save_tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+    # #     randomize_sequence_order=True
+    # # )
+
+    # config = GPTConfig44_BalancedSets()
+    # dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth'
+    # dataset = torch.load(dataset_path)
+    # train_loader, val_loader = initialize_loaders(config, dataset)
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    # model = GPT(config).to(device)
+    # checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
+    # model.load_state_dict(checkpoint["model"])
+
+    # val_accuracy = calculate_accuracy(model, val_loader, config, tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl', save_incorrect_path="larger_incorrect_predictions.txt")
+    # print("Val accuracy: ", val_accuracy)
 
     # run(
     #     config,
