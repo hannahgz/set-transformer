@@ -65,7 +65,7 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
 
         mask = targets != config.padding_token  # Create a mask to ignore padding
         matches = ((predictions == targets) | ~mask).all(dim=1)
-        breakpoint()
+        # breakpoint()
         if save_incorrect_path:
             with open(save_incorrect_path, "a") as f:
                 # Print incorrect predictions and corresponding targets to file
@@ -403,20 +403,43 @@ if __name__ == "__main__":
     #     dataset_path=dataset_path
     # )
 
-    config = GPTConfig44_Final()
-    dataset_path = f'{PATH_PREFIX}/final_causal_balanced_dataset.pth'
-    tokenizer_path=f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl',
+    final_config = GPTConfig44_Final()
+    # tokenizer_path=f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl',
 
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    final_model = GPT(final_config).to(device)
+    checkpoint = torch.load(f"{PATH_PREFIX}/{final_config.filename}", weights_only=False)
+    final_model.load_state_dict(checkpoint["model"])
+
+    final_dataset_path = f'{PATH_PREFIX}/final_causal_balanced_dataset.pth'
+    final_dataset = torch.load(final_dataset_path)
+    final_train_loader, final_val_loader = initialize_loaders(final_config, final_dataset)
+
+
+    config = GPTConfig44()
+    
+    dataset_path = f'{PATH_PREFIX}/balanced_set_dataset_random.pth'
     dataset = torch.load(dataset_path)
     train_loader, val_loader = initialize_loaders(config, dataset)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
 
     model = GPT(config).to(device)
     checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
     model.load_state_dict(checkpoint["model"])
 
-    val_accuracy = calculate_accuracy(model, val_loader, config, tokenizer_path=tokenizer_path)
-    print("Val accuracy: ", val_accuracy)
+
+    val_accuracy = calculate_accuracy(final_model, final_val_loader, final_config)
+    print("Val accuracy for final model on final dataset: ", val_accuracy)
+
+    val_accuracy = calculate_accuracy(final_model, val_loader, final_config)
+    print("Val accuracy for final model on original: ", val_accuracy)
+
+    val_accuracy = calculate_accuracy(model, final_val_loader, config)
+    print("Val accuracy for model on final dataset: ", val_accuracy)
+
+    val_accuracy = calculate_accuracy(model, val_loader, config)
+    print("Val accuracy for model on original: ", val_accuracy)
+    
 
     # # OLD - before Jan 15th
 
