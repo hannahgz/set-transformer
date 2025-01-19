@@ -55,7 +55,7 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
     total = 0
 
     for index, sequences in enumerate(dataloader):
-        print(f"Batch: {index}/{len(dataloader)}")
+        print(f"Input: {index}/{len(dataloader)}")
         inputs = sequences[:, : config.input_size].to(device)
         targets = sequences[:, config.input_size:].to(device)
 
@@ -65,7 +65,7 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
 
         mask = targets != config.padding_token  # Create a mask to ignore padding
         matches = ((predictions == targets) | ~mask).all(dim=1)
-
+        breakpoint()
         if save_incorrect_path:
             with open(save_incorrect_path, "a") as f:
                 # Print incorrect predictions and corresponding targets to file
@@ -386,22 +386,37 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    # Attempt to improve model accuracy
+    # # Attempt to improve model accuracy
+    # config = GPTConfig44_Final()
+    # dataset_path = f'{PATH_PREFIX}/final_causal_balanced_dataset.pth'
+    # dataset = initialize_datasets(
+    #     config,
+    #     # save_dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth',
+    #     save_dataset_path=dataset_path,
+    #     save_tokenizer_path=f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl',
+    #     randomize_sequence_order=True
+    # )
+    # print("Initialize dataset")
+
+    # run(
+    #     config,
+    #     dataset_path=dataset_path
+    # )
+
     config = GPTConfig44_Final()
     dataset_path = f'{PATH_PREFIX}/final_causal_balanced_dataset.pth'
-    dataset = initialize_datasets(
-        config,
-        # save_dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth',
-        save_dataset_path=dataset_path,
-        save_tokenizer_path=f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl',
-        randomize_sequence_order=True
-    )
-    print("Initialize dataset")
+    tokenizer_path=f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl',
 
-    run(
-        config,
-        dataset_path=dataset_path
-    )
+    dataset = torch.load(dataset_path)
+    train_loader, val_loader = initialize_loaders(config, dataset)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    model = GPT(config).to(device)
+    checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
+    model.load_state_dict(checkpoint["model"])
+
+    val_accuracy = calculate_accuracy(model, val_loader, config, tokenizer_path=tokenizer_path)
+    print("Val accuracy: ", val_accuracy)
 
     # # OLD - before Jan 15th
 
