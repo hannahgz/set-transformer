@@ -58,6 +58,7 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
 
         if index % 1000 == 0:
             print(f"Input: {index}/{len(dataloader)}")
+            print("Accuracy: ", correct / total)
         inputs = sequences[:, : config.input_size].to(device)
         targets = sequences[:, config.input_size:].to(device)
 
@@ -85,7 +86,7 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
 
         correct += matches.sum().item()
         total += mask.any(dim=1).sum().item()
-        print("Accuracy: ", correct / total)
+        # print("Accuracy: ", correct / total)
 
     return correct / total
 
