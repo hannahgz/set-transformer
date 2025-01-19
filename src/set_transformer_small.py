@@ -396,11 +396,12 @@ if __name__ == "__main__":
         save_tokenizer_path=f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl',
         randomize_sequence_order=True
     )
+    print("Initialize dataset")
 
-    # run(
-    #     config,
-    #     dataset_path=dataset_path
-    # )
+    run(
+        config,
+        dataset_path=dataset_path
+    )
 
     # # OLD - before Jan 15th
 
