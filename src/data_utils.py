@@ -143,9 +143,9 @@ def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, 
 
         target_seq = get_target_seq(
                 combination, target_size, pad_symbol)
-        random.seed(42)
+        # random.seed(42)
         for i in range(random_iterations):
-            random.seed(42 + i)
+            # random.seed(42 + i)
             # Randomize the array
             if random_order:
                 random.shuffle(tuple_array)
@@ -215,16 +215,16 @@ def initialize_datasets(config, save_dataset_path=None, save_tokenizer_path=None
         config.target_size, config.pad_symbol, config.n_cards, random_order=True, attr_first=attr_first, balance_sets=True
     )
 
-    start_time = time.time()
+    # start_time = time.time()
     small_combinations = list(optimized_combinations)
-    print("Len small_combinations: ", len(small_combinations))
-    end_time = time.time()
+    # print("Len small_combinations: ", len(small_combinations))
+    # end_time = time.time()
 
-    print("Time taken to construct small_combinations: ", end_time - start_time, "seconds")
+    # print("Time taken to construct small_combinations: ", end_time - start_time, "seconds")
 
-    with open(f'{PATH_PREFIX}/small_combo.pkl', 'wb') as f:
-        print("Saving small_combinations to pickle file")
-        pickle.dump(small_combinations, f)
+    # with open(f'{PATH_PREFIX}/small_combo.pkl', 'wb') as f:
+    #     print("Saving small_combinations to pickle file")
+    #     pickle.dump(small_combinations, f)
 
     # Create tokenizer and tokenize all sequences
     tokenizer = Tokenizer()

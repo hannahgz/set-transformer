@@ -12,7 +12,7 @@ from torch import optim
 import wandb
 from model import GPT
 # from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20, GPTConfig44_AttrFirst
-from model import GPTConfig44, GPTConfig44TriplesEmbdDrop, GPTConfig44_AttrFirst, GPTConfig44_BalancedSets
+from model import GPTConfig44, GPTConfig44TriplesEmbdDrop, GPTConfig44_AttrFirst, GPTConfig44_BalancedSets, GPTConfig44_Final
 from model import add_causal_masking
 from data_utils import initialize_datasets, initialize_loaders, initialize_triples_datasets
 import random
@@ -387,18 +387,20 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     # Attempt to improve model accuracy
-
+    config = GPTConfig44_Final()
+    dataset_path = f'{PATH_PREFIX}/final_causal_balanced_dataset.pth'
     dataset = initialize_datasets(
-        GPTConfig44_BalancedSets(),
-        save_dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth',
-        save_tokenizer_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random_tokenizer.pkl',
+        config,
+        # save_dataset_path=f'{PATH_PREFIX}/larger_balanced_set_dataset_random.pth',
+        save_dataset_path=dataset_path,
+        save_tokenizer_path=f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl',
         randomize_sequence_order=True
     )
 
-    run(
-        config,
-        dataset_path=dataset_path
-    )
+    # run(
+    #     config,
+    #     dataset_path=dataset_path
+    # )
 
     # # OLD - before Jan 15th
 
