@@ -55,7 +55,9 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
     total = 0
 
     for index, sequences in enumerate(dataloader):
-        print(f"Input: {index}/{len(dataloader)}")
+
+        if index % 1000 == 0:
+            print(f"Input: {index}/{len(dataloader)}")
         inputs = sequences[:, : config.input_size].to(device)
         targets = sequences[:, config.input_size:].to(device)
 
@@ -428,17 +430,23 @@ if __name__ == "__main__":
     model.load_state_dict(checkpoint["model"])
 
 
-    val_accuracy = calculate_accuracy(final_model, final_val_loader, final_config)
-    print("Val accuracy for final model on final dataset: ", val_accuracy)
+    final_final_val_accuracy = calculate_accuracy(final_model, final_val_loader, final_config)
+    print("Val accuracy for final model on final dataset: ", final_final_val_accuracy)
 
-    val_accuracy = calculate_accuracy(final_model, val_loader, final_config)
-    print("Val accuracy for final model on original: ", val_accuracy)
+    final_orig_val_accuracy = calculate_accuracy(final_model, val_loader, final_config)
+    print("Val accuracy for final model on original: ", final_orig_val_accuracy)
 
-    val_accuracy = calculate_accuracy(model, final_val_loader, config)
-    print("Val accuracy for model on final dataset: ", val_accuracy)
+    orig_final_val_accuracy = calculate_accuracy(model, final_val_loader, config)
+    print("Val accuracy for model on final dataset: ", orig_final_val_accuracy)
 
-    val_accuracy = calculate_accuracy(model, val_loader, config)
-    print("Val accuracy for model on original: ", val_accuracy)
+    orig_orig_val_accuracy = calculate_accuracy(model, val_loader, config)
+    print("Val accuracy for model on original: ", orig_orig_val_accuracy)
+
+    with open("accuracies_benchmarking.txt", "w") as f:
+        f.write(f"Val accuracy for final model on final dataset: {final_final_val_accuracy:.4f}\n")
+        f.write(f"Val accuracy for final model on original: {final_orig_val_accuracy:.4f}\n")
+        f.write(f"Val accuracy for model on final dataset: {orig_final_val_accuracy:.4f}\n")
+        f.write(f"Val accuracy for model on original: {orig_orig_val_accuracy:.4f}\n")
     
 
     # # OLD - before Jan 15th
