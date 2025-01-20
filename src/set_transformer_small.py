@@ -12,7 +12,7 @@ from torch import optim
 import wandb
 from model import GPT
 # from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20, GPTConfig44_AttrFirst
-from model import GPTConfig44, GPTConfig44TriplesEmbdDrop, GPTConfig44_AttrFirst, GPTConfig44_BalancedSets, GPTConfig44_Final
+from model import GPTConfig44, GPTConfig44TriplesEmbdDrop, GPTConfig44_AttrFirst, GPTConfig44_BalancedSets, GPTConfig44_Final, GPTConfig44_FinalLR
 from model import add_causal_masking
 from data_utils import initialize_datasets, initialize_loaders, initialize_triples_datasets
 import random
@@ -24,7 +24,7 @@ from classify import LinearModel, evaluate_model, analyze_weights, plot_weights_
 from sklearn.model_selection import train_test_split
 from dimension_reduce import run_pca_analysis, run_umap_analysis
 from binding_id import construct_binding_id_dataset, train_binding_classifier, train_binding_classifier_single_chunk
-
+from torch.cuda.amp import autocast, GradScaler
 from classify import run_classify
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -55,22 +55,24 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
     total = 0
 
     for index, sequences in enumerate(dataloader):
-
         if index % 1000 == 0:
             print(f"Input: {index}/{len(dataloader)}")
-        inputs = sequences[:, : config.input_size].to(device)
+            
+        inputs = sequences[:, :config.input_size].to(device)
         targets = sequences[:, config.input_size:].to(device)
 
-        outputs = model.generate(
-            inputs, max_new_tokens=config.target_size)
+        # Add autocast for the forward pass (model.generate)
+        with autocast():
+            outputs = model.generate(
+                inputs, max_new_tokens=config.target_size)
+            
         predictions = outputs[:, config.input_size:]
 
         mask = targets != config.padding_token  # Create a mask to ignore padding
         matches = ((predictions == targets) | ~mask).all(dim=1)
-        # breakpoint()
+
         if save_incorrect_path:
             with open(save_incorrect_path, "a") as f:
-                # Print incorrect predictions and corresponding targets to file
                 tokenizer = load_tokenizer(tokenizer_path)
                 for i in range(len(matches)):
                     if not matches[i].item():
@@ -93,25 +95,17 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
 
 
 @torch.no_grad()
-def evaluate_val_loss(
-    model,
-    val_loader,
-    optimizer,
-    counter,
-    best_val_loss,
-    val_losses,
-    config,
-    epoch=None,
-):
+def evaluate_val_loss(model, val_loader, optimizer, counter, best_val_loss, val_losses, config, epoch):
     model.eval()
     total_val_loss = 0
-    avg_val_loss = 0
-
-    for inputs in val_loader:
-        inputs = inputs.to(device)
-        _, loss, _, _ = model(inputs, True)
-        total_val_loss += loss.item()
-
+    
+    with torch.no_grad():
+        for inputs in val_loader:
+            inputs = inputs.to(device)
+            with autocast():  # Add this line
+                _, loss, _, _ = model(inputs, True)
+            total_val_loss += loss.item()
+    
     avg_val_loss = total_val_loss / len(val_loader)
     val_losses.append(avg_val_loss)
 
@@ -177,6 +171,17 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
         optimizer = optim.AdamW(
             model.parameters(), lr=config.lr, weight_decay=0.01)
 
+        scheduler = torch.optim.lr_scheduler.OneCycleLR(
+            optimizer,
+            max_lr=1e-3,  # Your current learning rate
+            epochs=config.epochs,
+            steps_per_epoch=len(train_loader),
+            pct_start=0.1,  # 10% of training for warmup
+            div_factor=25   # Starting lr will be max_lr/25
+        )
+
+        scaler = GradScaler()
+        
         train_losses = []
         val_losses = []
 
@@ -187,19 +192,36 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
         for epoch in range(config.epochs):
             if counter >= config.patience:
                 break
+            
             model.train()
             total_train_loss = 0
+            
             for index, inputs in enumerate(train_loader):
                 if index % 10000 == 0:
-                    print(f"Epoch: {epoch}/{config.epochs}, Batch: {index}/{len(train_loader)}")
-                model.train()
+                    current_lr = scheduler.get_last_lr()[0]
+                    print(f"Epoch: {epoch}/{config.epochs}, Batch: {index}/{len(train_loader)}, LR: {current_lr:.2e}")
+                
                 inputs = inputs.to(device)
                 optimizer.zero_grad()
-                _, loss, _, _ = model(inputs, True)
-                loss.backward()
-                optimizer.step()
+                
+                # Automatic mixed precision
+                with autocast():
+                    _, loss, _, _ = model(inputs, True)
+                
+                # Scale the loss and call backward
+                scaler.scale(loss).backward()
+                
+                # Unscale gradients and clip them
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                
+                # Step optimizer and update scaler
+                scaler.step(optimizer)
+                scaler.update()
+                scheduler.step()
+                
                 total_train_loss += loss.item()
-
+                
             avg_train_loss = total_train_loss / len(train_loader)
             train_losses.append(avg_train_loss)
 
@@ -216,6 +238,7 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
             )
 
             wandb_log(config, avg_train_loss, avg_val_loss, epoch=epoch)
+            wandb.log({"learning_rate": scheduler.get_last_lr()[0]}, step=epoch)
 
     print("Calculating accuracy")
     train_accuracy, val_accuracy = model_accuracy(config, model, train_loader, val_loader)
@@ -390,6 +413,15 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
+     # Attempt to improve model accuracy - with lr scheduler and amp
+    config = GPTConfig44_FinalLR()
+    dataset_path = f'{PATH_PREFIX}/final_causal_balanced_dataset.pth'
+    run(
+        config,
+        dataset_path=dataset_path
+    )
+
+
     # # Attempt to improve model accuracy
     # config = GPTConfig44_Final()
     # dataset_path = f'{PATH_PREFIX}/final_causal_balanced_dataset.pth'
@@ -407,48 +439,48 @@ if __name__ == "__main__":
     #     dataset_path=dataset_path
     # )
 
-    final_config = GPTConfig44_Final()
-    # tokenizer_path=f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl',
+    # final_config = GPTConfig44_Final()
+    # # tokenizer_path=f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl',
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    final_model = GPT(final_config).to(device)
-    checkpoint = torch.load(f"{PATH_PREFIX}/{final_config.filename}", weights_only=False)
-    final_model.load_state_dict(checkpoint["model"])
+    # final_model = GPT(final_config).to(device)
+    # checkpoint = torch.load(f"{PATH_PREFIX}/{final_config.filename}", weights_only=False)
+    # final_model.load_state_dict(checkpoint["model"])
 
-    final_dataset_path = f'{PATH_PREFIX}/final_causal_balanced_dataset.pth'
-    final_dataset = torch.load(final_dataset_path)
-    final_train_loader, final_val_loader = initialize_loaders(final_config, final_dataset)
+    # final_dataset_path = f'{PATH_PREFIX}/final_causal_balanced_dataset.pth'
+    # final_dataset = torch.load(final_dataset_path)
+    # final_train_loader, final_val_loader = initialize_loaders(final_config, final_dataset)
 
 
-    config = GPTConfig44()
+    # config = GPTConfig44()
     
-    dataset_path = f'{PATH_PREFIX}/balanced_set_dataset_random.pth'
-    dataset = torch.load(dataset_path)
-    train_loader, val_loader = initialize_loaders(config, dataset)
+    # dataset_path = f'{PATH_PREFIX}/balanced_set_dataset_random.pth'
+    # dataset = torch.load(dataset_path)
+    # train_loader, val_loader = initialize_loaders(config, dataset)
 
-    model = GPT(config).to(device)
-    checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
-    model.load_state_dict(checkpoint["model"])
+    # model = GPT(config).to(device)
+    # checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
+    # model.load_state_dict(checkpoint["model"])
 
 
-    final_final_val_accuracy = calculate_accuracy(final_model, final_val_loader, final_config)
-    print("Val accuracy for final model on final dataset: ", final_final_val_accuracy)
+    # final_final_val_accuracy = calculate_accuracy(final_model, final_val_loader, final_config)
+    # print("Val accuracy for final model on final dataset: ", final_final_val_accuracy)
 
-    final_orig_val_accuracy = calculate_accuracy(final_model, val_loader, final_config)
-    print("Val accuracy for final model on original: ", final_orig_val_accuracy)
+    # final_orig_val_accuracy = calculate_accuracy(final_model, val_loader, final_config)
+    # print("Val accuracy for final model on original: ", final_orig_val_accuracy)
 
-    orig_final_val_accuracy = calculate_accuracy(model, final_val_loader, config)
-    print("Val accuracy for model on final dataset: ", orig_final_val_accuracy)
+    # orig_final_val_accuracy = calculate_accuracy(model, final_val_loader, config)
+    # print("Val accuracy for model on final dataset: ", orig_final_val_accuracy)
 
-    orig_orig_val_accuracy = calculate_accuracy(model, val_loader, config)
-    print("Val accuracy for model on original: ", orig_orig_val_accuracy)
+    # orig_orig_val_accuracy = calculate_accuracy(model, val_loader, config)
+    # print("Val accuracy for model on original: ", orig_orig_val_accuracy)
 
-    with open("accuracies_benchmarking.txt", "w") as f:
-        f.write(f"Val accuracy for final model on final dataset: {final_final_val_accuracy:.4f}\n")
-        f.write(f"Val accuracy for final model on original: {final_orig_val_accuracy:.4f}\n")
-        f.write(f"Val accuracy for model on final dataset: {orig_final_val_accuracy:.4f}\n")
-        f.write(f"Val accuracy for model on original: {orig_orig_val_accuracy:.4f}\n")
+    # with open("accuracies_benchmarking.txt", "w") as f:
+    #     f.write(f"Val accuracy for final model on final dataset: {final_final_val_accuracy:.4f}\n")
+    #     f.write(f"Val accuracy for final model on original: {final_orig_val_accuracy:.4f}\n")
+    #     f.write(f"Val accuracy for model on final dataset: {orig_final_val_accuracy:.4f}\n")
+    #     f.write(f"Val accuracy for model on original: {orig_orig_val_accuracy:.4f}\n")
     
 
     # # OLD - before Jan 15th
