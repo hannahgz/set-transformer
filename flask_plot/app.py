@@ -7,7 +7,7 @@ from typing import List, Tuple
 from dataclasses import dataclass
 import torch
 import os
-from model import GPT, GPTConfig44_BalancedSets
+from model import GPT, GPTConfig44_BalancedSets, GPTConfig44_Final
 from tokenizer import load_tokenizer
 import random
 
@@ -166,59 +166,204 @@ def attention_weights_from_sequence(
     
     return all_att_weights_np
 
+# def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4, n_heads=4, threshold=0.01):
+#     fig = make_subplots(rows=n_layers, cols=n_heads, 
+#                         subplot_titles=[f"Layer {l+1} Head {h+1}" for l in range(n_layers) for h in range(n_heads)],
+#                         specs=[[{"secondary_y": True} for _ in range(n_heads)] for _ in range(n_layers)],
+#                         vertical_spacing=0.03)
+    
+#     # Pre-calculate x coordinates
+#     x_coords = [0, 1]
+
+#     # Set range for both axes
+#     y_min = -0.5  # Add some padding
+#     y_max = len(labels1) - 0.5  # Add some padding
+    
+
+#     reversed_labels = labels1[::-1]
+
+#     highlight_indices = {len(labels1) - i - 1: 'green' for i, (label1, label2) in enumerate(zip(labels1, labels2)) if label1 != label2}
+
+#     custom_ticktext = []
+#     for i, label in enumerate(reversed_labels):
+#         if i in highlight_indices and i > 8:
+#             # Use HTML color tag
+#             custom_ticktext.append(f'<span style="color: {highlight_indices[i]}">{label}</span>')
+#         else:
+#             custom_ticktext.append(label)
+    
+#     for layer in range(n_layers):
+#         for head in range(n_heads):
+#             # Get the attention weights for this layer and head
+#             weights_diff = attention_weights[0][layer][head] - attention_weights[1][layer][head]
+            
+#             # Create coordinate arrays for all possible connections
+#             n_points = len(labels1)
+#             all_connections = []
+            
+#             # Generate all possible connections
+#             for i in range(n_points):
+#                 for j in range(n_points):
+#                     weight = abs(weights_diff[i, j])
+#                     if weight > threshold:
+#                         # Flip the y-coordinates to match natural reading direction (top-to-bottom)
+#                         all_connections.append({
+#                             'x': x_coords,
+#                             'y': [n_points - 1 - i, n_points - 1 - j],  # Flip the y coordinates
+#                             'weight': weight,
+#                             'from_idx': i,  # Store original indices for hover text
+#                             'to_idx': j
+#                         })
+            
+#             # Sort connections by weight to draw strongest connections last
+#             # all_connections.sort(key=lambda x: x['weight'])
+            
+#             # Add traces for each significant connection
+#             for conn in all_connections:
+#                 fig.add_trace(
+#                     go.Scatter(
+#                         x=conn['x'],
+#                         y=conn['y'],
+#                         mode='lines',
+#                         line=dict(
+#                             color='blue',
+#                             width=max(1.0, conn['weight'] * 5)
+#                         ),
+#                         opacity=conn['weight'],
+#                         showlegend=False,
+#                         hovertemplate=f"Weight: {conn['weight']:.3f}<br>From: {labels1[conn['from_idx']]}<br>To: {labels1[conn['to_idx']]}",
+#                         name="",
+#                         hoveron='points+fills',
+#                     ),
+#                     row=layer+1, col=head+1,
+#                     secondary_y=False
+#                 )
+        
+#             if len(all_connections) == 0:
+#                 fig.add_trace(
+#                     go.Scatter(
+#                         x=[None],
+#                         y=[None],
+#                         mode='lines',
+#                         line=dict(color='blue', width=1),
+#                         opacity=0,
+#                         showlegend=False,
+#                         hoverinfo='skip'
+#                     ),
+#                     row=layer+1, col=head+1,
+#                     secondary_y=False
+#                 )
+
+#             # Add dummy trace for secondary y-axis to ensure labels are shown
+#             fig.add_trace(
+#                 go.Scatter(
+#                     x=[None],
+#                     y=[None],
+#                     mode='lines',
+#                     line=dict(color='blue', width=1),
+#                     opacity=0,
+#                     showlegend=False,
+#                     hoverinfo='skip'
+#                 ),
+#                 row=layer+1, col=head+1,
+#                 secondary_y=True
+#             )
+            
+#             # Update axes (doing this only once per subplot)
+#             fig.update_xaxes(
+#                 ticktext=["Query", "Key"],
+#                 tickvals=[0, 1],
+#                 row=layer+1,
+#                 col=head+1,
+#                 range=[-0.1, 1.1],
+#                 showline=False,
+#                 showgrid=False  # Disable grid to reduce rendering overhead
+#             )
+
+#             # for secondary_y in [False, True]:
+#             #     fig.update_yaxes(
+#             #         # ticktext=reversed_labels,
+#             #         ticktext=custom_ticktext,
+#             #         tickvals=list(range(len(labels1))),
+#             #         range=[y_min, y_max],
+#             #         secondary_y=secondary_y,
+#             #         row=layer+1,
+#             #         col=head+1,
+#             #         showline=False,
+#             #         showgrid=False,
+#             #         side='left' if not secondary_y else 'right'
+#             #     )
+
+#             for secondary_y in [False, True]:
+#                 fig.update_yaxes(
+#                     ticktext=custom_ticktext,
+#                     tickvals=list(range(len(labels1))),
+#                     range=[y_min, y_max],
+#                     secondary_y=secondary_y,
+#                     row=layer+1,
+#                     col=head+1,
+#                     showline=False,
+#                     showgrid=False,
+#                     side='left' if not secondary_y else 'right',
+#     )
+
+#     # Optimize layout
+#     fig.update_layout(
+#         height=n_layers*300,
+#         width=n_heads*250,
+#         # title_text="Attention Line Pattern Differences (Group 1 minus Group 2)",
+#         showlegend=False,
+#     )
+
+#     return fig
+
 def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4, n_heads=4, threshold=0.01):
-    fig = make_subplots(rows=n_layers, cols=n_heads, 
-                        subplot_titles=[f"Layer {l+1} Head {h+1}" for l in range(n_layers) for h in range(n_heads)],
-                        specs=[[{"secondary_y": True} for _ in range(n_heads)] for _ in range(n_layers)],
-                        vertical_spacing=0.03)
+    # Calculate a more compact height based on screen size
+    height_per_layer = 400  # Reduced from 300
+    total_height = n_layers * height_per_layer
     
-    # Pre-calculate x coordinates
+    fig = make_subplots(
+        rows=n_layers, 
+        cols=n_heads,
+        subplot_titles=[f"L{l+1}H{h+1}" for l in range(n_layers) for h in range(n_heads)],  # Shortened titles
+        specs=[[{"secondary_y": True} for _ in range(n_heads)] for _ in range(n_layers)],
+        vertical_spacing=0.02,  # Reduced spacing between subplots
+        horizontal_spacing=0.02  # Reduced horizontal spacing
+    )
+    
     x_coords = [0, 1]
-
-    # Set range for both axes
-    y_min = -0.5  # Add some padding
-    y_max = len(labels1) - 0.5  # Add some padding
+    y_min = -0.5
+    y_max = len(labels1) - 0.5
     
-
     reversed_labels = labels1[::-1]
-
     highlight_indices = {len(labels1) - i - 1: 'green' for i, (label1, label2) in enumerate(zip(labels1, labels2)) if label1 != label2}
 
+    # Make the font size smaller
     custom_ticktext = []
     for i, label in enumerate(reversed_labels):
         if i in highlight_indices and i > 8:
-            # Use HTML color tag
-            custom_ticktext.append(f'<span style="color: {highlight_indices[i]}">{label}</span>')
+            custom_ticktext.append(f'<span style="color: {highlight_indices[i]};font-size:10px">{label}</span>')
         else:
-            custom_ticktext.append(label)
+            custom_ticktext.append(f'<span style="font-size:10px">{label}</span>')
     
     for layer in range(n_layers):
         for head in range(n_heads):
-            # Get the attention weights for this layer and head
             weights_diff = attention_weights[0][layer][head] - attention_weights[1][layer][head]
-            
-            # Create coordinate arrays for all possible connections
             n_points = len(labels1)
             all_connections = []
             
-            # Generate all possible connections
             for i in range(n_points):
                 for j in range(n_points):
                     weight = abs(weights_diff[i, j])
                     if weight > threshold:
-                        # Flip the y-coordinates to match natural reading direction (top-to-bottom)
                         all_connections.append({
                             'x': x_coords,
-                            'y': [n_points - 1 - i, n_points - 1 - j],  # Flip the y coordinates
+                            'y': [n_points - 1 - i, n_points - 1 - j],
                             'weight': weight,
-                            'from_idx': i,  # Store original indices for hover text
+                            'from_idx': i,
                             'to_idx': j
                         })
             
-            # Sort connections by weight to draw strongest connections last
-            # all_connections.sort(key=lambda x: x['weight'])
-            
-            # Add traces for each significant connection
             for conn in all_connections:
                 fig.add_trace(
                     go.Scatter(
@@ -227,7 +372,7 @@ def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4,
                         mode='lines',
                         line=dict(
                             color='blue',
-                            width=max(1.0, conn['weight'] * 5)
+                            width=max(0.5, conn['weight'] * 3)  # Reduced line width
                         ),
                         opacity=conn['weight'],
                         showlegend=False,
@@ -241,59 +386,32 @@ def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4,
         
             if len(all_connections) == 0:
                 fig.add_trace(
-                    go.Scatter(
-                        x=[None],
-                        y=[None],
-                        mode='lines',
-                        line=dict(color='blue', width=1),
-                        opacity=0,
-                        showlegend=False,
-                        hoverinfo='skip'
-                    ),
-                    row=layer+1, col=head+1,
-                    secondary_y=False
+                    go.Scatter(x=[None], y=[None], mode='lines', 
+                             line=dict(color='blue', width=1), opacity=0, 
+                             showlegend=False, hoverinfo='skip'),
+                    row=layer+1, col=head+1, secondary_y=False
                 )
 
-            # Add dummy trace for secondary y-axis to ensure labels are shown
             fig.add_trace(
-                go.Scatter(
-                    x=[None],
-                    y=[None],
-                    mode='lines',
-                    line=dict(color='blue', width=1),
-                    opacity=0,
-                    showlegend=False,
-                    hoverinfo='skip'
-                ),
-                row=layer+1, col=head+1,
-                secondary_y=True
+                go.Scatter(x=[None], y=[None], mode='lines',
+                          line=dict(color='blue', width=1), opacity=0,
+                          showlegend=False, hoverinfo='skip'),
+                row=layer+1, col=head+1, secondary_y=True
             )
             
-            # Update axes (doing this only once per subplot)
+            # Update x-axes with smaller font and ticks
             fig.update_xaxes(
-                ticktext=["Query", "Key"],
+                ticktext=["Q", "K"],  # Shortened labels
                 tickvals=[0, 1],
                 row=layer+1,
                 col=head+1,
                 range=[-0.1, 1.1],
                 showline=False,
-                showgrid=False  # Disable grid to reduce rendering overhead
+                showgrid=False,
+                tickfont=dict(size=4)  # Smaller font size
             )
 
-            # for secondary_y in [False, True]:
-            #     fig.update_yaxes(
-            #         # ticktext=reversed_labels,
-            #         ticktext=custom_ticktext,
-            #         tickvals=list(range(len(labels1))),
-            #         range=[y_min, y_max],
-            #         secondary_y=secondary_y,
-            #         row=layer+1,
-            #         col=head+1,
-            #         showline=False,
-            #         showgrid=False,
-            #         side='left' if not secondary_y else 'right'
-            #     )
-
+            # Update y-axes with smaller font and optimized spacing
             for secondary_y in [False, True]:
                 fig.update_yaxes(
                     ticktext=custom_ticktext,
@@ -305,14 +423,17 @@ def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4,
                     showline=False,
                     showgrid=False,
                     side='left' if not secondary_y else 'right',
-    )
+                    tickfont=dict(size=2),  # Smaller font size
+                )
 
     # Optimize layout
     fig.update_layout(
-        height=n_layers*600,
-        width=n_heads*300,
-        title_text="Attention Line Pattern Differences (Group 1 minus Group 2)",
+        height=total_height,
+        width=n_heads*250,  # Reduced width
         showlegend=False,
+        margin=dict(l=50, r=50, t=10, b=20),  # Optimized margins
+        title_x=0.5,
+        # font=dict(size=4)  # Global font size reduction
     )
 
     return fig
@@ -377,12 +498,17 @@ def save_cards():
     # ]
     sequence2 = generate_input(card_groups, "group2")
 
+    # attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
+    #     GPTConfig44_BalancedSets, sequence1, get_prediction=True)
+    
     attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
-        GPTConfig44_BalancedSets, sequence1, get_prediction=True)
+        GPTConfig44_Final, sequence1, tokenizer_path="final_causal_balanced_tokenizer.pkl", get_prediction=True)
     print("Got attention weights 1")
 
+    # attention_weights2, is_correct2, decoded_predictions2, decoded_targets2 = attention_weights_from_sequence(
+    #     GPTConfig44_BalancedSets, sequence2, get_prediction=True)
     attention_weights2, is_correct2, decoded_predictions2, decoded_targets2 = attention_weights_from_sequence(
-        GPTConfig44_BalancedSets, sequence2, get_prediction=True)
+        GPTConfig44_Final, sequence2, tokenizer_path="final_causal_balanced_tokenizer.pkl", get_prediction=True)
     print("Got attention weights 2")
 
     prediction_results = {

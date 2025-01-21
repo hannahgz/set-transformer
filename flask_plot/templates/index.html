@@ -6,189 +6,207 @@
     <title>Card Selector and Visualization</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
+        body {
+            margin: 0;
+            padding: 10px;
+            height: 100vh;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+            display: grid;
+            grid-template-columns: 250px 350px 1fr;
+            gap: 20px;
+            height: calc(100vh - 50px);
+            max-height: calc(100vh - 50px);
+            max-width: 100vw;
+            box-sizing: border-box;
+            padding-top: 5px;
+        }
+        .left-panel, .middle-panel, .right-panel {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
         }
         .card-container {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 20px;
-            margin: 20px 0;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin: 10px 0;
         }
         .card {
             border: 1px solid #ccc;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 8px;
+            border-radius: 4px;
+            background: white;
         }
         .attribute-select {
             width: 100%;
-            margin: 5px 0;
-            padding: 5px;
+            margin: 2px 0;
+            padding: 2px;
+            font-size: 12px;
         }
-        .save-button {
-            margin: 20px 0;
-            padding: 10px 20px;
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .save-button, .duplicate-button {
+            padding: 6px 12px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-        }
-        .duplicate-button {
-            margin: 20px 0;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .save-button:hover {
-            background-color: #45a049;
-        }
-        .visualization {
-            margin-top: 40px;
-            overflow-x: auto;
+            font-size: 12px;
         }
         .mappings-container {
-            margin: 20px 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-            border-radius: 8px;
+            margin: 0;
+            padding: 10px;
+            background-color: white;
+            border-radius: 4px;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow-x: hidden;
         }
         .mapping-item {
-            margin: 10px 0;
-            padding: 10px;
-            background-color: white;
+            margin: 5px 0;
+            padding: 6px;
+            background-color: #f8f9fa;
             border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-size: 12px;
+            max-width: 300px;
         }
         .prediction-info {
-            margin-top: 10px;
-            padding: 10px;
+            margin-top: 8px;
+            padding: 8px;
             background-color: #e9ecef;
             border-radius: 4px;
-        }
-        .correct {
-            color: #28a745;
-        }
-        .incorrect {
-            color: #dc3545;
-        }
-        .sequence-comparison {
-            font-family: 'Courier New', monospace;
-            /* white-space: pre; */
-            background-color: white;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 10px;
-            white-space: normal;  /* Allow wrapping within the element */
-            word-wrap: break-word; /* Force long words to break to the next line if needed */
-            word-break: break-word; /* Break long words if needed */
-            max-width: 100%; /* Ensure container does not overflow */
-            overflow-wrap: break-word;  /* Break long words if they don't fit */
-            word-wrap: break-word; /* Ensure word break works in all browsers */
-        }
-        .sequence-label {
-            font-weight: bold;
-            display: inline-block;
-            width: 150px;
+            font-size: 12px;
+            max-width: 300px;
         }
         .group-header {
-            text-align: left;
-            margin-bottom: 20px; /* Space between header and cards */
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        h2 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+        h3 {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        h4 {
+            margin: 5px 0;
+            font-size: 13px;
+        }
+        .threshold-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 5px 0;
+            font-size: 12px;
+        }
+        #threshold-input {
+            width: 60px;
+            padding: 2px;
+        }
+        /* Keep other existing styles but remove any margin/padding that might cause overflow */
+        .sequence-comparison {
+            font-size: 12px;
+            margin: 5px 0;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow-wrap: break-word;
+        }
+        .sequence-label {
+            font-size: 12px;
+            margin: 5px 0;
+            width: auto;
+            padding-right: 10px;
         }
         .sequence-text {
+            font-size: 12px;
+            margin: 5px 0;
+            max-width: calc(100% - 100px);
             display: inline-block;
-            word-wrap: break-word;  /* Enable word wrapping for long sequences */
-            overflow-wrap: break-word;  /* Additional support for wrapping long text */
-            white-space: normal;  /* Make sure the text can wrap */
-            max-width: 100%;  /* Prevent the inline-block from overflowing */
+            word-break: break-word;
         }
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border-left-color: #09f;
-            animation: spin 1s ease infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
+        #plotly-div {
+            height: calc(100% - 50px);
+            width: 100%;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>SET! Attention Weight Visualizer</h2>
-
-        {{ macros.render_group('group1', card_labels) }}
-        {{ macros.render_group('group2', card_labels) }}
-        
-
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <button class="save-button" onclick="saveCards()">Save Cards</button>
-            <button class="duplicate-button" onclick="duplicateGroup1To2()">Duplicate Group 1 to 2</button>
-            <label for="threshold-input">Threshold for Weights:</label>
-            <input type="number" id="threshold-input" value="0.1" min="0" max="1" step="0.01">
-        </div>
-
-        <div id="loading-indicator" style="display: none;">
-            <div class="spinner"></div>
-        </div>
-
-        <div class="mappings-container">
-            <h3>Saved Card Mappings</h3>
-            <!-- Section for Set 1 -->
-            <div class="set-mappings" id="group1-mappings">
-                <h4>Set 1</h4>
-                <div id="group1-list">
-                    {% for mapping in saved_mappings.group1 %}
-                    <div class="mapping-item">
-                        <strong>Card {{mapping.letter}}:</strong> 
-                        {{mapping.attributes.shape}} {{mapping.attributes.color}} {{mapping.attributes.number}} {{mapping.attributes.shading}}
-                    </div>
-                    {% endfor %}
-                </div>
-                <div class="prediction-info" id="group1-prediction">
-                    <!-- Prediction info will be inserted here -->
-                </div>
+        <!-- Left Panel - Card Selection -->
+        <div class="left-panel">
+            <h2>SET! Card Selection</h2>
+            {{ macros.render_group('group1', card_labels) }}
+            {{ macros.render_group('group2', card_labels) }}
+            
+            <div class="button-container">
+                <button class="save-button" onclick="saveCards()">Save</button>
+                <button class="duplicate-button" onclick="duplicateGroup1To2()">Duplicate 1→2</button>
             </div>
-
-            <!-- Section for Set 2 -->
-            <div class="set-mappings" id="group2-mappings">
-                <h4>Set 2</h4>
-                <div id="group2-list">
-                    {% for mapping in saved_mappings.group2 %}
-                    <div class="mapping-item">
-                        <strong>Card {{mapping.letter}}:</strong> 
-                        {{mapping.attributes.shape}} {{mapping.attributes.color}} {{mapping.attributes.number}} {{mapping.attributes.shading}}
-                    </div>
-                    {% endfor %}
-                </div>
-                <div class="prediction-info" id="group2-prediction">
-                    <!-- Prediction info will be inserted here -->
-                </div>
+            <div class="threshold-container">
+                <label for="threshold-input">Threshold:</label>
+                <input type="number" id="threshold-input" value="0.1" min="0" max="1" step="0.01">
+            </div>
+            <div id="loading-indicator" style="display: none;">
+                <div class="spinner"></div>
             </div>
         </div>
 
-        <div class="visualization">
+        <!-- Middle Panel - Mappings -->
+        <div class="middle-panel">
+            <h2>Saved Card Mappings</h2>
+            <div class="mappings-container">
+                <div class="set-mappings" id="group1-mappings">
+                    <h3>Set 1</h3>
+                    <div id="group1-list">
+                        {% for mapping in saved_mappings.group1 %}
+                        <div class="mapping-item">
+                            <strong>Card {{mapping.letter}}:</strong> 
+                            {{mapping.attributes.shape}} {{mapping.attributes.color}} {{mapping.attributes.number}} {{mapping.attributes.shading}}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="prediction-info" id="group1-prediction"></div>
+                </div>
+
+                <div class="set-mappings" id="group2-mappings">
+                    <h3>Set 2</h3>
+                    <div id="group2-list">
+                        {% for mapping in saved_mappings.group2 %}
+                        <div class="mapping-item">
+                            <strong>Card {{mapping.letter}}:</strong> 
+                            {{mapping.attributes.shape}} {{mapping.attributes.color}} {{mapping.attributes.number}} {{mapping.attributes.shading}}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="prediction-info" id="group2-prediction"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Visualization -->
+        <div class="right-panel">
             <h2>Attention Visualization</h2>
-            <h5><span style="color: green">green text denotes where two inputs differ</span></h5>
+            <h5 style="margin: 5px 0;"><span style="color: green">green text denotes where two inputs differ</span></h5>
             <div id="plotly-div"></div>
         </div>
     </div>
 
     <script>
-        // Initialize the plot
+        // Keep all existing JavaScript code as is
         var graphs = {{ plot_json | safe }};
         Plotly.newPlot('plotly-div', graphs.data, graphs.layout);
 
@@ -196,9 +214,8 @@
             const groupPrediction = document.getElementById(`group${group_num}-prediction`);
             const [sequence, is_correct, decoded_predictions, decoded_targets] = prediction_results[group_num]
 
-            // Create a formattedComparison that aligns the sequences
             const formattedComparison = `
-                <h3>Prediction Results:</h3>
+                <h4>Prediction Results:</h4>
                 <p><strong>Status:</strong> <span class="${is_correct ? 'correct' : 'incorrect'}">${is_correct ? 'Correct' : 'Incorrect'}</span></p>
                 <div class="sequence-comparison">
                     <div><span class="sequence-label">Input:</span><span class="sequence-text">${sequence.join(' ')}</span></div>
@@ -208,7 +225,7 @@
             
             groupPrediction.innerHTML = formattedComparison;
         }
-        
+
         function saveCards() {
             let group1Cards = [];
             let group2Cards = [];
@@ -238,23 +255,19 @@
                 group2Cards.push(cardGroup2);
             }
 
-            // Get the threshold value from the input box
             const threshold = parseFloat(document.getElementById('threshold-input').value);
 
-            // Ensure the threshold value is within [0, 1]
             if (threshold < 0 || threshold > 1 || isNaN(threshold)) {
                 alert('Please enter a valid threshold between 0 and 1.');
                 return;
             }
 
-            // Combine into an object to send to the server
             const cardData = {
                 group1: group1Cards,
                 group2: group2Cards,
                 threshold: threshold,
             };
 
-            // Send the data to the server
             fetch('/save_cards', {
                 method: 'POST',
                 headers: {
@@ -265,57 +278,42 @@
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
-                // console.log("Input1: ", data.input1);
-                // console.log("Input2: ", data.input2);
-                // Refresh the page to show updated mappings
-                // location.reload();
-                // console.log('Server Response:', data);
-                // Update prediction information
                 updatePredictionInfo(data.prediction_results, 1);
                 updatePredictionInfo(data.prediction_results, 2);
-
                 updateSavedMappings(data.cards);
                 const updatedPlot = JSON.parse(data.plot_json);
-
-                console.log('Updated Plot:', updatedPlot);
-                // Re-render the plot with the updated data
                 Plotly.react('plotly-div', updatedPlot.data, updatedPlot.layout);
             })
             .catch((error) => {
                 console.error('Error:', error);
                 alert('Error saving cards!');
-            }).finally(() => {
-                // Hide loading indicator
+            })
+            .finally(() => {
                 loadingIndicator.style.display = 'none';
             });
         }
 
         function duplicateGroup1To2() {
             for (let i = 0; i < 5; i++) {
-                // Get selected values from Set 1
                 const shape = document.getElementById(`group1-shape${i}`).value;
                 const color = document.getElementById(`group1-color${i}`).value;
                 const number = document.getElementById(`group1-number${i}`).value;
                 const shading = document.getElementById(`group1-shading${i}`).value;
 
-                // Set those values in Set 2
                 document.getElementById(`group2-shape${i}`).value = shape;
                 document.getElementById(`group2-color${i}`).value = color;
                 document.getElementById(`group2-number${i}`).value = number;
                 document.getElementById(`group2-shading${i}`).value = shading;
             }
-            // alert('Set 1 values have been duplicated to Set 2!');
         }
 
         function updateSavedMappings(savedMappings) {
-            // Clear the existing mappings
             const group1List = document.getElementById('group1-list');
             const group2List = document.getElementById('group2-list');
 
             group1List.innerHTML = '';
             group2List.innerHTML = '';
 
-            // Update Set 1 mappings
             savedMappings.group1.forEach((mapping) => {
                 const mappingItem = document.createElement('div');
                 mappingItem.className = 'mapping-item';
@@ -326,7 +324,6 @@
                 group1List.appendChild(mappingItem);
             });
 
-            // Update Set 2 mappings
             savedMappings.group2.forEach((mapping) => {
                 const mappingItem = document.createElement('div');
                 mappingItem.className = 'mapping-item';
@@ -337,7 +334,6 @@
                 group2List.appendChild(mappingItem);
             });
         }
-
     </script>
 </body>
 </html>

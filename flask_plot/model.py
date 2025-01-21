@@ -479,6 +479,30 @@ class GPTConfig44_BalancedSets:
     end_of_seq_token: int = 13
     padding_token: int = 14
 
+@dataclass
+class GPTConfig44_Final:
+    lr: float = 1e-3
+    epochs: int = 100
+    batch_size: int = 64
+    n_layer: int = 4
+    n_head: int = 4
+    n_embd: int = 64
+    patience: int = 5
+    eval_freq: int = 0
+    dropout: float = 0.0
+    n_cards: int = 5
+    block_size: int = 49
+    vocab_size: int = 22
+    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
+    target_size: int = 8
+    pad_symbol: str = "_"
+    out_dir: str = ""
+    filename: str = "final_causal_balanced_layers_4_heads_4.pt"
+    end_of_seq_token: int = 13
+    padding_token: int = 14
+
+
 
 class LayerNorm(nn.Module):
     """LayerNorm but with an optional bias. PyTorch doesn't support simply bias=False"""
