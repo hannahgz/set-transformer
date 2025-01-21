@@ -45,14 +45,46 @@ def wandb_log(config, avg_train_loss, avg_val_loss, epoch=None):
     )
 
 
+def categorize_predict(target_num_sets, set_accuracy_dict, prediction_np):
+    if "*" in prediction_np:
+        set_accuracy_dict[target_num_sets]["incorrect"][0] += 1
+    elif "/" in prediction_np:
+        set_accuracy_dict[target_num_sets]["incorrect"][2] += 1
+    else:
+        set_accuracy_dict[target_num_sets]["incorrect"][1] += 1
+    
 # Update accuracy calculation
 # TODO: add alternate measure for computing accuracy (set prediction, but wrong order of cards)
 @torch.no_grad()
-def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_incorrect_path=None):
+def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_incorrect_path=None, breakdown=False):
     print("Calculating accuracy")
     model.eval()
     correct = 0
     total = 0
+
+    set_accuracy_dict = {
+        0: {
+            "incorrect": {
+                0: 0,
+                1: 0,
+                2: 0
+            },
+            "total": 0},
+        1: {
+            "incorrect": {
+                0: 0,
+                1: 0,
+                2: 0
+            },
+            "total": 0},
+        2: {
+            "incorrect": {
+                0: 0,
+                1: 0,
+                2: 0
+            },
+            "total": 0},
+    }
 
     for index, sequences in enumerate(dataloader):
         if index % 1000 == 0:
@@ -84,6 +116,35 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
                             f"  Target: {tokenizer.decode(targets[i].cpu().numpy())}\n")
                         f.write(
                             f"  Prediction: {tokenizer.decode(predictions[i].cpu().numpy())}\n\n")
+                        
+        if breakdown:
+            for i in range(len(matches)):
+                target_np = targets[i].cpu().numpy()
+                prediction_np = predictions[i].cpu().numpy()
+                if not matches[i].item():
+                    if "/" in target_np:
+                        categorize_predict(
+                            target_num_sets=2, 
+                            set_accuracy_dict=set_accuracy_dict, 
+                            prediction_np=prediction_np)
+                    elif "*" in target_np:
+                        categorize_predict(
+                            target_num_sets=0, 
+                            set_accuracy_dict=set_accuracy_dict, 
+                            prediction_np=prediction_np)
+                    else:
+                        categorize_predict(
+                            target_num_sets=1, 
+                            set_accuracy_dict=set_accuracy_dict, 
+                            prediction_np=prediction_np)
+                
+                if "/" in target_np:
+                    set_accuracy_dict[2]["total"] += 1
+                elif "*" in target_np:
+                    set_accuracy_dict[0]["total"] += 1
+                else:
+                    set_accuracy_dict[1]["total"] += 1
+
 
         correct += matches.sum().item()
         total += mask.any(dim=1).sum().item()
@@ -413,13 +474,15 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-     # Attempt to improve model accuracy - with lr scheduler and amp
-    config = GPTConfig44_FinalLR()
-    dataset_path = f'{PATH_PREFIX}/final_causal_balanced_dataset.pth'
-    run(
-        config,
-        dataset_path=dataset_path
-    )
+    tokenizer = load_tokenizer(f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl')
+    breakpoint()
+    #  # Attempt to improve model accuracy - with lr scheduler and amp
+    # config = GPTConfig44_FinalLR()
+    # dataset_path = f'{PATH_PREFIX}/final_causal_balanced_dataset.pth'
+    # run(
+    #     config,
+    #     dataset_path=dataset_path
+    # )
 
 
     # # Attempt to improve model accuracy
