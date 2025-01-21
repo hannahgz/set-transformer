@@ -45,10 +45,10 @@ def wandb_log(config, avg_train_loss, avg_val_loss, epoch=None):
     )
 
 
-def categorize_predict(target_num_sets, set_accuracy_dict, prediction_np):
-    if "*" in prediction_np:
+def categorize_predict(target_num_sets, set_accuracy_dict, prediction_np, two_set_id, zero_set_id):
+    if zero_set_id in prediction_np:
         set_accuracy_dict[target_num_sets]["incorrect"][0] += 1
-    elif "/" in prediction_np:
+    elif two_set_id in prediction_np:
         set_accuracy_dict[target_num_sets]["incorrect"][2] += 1
     else:
         set_accuracy_dict[target_num_sets]["incorrect"][1] += 1
@@ -118,29 +118,40 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
                             f"  Prediction: {tokenizer.decode(predictions[i].cpu().numpy())}\n\n")
                         
         if breakdown:
+            tokenizer = load_tokenizer(tokenizer_path)
+
+            two_set_id = tokenizer.token_to_id["/"]
+            zero_set_id = tokenizer.token_to_id["*"]
+
             for i in range(len(matches)):
                 target_np = targets[i].cpu().numpy()
                 prediction_np = predictions[i].cpu().numpy()
                 if not matches[i].item():
-                    if "/" in target_np:
+                    if two_set_id in target_np:
                         categorize_predict(
                             target_num_sets=2, 
                             set_accuracy_dict=set_accuracy_dict, 
-                            prediction_np=prediction_np)
-                    elif "*" in target_np:
+                            prediction_np=prediction_np,
+                            two_set_id=two_set_id,
+                            zero_set_id=zero_set_id)
+                    elif zero_set_id in target_np:
                         categorize_predict(
                             target_num_sets=0, 
                             set_accuracy_dict=set_accuracy_dict, 
-                            prediction_np=prediction_np)
+                            prediction_np=prediction_np,
+                            two_set_id=two_set_id,
+                            zero_set_id=zero_set_id)
                     else:
                         categorize_predict(
                             target_num_sets=1, 
                             set_accuracy_dict=set_accuracy_dict, 
-                            prediction_np=prediction_np)
+                            prediction_np=prediction_np,
+                            two_set_id=two_set_id,
+                            zero_set_id=zero_set_id)
                 
-                if "/" in target_np:
+                if two_set_id in target_np:
                     set_accuracy_dict[2]["total"] += 1
-                elif "*" in target_np:
+                elif zero_set_id in target_np:
                     set_accuracy_dict[0]["total"] += 1
                 else:
                     set_accuracy_dict[1]["total"] += 1
@@ -151,6 +162,14 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
 
         if index % 1000 == 0:
             print("Accuracy: ", correct / total)
+            if breakdown:
+                print("Set Accuracy Dict: ", set_accuracy_dict)
+                for i in range(3):
+                    total_incorrect = sum(set_accuracy_dict[i]["incorrect"].values())
+                    print("Percentage of incorrect predictions for set size", i, ": ", total_incorrect / set_accuracy_dict[i]["total"])
+                    for j in range(3):
+                        print("\t Predicted incorrectly with set size", j, ": ", set_accuracy_dict[i]["incorrect"][j] / total_incorrect)
+                
 
     return correct / total
 
@@ -474,8 +493,65 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    tokenizer = load_tokenizer(f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl')
-    breakpoint()
+    # Breakdown accuracy
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    final_config = GPTConfig44_Final()
+    final_tokenizer_path=f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl',
+
+    final_model = GPT(final_config).to(device)
+    checkpoint = torch.load(f"{PATH_PREFIX}/{final_config.filename}", weights_only=False)
+    final_model.load_state_dict(checkpoint["model"])
+
+    final_dataset_path = f'{PATH_PREFIX}/final_causal_balanced_dataset.pth'
+    final_dataset = torch.load(final_dataset_path)
+    final_train_loader, final_val_loader = initialize_loaders(final_config, final_dataset)
+
+    config = GPTConfig44()
+    tokenizer_path = f'{PATH_PREFIX}/balanced_set_dataset_random_tokenizer.pkl'
+
+    dataset_path = f'{PATH_PREFIX}/balanced_set_dataset_random.pth'
+    dataset = torch.load(dataset_path)
+    train_loader, val_loader = initialize_loaders(config, dataset)
+
+    model = GPT(config).to(device)
+    checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
+    model.load_state_dict(checkpoint["model"])
+
+    final_final_val_accuracy = calculate_accuracy(
+        model=final_model, 
+        dataloader=final_val_loader,
+        config=final_config, 
+        tokenizer_path=final_tokenizer_path,
+        breakdown=True)
+    print("Val accuracy for final model on final dataset: ", final_final_val_accuracy)
+
+    final_orig_val_accuracy = calculate_accuracy(
+        model=final_model, 
+        dataloader=val_loader, 
+        config=final_config,
+        tokenizer_path=tokenizer_path,
+        breakdown=True)
+    print("Val accuracy for final model on original dataset: ", final_orig_val_accuracy)
+
+    orig_final_val_accuracy = calculate_accuracy(
+        model=model, 
+        dataloader=final_val_loader, 
+        config=config,
+        tokenizer_path=final_tokenizer_path,
+        breakdown=True)
+    print("Val accuracy for model on final dataset: ", orig_final_val_accuracy)
+
+    orig_orig_val_accuracy = calculate_accuracy(
+        model=model, 
+        data_loader=val_loader, 
+        config=config,
+        tokenizer_path=tokenizer_path,
+        breakdown=True)
+    print("Val accuracy for model on original dataset: ", orig_orig_val_accuracy)
+
+
+
     #  # Attempt to improve model accuracy - with lr scheduler and amp
     # config = GPTConfig44_FinalLR()
     # dataset_path = f'{PATH_PREFIX}/final_causal_balanced_dataset.pth'
