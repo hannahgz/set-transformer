@@ -6,7 +6,7 @@ from model import GPT
 # from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20, GPTConfig44_AttrFirst
 from model import GPTConfig44, GPTConfig44TriplesEmbdDrop, GPTConfig44_AttrFirst, GPTConfig44_BalancedSets, GPTConfig44_Final, GPTConfig44_FinalLR
 from model import add_causal_masking
-from data_utils import initialize_datasets, initialize_loaders, initialize_triples_datasets
+from data_utils import initialize_loaders, initialize_triples_datasets
 import random
 import numpy as np
 from tokenizer import load_tokenizer
