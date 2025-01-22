@@ -162,7 +162,7 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
 
         if index % 1000 == 0:
             print("Accuracy: ", correct / total)
-            if breakdown:
+            if breakdown and index != 0:
                 print("Set Accuracy Dict: ", set_accuracy_dict)
                 for i in range(3):
                     total_incorrect = sum(set_accuracy_dict[i]["incorrect"].values())
