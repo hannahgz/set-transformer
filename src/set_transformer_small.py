@@ -166,10 +166,11 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
                 print("Set Accuracy Dict: ", set_accuracy_dict)
                 for i in range(3):
                     total_incorrect = sum(set_accuracy_dict[i]["incorrect"].values())
-                    print("Percentage of incorrect predictions for set size", i, ": ", total_incorrect / set_accuracy_dict[i]["total"])
-                    for j in range(3):
-                        if total_incorrect != 0:
-                            print("\t Predicted incorrectly with set size", j, ": ", set_accuracy_dict[i]["incorrect"][j] / total_incorrect)
+                    if set_accuracy_dict[i]["total"] != 0:
+                        print("Percentage of incorrect predictions for set size", i, ": ", total_incorrect / set_accuracy_dict[i]["total"])
+                        for j in range(3):
+                            if total_incorrect != 0:
+                                print("\t Predicted incorrectly with set size", j, ": ", set_accuracy_dict[i]["incorrect"][j] / total_incorrect)
                 
 
     return correct / total
