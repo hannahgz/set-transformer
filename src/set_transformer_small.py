@@ -497,7 +497,7 @@ if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     final_config = GPTConfig44_Final()
-    final_tokenizer_path=f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl',
+    final_tokenizer_path=f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl'
 
     final_model = GPT(final_config).to(device)
     checkpoint = torch.load(f"{PATH_PREFIX}/{final_config.filename}", weights_only=False)
