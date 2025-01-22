@@ -15,15 +15,16 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     # Attempt to improve model accuracy
-    print("Initializing dataset")
+    
     config = GPTConfig44_Equal()
     dataset_path = f'{PATH_PREFIX}/equal_causal_balanced_dataset.pth'
-    tokenizer_path = f'{PATH_PREFIX}/equal_causal_balanced_tokenizer.pkl'
-    dataset = initialize_triples_datasets(
-        config,
-        save_dataset_path=dataset_path,
-        save_tokenizer_path=tokenizer_path
-    )
+    # tokenizer_path = f'{PATH_PREFIX}/equal_causal_balanced_tokenizer.pkl'
+    # print("Initializing dataset")
+    # dataset = initialize_triples_datasets(
+    #     config,
+    #     save_dataset_path=dataset_path,
+    #     save_tokenizer_path=tokenizer_path
+    # )
 
     print("Running model")
     run(

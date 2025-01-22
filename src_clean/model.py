@@ -357,9 +357,9 @@ class GPT(nn.Module):
         if get_loss:
             logits = self.lm_head(x) # (batch_size, seq_length, vocab_size)
             logits_for_loss = logits[
-                :, -(GPTConfig().target_size+1):-1, :
+                :, -(self.config.target_size+1):-1, :
             ]  
-            targets = idx[:, -GPTConfig().target_size :]
+            targets = idx[:, -self.config.target_size :]
             
             loss = F.cross_entropy(
                 logits_for_loss.reshape(-1, logits_for_loss.size(-1)),
