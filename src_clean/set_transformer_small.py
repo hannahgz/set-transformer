@@ -164,25 +164,22 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
 
 
 @torch.no_grad()
-def evaluate_val_loss(model, val_loader, optimizer, counter, best_val_loss, val_losses, config, epoch):
+def evaluate_val_loss(model, val_loader, optimizer, best_val_loss, val_losses, config, epoch):
     model.eval()
     total_val_loss = 0
     
     with torch.no_grad():
         for inputs in val_loader:
             inputs = inputs.to(device)
-            with autocast():  # Add this line
+            with autocast():
                 _, loss, _, _ = model(inputs, True)
             total_val_loss += loss.item()
     
     avg_val_loss = total_val_loss / len(val_loader)
     val_losses.append(avg_val_loss)
 
-    # if avg_val_loss < best_val_loss or always_save_checkpoint:
     if avg_val_loss < best_val_loss:
-        counter = 0
         best_val_loss = avg_val_loss
-
         checkpoint = {
             "model": model.state_dict(),
             "optimizer": optimizer.state_dict(),
@@ -192,11 +189,8 @@ def evaluate_val_loss(model, val_loader, optimizer, counter, best_val_loss, val_
         }
         print(f"saving checkpoint to {PATH_PREFIX}")
         torch.save(checkpoint, f"{PATH_PREFIX}/{config.filename}")
-    else:
-        counter += 1
 
-    return avg_val_loss, best_val_loss, counter
-
+    return avg_val_loss, best_val_loss
 
 
 def model_accuracy(config, model, train_loader, val_loader):
@@ -240,13 +234,13 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
         optimizer = optim.AdamW(
             model.parameters(), lr=config.lr, weight_decay=0.01)
 
-        scheduler = torch.optim.lr_scheduler.OneCycleLR(
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer,
-            max_lr=1e-3,  # Your current learning rate
-            epochs=config.epochs,
-            steps_per_epoch=len(train_loader),
-            pct_start=0.1,  # 10% of training for warmup
-            div_factor=25   # Starting lr will be max_lr/25
+            mode='min',
+            factor=0.5,  # Reduce LR by half when plateauing
+            patience=2,   # Wait 2 epochs before reducing LR
+            min_lr=1e-6,
+            verbose=True  # Print when LR changes
         )
 
         scaler = GradScaler()
@@ -287,27 +281,49 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
                 # Step optimizer and update scaler
                 scaler.step(optimizer)
                 scaler.update()
-                scheduler.step()
+                # scheduler.step()
                 
                 total_train_loss += loss.item()
-                
+
+                # Evaluate every eval_freq steps
+                if index > 0 and index % config.eval_freq == 0:
+                    current_avg_train_loss = total_train_loss / index
+                    
+                    print("Evaluating validation loss")
+                    avg_val_loss, best_val_loss = evaluate_val_loss(
+                        model,
+                        val_loader,
+                        optimizer,
+                        best_val_loss,
+                        val_losses,
+                        config,
+                        epoch=epoch,
+                    )
+                    
+                    # Step the scheduler with validation loss
+                    scheduler.step(avg_val_loss)
+
+                    if scheduler.num_bad_epochs >= scheduler.patience:
+                        counter += 1
+                    else:
+                        counter = 0
+                    
+                    # Log metrics
+                    current_lr = optimizer.param_groups[0]['lr']
+                    wandb.log({
+                        "step": index + epoch * len(train_loader),
+                        "train_loss": current_avg_train_loss,
+                        "val_loss": avg_val_loss,
+                        "learning_rate": current_lr
+                    })
+                    print(
+                        f"Epoch {epoch+1}/{config.epochs}, Step: {index + epoch * len(train_loader)}, Train Loss: {current_avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}"
+                    )
+                    # Return to training mode
+                    model.train()
+
             avg_train_loss = total_train_loss / len(train_loader)
             train_losses.append(avg_train_loss)
-
-            print("Evaluating validation loss")
-            avg_val_loss, best_val_loss, counter = evaluate_val_loss(
-                model,
-                val_loader,
-                optimizer,
-                counter,
-                best_val_loss,
-                val_losses,
-                config,
-                epoch=epoch,
-            )
-
-            wandb_log(config, avg_train_loss, avg_val_loss, epoch=epoch)
-            wandb.log({"learning_rate": scheduler.get_last_lr()[0]}, step=epoch)
 
     print("Calculating accuracy")
     train_accuracy, val_accuracy = model_accuracy(config, model, train_loader, val_loader)

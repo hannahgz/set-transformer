@@ -102,14 +102,19 @@ class GPTConfig44_FinalLR:
 
 @dataclass
 class GPTConfig44_Equal:
-    lr: float = 1e-3
-    epochs: int = 100
-    batch_size: int = 64
+    lr: float = 4e-4  # Base learning rate
+    epochs: int = 25  # Reduced epochs due to large dataset
+    batch_size: int = 512  # Increased for better throughput
+    patience: int = 4  # Early stopping patience
+    eval_freq: int = 10000  # Evaluate every 2000 steps
+    # lr: float = 1e-3
+    # epochs: int = 100
+    # batch_size: int = 256
+    # patience: int = 5
+    # eval_freq: int = 0
     n_layer: int = 4
     n_head: int = 4
     n_embd: int = 64
-    patience: int = 5
-    eval_freq: int = 0
     dropout: float = 0.0
     n_cards: int = 5
     block_size: int = 49
