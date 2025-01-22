@@ -111,13 +111,16 @@ def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, 
                 for attr in get_card_attributes(*card)
             ]
 
-        random_iterations = 0
+        random_iterations = 1
         if num_sets(combination) == 0 and balance_sets:
-            random_iterations = 3
+            # random_iterations = 3 # actual 0 set size = 22441536
+            random_iterations = 1
         elif num_sets(combination) == 1 and balance_sets:
-            random_iterations = 25
+            # random_iterations = 25 # actual 1 set size = 77922000/25 = 3116880
+            random_iterations = 7
         elif num_sets(combination) == 2 and balance_sets:
-            random_iterations = 250
+            # random_iterations = 250 # actual 2 set size = 15795000/250 = 63180
+            random_iterations = 345
 
         target_seq = get_target_seq(
                 combination, target_size, pad_symbol)
