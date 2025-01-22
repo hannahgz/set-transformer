@@ -33,14 +33,16 @@ def flatten_tuple(t):
 def is_set(card1, card2, card3):
     return all((a + b + c) % 3 == 0 for a, b, c in zip(card1, card2, card3))
 
-def contains_set(combination):
+def num_sets(combination):
     n_cards = len(combination)
+    num_sets = 0
     for i in range(n_cards - 2):
         for j in range(i + 1, n_cards - 1):
             for k in range(j + 1, n_cards):
                 if is_set(combination[i], combination[j], combination[k]):
-                    return True
-    return False
+                    num_sets += 1
+    
+    return num_sets
 
 def find_sets_with_cards(combination: Tuple) -> List[Tuple]:
     sets = []
@@ -109,9 +111,13 @@ def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, 
                 for attr in get_card_attributes(*card)
             ]
 
-        random_iterations = 1
-        if contains_set(combination) and balance_sets:
-            random_iterations = 7
+        random_iterations = 0
+        if num_sets(combination) == 0 and balance_sets:
+            random_iterations = 3
+        elif num_sets(combination) == 1 and balance_sets:
+            random_iterations = 25
+        elif num_sets(combination) == 2 and balance_sets:
+            random_iterations = 250
 
         target_seq = get_target_seq(
                 combination, target_size, pad_symbol)
@@ -152,7 +158,7 @@ def separate_all_sets(tokenized_combinations, no_set_token, separate_token):
 
 def initialize_triples_datasets(config, save_dataset_path=None, save_tokenizer_path=None, attr_first=False):
     optimized_combinations = generate_combinations(
-        config.target_size, config.pad_symbol, config.n_cards, random_order=True, attr_first=attr_first
+        config.target_size, config.pad_symbol, config.n_cards, random_order=True, balance_sets=True
     )
 
     small_combinations = list(optimized_combinations)
@@ -188,12 +194,15 @@ def initialize_triples_datasets(config, save_dataset_path=None, save_tokenizer_p
         tokenized_combinations, no_set_token, separate_token
     )
 
+    print("len(no_set_sequences): ", len(no_set_sequences))
+    print("len(one_set_sequences): ", len(one_set_sequences))
+    print("len(two_set_sequences): ", len(two_set_sequences))
+
     # Create dataset and dataloaders
     # dataset = SetDataset(tokenized_combinations)
     # train_size = int(0.95 * len(dataset))
     dataset = BalancedTriplesSetDataset(
         no_set_sequences, one_set_sequences, two_set_sequences)
-    breakpoint()
 
     if save_dataset_path:
         torch.save(dataset, save_dataset_path)
@@ -201,7 +210,7 @@ def initialize_triples_datasets(config, save_dataset_path=None, save_tokenizer_p
 
 
 def initialize_loaders(config, dataset):
-    train_size = int(0.95 * len(dataset))
+    train_size = int(0.99 * len(dataset))
 
     # make validation set a lot smaller TODO, revisit how large val set this leaves us with
     val_size = len(dataset) - train_size
