@@ -1,9 +1,9 @@
 import torch
-from model import GPTConfig44_Equal
-from data_utils import initialize_triples_datasets
+from model import GPTConfig44_Equal, GPT
+from data_utils import initialize_triples_datasets, initialize_loaders
 import random
 import numpy as np
-from set_transformer_small import run
+from set_transformer_small import run, calculate_accuracy
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
@@ -16,9 +16,11 @@ if __name__ == "__main__":
 
     # Attempt to improve model accuracy
     
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
     config = GPTConfig44_Equal()
     dataset_path = f'{PATH_PREFIX}/equal_causal_balanced_dataset.pth'
-    # tokenizer_path = f'{PATH_PREFIX}/equal_causal_balanced_tokenizer.pkl'
+    tokenizer_path = f'{PATH_PREFIX}/equal_causal_balanced_tokenizer.pkl'
     # print("Initializing dataset")
     # dataset = initialize_triples_datasets(
     #     config,
@@ -26,9 +28,25 @@ if __name__ == "__main__":
     #     save_tokenizer_path=tokenizer_path
     # )
 
-    print("Running model")
-    run(
-        config,
-        dataset_path=dataset_path
-    )
+    # print("Running model")
+    # run(
+    #     config,
+    #     dataset_path=dataset_path
+    # )
+
+
+    model = GPT(config).to(device)
+    checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
+    model.load_state_dict(checkpoint["model"])
+
+    dataset = torch.load(dataset_path)
+    train_loader, val_loader = initialize_loaders(config, dataset)
+
+    equal_equal_val_accuracy = calculate_accuracy(
+        model=model, 
+        dataloader=val_loader,
+        config=config, 
+        tokenizer_path=tokenizer_path,
+        breakdown=True)
+    print("Val accuracy for final model on final dataset: ", equal_equal_val_accuracy)
 
