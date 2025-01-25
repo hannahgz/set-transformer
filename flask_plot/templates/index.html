@@ -15,15 +15,37 @@
         }
         .container {
             display: grid;
-            grid-template-columns: 250px 350px 1fr;
-            gap: 20px;
+            grid-template-columns: minmax(500px, 30%) 1fr;
+            gap: 10px;
             height: calc(100vh - 50px);
             max-height: calc(100vh - 50px);
             max-width: 100vw;
             box-sizing: border-box;
             padding-top: 5px;
         }
-        .left-panel, .middle-panel, .right-panel {
+        .left-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+        }
+        .left-panel, .middle-panel {
+            background: #f5f5f5;
+            padding: 5px;
+            border-radius: 8px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+        .left-panel {
+            flex: 0 0 auto;
+            min-height: fit-content;
+            max-height: 50%;
+        }
+        .middle-panel {
+            flex: 1 1 auto;
+        }
+        .right-panel {
             background: #f5f5f5;
             padding: 15px;
             border-radius: 8px;
@@ -32,17 +54,14 @@
             overflow-x: hidden;
             box-sizing: border-box;
         }
-        .correct {
-            color: green;
-        }
-        .incorrect {
-            color: red;
-        }
+        .correct { color: green; }
+        .incorrect { color: red; }
+        /* Changed to: */
         .card-container {
-            display: grid;
-            grid-template-columns: 1fr;
+            display: flex;
             gap: 10px;
             margin: 10px 0;
+            overflow-x: auto;
         }
         .card {
             border: 1px solid #ccc;
@@ -71,6 +90,16 @@
             font-size: 12px;
         }
         .mappings-container {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+        }
+        .set-mappings {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        /* .mappings-container {
             margin: 0;
             padding: 10px;
             background-color: white;
@@ -86,7 +115,7 @@
             border-radius: 4px;
             font-size: 12px;
             max-width: 300px;
-        }
+        } */
         .prediction-info {
             margin-top: 8px;
             padding: 8px;
@@ -100,18 +129,9 @@
             font-size: 14px;
             font-weight: bold;
         }
-        h2 {
-            margin: 0 0 10px 0;
-            font-size: 16px;
-        }
-        h3 {
-            margin: 5px 0;
-            font-size: 14px;
-        }
-        h4 {
-            margin: 5px 0;
-            font-size: 13px;
-        }
+        h2 { margin: 0 0 10px 0; font-size: 16px; }
+        h3 { margin: 5px 0; font-size: 14px; }
+        h4 { margin: 5px 0; font-size: 13px; }
         .threshold-container {
             display: flex;
             align-items: center;
@@ -123,7 +143,6 @@
             width: 60px;
             padding: 2px;
         }
-        /* Keep other existing styles but remove any margin/padding that might cause overflow */
         .sequence-comparison {
             font-size: 12px;
             margin: 5px 0;
@@ -152,54 +171,52 @@
 </head>
 <body>
     <div class="container">
-        <!-- Left Panel - Card Selection -->
-        <div class="left-panel">
-            <h2>SET! Card Selection</h2>
-            {{ macros.render_group('group1', card_labels) }}
-            {{ macros.render_group('group2', card_labels) }}
-            
-            <div class="button-container">
-                <button class="save-button" onclick="saveDifferenceCards()">Save Difference View</button>
-                <button class="save-button" onclick="saveSingleCards()">Save Group 1 View</button>
-                <button class="duplicate-button" onclick="duplicateGroup1To2()">Duplicate 1→2</button>
-            </div>
-            <div class="threshold-container">
-                <label for="threshold-input">Threshold:</label>
-                <input type="number" id="threshold-input" value="0.1" min="0" max="1" step="0.01">
-            </div>
-            <div id="loading-indicator" style="display: none;">
-                <div class="spinner"></div>
-            </div>
-        </div>
-
-        <!-- Middle Panel - Mappings -->
-        <div class="middle-panel">
-            <h2>Saved Card Mappings</h2>
-            <div class="mappings-container">
-                <div class="set-mappings" id="group1-mappings">
-                    <h3>Set 1</h3>
-                    <div id="group1-list">
-                        {% for mapping in saved_mappings.group1 %}
-                        <div class="mapping-item">
-                            <strong>Card {{mapping.letter}}:</strong> 
-                            {{mapping.attributes.shape}} {{mapping.attributes.color}} {{mapping.attributes.number}} {{mapping.attributes.shading}}
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <div class="prediction-info" id="group1-prediction"></div>
+        <div class="left-stack">
+            <!-- Left Panel - Card Selection -->
+            <div class="left-panel">
+                {{ macros.render_group('group1', card_labels) }}
+                {{ macros.render_group('group2', card_labels) }}
+                
+                <div class="button-container">
+                    <button class="save-button" onclick="saveDifferenceCards()">Save Difference View</button>
+                    <button class="save-button" onclick="saveSingleCards()">Save Group 1 View</button>
+                    <button class="duplicate-button" onclick="duplicateGroup1To2()">Duplicate 1→2</button>
                 </div>
+                <div class="threshold-container">
+                    <label for="threshold-input">Threshold:</label>
+                    <input type="number" id="threshold-input" value="0.1" min="0" max="1" step="0.01">
+                </div>
+            </div>
 
-                <div class="set-mappings" id="group2-mappings">
-                    <h3>Set 2</h3>
-                    <div id="group2-list">
-                        {% for mapping in saved_mappings.group2 %}
-                        <div class="mapping-item">
-                            <strong>Card {{mapping.letter}}:</strong> 
-                            {{mapping.attributes.shape}} {{mapping.attributes.color}} {{mapping.attributes.number}} {{mapping.attributes.shading}}
-                        </div>
-                        {% endfor %}
+            <!-- Middle Panel - Mappings -->
+            <div class="middle-panel">
+                <!-- <h2>Saved Card Mappings</h2> -->
+                <div class="mappings-container">
+                    <div class="set-mappings" id="group1-mappings">
+                        <h3>Set 1</h3>
+                        <!-- <div id="group1-list">
+                            {% for mapping in saved_mappings.group1 %}
+                            <div class="mapping-item">
+                                <strong>Card {{mapping.letter}}:</strong> 
+                                {{mapping.attributes.shape}} {{mapping.attributes.color}} {{mapping.attributes.number}} {{mapping.attributes.shading}}
+                            </div>
+                            {% endfor %}
+                        </div> -->
+                        <div class="prediction-info" id="group1-prediction"></div>
                     </div>
-                    <div class="prediction-info" id="group2-prediction"></div>
+
+                    <div class="set-mappings" id="group2-mappings">
+                        <h3>Set 2</h3>
+                        <!-- <div id="group2-list">
+                            {% for mapping in saved_mappings.group2 %}
+                            <div class="mapping-item">
+                                <strong>Card {{mapping.letter}}:</strong> 
+                                {{mapping.attributes.shape}} {{mapping.attributes.color}} {{mapping.attributes.number}} {{mapping.attributes.shading}}
+                            </div>
+                            {% endfor %}
+                        </div> -->
+                        <div class="prediction-info" id="group2-prediction"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -213,7 +230,6 @@
     </div>
 
     <script>
-        // Keep all existing JavaScript code as is
         var graphs = {{ plot_json | safe }};
         Plotly.newPlot('plotly-div', graphs.data, graphs.layout);
 
@@ -304,10 +320,9 @@
             .then(response => response.json())
             .then(data => {
                 updatePredictionInfo(data.prediction_results, 1);
-                // Clear group 2 predictions since we're only showing group 1
                 document.getElementById('group2-prediction').innerHTML = '';
-                document.getElementById('group2-list').innerHTML = '';
-                updateSavedMappings(data.cards);
+                // document.getElementById('group2-list').innerHTML = '';
+                updateSavedMappings(data.cards, num_groups=1);
                 const updatedPlot = JSON.parse(data.plot_json);
                 Plotly.react('plotly-div', updatedPlot.data, updatedPlot.layout);
             })
@@ -331,32 +346,33 @@
             }
         }
 
-        function updateSavedMappings(savedMappings) {
-            const group1List = document.getElementById('group1-list');
-            const group2List = document.getElementById('group2-list');
+        function updateSavedMappings(savedMappings, num_groups=2) {
+            // const group1List = document.getElementById('group1-list');
+            // // group1List.innerHTML = '';
 
-            group1List.innerHTML = '';
-            group2List.innerHTML = '';
+            // savedMappings.group1.forEach((mapping) => {
+            //     const mappingItem = document.createElement('div');
+            //     mappingItem.className = 'mapping-item';
+            //     mappingItem.innerHTML = `
+            //         <strong>Card ${mapping.letter}:</strong>
+            //         ${mapping.attributes.shape} ${mapping.attributes.color} ${mapping.attributes.number} ${mapping.attributes.shading}
+            //     `;
+            //     group1List.appendChild(mappingItem);
+            // });
 
-            savedMappings.group1.forEach((mapping) => {
-                const mappingItem = document.createElement('div');
-                mappingItem.className = 'mapping-item';
-                mappingItem.innerHTML = `
-                    <strong>Card ${mapping.letter}:</strong>
-                    ${mapping.attributes.shape} ${mapping.attributes.color} ${mapping.attributes.number} ${mapping.attributes.shading}
-                `;
-                group1List.appendChild(mappingItem);
-            });
-
-            savedMappings.group2.forEach((mapping) => {
-                const mappingItem = document.createElement('div');
-                mappingItem.className = 'mapping-item';
-                mappingItem.innerHTML = `
-                    <strong>Card ${mapping.letter}:</strong>
-                    ${mapping.attributes.shape} ${mapping.attributes.color} ${mapping.attributes.number} ${mapping.attributes.shading}
-                `;
-                group2List.appendChild(mappingItem);
-            });
+            // if (num_groups === 2) {
+            //     const group2List = document.getElementById('group2-list');
+            //     // group2List.innerHTML = '';
+            //     savedMappings.group2.forEach((mapping) => {
+            //         const mappingItem = document.createElement('div');
+            //         mappingItem.className = 'mapping-item';
+            //         mappingItem.innerHTML = `
+            //             <strong>Card ${mapping.letter}:</strong>
+            //             ${mapping.attributes.shape} ${mapping.attributes.color} ${mapping.attributes.number} ${mapping.attributes.shading}
+            //         `;
+            //         group2List.appendChild(mappingItem);
+            //     });
+            // }
         }
     </script>
 </body>

@@ -177,7 +177,7 @@ def create_single_attention_weight_fig(attention_weights, labels, n_layers=4, n_
         subplot_titles=[f"L{l+1}H{h+1}" for l in range(n_layers) for h in range(n_heads)],
         specs=[[{"secondary_y": True} for _ in range(n_heads)] for _ in range(n_layers)],
         vertical_spacing=0.02,
-        horizontal_spacing=0.02
+        # horizontal_spacing=0.02
     )
     
     x_coords = [0, 1]
@@ -265,12 +265,14 @@ def create_single_attention_weight_fig(attention_weights, labels, n_layers=4, n_
                     tickfont=dict(size=2),
                 )
 
+    # Optimize layout
     fig.update_layout(
         height=total_height,
-        width=n_heads*250,
+        width=n_heads*220,  # Reduced width
         showlegend=False,
-        margin=dict(l=50, r=50, t=10, b=20),
+        margin=dict(l=10, r=10, t=20, b=10),  # Optimized margins
         title_x=0.5,
+        # font=dict(size=4)  # Global font size reduction
     )
 
     return fig
@@ -286,7 +288,7 @@ def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4,
         subplot_titles=[f"L{l+1}H{h+1}" for l in range(n_layers) for h in range(n_heads)],  # Shortened titles
         specs=[[{"secondary_y": True} for _ in range(n_heads)] for _ in range(n_layers)],
         vertical_spacing=0.02,  # Reduced spacing between subplots
-        horizontal_spacing=0.02  # Reduced horizontal spacing
+        # horizontal_spacing=0.02  # Reduced horizontal spacing
     )
     
     x_coords = [0, 1]
@@ -387,9 +389,9 @@ def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4,
     # Optimize layout
     fig.update_layout(
         height=total_height,
-        width=n_heads*250,  # Reduced width
+        width=n_heads*220,  # Reduced width
         showlegend=False,
-        margin=dict(l=50, r=50, t=10, b=20),  # Optimized margins
+        margin=dict(l=10, r=10, t=20, b=10),  # Optimized margins
         title_x=0.5,
         # font=dict(size=4)  # Global font size reduction
     )
@@ -527,4 +529,4 @@ def save_difference_cards():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=8000)
