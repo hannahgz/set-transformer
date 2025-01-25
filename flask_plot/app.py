@@ -166,156 +166,114 @@ def attention_weights_from_sequence(
     
     return all_att_weights_np
 
-# def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4, n_heads=4, threshold=0.01):
-#     fig = make_subplots(rows=n_layers, cols=n_heads, 
-#                         subplot_titles=[f"Layer {l+1} Head {h+1}" for l in range(n_layers) for h in range(n_heads)],
-#                         specs=[[{"secondary_y": True} for _ in range(n_heads)] for _ in range(n_layers)],
-#                         vertical_spacing=0.03)
+# Add new Python function to app.py:
+def create_single_attention_weight_fig(attention_weights, labels, n_layers=4, n_heads=4, threshold=0.01):
+    height_per_layer = 400
+    total_height = n_layers * height_per_layer
     
-#     # Pre-calculate x coordinates
-#     x_coords = [0, 1]
-
-#     # Set range for both axes
-#     y_min = -0.5  # Add some padding
-#     y_max = len(labels1) - 0.5  # Add some padding
+    fig = make_subplots(
+        rows=n_layers, 
+        cols=n_heads,
+        subplot_titles=[f"L{l+1}H{h+1}" for l in range(n_layers) for h in range(n_heads)],
+        specs=[[{"secondary_y": True} for _ in range(n_heads)] for _ in range(n_layers)],
+        vertical_spacing=0.02,
+        horizontal_spacing=0.02
+    )
     
-
-#     reversed_labels = labels1[::-1]
-
-#     highlight_indices = {len(labels1) - i - 1: 'green' for i, (label1, label2) in enumerate(zip(labels1, labels2)) if label1 != label2}
-
-#     custom_ticktext = []
-#     for i, label in enumerate(reversed_labels):
-#         if i in highlight_indices and i > 8:
-#             # Use HTML color tag
-#             custom_ticktext.append(f'<span style="color: {highlight_indices[i]}">{label}</span>')
-#         else:
-#             custom_ticktext.append(label)
+    x_coords = [0, 1]
+    y_min = -0.5
+    y_max = len(labels) - 0.5
     
-#     for layer in range(n_layers):
-#         for head in range(n_heads):
-#             # Get the attention weights for this layer and head
-#             weights_diff = attention_weights[0][layer][head] - attention_weights[1][layer][head]
+    reversed_labels = labels[::-1]
+    custom_ticktext = [f'<span style="font-size:10px">{label}</span>' for label in reversed_labels]
+    
+    for layer in range(n_layers):
+        for head in range(n_heads):
+            weights = attention_weights[layer][head]
+            n_points = len(labels)
+            all_connections = []
             
-#             # Create coordinate arrays for all possible connections
-#             n_points = len(labels1)
-#             all_connections = []
+            for i in range(n_points):
+                for j in range(n_points):
+                    weight = abs(weights[i, j])
+                    if weight > threshold:
+                        all_connections.append({
+                            'x': x_coords,
+                            'y': [n_points - 1 - i, n_points - 1 - j],
+                            'weight': weight,
+                            'from_idx': i,
+                            'to_idx': j
+                        })
             
-#             # Generate all possible connections
-#             for i in range(n_points):
-#                 for j in range(n_points):
-#                     weight = abs(weights_diff[i, j])
-#                     if weight > threshold:
-#                         # Flip the y-coordinates to match natural reading direction (top-to-bottom)
-#                         all_connections.append({
-#                             'x': x_coords,
-#                             'y': [n_points - 1 - i, n_points - 1 - j],  # Flip the y coordinates
-#                             'weight': weight,
-#                             'from_idx': i,  # Store original indices for hover text
-#                             'to_idx': j
-#                         })
+            for conn in all_connections:
+                fig.add_trace(
+                    go.Scatter(
+                        x=conn['x'],
+                        y=conn['y'],
+                        mode='lines',
+                        line=dict(
+                            color='blue',
+                            width=max(0.5, conn['weight'] * 3)
+                        ),
+                        opacity=conn['weight'],
+                        showlegend=False,
+                        hovertemplate=f"Weight: {conn['weight']:.3f}<br>From: {labels[conn['from_idx']]}<br>To: {labels[conn['to_idx']]}",
+                        name="",
+                        hoveron='points+fills',
+                    ),
+                    row=layer+1, col=head+1,
+                    secondary_y=False
+                )
+
+            if len(all_connections) == 0:
+                fig.add_trace(
+                    go.Scatter(x=[None], y=[None], mode='lines', 
+                             line=dict(color='blue', width=1), opacity=0, 
+                             showlegend=False, hoverinfo='skip'),
+                    row=layer+1, col=head+1, secondary_y=False
+                )
+
+            fig.add_trace(
+                go.Scatter(x=[None], y=[None], mode='lines',
+                          line=dict(color='blue', width=1), opacity=0,
+                          showlegend=False, hoverinfo='skip'),
+                row=layer+1, col=head+1, secondary_y=True
+            )
             
-#             # Sort connections by weight to draw strongest connections last
-#             # all_connections.sort(key=lambda x: x['weight'])
-            
-#             # Add traces for each significant connection
-#             for conn in all_connections:
-#                 fig.add_trace(
-#                     go.Scatter(
-#                         x=conn['x'],
-#                         y=conn['y'],
-#                         mode='lines',
-#                         line=dict(
-#                             color='blue',
-#                             width=max(1.0, conn['weight'] * 5)
-#                         ),
-#                         opacity=conn['weight'],
-#                         showlegend=False,
-#                         hovertemplate=f"Weight: {conn['weight']:.3f}<br>From: {labels1[conn['from_idx']]}<br>To: {labels1[conn['to_idx']]}",
-#                         name="",
-#                         hoveron='points+fills',
-#                     ),
-#                     row=layer+1, col=head+1,
-#                     secondary_y=False
-#                 )
-        
-#             if len(all_connections) == 0:
-#                 fig.add_trace(
-#                     go.Scatter(
-#                         x=[None],
-#                         y=[None],
-#                         mode='lines',
-#                         line=dict(color='blue', width=1),
-#                         opacity=0,
-#                         showlegend=False,
-#                         hoverinfo='skip'
-#                     ),
-#                     row=layer+1, col=head+1,
-#                     secondary_y=False
-#                 )
+            fig.update_xaxes(
+                ticktext=["Q", "K"],
+                tickvals=[0, 1],
+                row=layer+1,
+                col=head+1,
+                range=[-0.1, 1.1],
+                showline=False,
+                showgrid=False,
+                tickfont=dict(size=4)
+            )
 
-#             # Add dummy trace for secondary y-axis to ensure labels are shown
-#             fig.add_trace(
-#                 go.Scatter(
-#                     x=[None],
-#                     y=[None],
-#                     mode='lines',
-#                     line=dict(color='blue', width=1),
-#                     opacity=0,
-#                     showlegend=False,
-#                     hoverinfo='skip'
-#                 ),
-#                 row=layer+1, col=head+1,
-#                 secondary_y=True
-#             )
-            
-#             # Update axes (doing this only once per subplot)
-#             fig.update_xaxes(
-#                 ticktext=["Query", "Key"],
-#                 tickvals=[0, 1],
-#                 row=layer+1,
-#                 col=head+1,
-#                 range=[-0.1, 1.1],
-#                 showline=False,
-#                 showgrid=False  # Disable grid to reduce rendering overhead
-#             )
+            for secondary_y in [False, True]:
+                fig.update_yaxes(
+                    ticktext=custom_ticktext,
+                    tickvals=list(range(len(labels))),
+                    range=[y_min, y_max],
+                    secondary_y=secondary_y,
+                    row=layer+1,
+                    col=head+1,
+                    showline=False,
+                    showgrid=False,
+                    side='left' if not secondary_y else 'right',
+                    tickfont=dict(size=2),
+                )
 
-#             # for secondary_y in [False, True]:
-#             #     fig.update_yaxes(
-#             #         # ticktext=reversed_labels,
-#             #         ticktext=custom_ticktext,
-#             #         tickvals=list(range(len(labels1))),
-#             #         range=[y_min, y_max],
-#             #         secondary_y=secondary_y,
-#             #         row=layer+1,
-#             #         col=head+1,
-#             #         showline=False,
-#             #         showgrid=False,
-#             #         side='left' if not secondary_y else 'right'
-#             #     )
+    fig.update_layout(
+        height=total_height,
+        width=n_heads*250,
+        showlegend=False,
+        margin=dict(l=50, r=50, t=10, b=20),
+        title_x=0.5,
+    )
 
-#             for secondary_y in [False, True]:
-#                 fig.update_yaxes(
-#                     ticktext=custom_ticktext,
-#                     tickvals=list(range(len(labels1))),
-#                     range=[y_min, y_max],
-#                     secondary_y=secondary_y,
-#                     row=layer+1,
-#                     col=head+1,
-#                     showline=False,
-#                     showgrid=False,
-#                     side='left' if not secondary_y else 'right',
-#     )
-
-#     # Optimize layout
-#     fig.update_layout(
-#         height=n_layers*300,
-#         width=n_heads*250,
-#         # title_text="Attention Line Pattern Differences (Group 1 minus Group 2)",
-#         showlegend=False,
-#     )
-
-#     return fig
+    return fig
 
 def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4, n_heads=4, threshold=0.01):
     # Calculate a more compact height based on screen size
@@ -462,8 +420,39 @@ def index():
                             card_labels=card_labels,
                             chr=chr)
 
-@app.route('/save_cards', methods=['POST'])
-def save_cards():
+# Add new endpoint in app.py:
+@app.route('/save_single_cards', methods=['POST'])
+def save_single_cards():
+    card_groups = request.json
+    mapping = {"group1": []}
+    
+    for i, card in enumerate(card_groups.get('group1', [])):
+        letter = map_card_to_letter(i)
+        mapping['group1'].append({
+            'letter': letter,
+            'attributes': card
+        })
+    
+    sequence1 = generate_input(card_groups, "group1")
+    attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
+        GPTConfig44_Final, sequence1, tokenizer_path="final_causal_balanced_tokenizer.pkl", get_prediction=True)
+    
+    fig = create_single_attention_weight_fig(
+        attention_weights=attention_weights1,
+        labels=sequence1,
+        threshold=card_groups.get('threshold', 0.1)
+    )
+
+    return jsonify({
+        "status": "success",
+        "cards": mapping,
+        "prediction_results": {1: (sequence1, is_correct1, decoded_predictions1, decoded_targets1)},
+        "plot_json": plotly.utils.PlotlyJSONEncoder().encode(fig)
+    })
+
+
+@app.route('/save_difference_cards', methods=['POST'])
+def save_difference_cards():
     card_groups = request.json  # Expecting data in the format {'group1': [...], 'group2': [...]}
 
     # Initialize the mappings for both groups

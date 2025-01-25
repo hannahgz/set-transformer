@@ -153,7 +153,8 @@
             {{ macros.render_group('group2', card_labels) }}
             
             <div class="button-container">
-                <button class="save-button" onclick="saveCards()">Save</button>
+                <button class="save-button" onclick="saveDifferenceCards()">Save Difference View</button>
+                <button class="save-button" onclick="saveSingleCards()">Save Group 1 View</button>
                 <button class="duplicate-button" onclick="duplicateGroup1To2()">Duplicate 1→2</button>
             </div>
             <div class="threshold-container">
@@ -226,70 +227,87 @@
             groupPrediction.innerHTML = formattedComparison;
         }
 
-        function saveCards() {
+        function saveDifferenceCards() {
             let group1Cards = [];
             let group2Cards = [];
-
-            const loadingIndicator = document.getElementById('loading-indicator');
-            loadingIndicator.style.display = 'block';
-
-            // Process Set 1
+            
             for (let i = 0; i < 5; i++) {
-                const cardGroup1 = {
+                group1Cards.push({
                     shape: document.getElementById(`group1-shape${i}`).value,
                     color: document.getElementById(`group1-color${i}`).value,
                     number: document.getElementById(`group1-number${i}`).value,
                     shading: document.getElementById(`group1-shading${i}`).value
-                };
-                group1Cards.push(cardGroup1);
-            }
-
-            // Process Set 2
-            for (let i = 0; i < 5; i++) {
-                const cardGroup2 = {
+                });
+                
+                group2Cards.push({
                     shape: document.getElementById(`group2-shape${i}`).value,
                     color: document.getElementById(`group2-color${i}`).value,
                     number: document.getElementById(`group2-number${i}`).value,
                     shading: document.getElementById(`group2-shading${i}`).value
-                };
-                group2Cards.push(cardGroup2);
+                });
             }
 
             const threshold = parseFloat(document.getElementById('threshold-input').value);
-
             if (threshold < 0 || threshold > 1 || isNaN(threshold)) {
                 alert('Please enter a valid threshold between 0 and 1.');
                 return;
             }
 
-            const cardData = {
-                group1: group1Cards,
-                group2: group2Cards,
-                threshold: threshold,
-            };
-
-            fetch('/save_cards', {
+            fetch('/save_difference_cards', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(cardData)
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({group1: group1Cards, group2: group2Cards, threshold})
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Success:', data);
                 updatePredictionInfo(data.prediction_results, 1);
                 updatePredictionInfo(data.prediction_results, 2);
                 updateSavedMappings(data.cards);
                 const updatedPlot = JSON.parse(data.plot_json);
                 Plotly.react('plotly-div', updatedPlot.data, updatedPlot.layout);
             })
-            .catch((error) => {
+            .catch(error => {
                 console.error('Error:', error);
                 alert('Error saving cards!');
+            });
+        }
+
+        function saveSingleCards() {
+            let group1Cards = [];
+            
+            for (let i = 0; i < 5; i++) {
+                group1Cards.push({
+                    shape: document.getElementById(`group1-shape${i}`).value,
+                    color: document.getElementById(`group1-color${i}`).value,
+                    number: document.getElementById(`group1-number${i}`).value,
+                    shading: document.getElementById(`group1-shading${i}`).value
+                });
+            }
+
+            const threshold = parseFloat(document.getElementById('threshold-input').value);
+            if (threshold < 0 || threshold > 1 || isNaN(threshold)) {
+                alert('Please enter a valid threshold between 0 and 1.');
+                return;
+            }
+
+            fetch('/save_single_cards', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({group1: group1Cards, threshold})
             })
-            .finally(() => {
-                loadingIndicator.style.display = 'none';
+            .then(response => response.json())
+            .then(data => {
+                updatePredictionInfo(data.prediction_results, 1);
+                // Clear group 2 predictions since we're only showing group 1
+                document.getElementById('group2-prediction').innerHTML = '';
+                document.getElementById('group2-list').innerHTML = '';
+                updateSavedMappings(data.cards);
+                const updatedPlot = JSON.parse(data.plot_json);
+                Plotly.react('plotly-div', updatedPlot.data, updatedPlot.layout);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error saving cards!');
             });
         }
 
