@@ -7,7 +7,7 @@ from typing import List, Tuple
 from dataclasses import dataclass
 import torch
 import os
-from model import GPT, GPTConfig44_BalancedSets, GPTConfig44_Final
+from model import GPT, GPTConfig44_BalancedSets, GPTConfig44_Equal
 from tokenizer import load_tokenizer
 import random
 
@@ -167,7 +167,7 @@ def attention_weights_from_sequence(
     return all_att_weights_np
 
 # Add new Python function to app.py:
-def create_single_attention_weight_fig(attention_weights, labels, n_layers=4, n_heads=4, threshold=0.01):
+def create_single_attention_weight_fig(attention_weights, labels, n_layers=4, n_heads=4, threshold=0.01, seed=0):
     height_per_layer = 400
     total_height = n_layers * height_per_layer
     
@@ -277,7 +277,13 @@ def create_single_attention_weight_fig(attention_weights, labels, n_layers=4, n_
 
     return fig
 
-def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4, n_heads=4, threshold=0.01):
+def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4, n_heads=4, threshold=0.01, seed=0):
+    if seed != 0:
+        random.seed(seed)
+        pairs = [(sequence[i], sequence[i+1]) for i in range(0, len(sequence), 2)]
+        random.shuffle(pairs)
+        sequence = [item for pair in pairs for item in pair]
+
     # Calculate a more compact height based on screen size
     height_per_layer = 400  # Reduced from 300
     total_height = n_layers * height_per_layer
@@ -398,6 +404,18 @@ def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4,
 
     return fig
 
+def shuffle_input_sequence(sequence, seed):
+    if seed == 0:
+        return sequence
+    
+    random.seed(seed)
+    pairs = [(sequence[i], sequence[i+1]) for i in range(0, len(sequence) - 9, 2)]
+    random.shuffle(pairs)
+    sequence_start = [item for pair in pairs for item in pair]
+    sequence = sequence_start + sequence[-9:]
+    return sequence
+
+
 @app.route('/')
 def index():
     # Get data for the heatmap
@@ -436,13 +454,17 @@ def save_single_cards():
         })
     
     sequence1 = generate_input(card_groups, "group1")
+    print("sequence1: ", sequence1)
+    seed=card_groups.get('seed', 0)
+    sequence1 = shuffle_input_sequence(sequence1, seed)
+
     attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
-        GPTConfig44_Final, sequence1, tokenizer_path="final_causal_balanced_tokenizer.pkl", get_prediction=True)
+        GPTConfig44_Equal, sequence1, tokenizer_path="equal_causal_balanced_tokenizer.pkl", get_prediction=True)
     
     fig = create_single_attention_weight_fig(
         attention_weights=attention_weights1,
         labels=sequence1,
-        threshold=card_groups.get('threshold', 0.1)
+        threshold=card_groups.get('threshold', 0.1),
     )
 
     return jsonify({
@@ -491,15 +513,22 @@ def save_difference_cards():
 
     # attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
     #     GPTConfig44_BalancedSets, sequence1, get_prediction=True)
+    # breakpoint()
+    print("sequence1: ", sequence1)
+    # print("sequence1: ", sequence1)
+    seed = card_groups.get('seed', 0)
     
+    sequence1 = shuffle_input_sequence(sequence1, seed)
+    sequence2 = shuffle_input_sequence(sequence2, seed)
+
     attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
-        GPTConfig44_Final, sequence1, tokenizer_path="final_causal_balanced_tokenizer.pkl", get_prediction=True)
+        GPTConfig44_Equal, sequence1, tokenizer_path="equal_causal_balanced_tokenizer.pkl", get_prediction=True)
     print("Got attention weights 1")
 
     # attention_weights2, is_correct2, decoded_predictions2, decoded_targets2 = attention_weights_from_sequence(
     #     GPTConfig44_BalancedSets, sequence2, get_prediction=True)
     attention_weights2, is_correct2, decoded_predictions2, decoded_targets2 = attention_weights_from_sequence(
-        GPTConfig44_Final, sequence2, tokenizer_path="final_causal_balanced_tokenizer.pkl", get_prediction=True)
+        GPTConfig44_Equal, sequence2, tokenizer_path="equal_causal_balanced_tokenizer.pkl", get_prediction=True)
     print("Got attention weights 2")
 
     prediction_results = {
@@ -511,7 +540,7 @@ def save_difference_cards():
         attention_weights=[attention_weights1, attention_weights2],
         labels1=sequence1,
         labels2=sequence2,
-        threshold=card_groups.get('threshold', 0.1)
+        threshold=card_groups.get('threshold', 0.1),
     )
     print("Created attention weight fig")
 

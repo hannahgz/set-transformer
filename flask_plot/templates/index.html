@@ -178,14 +178,16 @@
                 {{ macros.render_group('group2', card_labels) }}
                 
                 <div class="button-container">
-                    <button class="save-button" onclick="saveDifferenceCards()">Save Difference View</button>
                     <button class="save-button" onclick="saveSingleCards()">Save Group 1 View</button>
                     <button class="duplicate-button" onclick="duplicateGroup1To2()">Duplicate 1→2</button>
+                    <button class="save-button" onclick="saveDifferenceCards()">Save Difference View</button>
                 </div>
                 <div class="threshold-container">
                     <label for="threshold-input">Threshold:</label>
                     <input type="number" id="threshold-input" value="0.1" min="0" max="1" step="0.01">
-                </div>
+                    <label for="seed-input">Random Seed:</label>
+                    <input type="number" id="seed-input" value="0" min="0">
+                 </div>
             </div>
 
             <!-- Middle Panel - Mappings -->
@@ -275,10 +277,11 @@
                 return;
             }
 
+            const seed = parseInt(document.getElementById('seed-input').value) || 0;
             fetch('/save_difference_cards', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({group1: group1Cards, group2: group2Cards, threshold})
+                body: JSON.stringify({group1: group1Cards, group2: group2Cards, threshold, seed})
             })
             .then(response => response.json())
             .then(data => {
@@ -312,10 +315,11 @@
                 return;
             }
 
+            const seed = parseInt(document.getElementById('seed-input').value) || 0;
             fetch('/save_single_cards', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({group1: group1Cards, threshold})
+                body: JSON.stringify({group1: group1Cards, threshold, seed})
             })
             .then(response => response.json())
             .then(data => {
