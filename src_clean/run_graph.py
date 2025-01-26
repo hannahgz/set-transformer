@@ -8,7 +8,7 @@ PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 # PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 if __name__ == "__main__":
 
-    input1 = ["A", "oval", "A", "green", "A", "one", "A", "solid", "B", "oval", "B", "blue", "B", "one", "B", "solid", "C", "oval", "C", "pink", "C", "one", "C", "solid", "D", "oval", "D", "green", "D", "two", "D", "solid", "E", "oval", "E", "green", "E", "three", "E", "solid", ">", "A", "B", "C", "/", "A", "D", "E"]
+    input1 = ["A", "oval", "A", "green", "A", "one", "A", "solid", "B", "oval", "B", "blue", "B", "one", "B", "solid", "C", "oval", "C", "pink", "C", "one", "C", "solid", "D", "oval", "D", "green", "D", "two", "D", "solid", "E", "oval", "E", "green", "E", "three", "E", "solid", ">", "A", "B", "C", "/", "A", "D", "E", "."]
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
