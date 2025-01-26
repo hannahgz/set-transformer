@@ -103,11 +103,11 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
                             f"  Target: {tokenizer.decode(targets[i].cpu().numpy())}\n")
                         f.write(
                             f"  Prediction: {tokenizer.decode(predictions[i].cpu().numpy())}\n\n")
-                    else:
-                        print("Correct prediction")
-                        print("Inputs: ", tokenizer.decode(inputs[i].cpu().numpy()))
-                        print("Target: ", tokenizer.decode(targets[i].cpu().numpy()))
-                        print("Prediction: ", tokenizer.decode(predictions[i].cpu().numpy()))
+                    # else:
+                    #     print("Correct prediction")
+                    #     print("Inputs: ", tokenizer.decode(inputs[i].cpu().numpy()))
+                    #     print("Target: ", tokenizer.decode(targets[i].cpu().numpy()))
+                    #     print("Prediction: ", tokenizer.decode(predictions[i].cpu().numpy()))
                         
         if breakdown:
             tokenizer = load_tokenizer(tokenizer_path)
@@ -152,7 +152,7 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
         correct += matches.sum().item()
         total += mask.any(dim=1).sum().item()
 
-        if index % 100 == 0:
+        if index % 1000 == 0:
             print("Accuracy: ", correct / total)
             if breakdown:
                 print("Set Accuracy Dict: ", set_accuracy_dict)
