@@ -24,7 +24,7 @@ if __name__ == "__main__":
     # dataset_path = f'{PATH_PREFIX}/final_causal_balanced_dataset.pth'
     # tokenizer_path = f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl'
     dataset_path = f'{PATH_PREFIX}/balanced_set_dataset_random.pth'
-    tokenizer_path=f"{PATH_PREFIX}/balanced_set_dataset_random_tokenizer.pkl",
+    tokenizer_path=f"{PATH_PREFIX}/balanced_set_dataset_random_tokenizer.pkl"
     # print("Initializing dataset")
     # dataset = initialize_triples_datasets(
     #     config,
