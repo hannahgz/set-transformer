@@ -243,8 +243,10 @@ def generate_lineplot(
 
         # print("labels: ", labels)
 
-        dir_path = f"figs/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}"
-        filename = f"larger_lineplot_sets_{number_set}_index_{dataset_index}_threshold_{threshold}.png"
+        dir_path = f"figs/equal_attention_pattern_layers_{config.n_layer}_heads_{config.n_head}"
+        filename = f"lineplot_sets_{number_set}_index_{dataset_index}_threshold_{threshold}.png"
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
         plot_attention_pattern_lines(
             attention_weights,
             labels,
@@ -253,15 +255,6 @@ def generate_lineplot(
             title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
             savefig=f"{dir_path}/{filename}",
             threshold=threshold)
-
-        # plot_attention_pattern_lines(
-        #     attention_weights,
-        #     labels,
-        #     config.n_layer,
-        #     config.n_head,
-        #     title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
-        #     savefig=None,
-        #     threshold=threshold)
 
 
 def make_prediction_given_input(
