@@ -2,6 +2,7 @@ from graph import make_prediction_given_input
 from model import GPTConfig44_Equal, GPT
 import random
 import torch
+from tokenizer import load_tokenizer
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 # PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
@@ -19,10 +20,11 @@ if __name__ == "__main__":
     checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
     model.load_state_dict(checkpoint["model"])
 
+    tokenizer = load_tokenizer(tokenizer_path)
     make_prediction_given_input(
         GPTConfig44_Equal,
         input1,
-        tokenizer_path=tokenizer_path,
+        tokenizer=tokenizer,
         model=model,
         get_prediction=True
     )
