@@ -309,9 +309,71 @@ def pretty_print_input(input):
     #     print(row_line)
 
 
-if __name__ == "__main__":
+def generate_base_combinations(n_cards = 5):
     cards = get_cards()
 
-    for combination in itertools.combinations(cards, 5):
-        breakpoint()
+    for combination in itertools.combinations(cards, n_cards):
+        # Create the initial array of 20 tuples
+
+        tuple_array = [
+            (attr, card_vectors[i])
+            for i, card in enumerate(combination)
+            for attr in get_card_attributes(*card)
+        ]
+
+        target_seq = get_target_seq(
+                combination, 8, "_")
+
+        random.shuffle(tuple_array)
+
+        # Flatten the array to 40 elements using the new flatten_tuple function
+        flattened_array = flatten_tuple(tuple_array)
+        flattened_array.append(">")
+
+        flattened_array.extend(target_seq)
+        
+        yield flattened_array
+
+def initialize_base_dataset(save_dataset_path=None, save_tokenizer_path=None):
+    optimized_combinations = generate_base_combinations()
+
+    small_combinations = list(optimized_combinations)
+
+    # Create tokenizer and tokenize all sequences
+    tokenizer = Tokenizer()
+    tokenized_combinations = [tokenizer.encode(
+        seq) for seq in small_combinations]
+
+    if save_tokenizer_path:
+        save_tokenizer(tokenizer, save_tokenizer_path)
+
+    separate_token = -1
+    no_set_token = -1
+
+    for i in range(len(small_combinations)):
+        if "/" in small_combinations[i]:
+            separate_token_pos = small_combinations[i].index("/")
+            separate_token = tokenized_combinations[i][separate_token_pos]
+
+        if "*" in small_combinations[i]:
+            no_set_token_pos = small_combinations[i].index("*")
+            no_set_token = tokenized_combinations[i][no_set_token_pos]
+
+        if no_set_token >= 0 and separate_token >= 0:
+            break
+
+    print("separate token: ", separate_token)
+    print("no set token: ", no_set_token)
+
+    dataset = SetDataset(tokenized_combinations)
+
+    if save_dataset_path:
+        torch.save(dataset, save_dataset_path)
+    return dataset
+
+if __name__ == "__main__":
+    initialize_base_dataset(
+        save_dataset_path=f"{PATH_PREFIX}/base_dataset.pth",
+        save_tokenizer_path=f"{PATH_PREFIX}/base_tokenizer.pkl"
+    )
 
