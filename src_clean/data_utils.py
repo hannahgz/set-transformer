@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 import time
 import pickle
+import numpy as np
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
@@ -372,6 +373,11 @@ def initialize_base_dataset(save_dataset_path=None, save_tokenizer_path=None):
     return dataset
 
 if __name__ == "__main__":
+    seed = 42
+    torch.manual_seed(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+
     initialize_base_dataset(
         save_dataset_path=f"{PATH_PREFIX}/base_dataset.pth",
         save_tokenizer_path=f"{PATH_PREFIX}/base_tokenizer.pkl"
