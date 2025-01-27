@@ -23,8 +23,11 @@ if __name__ == "__main__":
     # tokenizer_path = f'{PATH_PREFIX}/equal_causal_balanced_tokenizer.pkl'
     # dataset_path = f'{PATH_PREFIX}/final_causal_balanced_dataset.pth'
     # tokenizer_path = f'{PATH_PREFIX}/final_causal_balanced_tokenizer.pkl'
-    dataset_path = f'{PATH_PREFIX}/balanced_set_dataset_random.pth'
-    tokenizer_path=f"{PATH_PREFIX}/balanced_set_dataset_random_tokenizer.pkl"
+    # dataset_path = f'{PATH_PREFIX}/balanced_set_dataset_random.pth'
+    # tokenizer_path=f"{PATH_PREFIX}/balanced_set_dataset_random_tokenizer.pkl"
+
+    dataset_path = f'{PATH_PREFIX}/base_dataset.pth'
+    tokenizer_path=f"{PATH_PREFIX}/base_tokenizer.pkl"
     # print("Initializing dataset")
     # dataset = initialize_triples_datasets(
     #     config,
@@ -46,14 +49,23 @@ if __name__ == "__main__":
     dataset = torch.load(dataset_path)
     train_loader, val_loader = initialize_loaders(config, dataset)
 
-    equal_orig_train_accuracy = calculate_accuracy(
+    equal_base_train_accuracy = calculate_accuracy(
         model=model, 
         dataloader=train_loader,
         config=config, 
         tokenizer_path=tokenizer_path,
-        save_incorrect_path=f'{PATH_PREFIX}/equal_orig_train_incorrect_predictions.txt',
+        save_incorrect_path=f'{PATH_PREFIX}/equal_base_train_incorrect_predictions.txt',
         breakdown=True)
-    print("Train accuracy for equal model on orig dataset: ", equal_orig_train_accuracy)
+    print("Train accuracy for equal model on base dataset: ", equal_base_train_accuracy)
+
+    # equal_orig_train_accuracy = calculate_accuracy(
+    #     model=model, 
+    #     dataloader=train_loader,
+    #     config=config, 
+    #     tokenizer_path=tokenizer_path,
+    #     save_incorrect_path=f'{PATH_PREFIX}/equal_orig_train_incorrect_predictions.txt',
+    #     breakdown=True)
+    # print("Train accuracy for equal model on orig dataset: ", equal_orig_train_accuracy)
 
 
     # equal_equal_val_accuracy = calculate_accuracy(

@@ -74,7 +74,7 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
     }
 
     for index, sequences in enumerate(dataloader):
-        if index % 1000 == 0:
+        if index % 100 == 0:
             print(f"Input: {index}/{len(dataloader)}")
             
         inputs = sequences[:, :config.input_size].to(device)
@@ -152,7 +152,7 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
         correct += matches.sum().item()
         total += mask.any(dim=1).sum().item()
 
-        if index % 1000 == 0:
+        if index % 100 == 0:
             print("Accuracy: ", correct / total)
             if breakdown:
                 print("Set Accuracy Dict: ", set_accuracy_dict)
