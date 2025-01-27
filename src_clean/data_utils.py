@@ -317,7 +317,7 @@ def generate_base_combinations(n_cards = 5):
         # Create the initial array of 20 tuples
 
         tuple_array = [
-            (attr, card_vectors[i])
+            (card_vectors[i], attr)
             for i, card in enumerate(combination)
             for attr in get_card_attributes(*card)
         ]
