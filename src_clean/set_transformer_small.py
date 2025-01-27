@@ -103,11 +103,13 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
                             f"  Target: {tokenizer.decode(targets[i].cpu().numpy())}\n")
                         f.write(
                             f"  Prediction: {tokenizer.decode(predictions[i].cpu().numpy())}\n\n")
-                    # else:
-                    #     print("Correct prediction")
-                    #     print("Inputs: ", tokenizer.decode(inputs[i].cpu().numpy()))
-                    #     print("Target: ", tokenizer.decode(targets[i].cpu().numpy()))
-                    #     print("Prediction: ", tokenizer.decode(predictions[i].cpu().numpy()))
+                    else:
+                        if two_set_id in target_np:
+                            target_np = targets[i].cpu().numpy()
+                            print("Correct prediction")
+                            print("Inputs: ", tokenizer.decode(inputs[i].cpu().numpy()))
+                            print("Target: ", tokenizer.decode(targets[i].cpu().numpy()))
+                            print("Prediction: ", tokenizer.decode(predictions[i].cpu().numpy()))
                         
         if breakdown:
             tokenizer = load_tokenizer(tokenizer_path)
