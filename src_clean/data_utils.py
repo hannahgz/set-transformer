@@ -2,7 +2,7 @@ from typing import List, Tuple
 import itertools
 from itertools import chain
 import random
-from tokenizer import Tokenizer, save_tokenizer
+from tokenizer import Tokenizer, save_tokenizer, load_tokenizer
 from set_dataset import SetDataset, BalancedSetDataset, BalancedTriplesSetDataset
 import torch
 from torch.utils.data import DataLoader
@@ -372,7 +372,7 @@ def initialize_base_dataset(save_dataset_path=None, save_tokenizer_path=None):
         torch.save(dataset, save_dataset_path)
     return dataset
 
-def find_paired_sequence(dataset, target_sequence):
+def find_paired_sequence(dataset, tokenizer_path, target_sequence):
     """
     Search for any ordering of paired elements in the dataset.
     
@@ -386,10 +386,13 @@ def find_paired_sequence(dataset, target_sequence):
     
     # Convert target sequence into pairs
     target_pairs = []
+    tokenizer.encode(target_sequence)
     for i in range(0, len(target_sequence) - 8 - 1, 2):
         target_pairs.append((target_sequence[i], target_sequence[i + 1]))
     
     target_pairs_set = set(target_pairs)
+
+    tokenizer = load_tokenizer(tokenizer_path)
     
     # Iterate through dataset
     for idx, sequence in enumerate(dataset):
