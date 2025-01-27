@@ -372,6 +372,43 @@ def initialize_base_dataset(save_dataset_path=None, save_tokenizer_path=None):
         torch.save(dataset, save_dataset_path)
     return dataset
 
+def find_paired_sequence(dataset, target_sequence):
+    """
+    Search for any ordering of paired elements in the dataset.
+    
+    Args:
+        dataset: List of sequences
+        target_sequence: List with paired elements to search for
+        
+    Returns:
+        List of tuples containing (index, matching_subsequence) where found
+    """
+    
+    # Convert target sequence into pairs
+    target_pairs = []
+    for i in range(0, len(target_sequence) - 8 - 1, 2):
+        target_pairs.append((target_sequence[i], target_sequence[i + 1]))
+    
+    target_pairs_set = set(target_pairs)
+    
+    # Iterate through dataset
+    for idx, sequence in enumerate(dataset):
+        print(f"Id {idx}/{len(dataset)}")
+        if torch.is_tensor(sequence):
+            sequence = sequence.tolist()
+        # Convert sequence into pairs, excluding special tokens
+        sequence_pairs = []
+        for i in range(0, len(sequence) - 8 - 1, 2):
+            # Skip special tokens like ">", ".", "_"
+            sequence_pairs.append((sequence[i], sequence[i + 1]))
+
+        breakpoint()
+        if set(sequence_pairs) == target_pairs_set:
+            print("Found match at index:", idx)
+            return (idx, sequence)
+                
+    return None
+
 if __name__ == "__main__":
     seed = 42
     torch.manual_seed(seed)

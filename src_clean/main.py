@@ -1,6 +1,6 @@
 import torch
 from model import GPTConfig44_Equal, GPT
-from data_utils import initialize_triples_datasets, initialize_loaders
+from data_utils import initialize_triples_datasets, initialize_loaders, find_paired_sequence
 import random
 import numpy as np
 from set_transformer_small import run, calculate_accuracy
@@ -28,6 +28,11 @@ if __name__ == "__main__":
 
     dataset_path = f'{PATH_PREFIX}/base_dataset.pth'
     tokenizer_path=f"{PATH_PREFIX}/base_tokenizer.pkl"
+    dataset = torch.load(dataset_path)
+    find_paired_sequence(
+        dataset=dataset,
+        target_sequence=["A", "oval", "A", "green", "A", "one", "A", "solid", "B", "oval", "B", "blue", "B", "one", "B", "solid", "C", "oval", "C", "pink", "C", "one", "C", "solid", "D", "oval", "D", "green", "D", "two", "D", "solid", "E", "oval", "E", "green", "E", "three", "E", "solid", ">", "A", "B", "C", "/", "A", "D", "E", "."]
+    )
     # print("Initializing dataset")
     # dataset = initialize_triples_datasets(
     #     config,
@@ -42,21 +47,22 @@ if __name__ == "__main__":
     # )
 
 
-    model = GPT(config).to(device)
-    checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
-    model.load_state_dict(checkpoint["model"])
+    # model = GPT(config).to(device)
+    # checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
+    # model.load_state_dict(checkpoint["model"])
 
-    dataset = torch.load(dataset_path)
-    train_loader, val_loader = initialize_loaders(config, dataset)
+    # dataset = torch.load(dataset_path)
 
-    equal_base_train_accuracy = calculate_accuracy(
-        model=model, 
-        dataloader=train_loader,
-        config=config, 
-        tokenizer_path=tokenizer_path,
-        save_incorrect_path=f'{PATH_PREFIX}/equal_base_train_incorrect_predictions.txt',
-        breakdown=True)
-    print("Train accuracy for equal model on base dataset: ", equal_base_train_accuracy)
+    # train_loader, val_loader = initialize_loaders(config, dataset)
+
+    # equal_base_train_accuracy = calculate_accuracy(
+    #     model=model, 
+    #     dataloader=train_loader,
+    #     config=config, 
+    #     tokenizer_path=tokenizer_path,
+    #     save_incorrect_path=f'{PATH_PREFIX}/equal_base_train_incorrect_predictions.txt',
+    #     breakdown=True)
+    # print("Train accuracy for equal model on base dataset: ", equal_base_train_accuracy)
 
     # equal_orig_train_accuracy = calculate_accuracy(
     #     model=model, 
