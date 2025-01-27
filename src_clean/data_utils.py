@@ -386,13 +386,13 @@ def find_paired_sequence(dataset, tokenizer_path, target_sequence):
     
     # Convert target sequence into pairs
     target_pairs = []
+
+    tokenizer = load_tokenizer(tokenizer_path)
     tokenizer.encode(target_sequence)
     for i in range(0, len(target_sequence) - 8 - 1, 2):
         target_pairs.append((target_sequence[i], target_sequence[i + 1]))
     
     target_pairs_set = set(target_pairs)
-
-    tokenizer = load_tokenizer(tokenizer_path)
     
     # Iterate through dataset
     for idx, sequence in enumerate(dataset):
