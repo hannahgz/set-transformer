@@ -405,7 +405,7 @@ def find_paired_sequence(dataset, tokenizer_path, target_sequence):
             # Skip special tokens like ">", ".", "_"
             sequence_pairs.append((sequence[i], sequence[i + 1]))
 
-        breakpoint()
+        # breakpoint()
         if set(sequence_pairs) == target_pairs_set:
             print("Found match at index:", idx)
             return (idx, sequence)
