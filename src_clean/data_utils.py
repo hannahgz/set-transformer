@@ -393,7 +393,8 @@ def find_paired_sequence(dataset, tokenizer_path, target_sequence):
         target_pairs.append((target_sequence[i], target_sequence[i + 1]))
     
     target_pairs_set = set(target_pairs)
-    
+    print(f"Number of target pairs: {len(target_pairs_set)}")
+
     # Iterate through dataset
     for idx, sequence in enumerate(dataset):
         print(f"Id {idx}/{len(dataset)}")
@@ -405,7 +406,19 @@ def find_paired_sequence(dataset, tokenizer_path, target_sequence):
             # Skip special tokens like ">", ".", "_"
             sequence_pairs.append((sequence[i], sequence[i + 1]))
 
-        # breakpoint()
+        sequence_pairs_set = set(sequence_pairs)
+        print("Number of sequence pairs: ", len(sequence_pairs_set))
+        # Print what pairs are different
+        missing_pairs = target_pairs_set - sequence_pairs_set
+        extra_pairs = sequence_pairs_set - target_pairs_set
+        if missing_pairs:
+            print(f"Missing pairs: {missing_pairs}")
+            print(f"Num missing pairs: {len(missing_pairs)}")
+        if extra_pairs:
+            print(f"Extra pairs: {extra_pairs}")
+            print(f"Num extra pairs: {len(extra_pairs)}")
+
+        breakpoint()
         if set(sequence_pairs) == target_pairs_set:
             print("Found match at index:", idx)
             return (idx, sequence)
