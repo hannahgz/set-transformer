@@ -95,6 +95,7 @@ def calculate_accuracy(model, dataloader, config, tokenizer_path=None, save_inco
                 tokenizer = load_tokenizer(tokenizer_path)
                 two_set_id = tokenizer.token_to_id["/"]
                 for i in range(len(matches)):
+                    target_np = targets[i].cpu().numpy()
                     if not matches[i].item():
                         f.write(
                             f"Incorrect Prediction, sequence {index}, batch {i}:\n")
