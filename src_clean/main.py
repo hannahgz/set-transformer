@@ -31,6 +31,7 @@ if __name__ == "__main__":
     dataset = torch.load(dataset_path)
     find_paired_sequence(
         dataset=dataset,
+        tokenizer_path=tokenizer_path,
         target_sequence=["A", "oval", "A", "green", "A", "one", "A", "solid", "B", "oval", "B", "blue", "B", "one", "B", "solid", "C", "oval", "C", "pink", "C", "one", "C", "solid", "D", "oval", "D", "green", "D", "two", "D", "solid", "E", "oval", "E", "green", "E", "three", "E", "solid", ">", "A", "B", "C", "/", "A", "D", "E", "."]
     )
     # print("Initializing dataset")
