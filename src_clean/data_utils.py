@@ -326,7 +326,7 @@ def generate_base_combinations(n_cards = 5):
         target_seq = get_target_seq(
                 combination, 8, "_")
 
-        random.shuffle(tuple_array)
+        # random.shuffle(tuple_array)
 
         # Flatten the array to 40 elements using the new flatten_tuple function
         flattened_array = flatten_tuple(tuple_array)
@@ -436,6 +436,11 @@ if __name__ == "__main__":
     print(next(test))
     print(next(test))
     print(next(test))
+    print(next(test))
+    print(next(test))
+    print(next(test))
+    print(next(test))
+    
     # breakpoint()
     # initialize_base_dataset(
     #     save_dataset_path=f"{PATH_PREFIX}/base_dataset.pth",
