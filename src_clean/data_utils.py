@@ -105,7 +105,6 @@ def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, 
 
         shuffled_card_vectors = random.sample(card_vectors, n_cards)
         if not attr_first:
-            print("Card First Dataset")
             shuffled_tuple_array = [
                 (shuffled_card_vectors[i], attr)
                 for i, card in enumerate(combination)
