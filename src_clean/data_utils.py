@@ -321,7 +321,7 @@ def generate_base_combinations(n_cards = 5):
             for i, card in enumerate(combination)
             for attr in get_card_attributes(*card)
         ]
-        breakpoint()
+        # breakpoint()
 
         target_seq = get_target_seq(
                 combination, 8, "_")
@@ -433,6 +433,7 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     test = generate_base_combinations()
+    breakpoint()
     # initialize_base_dataset(
     #     save_dataset_path=f"{PATH_PREFIX}/base_dataset.pth",
     #     save_tokenizer_path=f"{PATH_PREFIX}/base_tokenizer.pkl"
