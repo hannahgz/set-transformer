@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 import time
 import pickle
 import numpy as np
+from model import GPTConfig44_Complete
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
@@ -428,13 +429,14 @@ if __name__ == "__main__":
 
     # breakpoint()
 
-    print("Initializing base dataset")
-    initialize_base_dataset(
-        save_dataset_path=f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
-    )
+    # print("Initializing base dataset")
+    # initialize_base_dataset(
+    #     save_dataset_path=f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
+    # )
 
     print("Initializing triples dataset")
     initialize_triples_datasets(
+        config = GPTConfig44_Complete(),
         save_dataset_path=f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_dataset.pth"
     )
 

@@ -130,7 +130,7 @@ class GPTConfig44_Equal:
 
 
 @dataclass
-class GPTConfig44_RandomRandom:
+class GPTConfig44_Complete:
     lr: float = 4e-4  # Base learning rate
     epochs: int = 25  # Reduced epochs due to large dataset
     batch_size: int = 512  # Increased for better throughput
