@@ -333,7 +333,7 @@ def generate_base_combinations(n_cards = 5):
         ]
 
         target_seq = get_target_seq(
-                combination, 8, "_")
+                combination, 8, "_", shuffled_card_vectors)
 
         # random.shuffle(tuple_array)
 
