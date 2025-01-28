@@ -433,7 +433,10 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     test = generate_base_combinations()
-    breakpoint()
+    print(next(test))
+    print(next(test))
+    print(next(test))
+    # breakpoint()
     # initialize_base_dataset(
     #     save_dataset_path=f"{PATH_PREFIX}/base_dataset.pth",
     #     save_tokenizer_path=f"{PATH_PREFIX}/base_tokenizer.pkl"
