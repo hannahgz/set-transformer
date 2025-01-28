@@ -441,18 +441,18 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    test = generate_base_combinations()
-    print(next(test))
-    print(next(test))
-    print(next(test))
-    print(next(test))
-    print(next(test))
-    print(next(test))
-    print(next(test))
+    # test = generate_base_combinations()
+    # print(next(test))
+    # print(next(test))
+    # print(next(test))
+    # print(next(test))
+    # print(next(test))
+    # print(next(test))
+    # print(next(test))
 
     # breakpoint()
-    # initialize_base_dataset(
-    #     save_dataset_path=f"{PATH_PREFIX}/base_dataset.pth",
-    #     save_tokenizer_path=f"{PATH_PREFIX}/base_tokenizer.pkl"
-    # )
+    initialize_base_dataset(
+        save_dataset_path=f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth",
+        save_tokenizer_path=f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_tokenizer.pkl"
+    )
 
