@@ -335,7 +335,7 @@ def generate_base_combinations(n_cards = 5):
         target_seq = get_target_seq(
                 combination, 8, "_", shuffled_card_vectors)
 
-        # random.shuffle(tuple_array)
+        random.shuffle(shuffled_tuple_array)
 
         # Flatten the array to 40 elements using the new flatten_tuple function
         flattened_array = flatten_tuple(shuffled_tuple_array)
