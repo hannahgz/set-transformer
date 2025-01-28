@@ -105,23 +105,25 @@ def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, 
 
         shuffled_card_vectors = random.sample(card_vectors, n_cards)
         if not attr_first:
-            print("Attribute First Dataset")
+            print("Card First Dataset")
+            shuffled_tuple_array = [
+                (shuffled_card_vectors[i], attr)
+                for i, card in enumerate(combination)
+                for attr in get_card_attributes(*card)
+            ]
             # tuple_array = [
             #     (card_vectors[i], attr)
             #     for i, card in enumerate(combination)
             #     for attr in get_card_attributes(*card)
             # ]
         else:
+            print("Attribute First Dataset")
             # tuple_array = [
             #     (attr, card_vectors[i])
             #     for i, card in enumerate(combination)
             #     for attr in get_card_attributes(*card)
             # ]
-            shuffled_tuple_array = [
-                (shuffled_card_vectors[i], attr)
-                for i, card in enumerate(combination)
-                for attr in get_card_attributes(*card)
-            ]
+
 
         random_iterations = 1
         if num_sets(combination) == 0 and balance_sets:

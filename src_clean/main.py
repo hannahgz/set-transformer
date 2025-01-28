@@ -26,6 +26,7 @@ if __name__ == "__main__":
     )
 
 
+    # PIPELINE - Calculate accuracy for complete model on base random dataset
     dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
     model = GPT(config).to(device)
     checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
@@ -34,12 +35,12 @@ if __name__ == "__main__":
     dataset = torch.load(dataset_path)
     train_loader, val_loader = initialize_loaders(config, dataset)
 
-    val_accuracy = calculate_accuracy(
+    complete_baserandom_val_accuracy = calculate_accuracy(
         model=model, 
         dataloader=val_loader,
         config=config, 
         tokenizer_path=config.tokenizer_path,
-        save_incorrect_path=f'{PATH_PREFIX}/complete_val_incorrect_predictions.txt',
+        save_incorrect_path=f'{PATH_PREFIX}/complete_baserandom_val_incorrect_predictions.txt',
         breakdown=True)
     print("Val accuracy for equal model on base random dataset: ", equal_baserandom_val_accuracy)
 
