@@ -148,7 +148,9 @@ class GPTConfig44_RandomRandom:
     target_size: int = 8
     pad_symbol: str = "_"
     out_dir: str = ""
-    filename: str = "equal_causal_balanced_layers_4_heads_4.pt"
+    tokenizer_path: str = f"{PATH_PREFIX}/all_tokenizer.pkl"
+    dataset_path: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_dataset.pth"
+    filename: str = "triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
     end_of_seq_token: int = 13
     padding_token: int = 14
 

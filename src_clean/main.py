@@ -1,5 +1,5 @@
 import torch
-from model import GPTConfig44_Equal, GPT
+from model import GPTConfig44_RandomRandom, GPT
 from data_utils import initialize_triples_datasets, initialize_loaders, find_paired_sequence
 import random
 import numpy as np
@@ -18,6 +18,13 @@ if __name__ == "__main__":
     
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
+    config = GPTConfig44_RandomRandom()
+
+    run(
+        config,
+        dataset_path=config.dataset_path
+    )
+    
     # config = GPTConfig44_Equal()
     # dataset_path = f'{PATH_PREFIX}/equal_causal_balanced_dataset.pth'
     # tokenizer_path = f'{PATH_PREFIX}/equal_causal_balanced_tokenizer.pkl'
