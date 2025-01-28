@@ -271,7 +271,7 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
             for index, inputs in enumerate(train_loader):
                 if index % 10000 == 0:
                     current_lr = scheduler.get_last_lr()[0]
-                    print(f"Epoch: {epoch}/{config.epochs}, Batch: {index}/{len(train_loader)}, LR: {current_lr:.2e}")
+                    print(f"Epoch: {epoch + 1}/{config.epochs}, Batch: {index}/{len(train_loader)}, LR: {current_lr:.2e}")
                 
                 inputs = inputs.to(device)
                 optimizer.zero_grad()
