@@ -102,15 +102,22 @@ def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, 
     for combination in itertools.combinations(cards, n_cards):
         # Create the initial array of 20 tuples
 
+        shuffled_card_vectors = random.sample(card_vectors, n_cards)
         if not attr_first:
-            tuple_array = [
-                (card_vectors[i], attr)
-                for i, card in enumerate(combination)
-                for attr in get_card_attributes(*card)
-            ]
+            print("Attribute First Dataset")
+            # tuple_array = [
+            #     (card_vectors[i], attr)
+            #     for i, card in enumerate(combination)
+            #     for attr in get_card_attributes(*card)
+            # ]
         else:
-            tuple_array = [
-                (attr, card_vectors[i])
+            # tuple_array = [
+            #     (attr, card_vectors[i])
+            #     for i, card in enumerate(combination)
+            #     for attr in get_card_attributes(*card)
+            # ]
+            shuffled_tuple_array = [
+                (shuffled_card_vectors[i], attr)
                 for i, card in enumerate(combination)
                 for attr in get_card_attributes(*card)
             ]
@@ -127,16 +134,16 @@ def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, 
             random_iterations = 345
 
         target_seq = get_target_seq(
-                combination, target_size, pad_symbol)
+                combination, target_size, pad_symbol, shuffled_card_vectors)
         # random.seed(42)
         for i in range(random_iterations):
             # random.seed(42 + i)
             # Randomize the array
             if random_order:
-                random.shuffle(tuple_array)
+                random.shuffle(shuffled_tuple_array)
 
             # Flatten the array to 40 elements using the new flatten_tuple function
-            flattened_array = flatten_tuple(tuple_array)
+            flattened_array = flatten_tuple(shuffled_tuple_array)
             flattened_array.append(">")
 
             flattened_array.extend(target_seq)
@@ -163,39 +170,28 @@ def separate_all_sets(tokenized_combinations, no_set_token, separate_token):
     return no_set_sequences, one_set_sequences, two_set_sequences
 
 
-def initialize_triples_datasets(config, save_dataset_path=None, save_tokenizer_path=None, attr_first=False):
+def initialize_triples_datasets(config, save_dataset_path=None, attr_first=False):
     optimized_combinations = generate_combinations(
-        config.target_size, config.pad_symbol, config.n_cards, random_order=True, balance_sets=True
+        target_size=config.target_size,
+        pad_symbol=config.pad_symbol,
+        n_cards=config.n_cards, 
+        random_order=True, 
+        attr_first=False,
+        balance_sets=True
     )
 
     small_combinations = list(optimized_combinations)
 
     # Create tokenizer and tokenize all sequences
-    tokenizer = Tokenizer()
+    tokenizer = load_tokenizer(f"{PATH_PREFIX}/all_tokenizer.pkl")
     tokenized_combinations = [tokenizer.encode(
         seq) for seq in small_combinations]
 
-    if save_tokenizer_path:
-        save_tokenizer(tokenizer, save_tokenizer_path)
+    
+    no_set_token = tokenizer.token_to_id["*"]
+    separate_token = tokenizer.token_to_id["/"]
 
-    separate_token = -1
-    no_set_token = -1
-
-    for i in range(len(small_combinations)):
-        if "/" in small_combinations[i]:
-            separate_token_pos = small_combinations[i].index("/")
-            separate_token = tokenized_combinations[i][separate_token_pos]
-
-        if "*" in small_combinations[i]:
-            no_set_token_pos = small_combinations[i].index("*")
-            no_set_token = tokenized_combinations[i][no_set_token_pos]
-
-        if no_set_token >= 0 and separate_token >= 0:
-            break
-
-    print("separate token: ", separate_token)
-    print("no set token: ", no_set_token)
-
+    breakpoint()
     # Separate out sets from non sets in the tokenized representation
     no_set_sequences, one_set_sequences, two_set_sequences = separate_all_sets(
         tokenized_combinations, no_set_token, separate_token
@@ -345,36 +341,16 @@ def generate_base_combinations(n_cards = 5):
         
         yield flattened_array
 
-def initialize_base_dataset(save_dataset_path=None, save_tokenizer_path=None):
+def initialize_base_dataset(save_dataset_path=None):
     optimized_combinations = generate_base_combinations()
 
     small_combinations = list(optimized_combinations)
 
     # Create tokenizer and tokenize all sequences
-    tokenizer = Tokenizer()
+    tokenizer = load_tokenizer(f"{PATH_PREFIX}/all_tokenizer.pkl")
     tokenized_combinations = [tokenizer.encode(
         seq) for seq in small_combinations]
-
-    if save_tokenizer_path:
-        save_tokenizer(tokenizer, save_tokenizer_path)
-
-    separate_token = -1
-    no_set_token = -1
-
-    for i in range(len(small_combinations)):
-        if "/" in small_combinations[i]:
-            separate_token_pos = small_combinations[i].index("/")
-            separate_token = tokenized_combinations[i][separate_token_pos]
-
-        if "*" in small_combinations[i]:
-            no_set_token_pos = small_combinations[i].index("*")
-            no_set_token = tokenized_combinations[i][no_set_token_pos]
-
-        if no_set_token >= 0 and separate_token >= 0:
-            break
-
-    print("separate token: ", separate_token)
-    print("no set token: ", no_set_token)
+    breakpoint()
 
     dataset = SetDataset(tokenized_combinations)
 
@@ -451,8 +427,14 @@ if __name__ == "__main__":
     # print(next(test))
 
     # breakpoint()
+
+    print("Initializing base dataset")
     initialize_base_dataset(
-        save_dataset_path=f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth",
-        save_tokenizer_path=f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_tokenizer.pkl"
+        save_dataset_path=f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
+    )
+
+    print("Initializing triples dataset")
+    initialize_triples_datasets(
+        save_dataset_path=f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_dataset.pth"
     )
 
