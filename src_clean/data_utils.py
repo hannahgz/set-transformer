@@ -45,7 +45,7 @@ def num_sets(combination):
     
     return num_sets
 
-def find_sets_with_cards(combination: Tuple) -> List[Tuple]:
+def find_sets_with_cards(combination: Tuple, shuffled_card_vectors: List):
     sets = []
     n_cards = len(combination)
     # print("combination: ", combination)
@@ -54,8 +54,11 @@ def find_sets_with_cards(combination: Tuple) -> List[Tuple]:
             for k in range(j + 1, n_cards):
                 if is_set(combination[i], combination[j], combination[k]):
                     # print("appending: ", (card_vectors[i], card_vectors[j], card_vectors[k]))
+                    # sets.extend(
+                    #     [card_vectors[i], card_vectors[j], card_vectors[k]])
+                    
                     sets.extend(
-                        [card_vectors[i], card_vectors[j], card_vectors[k]])
+                        [shuffled_card_vectors[i], shuffled_card_vectors[j], shuffled_card_vectors[k]])
 
     if len(sets) == 6:
         sets.insert(3, "/")
@@ -81,8 +84,8 @@ def get_cards():
     return cards
 
 
-def get_target_seq(combination, target_size, pad_symbol):
-    target_seq = find_sets_with_cards(combination)
+def get_target_seq(combination, target_size, pad_symbol, shuffled_card_vectors):
+    target_seq = find_sets_with_cards(combination, shuffled_card_vectors)
 
     target_seq.append(".")
 
