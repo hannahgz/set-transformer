@@ -316,12 +316,18 @@ def generate_base_combinations(n_cards = 5):
     for combination in itertools.combinations(cards, n_cards):
         # Create the initial array of 20 tuples
 
-        tuple_array = [
-            (card_vectors[i], attr)
+        # tuple_array = [
+        #     (card_vectors[i], attr)
+        #     for i, card in enumerate(combination)
+        #     for attr in get_card_attributes(*card)
+        # ]
+        shuffled_card_vectors = random.sample(card_vectors, n_cards)
+        
+        shuffled_tuple_array = [
+            (shuffled_card_vectors[i], attr)
             for i, card in enumerate(combination)
             for attr in get_card_attributes(*card)
         ]
-        # breakpoint()
 
         target_seq = get_target_seq(
                 combination, 8, "_")
@@ -329,7 +335,7 @@ def generate_base_combinations(n_cards = 5):
         # random.shuffle(tuple_array)
 
         # Flatten the array to 40 elements using the new flatten_tuple function
-        flattened_array = flatten_tuple(tuple_array)
+        flattened_array = flatten_tuple(shuffled_tuple_array)
         flattened_array.append(">")
 
         flattened_array.extend(target_seq)
@@ -440,7 +446,7 @@ if __name__ == "__main__":
     print(next(test))
     print(next(test))
     print(next(test))
-    
+
     # breakpoint()
     # initialize_base_dataset(
     #     save_dataset_path=f"{PATH_PREFIX}/base_dataset.pth",
