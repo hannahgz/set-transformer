@@ -15,8 +15,6 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     # Attempt to improve model accuracy
-    
-    device = "cuda" if torch.cuda.is_available() else "cpu"
 
     config = GPTConfig44_Complete()
     
@@ -26,23 +24,24 @@ if __name__ == "__main__":
     )
 
 
-    # PIPELINE - Calculate accuracy for complete model on base random dataset
-    dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
-    model = GPT(config).to(device)
-    checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
-    model.load_state_dict(checkpoint["model"])
+    # # PIPELINE - Calculate accuracy for complete model on base random dataset
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
+    # dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
+    # model = GPT(config).to(device)
+    # checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
+    # model.load_state_dict(checkpoint["model"])
 
-    dataset = torch.load(dataset_path)
-    train_loader, val_loader = initialize_loaders(config, dataset)
+    # dataset = torch.load(dataset_path)
+    # train_loader, val_loader = initialize_loaders(config, dataset)
 
-    complete_baserandom_val_accuracy = calculate_accuracy(
-        model=model, 
-        dataloader=val_loader,
-        config=config, 
-        tokenizer_path=config.tokenizer_path,
-        save_incorrect_path=f'{PATH_PREFIX}/complete_baserandom_val_incorrect_predictions.txt',
-        breakdown=True)
-    print("Val accuracy for equal model on base random dataset: ", equal_baserandom_val_accuracy)
+    # complete_baserandom_val_accuracy = calculate_accuracy(
+    #     model=model, 
+    #     dataloader=val_loader,
+    #     config=config, 
+    #     tokenizer_path=config.tokenizer_path,
+    #     save_incorrect_path=f'{PATH_PREFIX}/complete_baserandom_val_incorrect_predictions.txt',
+    #     breakdown=True)
+    # print("Val accuracy for equal model on base random dataset: ", complete_baserandom_val_accuracy)
 
     # config = GPTConfig44_Equal()
     # dataset_path = f'{PATH_PREFIX}/equal_causal_balanced_dataset.pth'
