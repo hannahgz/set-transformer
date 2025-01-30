@@ -7,7 +7,7 @@ from typing import List, Tuple
 from dataclasses import dataclass
 import torch
 import os
-from model import GPT, GPTConfig44_BalancedSets, GPTConfig44_Equal
+from model import GPT, GPTConfig44_Complete
 from tokenizer import load_tokenizer
 import random
 
@@ -104,11 +104,71 @@ def generate_input(card_groups, group):
     )
     return input
 
-
+def check_sequence_equality(prediction, target):
+    """
+    Check if two sequences are equivalent, accounting for:
+    1. Different orderings of groups (for two triplet cases)
+    2. Different orderings within each triplet
+    3. Single triplet cases with padding
+    4. Different padding tokens ('.' vs '_')
+    5. No triplet cases (just "*" and padding)
+    
+    Args:
+        prediction: List of strings, e.g. ["A", "B", "C", ".", ".", ".", ".", "."]
+                   or ["A", "B", "C", "/", "D", "E", "F", "."]
+                   or ["*", ".", ".", ".", ".", ".", ".", "."]
+        target: List of strings in same format
+        
+    Returns:
+        bool: True if sequences are equivalent, False otherwise
+    """
+    def get_triplets(sequence):
+        # First check if this is a "no triplet" case
+        if "*" in sequence:
+            return []
+            
+        # Find the separator index if it exists
+        try:
+            sep_idx = sequence.index("/")
+            # Split into two triplets
+            first_triplet = set(sequence[:sep_idx])
+            second_triplet = set(sequence[sep_idx + 1:])
+            # Remove padding tokens
+            first_triplet = {x for x in first_triplet if x not in [".", "_"]}
+            second_triplet = {x for x in second_triplet if x not in [".", "_"]}
+            return [first_triplet, second_triplet]
+        except ValueError:
+            # No separator found - single triplet case
+            # Get all non-padding tokens as one triplet
+            triplet = set(x for x in sequence if x not in [".", "_", "/"])
+            return [triplet]
+    
+    # Get triplets from both sequences
+    pred_triplets = get_triplets(prediction)
+    target_triplets = get_triplets(target)
+    
+    # If both have no triplets, they're equal
+    if not pred_triplets and not target_triplets:
+        return True
+        
+    # Check if same number of non-empty triplets
+    if len(pred_triplets) != len(target_triplets):
+        return False
+        
+    # For single triplet case, just compare the sets directly
+    if len(pred_triplets) == 1:
+        return pred_triplets[0] == target_triplets[0]
+        
+    # For two triplet case, try matching triplets in either order
+    if len(pred_triplets) == 2:
+        return (pred_triplets[0] == target_triplets[0] and pred_triplets[1] == target_triplets[1]) or \
+               (pred_triplets[0] == target_triplets[1] and pred_triplets[1] == target_triplets[0])
+               
+    return False
 def attention_weights_from_sequence(
         config,
         input,
-        tokenizer_path=f"larger_balanced_set_dataset_random_tokenizer.pkl",
+        tokenizer_path=f"all_cards_tokenizer.pkl",
         get_prediction=False):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -138,13 +198,30 @@ def attention_weights_from_sequence(
 
         predictions = outputs[:, config.input_size:]
 
-        mask = targets != config.padding_token  # Create a mask to ignore padding
-        matches = ((predictions == targets) | ~mask).all(dim=1)
-        is_correct = bool(matches.sum().item())
+        # no_set_token = tokenizer.token_to_id["*"]
+
+        # is_correct = check_sequence_equality(
+        #     prediciton = predictions[0],
+        #     target = targets[0],
+        #     no_set_token = no_set_token
+        # )
+        # # check_sequence_equality()
+        # mask = targets != config.padding_token  # Create a mask to ignore padding
+        # matches = ((predictions == targets) | ~mask).all(dim=1)
+        # is_correct = bool(matches.sum().item())
+
+        # # breakpoint()
+        # print("predictions[0]: ", predictions[0])
+        # print("targets[0]: ", targets[0])
 
         decoded_predictions = tokenizer.decode(predictions[0].tolist())
         decoded_targets = tokenizer.decode(targets[0].tolist())
-        print("correct: ", is_correct)
+
+        is_correct = check_sequence_equality (
+            decoded_predictions,
+            decoded_targets
+        )
+        # print("correct: ", is_correct)
 
         # print("full output: ", tokenizer.decode(outputs[0].tolist()))
         print("predictions: ", decoded_predictions)
@@ -195,7 +272,7 @@ def create_single_attention_weight_fig(attention_weights, labels, n_layers=4, n_
             
             for i in range(n_points):
                 for j in range(n_points):
-                    weight = abs(weights[i, j])
+                    weight = weights[i, j]
                     if weight > threshold:
                         all_connections.append({
                             'x': x_coords,
@@ -284,17 +361,15 @@ def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4,
         random.shuffle(pairs)
         sequence = [item for pair in pairs for item in pair]
 
-    # Calculate a more compact height based on screen size
-    height_per_layer = 400  # Reduced from 300
+    height_per_layer = 400
     total_height = n_layers * height_per_layer
     
     fig = make_subplots(
         rows=n_layers, 
         cols=n_heads,
-        subplot_titles=[f"L{l+1}H{h+1}" for l in range(n_layers) for h in range(n_heads)],  # Shortened titles
+        subplot_titles=[f"L{l+1}H{h+1}" for l in range(n_layers) for h in range(n_heads)],
         specs=[[{"secondary_y": True} for _ in range(n_heads)] for _ in range(n_layers)],
-        vertical_spacing=0.02,  # Reduced spacing between subplots
-        # horizontal_spacing=0.02  # Reduced horizontal spacing
+        vertical_spacing=0.02,
     )
     
     x_coords = [0, 1]
@@ -304,7 +379,6 @@ def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4,
     reversed_labels = labels1[::-1]
     highlight_indices = {len(labels1) - i - 1: 'green' for i, (label1, label2) in enumerate(zip(labels1, labels2)) if label1 != label2}
 
-    # Make the font size smaller
     custom_ticktext = []
     for i, label in enumerate(reversed_labels):
         if i in highlight_indices and i > 8:
@@ -320,8 +394,8 @@ def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4,
             
             for i in range(n_points):
                 for j in range(n_points):
-                    weight = abs(weights_diff[i, j])
-                    if weight > threshold:
+                    weight = weights_diff[i, j]
+                    if abs(weight) > threshold:
                         all_connections.append({
                             'x': x_coords,
                             'y': [n_points - 1 - i, n_points - 1 - j],
@@ -331,20 +405,35 @@ def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4,
                         })
             
             for conn in all_connections:
+                # Create smooth color gradient from red (-1) to white (0) to blue (1)
+                # weight = max(-1, min(1, conn['weight']))  # Clamp weight between -1 and 1
+                weight = conn["weight"]
+                if weight < 0:
+                    # Dark red (negative) to purple
+                    r = 220
+                    g = 20
+                    b = int(20 + 235 * (1 + weight))
+                else:
+                    # Purple to light blue (positive)
+                    r = int(220 - 180 * weight)
+                    g = int(20 + 180 * weight)
+                    b = 255
+                color = f'rgb({r},{g},{b})'
+                
                 fig.add_trace(
                     go.Scatter(
                         x=conn['x'],
                         y=conn['y'],
                         mode='lines',
                         line=dict(
-                            color='blue',
-                            width=max(0.5, conn['weight'] * 3)  # Reduced line width
+                            color=color,
+                            width=abs(conn['weight']) * 5
                         ),
-                        opacity=conn['weight'],
                         showlegend=False,
                         hovertemplate=f"Weight: {conn['weight']:.3f}<br>From: {labels1[conn['from_idx']]}<br>To: {labels1[conn['to_idx']]}",
                         name="",
-                        hoveron='points+fills',
+                        # hoveron='lines',
+                        hoverinfo='all',
                     ),
                     row=layer+1, col=head+1,
                     secondary_y=False
@@ -365,19 +454,17 @@ def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4,
                 row=layer+1, col=head+1, secondary_y=True
             )
             
-            # Update x-axes with smaller font and ticks
             fig.update_xaxes(
-                ticktext=["Q", "K"],  # Shortened labels
+                ticktext=["Q", "K"],
                 tickvals=[0, 1],
                 row=layer+1,
                 col=head+1,
                 range=[-0.1, 1.1],
                 showline=False,
                 showgrid=False,
-                tickfont=dict(size=4)  # Smaller font size
+                tickfont=dict(size=4)
             )
 
-            # Update y-axes with smaller font and optimized spacing
             for secondary_y in [False, True]:
                 fig.update_yaxes(
                     ticktext=custom_ticktext,
@@ -389,17 +476,46 @@ def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4,
                     showline=False,
                     showgrid=False,
                     side='left' if not secondary_y else 'right',
-                    tickfont=dict(size=2),  # Smaller font size
+                    tickfont=dict(size=2),
                 )
 
-    # Optimize layout
+    # Add colorscale
+    colorscale_trace = go.Scatter(
+        x=np.linspace(-1, 1, 100),
+        y=[0]*100,
+        mode='markers',
+        marker=dict(
+            size=10,
+            color=np.linspace(-1, 1, 100),
+            colorscale=[
+                [0, 'rgb(40,200,255)'],      # Light blue for 1 (bottom)
+                [0.5, 'rgb(140,100,255)'],   # Purple for 0 (middle)
+                [1, 'rgb(220,20,20)']        # Dark red for -1 (top)
+            ],
+            showscale=True,
+            colorbar=dict(
+                title='Weight Difference',
+                titleside='right',
+                thickness=10,
+                len=0.3,
+                x=1.02,
+                y=0.5,
+                ticktext=['-1', '0', '1'],
+                tickvals=[1.0, 0, -1],  # Maps -1 to top (1.0), 0 to middle (0.5), 1 to bottom (0.0)
+                tickmode='array'
+            )
+        ),
+        showlegend=False
+    )
+    
+    fig.add_trace(colorscale_trace)
+
     fig.update_layout(
         height=total_height,
-        width=n_heads*220,  # Reduced width
+        width=n_heads*220,
         showlegend=False,
-        margin=dict(l=10, r=10, t=20, b=10),  # Optimized margins
+        margin=dict(l=10, r=10, t=20, b=10),
         title_x=0.5,
-        # font=dict(size=4)  # Global font size reduction
     )
 
     return fig
@@ -459,8 +575,11 @@ def save_single_cards():
     sequence1 = shuffle_input_sequence(sequence1, seed)
 
     attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
-        GPTConfig44_Equal, sequence1, tokenizer_path="equal_causal_balanced_tokenizer.pkl", get_prediction=True)
+        GPTConfig44_Complete, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True)
     
+    if is_correct1:
+        sequence1 = sequence1[:-8] + decoded_predictions1
+        
     fig = create_single_attention_weight_fig(
         attention_weights=attention_weights1,
         labels=sequence1,
@@ -522,13 +641,13 @@ def save_difference_cards():
     sequence2 = shuffle_input_sequence(sequence2, seed)
 
     attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
-        GPTConfig44_Equal, sequence1, tokenizer_path="equal_causal_balanced_tokenizer.pkl", get_prediction=True)
+        GPTConfig44_Complete, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True)
     print("Got attention weights 1")
 
     # attention_weights2, is_correct2, decoded_predictions2, decoded_targets2 = attention_weights_from_sequence(
     #     GPTConfig44_BalancedSets, sequence2, get_prediction=True)
     attention_weights2, is_correct2, decoded_predictions2, decoded_targets2 = attention_weights_from_sequence(
-        GPTConfig44_Equal, sequence2, tokenizer_path="equal_causal_balanced_tokenizer.pkl", get_prediction=True)
+        GPTConfig44_Complete, sequence2, tokenizer_path="all_tokenizer.pkl", get_prediction=True)
     print("Got attention weights 2")
 
     prediction_results = {
