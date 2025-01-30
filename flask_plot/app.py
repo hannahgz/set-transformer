@@ -579,7 +579,7 @@ def save_single_cards():
     
     if is_correct1:
         sequence1 = sequence1[:-8] + decoded_predictions1
-        
+
     fig = create_single_attention_weight_fig(
         attention_weights=attention_weights1,
         labels=sequence1,
@@ -644,11 +644,18 @@ def save_difference_cards():
         GPTConfig44_Complete, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True)
     print("Got attention weights 1")
 
+    # Update the labels to reflect the actual predicted sequence if correct, just different order
+    if is_correct1:
+        sequence1 = sequence1[:-8] + decoded_predictions1
+
     # attention_weights2, is_correct2, decoded_predictions2, decoded_targets2 = attention_weights_from_sequence(
     #     GPTConfig44_BalancedSets, sequence2, get_prediction=True)
     attention_weights2, is_correct2, decoded_predictions2, decoded_targets2 = attention_weights_from_sequence(
         GPTConfig44_Complete, sequence2, tokenizer_path="all_tokenizer.pkl", get_prediction=True)
     print("Got attention weights 2")
+
+    if is_correct2:
+        sequence2 = sequence2[:-8] + decoded_predictions2
 
     prediction_results = {
         1: (sequence1, is_correct1, decoded_predictions1, decoded_targets1),
