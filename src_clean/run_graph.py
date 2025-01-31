@@ -1,5 +1,5 @@
-from graph import make_prediction_given_input, generate_lineplot
-from model import GPTConfig44_Equal, GPT
+from graph import make_prediction_given_input, generate_lineplot, lineplot_specific
+from model import GPT, GPTConfig44_Complete
 import random
 import torch
 from tokenizer import load_tokenizer
@@ -12,15 +12,13 @@ if __name__ == "__main__":
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    config = GPTConfig44_Equal()
-    dataset_path = f'{PATH_PREFIX}/equal_causal_balanced_dataset.pth'
-    tokenizer_path = f'{PATH_PREFIX}/equal_causal_balanced_tokenizer.pkl'
+    config = GPTConfig44_Complete()
 
     model = GPT(config).to(device)
     checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
     model.load_state_dict(checkpoint["model"])
 
-    tokenizer = load_tokenizer(tokenizer_path)
+    tokenizer = load_tokenizer(config.tokenizer_path)
     # make_prediction_given_input(
     #     GPTConfig44_Equal,
     #     input1,
@@ -29,14 +27,31 @@ if __name__ == "__main__":
     #     get_prediction=True
     # )
 
-    generate_lineplot(
-        config,
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-        dataset_path,
-        tokenizer_path,
-        use_labels=True,
-        threshold=0.05,
-        get_prediction=True)
+    test_input = [
+        "A", "oval", "A", "green", "A", "one", "A", "solid",
+        "B", "oval", "B", "blue", "B", "one", "B", "solid",
+        "C", "oval", "C", "pink", "C", "one", "C", "solid",
+        "D", "oval", "D", "green", "D", "two", "D", "solid",
+        "E", "oval", "E", "green", "E", "three", "E", "solid",
+        ">", "A", "D", "E", "/", "A", "B", "C", "."
+    ]
+
+    lineplot_specific(
+        config=config,
+        input=test_input,
+        tokenizer_path=config.tokenizer_path,
+        get_prediction=True,
+        filename_prefix="input0"
+    )
+
+    # generate_lineplot(
+    #     config,
+    #     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    #     dataset_path,
+    #     tokenizer_path,
+    #     use_labels=True,
+    #     threshold=0.05,
+    #     get_prediction=True)
 
     # input1 = [
     #     "A", "diamond",      "B", "diamond",      "C", "diamond",   "D", "oval",    "E", "oval",

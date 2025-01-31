@@ -58,9 +58,11 @@ def find_sets_with_cards(combination: Tuple, shuffled_card_vectors: List):
                     # sets.extend(
                     #     [card_vectors[i], card_vectors[j], card_vectors[k]])
                     
-                    sets.extend(
-                        [shuffled_card_vectors[i], shuffled_card_vectors[j], shuffled_card_vectors[k]])
-
+                    # sets.extend(
+                    #     [shuffled_card_vectors[i], shuffled_card_vectors[j], shuffled_card_vectors[k]])
+                    sorted_triplet = sorted([shuffled_card_vectors[i], shuffled_card_vectors[j], shuffled_card_vectors[k]])
+                    sets.extend(sorted_triplet)
+                    
     if len(sets) == 6:
         sets.insert(3, "/")
 

@@ -336,32 +336,32 @@ def lineplot_specific(
         print("predictions: ", tokenizer.decode(predictions[0].tolist()))
         print("target: ", tokenizer.decode(targets[0].tolist()))
 
-    # _, _, attention_weights, _ = model(
-    #     sequences.to(device), False)
+    _, _, attention_weights, _ = model(
+        sequences.to(device), False)
 
-    # labels = input.tolist()
-    # labels = tokenizer.decode(labels)
-    # if "/" in labels:
-    #     number_set = "two"
-    # elif "*" in labels:
-    #     number_set = "zero"
-    # else:
-    #     number_set = "one"
+    labels = input.tolist()
+    labels = tokenizer.decode(labels)
+    if "/" in labels:
+        number_set = "two"
+    elif "*" in labels:
+        number_set = "zero"
+    else:
+        number_set = "one"
 
-    # # print("labels: ", labels)
+    # print("labels: ", labels)
 
-    # dir_path = f"figs/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}/synthetic_larger"
-    # filename = f"{filename_prefix}_lineplot_sets_{number_set}_threshold_{threshold}.png"
-    # if not os.path.exists(dir_path):
-    #     os.makedirs(dir_path)
+    dir_path = f"COMPLETE_FIGS/attention_pattern_layers_{config.n_layer}_heads_{config.n_head}"
+    filename = f"{filename_prefix}_lineplot_sets_{number_set}_threshold_{threshold}.png"
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
 
-    # plot_attention_pattern_lines(
-    #     attention_weights,
-    #     labels,
-    #     config.n_layer,
-    #     config.n_head,
-    #     title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
-    #     savefig=f"{dir_path}/{filename}",
-    #     threshold=threshold)
+    plot_attention_pattern_lines(
+        attention_weights,
+        labels,
+        config.n_layer,
+        config.n_head,
+        title_prefix=f"Attention Pattern: {number_set.capitalize()} Set(s)",
+        savefig=f"{dir_path}/{filename}",
+        threshold=threshold)
     
 
