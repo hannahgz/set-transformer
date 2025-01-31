@@ -1,5 +1,5 @@
 import torch
-from model import GPTConfig44_Complete, GPT
+from model import GPTConfig44_Complete, GPT, GPTConfig24_Complete
 from data_utils import initialize_triples_datasets, initialize_loaders, find_paired_sequence
 import random
 import numpy as np
@@ -16,12 +16,13 @@ if __name__ == "__main__":
 
     # Attempt to improve model accuracy
 
-    config = GPTConfig44_Complete()
+    # config = GPTConfig44_Complete()
+    config = GPTConfig24_Complete()
     
-    # run(
-    #     config,
-    #     dataset_path=config.dataset_path
-    # )
+    run(
+        config,
+        dataset_path=config.dataset_path
+    )
 
 
     # PIPELINE - Calculate accuracy for complete model on base random dataset
@@ -39,9 +40,9 @@ if __name__ == "__main__":
         dataloader=val_loader,
         config=config, 
         tokenizer_path=config.tokenizer_path,
-        save_incorrect_path=f'{PATH_PREFIX}/complete_baserandom_val_incorrect_predictions.txt',
+        save_incorrect_path=f'{PATH_PREFIX}/complete_baserandom_val_incorrect_predictions_24.txt',
         breakdown=True)
-    print("Val accuracy for equal model on base random dataset: ", complete_baserandom_val_accuracy)
+    print("Val accuracy for complete model with 2 layers 4 heads on base random dataset: ", complete_baserandom_val_accuracy)
 
     # config = GPTConfig44_Equal()
     # dataset_path = f'{PATH_PREFIX}/equal_causal_balanced_dataset.pth'
