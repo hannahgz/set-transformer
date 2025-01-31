@@ -19,10 +19,10 @@ if __name__ == "__main__":
     # config = GPTConfig44_Complete()
     config = GPTConfig24_Complete()
     
-    run(
-        config,
-        dataset_path=config.dataset_path
-    )
+    # run(
+    #     config,
+    #     dataset_path=config.dataset_path
+    # )
 
 
     # PIPELINE - Calculate accuracy for complete model on base random dataset
