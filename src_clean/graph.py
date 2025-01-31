@@ -305,11 +305,11 @@ def lineplot_specific(
     print("Loaded dataset")
 
     # Restore the model state dict
-    # checkpoint = torch.load(os.path.join(
-    #     PATH_PREFIX, config.filename), weights_only=False)
-    
     checkpoint = torch.load(os.path.join(
-        config.filename), weights_only=False, map_location=torch.device('cpu'))
+        PATH_PREFIX, config.filename), weights_only=False)
+    
+    # checkpoint = torch.load(os.path.join(
+    #     config.filename), weights_only=False, map_location=torch.device('cpu'))
 
     model.load_state_dict(checkpoint["model"])
     print("Loaded model")
