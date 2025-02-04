@@ -466,6 +466,7 @@ if __name__ == "__main__":
     
     pred_card_from_attr = True
     for capture_layer in [0, 1, 3]:
+        print(f"Predicting card from attribute, capture layer: {capture_layer}")
         init_card_attr_binding_dataset(
             config=config,
             capture_layer=capture_layer,
@@ -484,6 +485,7 @@ if __name__ == "__main__":
         
     pred_card_from_attr = False
     for capture_layer in range(4):
+        print(f"Predicting attribute from card, capture layer: {capture_layer}")
         init_card_attr_binding_dataset(
             config=config,
             capture_layer=capture_layer,
