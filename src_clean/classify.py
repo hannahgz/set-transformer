@@ -27,11 +27,20 @@ class LinearModel(nn.Module):
         return self.fc(x)
 
 
-def evaluate_model(model, X, y, model_name, predict_dim, continuous_to_original_path=None, tokenizer_path=None):
+def evaluate_model(
+        model, 
+        X, 
+        y, 
+        model_name, 
+        predict_dim, 
+        continuous_to_original_path=None, 
+        dataset_name=None, 
+        capture_layer=None, 
+        tokenizer_path=None):
     """Evaluates the model on data and prints correct predictions."""
 
     checkpoint = torch.load(
-        f'{PATH_PREFIX}/classify/{model_name}.pt', weights_only=False)
+        f'{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/{model_name}.pt', weights_only=False)
     model.load_state_dict(checkpoint["model"])
 
     model.eval()  # Set the model to evaluation mode
@@ -63,8 +72,15 @@ def evaluate_model(model, X, y, model_name, predict_dim, continuous_to_original_
     print("\nPer-class statistics:")
 
     if continuous_to_original_path and tokenizer_path:
-        log_per_class_statistics(continuous_to_original_path, tokenizer_path,
-                                 model_name, predict_dim, class_total_counts, class_correct_counts)
+        log_per_class_statistics(
+            continuous_to_original_path, 
+            tokenizer_path,
+            model_name, 
+            predict_dim, 
+            class_total_counts, 
+            class_correct_counts,
+            dataset_name,
+            capture_layer)
 
     print(f"\nTotal correct predictions: {len(correct_predictions)}")
     print(f"Accuracy: {accuracy:.4f}")
@@ -72,12 +88,20 @@ def evaluate_model(model, X, y, model_name, predict_dim, continuous_to_original_
     return accuracy
 
 
-def log_per_class_statistics(continuous_to_original_path, tokenizer_path, model_name, predict_dim, class_total_counts, class_correct_counts):
+def log_per_class_statistics(
+        continuous_to_original_path, 
+        tokenizer_path, 
+        model_name, 
+        predict_dim, 
+        class_total_counts, 
+        class_correct_counts,
+        dataset_name,
+        capture_layer):
     with open(continuous_to_original_path, 'rb') as f:
         continuous_to_original = pickle.load(f)
     tokenizer = load_tokenizer(tokenizer_path)
     # Save the printed logs into a txt file
-    log_file_path = f'{PATH_PREFIX}/classify/{model_name}_evaluation_log.txt'
+    log_file_path = f'{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/{model_name}_evaluation_log.txt'
     print("log_file_path: ", log_file_path)
     with open(log_file_path, 'w') as log_file:
         log_file.write("\nPer-class statistics:\n")
@@ -101,7 +125,7 @@ def log_per_class_statistics(continuous_to_original_path, tokenizer_path, model_
                     f"  Accuracy: {accuracy_per_class:.4f} ({correct}/{total})\n")
 
 
-def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=100, batch_size=32, patience=5, model_name=None):
+def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=100, batch_size=32, patience=5, dataset_name=None, capture_layer=None, model_name=None):
     """Trains the model using validation accuracy for early stopping."""
     X_train, y_train = train_data
     X_val, y_val = val_data
@@ -166,7 +190,7 @@ def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=10
                 "epoch_num": epoch,
                 "best_val_loss": best_val_loss,
             }
-            torch.save(checkpoint, f'{PATH_PREFIX}/classify/{model_name}.pt')
+            torch.save(checkpoint, f'{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/{model_name}.pt')
         else:
             counter += 1
             if counter >= patience:
@@ -174,8 +198,31 @@ def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=10
                 break
 
 
-def run_classify(X, y, model_name, input_dim, output_dim, num_epochs=100, batch_size=32, lr=0.001, model_type="linear", continuous_to_original_path=None, tokenizer_path=None):
+def run_classify(
+        input_dim, 
+        output_dim, 
+        capture_layer,
+        num_epochs=100, 
+        batch_size=32, 
+        lr=0.001, 
+        model_type="linear", 
+        tokenizer_path=None, 
+        pred_card_from_attr=True):
     """Main function to run the model training and evaluation."""
+
+    if pred_card_from_attr:
+        dataset_name = "card_from_attr"
+    else:
+        dataset_name = "attr_from_card"
+
+    input_embeddings_path: f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/input_embeddings.pt"
+    mapped_target_tokens_path: f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/continuous_target_tokens.pt"
+    continuous_to_original_path: f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/continuous_to_original.pkl"
+
+    X = torch.load(input_embeddings_path)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    y = torch.load(mapped_target_tokens_path).to(device)
+
     # Prepare data with validation split
     X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y)
 
@@ -187,6 +234,7 @@ def run_classify(X, y, model_name, input_dim, output_dim, num_epochs=100, batch_
     # elif model_type == "mlp":
     #     model = MLPModel(input_dim=input_dim, hidden_dim=32,
     #                      output_dim=output_dim).to(device)
+
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
@@ -199,30 +247,45 @@ def run_classify(X, y, model_name, input_dim, output_dim, num_epochs=100, batch_
         optimizer,
         num_epochs,
         batch_size,
-        model_name=f"{model_name}_{model_type}"
+        dataset_name=dataset_name,
+        capture_layer=capture_layer,
+        model_name=model_type,
     )
 
     # Evaluate the model
+    
     train_accuracy = evaluate_model(
-        model,
-        X_train,
-        y_train,
-        model_name=f"{model_name}_{model_type}",
-        predict_dim=5)
+        model, 
+        X_train, 
+        y_train, 
+        model_name=model_type, 
+        predict_dim=5, 
+        continuous_to_original_path=continuous_to_original_path, 
+        dataset_name=dataset_name, 
+        capture_layer=capture_layer, 
+        tokenizer_path=tokenizer_path)
+    
     val_accuracy = evaluate_model(
-        model,
-        X_val,
-        y_val,
-        model_name=f"{model_name}_{model_type}",
-        predict_dim=5)
+        model, 
+        X_val, 
+        y_val, 
+        model_name=model_type, 
+        predict_dim=5, 
+        continuous_to_original_path=continuous_to_original_path, 
+        dataset_name=dataset_name, 
+        capture_layer=capture_layer, 
+        tokenizer_path=tokenizer_path)
+    
     test_accuracy = evaluate_model(
-        model,
-        X_test,
-        y_test,
-        model_name=f"{model_name}_{model_type}",
-        continuous_to_original_path=continuous_to_original_path,
-        tokenizer_path=tokenizer_path,
-        predict_dim=5)
+        model, 
+        X_test, 
+        y_test, 
+        model_name=model_type, 
+        predict_dim=5, 
+        continuous_to_original_path=continuous_to_original_path, 
+        dataset_name=dataset_name, 
+        capture_layer=capture_layer, 
+        tokenizer_path=tokenizer_path)
 
     wandb.log({
         "final_train_accuracy": train_accuracy,
@@ -241,7 +304,7 @@ def analyze_weights(model_path, input_dim=64, output_dim=5):
 
     # Load the model's state_dict
     model.load_state_dict(torch.load(
-        f"{PATH_PREFIX}/classify/{model_path}.pt")["model"])
+        f"{PATH_PREFIX}/complete/classify/{model_path}.pt")["model"])
     model.eval()
 
     # Access weights and biases
@@ -349,8 +412,6 @@ def init_card_attr_binding_dataset(config, capture_layer, pred_card_from_attr=Tr
     with open(continuous_to_original_path, "wb") as f:
         pickle.dump(continuous_to_original, f)
 
-    breakpoint()
-
     return combined_input_embeddings, mapped_target_tokens, continuous_to_original
 
 
@@ -376,6 +437,7 @@ def plot_weights_as_heatmap(weights, savefig_path=None):
     plt.show()
 
 
+
 if __name__ == "__main__":
     seed = 42
     torch.manual_seed(seed)
@@ -384,13 +446,29 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
     capture_layer = 2
-    init_card_attr_binding_dataset(
-        config=config,
+    
+    # init_card_attr_binding_dataset(
+    #     config=config,
+    #     capture_layer=capture_layer,
+    #     pred_card_from_attr=True)
+
+    run_classify(
+        input_dim=64, 
+        output_dim=5, 
         capture_layer=capture_layer,
+        num_epochs=5, 
+        batch_size=32, 
+        lr=0.001, 
+        model_type="linear", 
+        tokenizer_path=config.tokenizer_path, 
         pred_card_from_attr=True)
     
-    # for capture_layer in range(4):
+
+    
+    # for capture_layer in [0, 1, 3]:
     #     init_card_attr_binding_dataset(
     #         config=config,
     #         capture_layer=capture_layer,
     #         pred_card_from_attr=True)
+
+
