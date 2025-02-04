@@ -32,7 +32,7 @@ def evaluate_model(
         X, 
         y, 
         model_name, 
-        predict_dim, 
+        output_dim, 
         continuous_to_original_path=None, 
         dataset_name=None, 
         capture_layer=None, 
@@ -47,9 +47,9 @@ def evaluate_model(
     correct_predictions = []
 
     # Dictionary to count frequency of correct predictions for each class
-    class_correct_counts = {i: 0 for i in range(predict_dim)}
+    class_correct_counts = {i: 0 for i in range(output_dim)}
     # Dictionary to count total occurrences of each class
-    class_total_counts = {i: 0 for i in range(predict_dim)}
+    class_total_counts = {i: 0 for i in range(output_dim)}
 
     # input_correct_counts = {i: 0 for i in range(input_dim)}
     # # Dictionary to count total occurrences of each class
@@ -76,7 +76,7 @@ def evaluate_model(
             continuous_to_original_path, 
             tokenizer_path,
             model_name, 
-            predict_dim, 
+            output_dim, 
             class_total_counts, 
             class_correct_counts,
             dataset_name,
@@ -92,7 +92,7 @@ def log_per_class_statistics(
         continuous_to_original_path, 
         tokenizer_path, 
         model_name, 
-        predict_dim, 
+        output_dim, 
         class_total_counts, 
         class_correct_counts,
         dataset_name,
@@ -107,7 +107,7 @@ def log_per_class_statistics(
         log_file.write("\nPer-class statistics:\n")
 
         if continuous_to_original_path and tokenizer_path:
-            for class_idx in range(predict_dim):
+            for class_idx in range(output_dim):
                 total = class_total_counts[class_idx]
                 correct = class_correct_counts[class_idx]
                 accuracy_per_class = (correct / total) if total > 0 else 0
@@ -259,7 +259,7 @@ def run_classify(
         X_train, 
         y_train, 
         model_name=model_type, 
-        predict_dim=5, 
+        output_dim=output_dim, 
         continuous_to_original_path=continuous_to_original_path, 
         dataset_name=dataset_name, 
         capture_layer=capture_layer, 
@@ -270,7 +270,7 @@ def run_classify(
         X_val, 
         y_val, 
         model_name=model_type, 
-        predict_dim=5, 
+        output_dim=output_dim, 
         continuous_to_original_path=continuous_to_original_path, 
         dataset_name=dataset_name, 
         capture_layer=capture_layer, 
@@ -281,7 +281,7 @@ def run_classify(
         X_test, 
         y_test, 
         model_name=model_type, 
-        predict_dim=5, 
+        output_dim=output_dim, 
         continuous_to_original_path=continuous_to_original_path, 
         dataset_name=dataset_name, 
         capture_layer=capture_layer, 
