@@ -131,7 +131,7 @@ def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=10
     X_val, y_val = val_data
 
     wandb.init(
-        project="classify-card",
+        project="complete-classify-card",
         config={
             "epochs": num_epochs,
             "batch_size": batch_size,
