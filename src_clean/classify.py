@@ -309,18 +309,21 @@ def init_card_attr_binding_dataset(config, capture_layer, pred_card_from_attr=Tr
             target_start_index = 1
 
         # Get every other embedding in the input sequence starting from input_start_index, representing either all attribute or card embeddings
+        # input_embeddings.shape, torch.Size([512, 20, 64]), [batch size, sequence length, embedding size]
         input_embeddings = captured_embedding[:, input_start_index:(
             config.input_size-1):2, :]
+        # flattened_input_embeddings.shape, torch.Size([10240, 64]), [batch size * sequence length, embedding size]
         flattened_input_embeddings = input_embeddings.reshape(-1, 64)
 
         # Get every other token in the input starting from index target_start_index, representing either all the card tokens or attribute tokens
+        # target_tokens.shape, torch.Size([512, 20])
         target_tokens = batch[:, target_start_index:(config.input_size - 1):2]
+        # flattened_target_tokens.shape, torch.Size([10240])
         flattened_target_tokens = target_tokens.reshape(-1)
 
         # Append the flattened tensors to the respective lists
         all_flattened_input_embeddings.append(flattened_input_embeddings)
         all_flattened_target_tokens.append(flattened_target_tokens)
-        breakpoint()
 
     combined_input_embeddings = torch.cat(
         all_flattened_input_embeddings, dim=0)
@@ -385,3 +388,9 @@ if __name__ == "__main__":
         config=config,
         capture_layer=capture_layer,
         pred_card_from_attr=True)
+    
+    # for capture_layer in range(4):
+    #     init_card_attr_binding_dataset(
+    #         config=config,
+    #         capture_layer=capture_layer,
+    #         pred_card_from_attr=True)
