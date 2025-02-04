@@ -334,14 +334,14 @@ def init_card_attr_binding_dataset(config, capture_layer, pred_card_from_attr=Tr
     os.makedirs(base_dir, exist_ok=True)
 
     input_embeddings_path = f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/input_embeddings.pt"
-    mapped_targets_path = f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/continuous_target_tokens.pt"
-    continuous_to_original_path = f"{PATH_PREFIX}/classify/{dataset_name}/layer{capture_layer}/continuous_to_original.pkl"
+    mapped_target_tokens_path = f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/continuous_target_tokens.pt"
+    continuous_to_original_path = f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/continuous_to_original.pkl"
 
     # Save the combined_input_embeddings tensor
     torch.save(combined_input_embeddings, input_embeddings_path)
 
     # Save the mapped_target_attributes tensor
-    torch.save(mapped_target_tokens, mapped_targets_path)
+    torch.save(mapped_target_tokens, mapped_target_tokens_path)
 
     with open(continuous_to_original_path, "wb") as f:
         pickle.dump(continuous_to_original, f)
