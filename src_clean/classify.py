@@ -137,7 +137,7 @@ def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=10
             "batch_size": batch_size,
             "patience": patience,
         },
-        name=model_name
+        name=f"{dataset_name}_{model_name}_layer{capture_layer}"
     )
 
     counter = 0
@@ -388,8 +388,6 @@ def init_card_attr_binding_dataset(config, capture_layer, pred_card_from_attr=Tr
         all_flattened_input_embeddings.append(flattened_input_embeddings)
         all_flattened_target_tokens.append(flattened_target_tokens)
 
-        breakpoint()
-
     combined_input_embeddings = torch.cat(
         all_flattened_input_embeddings, dim=0)
 
@@ -447,12 +445,12 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
-    capture_layer = 2
+    # capture_layer = 2
     
-    init_card_attr_binding_dataset(
-        config=config,
-        capture_layer=capture_layer,
-        pred_card_from_attr=False)
+    # init_card_attr_binding_dataset(
+    #     config=config,
+    #     capture_layer=capture_layer,
+    #     pred_card_from_attr=False)
 
     # run_classify(
     #     input_dim=64, 
@@ -466,42 +464,42 @@ if __name__ == "__main__":
     #     pred_card_from_attr=True)
 
     
-    # pred_card_from_attr = True
-    # for capture_layer in [0, 1, 3]:
-    #     init_card_attr_binding_dataset(
-    #         config=config,
-    #         capture_layer=capture_layer,
-    #         pred_card_from_attr=pred_card_from_attr)
+    pred_card_from_attr = True
+    for capture_layer in [0, 1, 3]:
+        init_card_attr_binding_dataset(
+            config=config,
+            capture_layer=capture_layer,
+            pred_card_from_attr=pred_card_from_attr)
         
-    #     run_classify(
-    #         input_dim=64, 
-    #         output_dim=5, 
-    #         capture_layer=capture_layer,
-    #         num_epochs=5, 
-    #         batch_size=32, 
-    #         lr=0.001, 
-    #         model_type="linear", 
-    #         tokenizer_path=config.tokenizer_path, 
-    #         pred_card_from_attr=pred_card_from_attr)
+        run_classify(
+            input_dim=64, 
+            output_dim=5, 
+            capture_layer=capture_layer,
+            num_epochs=5, 
+            batch_size=32, 
+            lr=0.001, 
+            model_type="linear", 
+            tokenizer_path=config.tokenizer_path, 
+            pred_card_from_attr=pred_card_from_attr)
         
-
-    # pred_card_from_attr = False
-    # for capture_layer in range(4):
-    #     init_card_attr_binding_dataset(
-    #         config=config,
-    #         capture_layer=capture_layer,
-    #         pred_card_from_attr=pred_card_from_attr)
+    pred_card_from_attr = False
+    for capture_layer in range(4):
+        init_card_attr_binding_dataset(
+            config=config,
+            capture_layer=capture_layer,
+            pred_card_from_attr=pred_card_from_attr)
         
-    #     run_classify(
-    #         input_dim=64, 
-    #         output_dim=5, 
-    #         capture_layer=capture_layer,
-    #         num_epochs=5, 
-    #         batch_size=32, 
-    #         lr=0.001, 
-    #         model_type="linear", 
-    #         tokenizer_path=config.tokenizer_path, 
-    #         pred_card_from_attr=pred_card_from_attr)
+        run_classify(
+            input_dim=64, 
+            output_dim=5, 
+            capture_layer=capture_layer,
+            num_epochs=5, 
+            batch_size=32, 
+            lr=0.001, 
+            model_type="linear", 
+            tokenizer_path=config.tokenizer_path, 
+            pred_card_from_attr=pred_card_from_attr)
+        
 
 
 
