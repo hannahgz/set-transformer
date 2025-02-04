@@ -464,27 +464,39 @@ if __name__ == "__main__":
     #     pred_card_from_attr=True)
 
     
-    pred_card_from_attr = True
-    for capture_layer in [0, 1, 3]:
-        print(f"Predicting card from attribute, capture layer: {capture_layer}")
-        init_card_attr_binding_dataset(
-            config=config,
-            capture_layer=capture_layer,
-            pred_card_from_attr=pred_card_from_attr)
+    # pred_card_from_attr = True
+    # for capture_layer in [0, 1, 3]:
+    #     print(f"Predicting card from attribute, capture layer: {capture_layer}")
+    #     init_card_attr_binding_dataset(
+    #         config=config,
+    #         capture_layer=capture_layer,
+    #         pred_card_from_attr=pred_card_from_attr)
         
-        run_classify(
-            input_dim=64, 
-            output_dim=5, 
-            capture_layer=capture_layer,
-            num_epochs=5, 
-            batch_size=32, 
-            lr=0.001, 
-            model_type="linear", 
-            tokenizer_path=config.tokenizer_path, 
-            pred_card_from_attr=pred_card_from_attr)
+    #     run_classify(
+    #         input_dim=64, 
+    #         output_dim=5, 
+    #         capture_layer=capture_layer,
+    #         num_epochs=5, 
+    #         batch_size=32, 
+    #         lr=0.001, 
+    #         model_type="linear", 
+    #         tokenizer_path=config.tokenizer_path, 
+    #         pred_card_from_attr=pred_card_from_attr)
         
     pred_card_from_attr = False
-    for capture_layer in range(4):
+
+    run_classify(
+        input_dim=64, 
+        output_dim=12, 
+        capture_layer=0,
+        num_epochs=5, 
+        batch_size=32, 
+        lr=0.001, 
+        model_type="linear", 
+        tokenizer_path=config.tokenizer_path, 
+        pred_card_from_attr=pred_card_from_attr)
+    
+    for capture_layer in range(1,4):
         print(f"Predicting attribute from card, capture layer: {capture_layer}")
         init_card_attr_binding_dataset(
             config=config,
@@ -493,7 +505,7 @@ if __name__ == "__main__":
         
         run_classify(
             input_dim=64, 
-            output_dim=5, 
+            output_dim=12, 
             capture_layer=capture_layer,
             num_epochs=5, 
             batch_size=32, 
