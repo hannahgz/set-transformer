@@ -592,24 +592,29 @@ if __name__ == "__main__":
         ">", "A", "D", "E", "/", "A", "B", "C", "."
     ]
 
-    # similarity_matrix = linear_probe_vector_analysis(
-    #     model_config=config,
-    #     probe_config=LinearProbeBindingCardAttrConfig_Layer1(),
-    #     input_sequence=input_sequence
-    # )
+    test_input = [
+        "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+        ">", "A", "B", "C", ".", "_", "_", "_", "_"
+    ]
 
-    # fig = plot_similarity_heatmap(similarity_matrix)
-    # fig.savefig("COMPLETE_FIGS/cosine_similarity_heatmap_layer1.png", bbox_inches="tight")
+    similarity_matrix = linear_probe_vector_analysis(
+        model_config=config,
+        probe_config=LinearProbeBindingCardAttrConfig_Layer1(),
+        input_sequence=test_input
+    )
+
+    fig = plot_similarity_heatmap(similarity_matrix)
+    fig.savefig("COMPLETE_FIGS/cosine_similarity_heatmap_layer1_test_input.png", bbox_inches="tight")
 
 
     similarity_matrix = linear_probe_vector_analysis(
         model_config=config,
         probe_config=LinearProbeBindingCardAttrConfig_Layer0(),
-        input_sequence=input_sequence
+        input_sequence=test_input
     )
 
     fig = plot_similarity_heatmap(similarity_matrix)
-    fig.savefig("COMPLETE_FIGS/cosine_similarity_heatmap_layer0.png", bbox_inches="tight")
+    fig.savefig("COMPLETE_FIGS/cosine_similarity_heatmap_layer0_test_input.png", bbox_inches="tight")
 
     # analyze_weights(
     #     capture_layer=1,
