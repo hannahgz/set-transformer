@@ -375,8 +375,30 @@ def load_continuous_to_original_from_config(config):
 
     return continuous_to_original
 
+def plot_similarity_heatmap(similarity_matrix):
+    cards = ['A', 'B', 'C', 'D', 'E']
+    
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(similarity_matrix,
+                xticklabels=cards,
+                yticklabels=cards,
+                annot=True,
+                fmt='.3f',
+                cmap='RdYlBu',
+                center=0,
+                square=True,
+                cbar_kws={'label': 'Cosine Similarity'})
+
+    plt.title('Card Cosine Similarities')
+    plt.xlabel('Probe Dimension Cards')
+    plt.ylabel('Input Sequence Cards')
+    plt.tight_layout()
+    
+    return plt.gcf()
 
 def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
+    similarity_matrix = np.zeros((model_config.n_cards, model_config.n_cards))
+
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     model = load_model_from_config(model_config).to(device)
@@ -419,6 +441,13 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
 
             print(f"Position {pos}, Card {current_card}, Probe dim {probe_dim}, Probe dim card {probe_dim_card}:")
             print(f"Cosine similarity: {cosine_sim.item():.3f}, Dot product: {dot_product.item():.3f}")
+
+            # Convert card indices to matrix indices (A=0, B=1, etc.)
+            row_idx = ord(current_card) - ord('A')
+            col_idx = ord(probe_dim_card) - ord('A')
+            similarity_matrix[row_idx, col_idx] = cosine_sim.item()
+    
+    return similarity_matrix
             # breakpoint()
 
 
@@ -554,11 +583,14 @@ if __name__ == "__main__":
         ">", "A", "D", "E", "/", "A", "B", "C", "."
     ]
 
-    linear_probe_vector_analysis(
+    similarity_matrix = linear_probe_vector_analysis(
         model_config=config,
         probe_config=LinearProbeBindingCardAttrConfig(),
         input_sequence=input_sequence
     )
+
+    fig = plot_similarity_heatmap(similarity_matrix)
+    fig.savefig("COMPLETE_FIGS/heatmap.png", bbox_inches="tight")
 
     # analyze_weights(
     #     capture_layer=1,
