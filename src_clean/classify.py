@@ -340,8 +340,11 @@ def analyze_weights(capture_layer, pred_card_from_attr, model_type="linear", inp
     return weights, biases
 
 
-def load_model_from_config(config):
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+def load_model_from_config(config, device=True):
+    if device:
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    else:
+        device = "cpu"
 
     model = GPT(config).to(device)
     checkpoint = torch.load(config.filename, weights_only=False)
@@ -377,7 +380,7 @@ def load_continuous_to_original_from_config(config):
 
 
 def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
-    model = load_model_from_config(model_config)
+    model = load_model_from_config(model_config, device=False)
     probe = load_linear_probe_from_config(probe_config)
     continuous_to_original = load_continuous_to_original_from_config(
         probe_config)
@@ -554,7 +557,7 @@ if __name__ == "__main__":
         probe_config=LinearProbeBindingCardAttrConfig(),
         input_sequence=input_sequence
     )
-    
+
     # analyze_weights(
     #     capture_layer=1,
     #     pred_card_from_attr=True,
