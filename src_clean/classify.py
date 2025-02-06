@@ -30,7 +30,16 @@ class LinearModel(nn.Module):
 
 
 @dataclass
-class LinearProbeBindingCardAttrConfig:
+class LinearProbeBindingCardAttrConfig_Layer0:
+    capture_layer: int = 0
+    pred_card_from_attr: bool = True
+    model_type: str = "linear"
+    input_dim: int = 64
+    output_dim: int = 5
+
+
+@dataclass
+class LinearProbeBindingCardAttrConfig_Layer1:
     capture_layer: int = 1
     pred_card_from_attr: bool = True
     model_type: str = "linear"
@@ -583,14 +592,24 @@ if __name__ == "__main__":
         ">", "A", "D", "E", "/", "A", "B", "C", "."
     ]
 
+    # similarity_matrix = linear_probe_vector_analysis(
+    #     model_config=config,
+    #     probe_config=LinearProbeBindingCardAttrConfig_Layer1(),
+    #     input_sequence=input_sequence
+    # )
+
+    # fig = plot_similarity_heatmap(similarity_matrix)
+    # fig.savefig("COMPLETE_FIGS/cosine_similarity_heatmap_layer1.png", bbox_inches="tight")
+
+
     similarity_matrix = linear_probe_vector_analysis(
         model_config=config,
-        probe_config=LinearProbeBindingCardAttrConfig(),
+        probe_config=LinearProbeBindingCardAttrConfig_Layer0(),
         input_sequence=input_sequence
     )
 
     fig = plot_similarity_heatmap(similarity_matrix)
-    fig.savefig("COMPLETE_FIGS/cosine_similarity_heatmap_layer1.png", bbox_inches="tight")
+    fig.savefig("COMPLETE_FIGS/cosine_similarity_heatmap_layer0.png", bbox_inches="tight")
 
     # analyze_weights(
     #     capture_layer=1,
