@@ -410,17 +410,15 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
             probe_vector = probe_weights[probe_dim]  # Shape: [64]
             probe_dim_card = tokenizer.decode([continuous_to_original[probe_dim]])
             print(f"probe dim: {probe_dim}, corresponds to card {probe_dim_card}")
-            breakpoint()
+            # breakpoint()
 
             # Analysis metrics
-            cosine_sim = F.cosine_similarity(
-                token_embedding.unsqueeze(0), probe_vector.unsqueeze(0))
+            cosine_sim = F.cosine_similarity(token_embedding.unsqueeze(0), probe_vector.unsqueeze(0))
             dot_product = torch.dot(token_embedding, probe_vector)
 
             print(f"Position {pos}, Card {current_card}, Probe dim {probe_dim}, Probe dim card {probe_dim_card}:")
-            print(f"Cosine similarity: {cosine_sim.item():.3f}")
-            print(f"Dot product: {dot_product.item():.3f}")
-            breakpoint()
+            print(f"Cosine similarity: {cosine_sim.item():.3f}, Dot product: {dot_product.item():.3f}")
+            # breakpoint()
 
 
 def map_non_continuous_vals_to_continuous(data):
