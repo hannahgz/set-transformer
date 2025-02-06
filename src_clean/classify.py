@@ -13,6 +13,8 @@ from data_utils import split_data
 from tokenizer import load_tokenizer
 from model import GPT, GPTConfig44_Complete
 from data_utils import initialize_loaders
+from dataclasses import dataclass
+from torch.nn import functional as F
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
@@ -27,15 +29,24 @@ class LinearModel(nn.Module):
         return self.fc(x)
 
 
+@dataclass
+class LinearProbeBindingCardAttrConfig:
+    capture_layer: int = 2
+    pred_card_from_attr: bool = True
+    model_type: str = "linear"
+    input_dim: int = 64
+    output_dim: int = 5
+
+
 def evaluate_model(
-        model, 
-        X, 
-        y, 
-        model_name, 
-        output_dim, 
-        continuous_to_original_path=None, 
-        dataset_name=None, 
-        capture_layer=None, 
+        model,
+        X,
+        y,
+        model_name,
+        output_dim,
+        continuous_to_original_path=None,
+        dataset_name=None,
+        capture_layer=None,
         tokenizer_path=None):
     """Evaluates the model on data and prints correct predictions."""
 
@@ -73,11 +84,11 @@ def evaluate_model(
 
     if continuous_to_original_path and tokenizer_path:
         log_per_class_statistics(
-            continuous_to_original_path, 
+            continuous_to_original_path,
             tokenizer_path,
-            model_name, 
-            output_dim, 
-            class_total_counts, 
+            model_name,
+            output_dim,
+            class_total_counts,
             class_correct_counts,
             dataset_name,
             capture_layer)
@@ -89,11 +100,11 @@ def evaluate_model(
 
 
 def log_per_class_statistics(
-        continuous_to_original_path, 
-        tokenizer_path, 
-        model_name, 
-        output_dim, 
-        class_total_counts, 
+        continuous_to_original_path,
+        tokenizer_path,
+        model_name,
+        output_dim,
+        class_total_counts,
         class_correct_counts,
         dataset_name,
         capture_layer):
@@ -190,7 +201,8 @@ def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=10
                 "epoch_num": epoch,
                 "best_val_loss": best_val_loss,
             }
-            torch.save(checkpoint, f'{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/{model_name}.pt')
+            torch.save(
+                checkpoint, f'{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/{model_name}.pt')
         else:
             counter += 1
             if counter >= patience:
@@ -199,14 +211,14 @@ def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=10
 
 
 def run_classify(
-        input_dim, 
-        output_dim, 
+        input_dim,
+        output_dim,
         capture_layer,
-        num_epochs=100, 
-        batch_size=32, 
-        lr=0.001, 
-        model_type="linear", 
-        tokenizer_path=None, 
+        num_epochs=100,
+        batch_size=32,
+        lr=0.001,
+        model_type="linear",
+        tokenizer_path=None,
         pred_card_from_attr=True):
     """Main function to run the model training and evaluation."""
 
@@ -253,38 +265,38 @@ def run_classify(
     )
 
     # Evaluate the model
-    
+
     train_accuracy = evaluate_model(
-        model, 
-        X_train, 
-        y_train, 
-        model_name=model_type, 
-        output_dim=output_dim, 
-        continuous_to_original_path=continuous_to_original_path, 
-        dataset_name=dataset_name, 
-        capture_layer=capture_layer, 
+        model,
+        X_train,
+        y_train,
+        model_name=model_type,
+        output_dim=output_dim,
+        continuous_to_original_path=continuous_to_original_path,
+        dataset_name=dataset_name,
+        capture_layer=capture_layer,
         tokenizer_path=tokenizer_path)
-    
+
     val_accuracy = evaluate_model(
-        model, 
-        X_val, 
-        y_val, 
-        model_name=model_type, 
-        output_dim=output_dim, 
-        continuous_to_original_path=continuous_to_original_path, 
-        dataset_name=dataset_name, 
-        capture_layer=capture_layer, 
+        model,
+        X_val,
+        y_val,
+        model_name=model_type,
+        output_dim=output_dim,
+        continuous_to_original_path=continuous_to_original_path,
+        dataset_name=dataset_name,
+        capture_layer=capture_layer,
         tokenizer_path=tokenizer_path)
-    
+
     test_accuracy = evaluate_model(
-        model, 
-        X_test, 
-        y_test, 
-        model_name=model_type, 
-        output_dim=output_dim, 
-        continuous_to_original_path=continuous_to_original_path, 
-        dataset_name=dataset_name, 
-        capture_layer=capture_layer, 
+        model,
+        X_test,
+        y_test,
+        model_name=model_type,
+        output_dim=output_dim,
+        continuous_to_original_path=continuous_to_original_path,
+        dataset_name=dataset_name,
+        capture_layer=capture_layer,
         tokenizer_path=tokenizer_path)
 
     wandb.log({
@@ -326,6 +338,81 @@ def analyze_weights(capture_layer, pred_card_from_attr, model_type="linear", inp
             print(f"Weight at index ({i}, {j}): {weights[i, j].item()}")
 
     return weights, biases
+
+
+def load_model_from_config(config):
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    model = GPT(config).to(device)
+    checkpoint = torch.load(config.filename, weights_only=False)
+    model.load_state_dict(checkpoint["model"])
+    model.eval()
+    return model
+
+
+def load_linear_probe_from_config(config):
+    if config.pred_card_from_attr:
+        dataset_name = "card_from_attr"
+    else:
+        dataset_name = "attr_from_card"
+
+    model = LinearModel(config.input_dim, config.output_dim)
+    model.load_state_dict(torch.load(
+        f'{PATH_PREFIX}/complete/classify/{dataset_name}/layer{config.capture_layer}/{config.model_type}.pt')["model"])
+    model.eval()
+    return model
+
+
+def load_continuous_to_original_from_config(config):
+    if config.pred_card_from_attr:
+        dataset_name = "card_from_attr"
+    else:
+        dataset_name = "attr_from_card"
+
+    continuous_to_original_path = f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{config.capture_layer}/continuous_to_original.pkl"
+    with open(continuous_to_original_path, 'rb') as f:
+        continuous_to_original = pickle.load(f)
+
+    return continuous_to_original
+
+
+def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
+    model = load_model_from_config(model_config)
+    probe = load_linear_probe_from_config(probe_config)
+    continuous_to_original = load_continuous_to_original_from_config(
+        probe_config)
+    tokenizer = load_tokenizer(model_config.tokenizer_path)
+
+    print("continuous_to_original: ", continuous_to_original)
+    input_sequence = torch.tensor(
+        tokenizer.encode(input_sequence)).unsqueeze(0)
+    print("input_sequence shape: ", input_sequence.shape)
+
+    # Get embeddings at specific layer
+    _, _, _, layer_embedding, _ = model(
+        input_sequence, capture_layer=config.capture_layer)
+    print("layer_embedding shape: ", layer_embedding.shape)
+
+    # Get probe weights
+    # Shape: [5, 64] for your 5-class probe
+    probe_weights = probe.weight.detach()
+
+    for pos in range(input_sequence.shape[1]):
+        token_embedding = layer_embedding[0, pos, :]  # Shape: [64]
+
+        # Compare with each probe dimension
+        for probe_dim in range(probe_weights.shape[0]):
+            probe_vector = probe_weights[probe_dim]  # Shape: [64]
+
+            # Analysis metrics
+            cosine_sim = F.cosine_similarity(
+                token_embedding.unsqueeze(0), probe_vector.unsqueeze(0))
+            dot_product = torch.dot(token_embedding, probe_vector)
+
+            print(f"Position {pos}, Probe dim {probe_dim}:")
+            print(f"Cosine similarity: {cosine_sim:.3f}")
+            print(f"Dot product: {dot_product:.3f}")
+            breakpoint()
 
 
 def map_non_continuous_vals_to_continuous(data):
@@ -443,7 +530,6 @@ def plot_weights_as_heatmap(weights, savefig_path=None):
     plt.show()
 
 
-
 if __name__ == "__main__":
     seed = 42
     torch.manual_seed(seed)
@@ -452,31 +538,30 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
     analyze_weights(
-        capture_layer=1, 
-        pred_card_from_attr=True, 
-        model_type="linear", 
-        input_dim=64, 
+        capture_layer=1,
+        pred_card_from_attr=True,
+        model_type="linear",
+        input_dim=64,
         output_dim=5)
 
     # capture_layer = 2
-    
+
     # init_card_attr_binding_dataset(
     #     config=config,
     #     capture_layer=capture_layer,
     #     pred_card_from_attr=False)
 
     # run_classify(
-    #     input_dim=64, 
-    #     output_dim=5, 
+    #     input_dim=64,
+    #     output_dim=5,
     #     capture_layer=capture_layer,
-    #     num_epochs=5, 
-    #     batch_size=32, 
-    #     lr=0.001, 
-    #     model_type="linear", 
-    #     tokenizer_path=config.tokenizer_path, 
+    #     num_epochs=5,
+    #     batch_size=32,
+    #     lr=0.001,
+    #     model_type="linear",
+    #     tokenizer_path=config.tokenizer_path,
     #     pred_card_from_attr=True)
 
-    
     # pred_card_from_attr = True
     # for capture_layer in [0, 1, 3]:
     #     print(f"Predicting card from attribute, capture layer: {capture_layer}")
@@ -484,49 +569,45 @@ if __name__ == "__main__":
     #         config=config,
     #         capture_layer=capture_layer,
     #         pred_card_from_attr=pred_card_from_attr)
-        
+
     #     run_classify(
-    #         input_dim=64, 
-    #         output_dim=5, 
+    #         input_dim=64,
+    #         output_dim=5,
     #         capture_layer=capture_layer,
-    #         num_epochs=5, 
-    #         batch_size=32, 
-    #         lr=0.001, 
-    #         model_type="linear", 
-    #         tokenizer_path=config.tokenizer_path, 
+    #         num_epochs=5,
+    #         batch_size=32,
+    #         lr=0.001,
+    #         model_type="linear",
+    #         tokenizer_path=config.tokenizer_path,
     #         pred_card_from_attr=pred_card_from_attr)
-        
+
     # pred_card_from_attr = False
 
     # run_classify(
-    #     input_dim=64, 
-    #     output_dim=12, 
+    #     input_dim=64,
+    #     output_dim=12,
     #     capture_layer=0,
-    #     num_epochs=5, 
-    #     batch_size=32, 
-    #     lr=0.001, 
-    #     model_type="linear", 
-    #     tokenizer_path=config.tokenizer_path, 
+    #     num_epochs=5,
+    #     batch_size=32,
+    #     lr=0.001,
+    #     model_type="linear",
+    #     tokenizer_path=config.tokenizer_path,
     #     pred_card_from_attr=pred_card_from_attr)
-    
+
     # for capture_layer in range(1,4):
     #     print(f"Predicting attribute from card, capture layer: {capture_layer}")
     #     init_card_attr_binding_dataset(
     #         config=config,
     #         capture_layer=capture_layer,
     #         pred_card_from_attr=pred_card_from_attr)
-        
+
     #     run_classify(
-    #         input_dim=64, 
-    #         output_dim=12, 
+    #         input_dim=64,
+    #         output_dim=12,
     #         capture_layer=capture_layer,
-    #         num_epochs=5, 
-    #         batch_size=32, 
-    #         lr=0.001, 
-    #         model_type="linear", 
-    #         tokenizer_path=config.tokenizer_path, 
+    #         num_epochs=5,
+    #         batch_size=32,
+    #         lr=0.001,
+    #         model_type="linear",
+    #         tokenizer_path=config.tokenizer_path,
     #         pred_card_from_attr=pred_card_from_attr)
-        
-
-
-
