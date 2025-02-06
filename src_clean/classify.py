@@ -444,7 +444,7 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
 
             # Convert card indices to matrix indices (A=0, B=1, etc.)
             row_idx = ord(current_card) - ord('A')
-            col_idx = ord(probe_dim_card) - ord('A')
+            col_idx = ord(probe_dim_card[0]) - ord('A')
             similarity_matrix[row_idx, col_idx] = cosine_sim.item()
     
     return similarity_matrix
