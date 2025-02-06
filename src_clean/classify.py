@@ -384,32 +384,36 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
     tokenizer = load_tokenizer(model_config.tokenizer_path)
 
     print("continuous_to_original: ", continuous_to_original)
-    input_sequence = torch.tensor(
+    tokenized_input_sequence = torch.tensor(
         tokenizer.encode(input_sequence)).unsqueeze(0)
-    print("input_sequence shape: ", input_sequence.shape)
+    print("tokenized_input_sequence shape: ", tokenized_input_sequence.shape)
 
     # Get embeddings at specific layer
     _, _, _, layer_embedding, _ = model(
-        input_sequence, capture_layer=config.capture_layer)
+        tokenized_input_sequence, capture_layer=probe_config.capture_layer)
     print("layer_embedding shape: ", layer_embedding.shape)
 
     # Get probe weights
     # Shape: [5, 64] for your 5-class probe
     probe_weights = probe.weight.detach()
 
-    for pos in range(input_sequence.shape[1]):
+    for pos in range(0, input_sequence.shape[1], 2):
         token_embedding = layer_embedding[0, pos, :]  # Shape: [64]
+        current_card = input_sequence[pos]
+        print("current_card: ", current_card)
 
         # Compare with each probe dimension
         for probe_dim in range(probe_weights.shape[0]):
             probe_vector = probe_weights[probe_dim]  # Shape: [64]
+            probe_dim_card = tokenizer.decode(continuous_to_original[probe_dim])
+            print(f"probe dim: {probe_dim}, corresponds to card {probe_dim_card}")
 
             # Analysis metrics
             cosine_sim = F.cosine_similarity(
                 token_embedding.unsqueeze(0), probe_vector.unsqueeze(0))
             dot_product = torch.dot(token_embedding, probe_vector)
 
-            print(f"Position {pos}, Probe dim {probe_dim}:")
+            print(f"Position {pos}, Card {current_card}, Probe dim {probe_dim}, Probe dim card {probe_dim_card}:")
             print(f"Cosine similarity: {cosine_sim:.3f}")
             print(f"Dot product: {dot_product:.3f}")
             breakpoint()
@@ -537,12 +541,26 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
-    analyze_weights(
-        capture_layer=1,
-        pred_card_from_attr=True,
-        model_type="linear",
-        input_dim=64,
-        output_dim=5)
+
+    input_sequence = [
+        "B", "oval", "C", "green", "B", "one", "B", "green", "D", "one", "E", "green", "E", "one",
+        "A", "green", "A", "one", "D", "open", "C", "one", "A", "solid", "D", "oval", "B", "striped",
+        "D", "green", "A", "oval", "E", "diamond", "C", "solid", "C", "squiggle", "E", "solid",
+        "A", "B", "D", "A", "C", "E", "."
+    ]
+
+    linear_probe_vector_analysis(
+        model_config=config,
+        probe_config=LinearProbeBindingCardAttrConfig(),
+        input_sequence=input_sequence
+    )
+    
+    # analyze_weights(
+    #     capture_layer=1,
+    #     pred_card_from_attr=True,
+    #     model_type="linear",
+    #     input_dim=64,
+    #     output_dim=5)
 
     # capture_layer = 2
 
