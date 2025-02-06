@@ -31,7 +31,7 @@ class LinearModel(nn.Module):
 
 @dataclass
 class LinearProbeBindingCardAttrConfig:
-    capture_layer: int = 2
+    capture_layer: int = 1
     pred_card_from_attr: bool = True
     model_type: str = "linear"
     input_dim: int = 64
@@ -590,7 +590,7 @@ if __name__ == "__main__":
     )
 
     fig = plot_similarity_heatmap(similarity_matrix)
-    fig.savefig("COMPLETE_FIGS/heatmap.png", bbox_inches="tight")
+    fig.savefig("COMPLETE_FIGS/cosine_similarity_heatmap_layer1.png", bbox_inches="tight")
 
     # analyze_weights(
     #     capture_layer=1,
