@@ -418,8 +418,8 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
             dot_product = torch.dot(token_embedding, probe_vector)
 
             print(f"Position {pos}, Card {current_card}, Probe dim {probe_dim}, Probe dim card {probe_dim_card}:")
-            print(f"Cosine similarity: {cosine_sim:.3f}")
-            print(f"Dot product: {dot_product:.3f}")
+            print(f"Cosine similarity: {cosine_sim.item():.3f}")
+            print(f"Dot product: {dot_product.item():.3f}")
             breakpoint()
 
 
