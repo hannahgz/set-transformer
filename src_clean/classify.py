@@ -398,7 +398,7 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
 
     # Get probe weights
     # Shape: [5, 64] for your 5-class probe
-    probe_weights = probe.weight.detach()
+    probe_weights = probe.fc.weight.data.detach()
 
     for pos in range(0, input_sequence.shape[1], 2):
         token_embedding = layer_embedding[0, pos, :]  # Shape: [64]
@@ -546,10 +546,12 @@ if __name__ == "__main__":
     config = GPTConfig44_Complete()
 
     input_sequence = [
-        "B", "oval", "C", "green", "B", "one", "B", "green", "D", "one", "E", "green", "E", "one",
-        "A", "green", "A", "one", "D", "open", "C", "one", "A", "solid", "D", "oval", "B", "striped",
-        "D", "green", "A", "oval", "E", "diamond", "C", "solid", "C", "squiggle", "E", "solid",
-        "A", "B", "D", "A", "C", "E", "."
+        "A", "oval", "A", "green", "A", "one", "A", "solid",
+        "B", "oval", "B", "blue", "B", "one", "B", "solid",
+        "C", "oval", "C", "pink", "C", "one", "C", "solid",
+        "D", "oval", "D", "green", "D", "two", "D", "solid",
+        "E", "oval", "E", "green", "E", "three", "E", "solid",
+        ">", "A", "D", "E", "/", "A", "B", "C", "."
     ]
 
     linear_probe_vector_analysis(
