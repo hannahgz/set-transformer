@@ -400,16 +400,16 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
     # Shape: [5, 64] for your 5-class probe
     probe_weights = probe.fc.weight.data.detach()
 
-    for pos in range(0, len(input_sequence), 2):
+    for pos in range(0, len(input_sequence) - config.target_size - 1, 2):
         token_embedding = layer_embedding[0, pos, :]  # Shape: [64]
         current_card = input_sequence[pos]
-        print("current_card: ", current_card)
+        # print("current_card: ", current_card)
 
         # Compare with each probe dimension
         for probe_dim in range(probe_weights.shape[0]):
             probe_vector = probe_weights[probe_dim]  # Shape: [64]
             probe_dim_card = tokenizer.decode([continuous_to_original[probe_dim]])
-            print(f"probe dim: {probe_dim}, corresponds to card {probe_dim_card}")
+            # print(f"probe dim: {probe_dim}, corresponds to card {probe_dim_card}")
             # breakpoint()
 
             # Analysis metrics
