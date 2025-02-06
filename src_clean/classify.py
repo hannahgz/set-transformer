@@ -341,10 +341,7 @@ def analyze_weights(capture_layer, pred_card_from_attr, model_type="linear", inp
 
 
 def load_model_from_config(config, device=True):
-    if device:
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-    else:
-        device = "cpu"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
     model = GPT(config).to(device)
     checkpoint = torch.load(config.filename, weights_only=False)
@@ -380,15 +377,18 @@ def load_continuous_to_original_from_config(config):
 
 
 def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
-    model = load_model_from_config(model_config, device=False)
-    probe = load_linear_probe_from_config(probe_config)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    model = load_model_from_config(model_config).to(device)
+    probe = load_linear_probe_from_config(probe_config).to(device)
+
     continuous_to_original = load_continuous_to_original_from_config(
         probe_config)
     tokenizer = load_tokenizer(model_config.tokenizer_path)
 
     print("continuous_to_original: ", continuous_to_original)
     tokenized_input_sequence = torch.tensor(
-        tokenizer.encode(input_sequence)).unsqueeze(0)
+        tokenizer.encode(input_sequence)).unsqueeze(0).to(device)
     print("tokenized_input_sequence shape: ", tokenized_input_sequence.shape)
 
     # Get embeddings at specific layer
