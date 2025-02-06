@@ -400,9 +400,10 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
     # Shape: [5, 64] for your 5-class probe
     probe_weights = probe.fc.weight.data.detach()
 
-    for pos in range(0, len(input_sequence) - config.target_size - 1, 2):
+    # for pos in range(0, len(input_sequence) - config.target_size - 1, 2):
+    for pos in range(1, len(input_sequence) - config.target_size - 1, 2):    
         token_embedding = layer_embedding[0, pos, :]  # Shape: [64]
-        current_card = input_sequence[pos]
+        current_card = input_sequence[pos - 1]
         # print("current_card: ", current_card)
 
         # Compare with each probe dimension
