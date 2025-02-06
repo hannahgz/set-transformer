@@ -273,7 +273,7 @@ class CausalSelfAttention(nn.Module):
 
         # output projection
         y = self.resid_dropout(self.c_proj(y))
-        return y, att_weights
+        return y, att_weights, v
 
 
 class MLP(nn.Module):
@@ -303,10 +303,10 @@ class Block(nn.Module):
         self.mlp = MLP(config)
 
     def forward(self, x):
-        attn_output, att_weights = self.attn(self.ln_1(x))
+        attn_output, att_weights, v = self.attn(self.ln_1(x))
         x = x + attn_output
         x = x + self.mlp(self.ln_2(x))
-        return x, att_weights
+        return x, att_weights, v
 
 
 class GPT(nn.Module):
@@ -389,11 +389,13 @@ class GPT(nn.Module):
         # x = self.transformer.drop(tok_emb + pos_emb)
         x = tok_emb + pos_emb
         attention_weights = []
+        value_vectors = []
         capture_embedding = None
 
         for layer_idx, block in enumerate(self.transformer.h):
-            x, att_weights = block(x)
+            x, att_weights, v = block(x)
             attention_weights.append(att_weights)
+            value_vectors.append(v)
 
             # with torch.no_grad():
             #     if capture_layer is not None and capture_head is not None:
@@ -430,7 +432,7 @@ class GPT(nn.Module):
             )  # note: using list [-1] to preserve the time dim
             loss = None
 
-        return logits, loss, attention_weights, capture_embedding
+        return logits, loss, attention_weights, capture_embedding, value_vectors
 
     @torch.no_grad()
     def generate(self, idx, max_new_tokens, temperature=1.0, top_k=None):

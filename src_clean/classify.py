@@ -299,18 +299,24 @@ def run_classify(
     print(f"Test Accuracy: {test_accuracy * 100:.2f}%")
 
 
-def analyze_weights(model_path, input_dim=64, output_dim=5):
+def analyze_weights(capture_layer, pred_card_from_attr, model_type="linear", input_dim=64, output_dim=5):
     model = LinearModel(input_dim, output_dim)
+
+    if pred_card_from_attr:
+        dataset_name = "card_from_attr"
+    else:
+        dataset_name = "attr_from_card"
 
     # Load the model's state_dict
     model.load_state_dict(torch.load(
-        f"{PATH_PREFIX}/complete/classify/{model_path}.pt")["model"])
+        f'{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/{model_type}.pt')["model"])
     model.eval()
 
     # Access weights and biases
     weights = model.fc.weight.data
     biases = model.fc.bias.data
 
+    print("Weights shape:", weights.shape)
     print("Weights:\n", weights)
     print("Biases:\n", biases)
 
@@ -445,6 +451,13 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
+    analyze_weights(
+        capture_layer=1, 
+        pred_card_from_attr=True, 
+        model_type="linear", 
+        input_dim=64, 
+        output_dim=5)
+
     # capture_layer = 2
     
     # init_card_attr_binding_dataset(
@@ -483,36 +496,36 @@ if __name__ == "__main__":
     #         tokenizer_path=config.tokenizer_path, 
     #         pred_card_from_attr=pred_card_from_attr)
         
-    pred_card_from_attr = False
+    # pred_card_from_attr = False
 
-    run_classify(
-        input_dim=64, 
-        output_dim=12, 
-        capture_layer=0,
-        num_epochs=5, 
-        batch_size=32, 
-        lr=0.001, 
-        model_type="linear", 
-        tokenizer_path=config.tokenizer_path, 
-        pred_card_from_attr=pred_card_from_attr)
+    # run_classify(
+    #     input_dim=64, 
+    #     output_dim=12, 
+    #     capture_layer=0,
+    #     num_epochs=5, 
+    #     batch_size=32, 
+    #     lr=0.001, 
+    #     model_type="linear", 
+    #     tokenizer_path=config.tokenizer_path, 
+    #     pred_card_from_attr=pred_card_from_attr)
     
-    for capture_layer in range(1,4):
-        print(f"Predicting attribute from card, capture layer: {capture_layer}")
-        init_card_attr_binding_dataset(
-            config=config,
-            capture_layer=capture_layer,
-            pred_card_from_attr=pred_card_from_attr)
+    # for capture_layer in range(1,4):
+    #     print(f"Predicting attribute from card, capture layer: {capture_layer}")
+    #     init_card_attr_binding_dataset(
+    #         config=config,
+    #         capture_layer=capture_layer,
+    #         pred_card_from_attr=pred_card_from_attr)
         
-        run_classify(
-            input_dim=64, 
-            output_dim=12, 
-            capture_layer=capture_layer,
-            num_epochs=5, 
-            batch_size=32, 
-            lr=0.001, 
-            model_type="linear", 
-            tokenizer_path=config.tokenizer_path, 
-            pred_card_from_attr=pred_card_from_attr)
+    #     run_classify(
+    #         input_dim=64, 
+    #         output_dim=12, 
+    #         capture_layer=capture_layer,
+    #         num_epochs=5, 
+    #         batch_size=32, 
+    #         lr=0.001, 
+    #         model_type="linear", 
+    #         tokenizer_path=config.tokenizer_path, 
+    #         pred_card_from_attr=pred_card_from_attr)
         
 
 
