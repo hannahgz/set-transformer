@@ -459,6 +459,62 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
     return similarity_matrix
             # breakpoint()
 
+def linear_probe_vector_analysis_average(model_config, probe_config):
+    similarity_matrix = np.zeros((model_config.n_cards, model_config.n_cards))
+    similarity_counts = np.zeros((model_config.n_cards, model_config.n_cards))
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    model = load_model_from_config(model_config).to(device)
+    probe = load_linear_probe_from_config(probe_config).to(device)
+
+    continuous_to_original = load_continuous_to_original_from_config(probe_config)
+    tokenizer = load_tokenizer(model_config.tokenizer_path)
+
+    # Get probe weights
+    probe_weights = probe.fc.weight.data.detach()  # Shape: [5, 64] for 5-class probe
+
+    dataset = torch.load(model_config.dataset_path)
+    _, val_loader = initialize_loaders(config, dataset)
+
+    for index, batch in enumerate(val_loader):
+        breakpoint()
+    # for input_sequence in input_sequences:
+    #     # Tokenize current sequence
+    #     tokenized_input_sequence = torch.tensor(
+    #         tokenizer.encode(input_sequence)).unsqueeze(0).to(device)
+
+    #     # Get embeddings at specific layer
+    #     _, _, _, layer_embedding, _ = model(
+    #         tokenized_input_sequence, capture_layer=probe_config.capture_layer)
+
+    #     # Process each position in the sequence
+    #     for pos in range(1, len(input_sequence) - config.target_size - 1, 2):
+    #         token_embedding = layer_embedding[0, pos, :]  # Shape: [64]
+    #         current_card = input_sequence[pos - 1]
+
+    #         # Compare with each probe dimension
+    #         for probe_dim in range(probe_weights.shape[0]):
+    #             probe_vector = probe_weights[probe_dim]  # Shape: [64]
+    #             probe_dim_card = tokenizer.decode([continuous_to_original[probe_dim]])
+
+    #             # Compute cosine similarity
+    #             cosine_sim = F.cosine_similarity(
+    #                 token_embedding.unsqueeze(0), 
+    #                 probe_vector.unsqueeze(0)
+    #             )
+
+    #             # Update similarity matrix and counts
+    #             row_idx = ord(current_card) - ord('A')
+    #             col_idx = ord(probe_dim_card[0]) - ord('A')
+    #             similarity_matrix[row_idx, col_idx] += cosine_sim.item()
+    #             similarity_counts[row_idx, col_idx] += 1
+
+    # # Compute averages
+    # average_similarity_matrix = similarity_matrix / similarity_counts
+
+    # return average_similarity_matrix, similarity_counts
+
 
 def map_non_continuous_vals_to_continuous(data):
     # Get the unique values in input data
@@ -582,39 +638,39 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
+    linear_probe_vector_analysis_average(model_config=config, probe_config=LinearProbeBindingCardAttrConfig_Layer0())
+    # input_sequence = [
+    #     "A", "oval", "A", "green", "A", "one", "A", "solid",
+    #     "B", "oval", "B", "blue", "B", "one", "B", "solid",
+    #     "C", "oval", "C", "pink", "C", "one", "C", "solid",
+    #     "D", "oval", "D", "green", "D", "two", "D", "solid",
+    #     "E", "oval", "E", "green", "E", "three", "E", "solid",
+    #     ">", "A", "D", "E", "/", "A", "B", "C", "."
+    # ]
 
-    input_sequence = [
-        "A", "oval", "A", "green", "A", "one", "A", "solid",
-        "B", "oval", "B", "blue", "B", "one", "B", "solid",
-        "C", "oval", "C", "pink", "C", "one", "C", "solid",
-        "D", "oval", "D", "green", "D", "two", "D", "solid",
-        "E", "oval", "E", "green", "E", "three", "E", "solid",
-        ">", "A", "D", "E", "/", "A", "B", "C", "."
-    ]
+    # test_input = [
+    #     "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
+    #     ">", "A", "B", "C", ".", "_", "_", "_", "_"
+    # ]
 
-    test_input = [
-        "E", "striped", "B", "green", "D", "two", "B", "oval", "C", "green", "D", "green", "D", "solid", "E", "two", "B", "one", "D", "oval", "E", "green", "C", "one", "A", "green", "C", "open", "A", "one", "E", "oval", "B", "striped", "C", "oval", "A", "oval", "A", "solid",
-        ">", "A", "B", "C", ".", "_", "_", "_", "_"
-    ]
+    # similarity_matrix = linear_probe_vector_analysis(
+    #     model_config=config,
+    #     probe_config=LinearProbeBindingCardAttrConfig_Layer1(),
+    #     input_sequence=test_input
+    # )
 
-    similarity_matrix = linear_probe_vector_analysis(
-        model_config=config,
-        probe_config=LinearProbeBindingCardAttrConfig_Layer1(),
-        input_sequence=test_input
-    )
-
-    fig = plot_similarity_heatmap(similarity_matrix)
-    fig.savefig("COMPLETE_FIGS/cosine_similarity_heatmap_layer1_test_input.png", bbox_inches="tight")
+    # fig = plot_similarity_heatmap(similarity_matrix)
+    # fig.savefig("COMPLETE_FIGS/cosine_similarity_heatmap_layer1_test_input.png", bbox_inches="tight")
 
 
-    similarity_matrix = linear_probe_vector_analysis(
-        model_config=config,
-        probe_config=LinearProbeBindingCardAttrConfig_Layer0(),
-        input_sequence=test_input
-    )
+    # similarity_matrix = linear_probe_vector_analysis(
+    #     model_config=config,
+    #     probe_config=LinearProbeBindingCardAttrConfig_Layer0(),
+    #     input_sequence=test_input
+    # )
 
-    fig = plot_similarity_heatmap(similarity_matrix)
-    fig.savefig("COMPLETE_FIGS/cosine_similarity_heatmap_layer0_test_input.png", bbox_inches="tight")
+    # fig = plot_similarity_heatmap(similarity_matrix)
+    # fig.savefig("COMPLETE_FIGS/cosine_similarity_heatmap_layer0_test_input.png", bbox_inches="tight")
 
     # analyze_weights(
     #     capture_layer=1,
