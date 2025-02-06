@@ -408,10 +408,10 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
         # Compare with each probe dimension
         for probe_dim in range(probe_weights.shape[0]):
             probe_vector = probe_weights[probe_dim]  # Shape: [64]
-            probe_dim_card = tokenizer.decode(continuous_to_original[probe_dim])
+            probe_dim_card = tokenizer.decode([continuous_to_original[probe_dim]])
             print(f"probe dim: {probe_dim}, corresponds to card {probe_dim_card}")
             breakpoint()
-            
+
             # Analysis metrics
             cosine_sim = F.cosine_similarity(
                 token_embedding.unsqueeze(0), probe_vector.unsqueeze(0))
