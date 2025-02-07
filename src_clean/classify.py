@@ -477,7 +477,8 @@ def linear_probe_vector_analysis_average(model_config, probe_config):
     dataset = torch.load(model_config.dataset_path)
     _, val_loader = initialize_loaders(config, dataset)
 
-    for _, batch in enumerate(val_loader):
+    for batch_index, batch in enumerate(val_loader):
+        print(f"Batch {batch_index + 1}/{len(val_loader)}")
         batch = batch.to(device)
         # layer_embeddings.shape, torch.Size([512, 49, 64])
         _, _, _, layer_embeddings, _ = model(
