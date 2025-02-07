@@ -634,12 +634,12 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
-    avg_similarity_matrix = linear_probe_vector_analysis_average(
-        model_config=config, 
-        probe_config=LinearProbeBindingCardAttrConfig_Layer1())
+    # avg_similarity_matrix = linear_probe_vector_analysis_average(
+    #     model_config=config, 
+    #     probe_config=LinearProbeBindingCardAttrConfig_Layer1())
     
-    fig = plot_similarity_heatmap(avg_similarity_matrix)
-    fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer1.png", bbox_inches="tight")
+    # fig = plot_similarity_heatmap(avg_similarity_matrix)
+    # fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer1.png", bbox_inches="tight")
 
     avg_similarity_matrix = linear_probe_vector_analysis_average(
         model_config=config, 
