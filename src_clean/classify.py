@@ -432,7 +432,7 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
     probe_weights = probe.fc.weight.data.detach()
 
     # for pos in range(0, len(input_sequence) - config.target_size - 1, 2):
-    for pos in range(1, len(input_sequence) - config.target_size - 1, 2):    
+    for pos in range(1, model_config.input_size - 1, 2):    
         token_embedding = layer_embedding[0, pos, :]  # Shape: [64]
         current_card = input_sequence[pos - 1]
         # print("current_card: ", current_card)
@@ -477,43 +477,40 @@ def linear_probe_vector_analysis_average(model_config, probe_config):
     dataset = torch.load(model_config.dataset_path)
     _, val_loader = initialize_loaders(config, dataset)
 
-    for index, batch in enumerate(val_loader):
+    for _, batch in enumerate(val_loader):
+        batch = batch.to(device)
+        # Get embeddings at specific layer
+        _, _, _, layer_embeddings, _ = model(
+            batch, capture_layer=probe_config.capture_layer)
         breakpoint()
-    # for input_sequence in input_sequences:
-    #     # Tokenize current sequence
-    #     tokenized_input_sequence = torch.tensor(
-    #         tokenizer.encode(input_sequence)).unsqueeze(0).to(device)
+        for index, layer_embedding in enumerate(layer_embeddings):
+            # Process each position in the sequence
+            for pos in range(1, model_config.input_size - 1, 2):
+                token_embedding = layer_embedding[0, pos, :]  # Shape: [64]
+                current_card = tokenizer.decode([batch[index][pos - 1]])
 
-    #     # Get embeddings at specific layer
-    #     _, _, _, layer_embedding, _ = model(
-    #         tokenized_input_sequence, capture_layer=probe_config.capture_layer)
+                # Compare with each probe dimension
+                for probe_dim in range(probe_weights.shape[0]):
+                    probe_vector = probe_weights[probe_dim]  # Shape: [64]
+                    probe_dim_card = tokenizer.decode([continuous_to_original[probe_dim]])
 
-    #     # Process each position in the sequence
-    #     for pos in range(1, len(input_sequence) - config.target_size - 1, 2):
-    #         token_embedding = layer_embedding[0, pos, :]  # Shape: [64]
-    #         current_card = input_sequence[pos - 1]
+                    # Compute cosine similarity
+                    cosine_sim = F.cosine_similarity(
+                        token_embedding.unsqueeze(0), 
+                        probe_vector.unsqueeze(0)
+                    )
 
-    #         # Compare with each probe dimension
-    #         for probe_dim in range(probe_weights.shape[0]):
-    #             probe_vector = probe_weights[probe_dim]  # Shape: [64]
-    #             probe_dim_card = tokenizer.decode([continuous_to_original[probe_dim]])
+                    # Update similarity matrix and counts
+                    row_idx = ord(current_card) - ord('A')
+                    col_idx = ord(probe_dim_card[0]) - ord('A')
+                    similarity_matrix[row_idx, col_idx] += cosine_sim.item()
+                    similarity_counts[row_idx, col_idx] += 1
+                    breakpoint()
 
-    #             # Compute cosine similarity
-    #             cosine_sim = F.cosine_similarity(
-    #                 token_embedding.unsqueeze(0), 
-    #                 probe_vector.unsqueeze(0)
-    #             )
+    # Compute averages
+    average_similarity_matrix = similarity_matrix / similarity_counts
 
-    #             # Update similarity matrix and counts
-    #             row_idx = ord(current_card) - ord('A')
-    #             col_idx = ord(probe_dim_card[0]) - ord('A')
-    #             similarity_matrix[row_idx, col_idx] += cosine_sim.item()
-    #             similarity_counts[row_idx, col_idx] += 1
-
-    # # Compute averages
-    # average_similarity_matrix = similarity_matrix / similarity_counts
-
-    # return average_similarity_matrix, similarity_counts
+    return average_similarity_matrix
 
 
 def map_non_continuous_vals_to_continuous(data):
