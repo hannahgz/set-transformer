@@ -479,15 +479,14 @@ def linear_probe_vector_analysis_average(model_config, probe_config):
 
     for _, batch in enumerate(val_loader):
         batch = batch.to(device)
-        # Get embeddings at specific layer
+        # layer_embeddings.shape, torch.Size([512, 49, 64])
         _, _, _, layer_embeddings, _ = model(
             batch, capture_layer=probe_config.capture_layer)
-        breakpoint()
         for index, layer_embedding in enumerate(layer_embeddings):
             # Process each position in the sequence
             for pos in range(1, model_config.input_size - 1, 2):
-                token_embedding = layer_embedding[0, pos, :]  # Shape: [64]
-                current_card = tokenizer.decode([batch[index][pos - 1]])
+                token_embedding = layer_embedding[pos, :]  # Shape: [64]
+                current_card = tokenizer.decode([batch[index][pos - 1].item()])[0]
 
                 # Compare with each probe dimension
                 for probe_dim in range(probe_weights.shape[0]):
