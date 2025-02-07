@@ -440,7 +440,7 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
         # Compare with each probe dimension
         for probe_dim in range(probe_weights.shape[0]):
             probe_vector = probe_weights[probe_dim]  # Shape: [64]
-            probe_dim_card = tokenizer.decode([continuous_to_original[probe_dim]])
+            probe_dim_card = tokenizer.decode([continuous_to_original[probe_dim]])[0]
             # print(f"probe dim: {probe_dim}, corresponds to card {probe_dim_card}")
             # breakpoint()
 
@@ -453,7 +453,7 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
 
             # Convert card indices to matrix indices (A=0, B=1, etc.)
             row_idx = ord(current_card) - ord('A')
-            col_idx = ord(probe_dim_card[0]) - ord('A')
+            col_idx = ord(probe_dim_card) - ord('A')
             similarity_matrix[row_idx, col_idx] = cosine_sim.item()
     
     return similarity_matrix
@@ -491,7 +491,7 @@ def linear_probe_vector_analysis_average(model_config, probe_config):
                 # Compare with each probe dimension
                 for probe_dim in range(probe_weights.shape[0]):
                     probe_vector = probe_weights[probe_dim]  # Shape: [64]
-                    probe_dim_card = tokenizer.decode([continuous_to_original[probe_dim]])
+                    probe_dim_card = tokenizer.decode([continuous_to_original[probe_dim]])[0]
 
                     # Compute cosine similarity
                     cosine_sim = F.cosine_similarity(
@@ -501,10 +501,9 @@ def linear_probe_vector_analysis_average(model_config, probe_config):
 
                     # Update similarity matrix and counts
                     row_idx = ord(current_card) - ord('A')
-                    col_idx = ord(probe_dim_card[0]) - ord('A')
+                    col_idx = ord(probe_dim_card) - ord('A')
                     similarity_matrix[row_idx, col_idx] += cosine_sim.item()
                     similarity_counts[row_idx, col_idx] += 1
-                    breakpoint()
 
     # Compute averages
     average_similarity_matrix = similarity_matrix / similarity_counts
@@ -634,7 +633,20 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
-    linear_probe_vector_analysis_average(model_config=config, probe_config=LinearProbeBindingCardAttrConfig_Layer0())
+    avg_similarity_matrix = linear_probe_vector_analysis_average(
+        model_config=config, 
+        probe_config=LinearProbeBindingCardAttrConfig_Layer1())
+    
+    fig = plot_similarity_heatmap(avg_similarity_matrix)
+    fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer1.png", bbox_inches="tight")
+
+    avg_similarity_matrix = linear_probe_vector_analysis_average(
+        model_config=config, 
+        probe_config=LinearProbeBindingCardAttrConfig_Layer0())
+    
+    fig = plot_similarity_heatmap(avg_similarity_matrix)
+    fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer0.png", bbox_inches="tight")
+
     # input_sequence = [
     #     "A", "oval", "A", "green", "A", "one", "A", "solid",
     #     "B", "oval", "B", "blue", "B", "one", "B", "solid",
