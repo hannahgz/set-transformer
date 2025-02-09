@@ -187,6 +187,10 @@
                     <input type="number" id="threshold-input" value="0.1" min="0" max="1" step="0.01">
                     <label for="seed-input">Random Seed:</label>
                     <input type="number" id="seed-input" value="0" min="0">
+                    <label>
+                        <input type="checkbox" id="value-weighting" checked>
+                        Value weighting
+                    </label>
                  </div>
             </div>
 
@@ -278,16 +282,16 @@
             }
 
             const seed = parseInt(document.getElementById('seed-input').value) || 0;
+            const valueWeighting = document.getElementById('value-weighting').checked;
             fetch('/save_difference_cards', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({group1: group1Cards, group2: group2Cards, threshold, seed})
+                body: JSON.stringify({group1: group1Cards, group2: group2Cards, threshold, seed, valueWeighting})
             })
             .then(response => response.json())
             .then(data => {
                 updatePredictionInfo(data.prediction_results, 1);
                 updatePredictionInfo(data.prediction_results, 2);
-                updateSavedMappings(data.cards);
                 const updatedPlot = JSON.parse(data.plot_json);
                 Plotly.react('plotly-div', updatedPlot.data, updatedPlot.layout);
             })
@@ -316,17 +320,17 @@
             }
 
             const seed = parseInt(document.getElementById('seed-input').value) || 0;
+            const valueWeighting = document.getElementById('value-weighting').checked;
             fetch('/save_single_cards', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({group1: group1Cards, threshold, seed})
+                body: JSON.stringify({group1: group1Cards, threshold, seed, valueWeighting})
             })
             .then(response => response.json())
             .then(data => {
                 updatePredictionInfo(data.prediction_results, 1);
                 document.getElementById('group2-prediction').innerHTML = '';
                 // document.getElementById('group2-list').innerHTML = '';
-                updateSavedMappings(data.cards, num_groups=1);
                 const updatedPlot = JSON.parse(data.plot_json);
                 Plotly.react('plotly-div', updatedPlot.data, updatedPlot.layout);
             })
@@ -348,35 +352,6 @@
                 document.getElementById(`group2-number${i}`).value = number;
                 document.getElementById(`group2-shading${i}`).value = shading;
             }
-        }
-
-        function updateSavedMappings(savedMappings, num_groups=2) {
-            // const group1List = document.getElementById('group1-list');
-            // // group1List.innerHTML = '';
-
-            // savedMappings.group1.forEach((mapping) => {
-            //     const mappingItem = document.createElement('div');
-            //     mappingItem.className = 'mapping-item';
-            //     mappingItem.innerHTML = `
-            //         <strong>Card ${mapping.letter}:</strong>
-            //         ${mapping.attributes.shape} ${mapping.attributes.color} ${mapping.attributes.number} ${mapping.attributes.shading}
-            //     `;
-            //     group1List.appendChild(mappingItem);
-            // });
-
-            // if (num_groups === 2) {
-            //     const group2List = document.getElementById('group2-list');
-            //     // group2List.innerHTML = '';
-            //     savedMappings.group2.forEach((mapping) => {
-            //         const mappingItem = document.createElement('div');
-            //         mappingItem.className = 'mapping-item';
-            //         mappingItem.innerHTML = `
-            //             <strong>Card ${mapping.letter}:</strong>
-            //             ${mapping.attributes.shape} ${mapping.attributes.color} ${mapping.attributes.number} ${mapping.attributes.shading}
-            //         `;
-            //         group2List.appendChild(mappingItem);
-            //     });
-            // }
         }
     </script>
 </body>

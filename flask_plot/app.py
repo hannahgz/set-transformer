@@ -178,12 +178,109 @@ def check_sequence_equality(prediction, target):
 
     return False
 
+# def normalize_attention_impact(attention_weights, value_vectors):
+#    model_impacts = []
+#    max_impact_global = 0
+   
+#    # Find global max impact
+#    for layer in range(len(attention_weights)):
+#        alpha = attention_weights[layer]  # [1,4,49,49]
+#        v = value_vectors[layer]  # [1,4,49,16]
+       
+#        for head in range(alpha.shape[1]):
+#            head_max = torch.max(alpha[0,head]) * torch.max(torch.norm(v[0,head], dim=1))
+#            max_impact_global = max(max_impact_global, head_max)
+
+#    # Normalize all impacts by global max
+#    for layer in range(len(attention_weights)):
+#        layer_impacts = []
+#        alpha = attention_weights[layer]
+#        v = value_vectors[layer]
+       
+#        for head in range(alpha.shape[1]):
+#            v_norms = torch.norm(v[0,head], dim=1)  # [49] 
+#            weighted_impact = alpha[0,head] * v_norms  # [49,49]
+#            normalized_impact = weighted_impact / max_impact_global
+#            layer_impacts.append(normalized_impact)
+           
+#        model_impacts.append(layer_impacts)
+       
+#    return model_impacts
+
+def normalize_attention_impact(attention_weights, value_vectors):
+    model_impacts = []
+    all_impacts = []
+    max_location = {'layer': -1, 'head': -1, 'alpha_idx': (-1,-1), 'value_norm': -1}
+    max_impact_global = 0
+    
+    # First pass to find max and its location
+    for layer in range(len(attention_weights)):
+        alpha = attention_weights[layer]
+        v = value_vectors[layer]
+        
+        for head in range(alpha.shape[1]):
+            v_norms = torch.norm(v[0,head], dim=1)  # [49]
+            att_values = alpha[0,head]  # [49,49]
+            
+            # For each position pair, compute impact
+            for i in range(att_values.shape[0]):
+                for j in range(att_values.shape[1]):
+                    impact = float(att_values[i,j] * v_norms[j])
+                    all_impacts.append(impact)
+                    
+                    if impact > max_impact_global:
+                        max_impact_global = impact
+                        max_location = {
+                            'layer': layer,
+                            'head': head,
+                            'alpha_idx': (i,j),
+                            'value_norm': float(v_norms[j])
+                        }
+    
+    print(f"Maximum impact found in:")
+    print(f"Layer: {max_location['layer']}")
+    print(f"Head: {max_location['head']}")
+    print(f"Attention position (i,j): {max_location['alpha_idx']}")
+    print(f"Value vector norm at position j: {max_location['value_norm']}")
+    print(f"Attention weight at this position: {float(attention_weights[max_location['layer']][0,max_location['head']][max_location['alpha_idx']])}")
+    print(f"Maximum impact: {max_impact_global}")
+    
+    impact_95th = np.percentile(all_impacts, 99)
+    print(f"95th percentile impact: {impact_95th}")
+
+    # print("max_impact_global: ", max_impact_global)
+    # print("impact_95th: ", impact_95th)
+
+    # Normalize all impacts by global max
+    for layer in range(len(attention_weights)):
+        layer_impacts = []
+        alpha = attention_weights[layer]
+        v = value_vectors[layer]
+        
+        print("alpha shape: ", alpha.shape)
+        for head in range(alpha.shape[1]):
+            v_norms = torch.norm(v[0,head], dim=1)  # [49] 
+            print("v_norms shape: ", v_norms.shape)
+            print("v_norms: ", v_norms)
+            weighted_impact = alpha[0,head] * v_norms  # [49,49]
+            weighted_impact = weighted_impact.detach().cpu().numpy()
+            print("weighted impact:", weighted_impact)
+            # normalized_impact = (weighted_impact / max_impact_global).detach().cpu().numpy()
+            # normalized_impact = (weighted_impact / impact_95th).detach().cpu().numpy()
+            # normalized_impact = (weighted_impact / impact_95th).detach().cpu().numpy()
+            # layer_impacts.append(normalized_impact)
+            layer_impacts.append(weighted_impact)
+            
+        model_impacts.append(layer_impacts)
+        
+    return model_impacts
 
 def attention_weights_from_sequence(
         config,
         input,
         tokenizer_path=f"all_cards_tokenizer.pkl",
-        get_prediction=False):
+        get_prediction=False,
+        value_weighting=False):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
@@ -242,18 +339,28 @@ def attention_weights_from_sequence(
         print("predictions: ", decoded_predictions)
         print("target: ", decoded_targets)
 
-    _, _, attention_weights, _ = model(
+    _, _, attention_weights, _, value_vectors = model(
         sequences.to(device), False)
+    # print("Value vectors: ", value_vectors)
+    # print("len(value_vectors): ", len(value_vectors))
+    # print("value vectors 0 shape: ", value_vectors[0].shape)
 
-    all_att_weights_np = []
-    for layer in range(4):
-        layer_weights = []  # Create a sublist for each layer
-        for head in range(4):
-            # Append the attention weights for the current head to the layer sublist
-            layer_weights.append(
-                attention_weights[layer][0][head].detach().cpu().numpy())
-        # Append the layer sublist to the main list
-        all_att_weights_np.append(layer_weights)
+    # print("Attention weights: ", attention_weights)
+    # print("len(attention_weights): ", len(attention_weights))
+    # print("attention weights 0 shape: ", attention_weights[0].shape)
+
+    if value_weighting:
+        all_att_weights_np = normalize_attention_impact(attention_weights, value_vectors)
+    else:
+        all_att_weights_np = []
+        for layer in range(4):
+            layer_weights = []  # Create a sublist for each layer
+            for head in range(4):
+                # Append the attention weights for the current head to the layer sublist
+                layer_weights.append(
+                    attention_weights[layer][0][head].detach().cpu().numpy())
+            # Append the layer sublist to the main list
+            all_att_weights_np.append(layer_weights)
 
     if get_prediction:
         return all_att_weights_np, is_correct, decoded_predictions, decoded_targets
@@ -323,7 +430,7 @@ def create_single_attention_weight_fig(attention_weights, labels, n_layers=4, n_
                             size=0.1,  # Very small markers
                             color='blue'
                         ),
-                        opacity=conn['weight'],
+                        opacity=min(conn['weight'],1),
                         showlegend=False,
                         hovertemplate=f"Weight: {conn['weight']:.3f}<br>From: {labels[conn['from_idx']]}<br>To: {labels[conn['to_idx']]}",
                         name="",
@@ -627,9 +734,10 @@ def save_single_cards():
     print("sequence1: ", sequence1)
     seed = card_groups.get('seed', 0)
     sequence1 = shuffle_input_sequence(sequence1, seed)
+    value_weighting = card_groups.get("valueWeighting", False)
 
     attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
-        GPTConfig44_Complete, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True)
+        GPTConfig44_Complete, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True, value_weighting=value_weighting)
 
     if is_correct1:
         sequence1 = sequence1[:-8] + decoded_predictions1
@@ -692,12 +800,13 @@ def save_difference_cards():
     print("sequence1: ", sequence1)
     # print("sequence1: ", sequence1)
     seed = card_groups.get('seed', 0)
+    value_weighting = card_groups.get("valueWeighting", False)
 
     sequence1 = shuffle_input_sequence(sequence1, seed)
     sequence2 = shuffle_input_sequence(sequence2, seed)
 
     attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
-        GPTConfig44_Complete, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True)
+        GPTConfig44_Complete, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True, value_weighting=value_weighting)
     print("Got attention weights 1")
 
     # Update the labels to reflect the actual predicted sequence if correct, just different order
@@ -707,7 +816,7 @@ def save_difference_cards():
     # attention_weights2, is_correct2, decoded_predictions2, decoded_targets2 = attention_weights_from_sequence(
     #     GPTConfig44_BalancedSets, sequence2, get_prediction=True)
     attention_weights2, is_correct2, decoded_predictions2, decoded_targets2 = attention_weights_from_sequence(
-        GPTConfig44_Complete, sequence2, tokenizer_path="all_tokenizer.pkl", get_prediction=True)
+        GPTConfig44_Complete, sequence2, tokenizer_path="all_tokenizer.pkl", get_prediction=True, value_weighting=value_weighting)
     print("Got attention weights 2")
 
     if is_correct2:

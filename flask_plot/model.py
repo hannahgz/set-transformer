@@ -148,9 +148,34 @@ class GPTConfig44_Complete:
     target_size: int = 8
     pad_symbol: str = "_"
     out_dir: str = ""
+    tokenizer_path: str = f"all_tokenizer.pkl"
+    dataset_path: str = f"triples_card_randomization_tuple_randomization_dataset.pth"
+    filename: str = f"triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
+    end_of_seq_token: int = 13
+    padding_token: int = 14
+
+@dataclass
+class GPTConfig24_Complete:
+    lr: float = 4e-4  # Base learning rate
+    epochs: int = 25  # Reduced epochs due to large dataset
+    batch_size: int = 512  # Increased for better throughput
+    patience: int = 4  # Early stopping patience
+    eval_freq: int = 10000  # Evaluate every 2000 steps
+    n_layer: int = 2
+    n_head: int = 4
+    n_embd: int = 64
+    dropout: float = 0.0
+    n_cards: int = 5
+    block_size: int = 49
+    vocab_size: int = 22
+    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
+    target_size: int = 8
+    pad_symbol: str = "_"
+    out_dir: str = ""
     tokenizer_path: str = f"{PATH_PREFIX}/all_tokenizer.pkl"
     dataset_path: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_dataset.pth"
-    filename: str = "triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
+    filename: str = "triples_card_randomization_tuple_randomization_layers_2_heads_4.pt"
     end_of_seq_token: int = 13
     padding_token: int = 14
 
@@ -248,7 +273,7 @@ class CausalSelfAttention(nn.Module):
 
         # output projection
         y = self.resid_dropout(self.c_proj(y))
-        return y, att_weights
+        return y, att_weights, v
 
 
 class MLP(nn.Module):
@@ -278,10 +303,10 @@ class Block(nn.Module):
         self.mlp = MLP(config)
 
     def forward(self, x):
-        attn_output, att_weights = self.attn(self.ln_1(x))
+        attn_output, att_weights, v = self.attn(self.ln_1(x))
         x = x + attn_output
         x = x + self.mlp(self.ln_2(x))
-        return x, att_weights
+        return x, att_weights, v
 
 
 class GPT(nn.Module):
@@ -364,11 +389,13 @@ class GPT(nn.Module):
         # x = self.transformer.drop(tok_emb + pos_emb)
         x = tok_emb + pos_emb
         attention_weights = []
+        value_vectors = []
         capture_embedding = None
 
         for layer_idx, block in enumerate(self.transformer.h):
-            x, att_weights = block(x)
+            x, att_weights, v = block(x)
             attention_weights.append(att_weights)
+            value_vectors.append(v)
 
             # with torch.no_grad():
             #     if capture_layer is not None and capture_head is not None:
@@ -405,7 +432,7 @@ class GPT(nn.Module):
             )  # note: using list [-1] to preserve the time dim
             loss = None
 
-        return logits, loss, attention_weights, capture_embedding
+        return logits, loss, attention_weights, capture_embedding, value_vectors
 
     @torch.no_grad()
     def generate(self, idx, max_new_tokens, temperature=1.0, top_k=None):
@@ -423,7 +450,7 @@ class GPT(nn.Module):
                 else idx[:, -self.config.block_size :]
             )
             # forward the model to get the logits for the index in the sequence
-            logits, _, _, _ = self(idx_cond)
+            logits, _, _, _, _ = self(idx_cond)
             # pluck the logits at the final step and scale by desired temperature
             logits = logits[:, -1, :] / temperature
 
