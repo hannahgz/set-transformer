@@ -162,6 +162,11 @@
             height: calc(100% - 50px);
             width: 100%;
         }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
     </style>
 </head>
 <body>
@@ -183,15 +188,16 @@
                     <input type="number" id="threshold-input" value="0.1" min="0" max="1" step="0.01">
                     <label for="seed-input">Seed:</label>
                     <input type="number" id="seed-input" value="0" min="0">
-                    <label>
-                        <input type="checkbox" id="value-weighting" checked>
-                        Value weighting
-                    </label>
+                
                     <label for="layer-select">Layers:</label>
                     <select id="layer-select">
                         <option value="3">3</option>
                         <option value="4">4</option>
                     </select>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="value-weighting" checked>
+                        <label for="value-weighting">Value weighting</label>
+                    </div>
                  </div>
             </div>
 
