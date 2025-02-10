@@ -181,7 +181,7 @@ def evaluate_val_loss(model, val_loader, optimizer, best_val_loss, val_losses, c
         for inputs in val_loader:
             inputs = inputs.to(device)
             with autocast():
-                _, loss, _, _ = model(inputs, True)
+                _, loss, _, _, _ = model(inputs, True)
             total_val_loss += loss.item()
     
     avg_val_loss = total_val_loss / len(val_loader)
@@ -278,7 +278,7 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
                 
                 # Automatic mixed precision
                 with autocast():
-                    _, loss, _, _ = model(inputs, True)
+                    _, loss, _, _, _ = model(inputs, True)
                 
                 # Scale the loss and call backward
                 scaler.scale(loss).backward()
@@ -359,7 +359,7 @@ def analyze_embeddings(config, dataset_name, model_path, capture_layer):
     for index, batch in enumerate(val_loader):
         print(f"Batch {index + 1}/{len(val_loader)}")
         batch = batch.to(device)
-        _, _, _, captured_embedding = model(batch, True, capture_layer)
+        _, _, _, captured_embedding, _ = model(batch, True, capture_layer)
 
         input_embeddings = captured_embedding[:, 1:(config.input_size-1):2, :]
         flattened_input_embeddings = input_embeddings.reshape(-1, 64)
@@ -420,7 +420,7 @@ def opp_analyze_embeddings(config, dataset_name, capture_layer):
 
     for index, batch in enumerate(val_loader):
         batch = batch.to(device)
-        _, _, _, captured_embedding = model(batch, True, capture_layer)
+        _, _, _, captured_embedding, _ = model(batch, True, capture_layer)
 
         # input_embeddings = captured_embedding[:, 1:(config.input_size-1):2, :]
         input_embeddings = captured_embedding[:, :(config.input_size-1):2, :]
@@ -480,7 +480,7 @@ def get_raw_input_embeddings(config, dataset_name, capture_layer):
 
     for index, batch in enumerate(val_loader):
         batch = batch.to(device)
-        _, _, _, captured_embedding = model(batch, True, capture_layer)
+        _, _, _, captured_embedding, _ = model(batch, True, capture_layer)
         # torch.Size([64, 49, 64])
         # [batch_size, seq_len, embedding_dim]
 
