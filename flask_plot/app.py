@@ -7,7 +7,7 @@ from typing import List, Tuple
 from dataclasses import dataclass
 import torch
 import os
-from model import GPT, GPTConfig44_Complete
+from model import GPT, GPTConfig44_Complete, GPTConfig34_Complete
 from tokenizer import load_tokenizer
 import random
 
@@ -28,7 +28,7 @@ saved_card_mappings = []
 
 card_vectors = ["A", "B", "C", "D", "E"]
 
-config = GPTConfig44_Complete()
+config = GPTConfig34_Complete()
 
 def is_set(card1, card2, card3):
     return all((a + b + c) % 3 == 0 for a, b, c in zip(card1, card2, card3))
@@ -325,9 +325,9 @@ def attention_weights_from_sequence(
         all_att_weights_np = normalize_attention_impact(attention_weights, value_vectors)
     else:
         all_att_weights_np = []
-        for layer in range(4):
+        for layer in range(config.n_layer):
             layer_weights = []  # Create a sublist for each layer
-            for head in range(4):
+            for head in range(config.n_head):
                 # Append the attention weights for the current head to the layer sublist
                 layer_weights.append(
                     attention_weights[layer][0][head].detach().cpu().numpy())
@@ -828,6 +828,15 @@ def save_difference_cards():
         "plot_json": plot_json
     })
 
+@app.route('/change_config', methods=['POST'])
+def change_config():
+    global config
+    layers = request.json.get('layers')
+    if layers == 3:
+        config = GPTConfig34_Complete()
+    else:
+        config = GPTConfig44_Complete()
+    return jsonify({"status": "success"})
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000)

@@ -187,6 +187,11 @@
                         <input type="checkbox" id="value-weighting" checked>
                         Value weighting
                     </label>
+                    <label for="layer-select">Layers:</label>
+                    <select id="layer-select">
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
                  </div>
             </div>
 
@@ -234,6 +239,15 @@
     <script>
         var graphs = {{ plot_json | safe }};
         Plotly.newPlot('plotly-div', graphs.data, graphs.layout);
+
+        document.getElementById('layer-select').addEventListener('change', function() {
+            const layers = parseInt(this.value);
+            fetch('/change_config', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({layers: layers})
+            });
+        });
 
         function updatePredictionInfo(prediction_results, group_num) {
             const groupPrediction = document.getElementById(`group${group_num}-prediction`);
