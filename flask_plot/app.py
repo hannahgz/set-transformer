@@ -28,6 +28,7 @@ saved_card_mappings = []
 
 card_vectors = ["A", "B", "C", "D", "E"]
 
+config = GPTConfig44_Complete()
 
 def is_set(card1, card2, card3):
     return all((a + b + c) % 3 == 0 for a, b, c in zip(card1, card2, card3))
@@ -76,7 +77,7 @@ def get_attention_weights():
 
 
 def get_labels():
-    return ['Label' + str(i) for i in range(49)], ['Label' + str(i) for i in range(49)]
+    return [str(i) for i in range(49)], [str(i) for i in range(49)]
 
 
 def shuffle_input(input):
@@ -177,35 +178,6 @@ def check_sequence_equality(prediction, target):
                 and pred_triplets[1] == target_triplets[0])
 
     return False
-
-# def normalize_attention_impact(attention_weights, value_vectors):
-#    model_impacts = []
-#    max_impact_global = 0
-   
-#    # Find global max impact
-#    for layer in range(len(attention_weights)):
-#        alpha = attention_weights[layer]  # [1,4,49,49]
-#        v = value_vectors[layer]  # [1,4,49,16]
-       
-#        for head in range(alpha.shape[1]):
-#            head_max = torch.max(alpha[0,head]) * torch.max(torch.norm(v[0,head], dim=1))
-#            max_impact_global = max(max_impact_global, head_max)
-
-#    # Normalize all impacts by global max
-#    for layer in range(len(attention_weights)):
-#        layer_impacts = []
-#        alpha = attention_weights[layer]
-#        v = value_vectors[layer]
-       
-#        for head in range(alpha.shape[1]):
-#            v_norms = torch.norm(v[0,head], dim=1)  # [49] 
-#            weighted_impact = alpha[0,head] * v_norms  # [49,49]
-#            normalized_impact = weighted_impact / max_impact_global
-#            layer_impacts.append(normalized_impact)
-           
-#        model_impacts.append(layer_impacts)
-       
-#    return model_impacts
 
 def normalize_attention_impact(attention_weights, value_vectors):
     model_impacts = []
@@ -561,11 +533,15 @@ def create_attention_weight_fig(attention_weights, labels1, labels2, n_layers=4,
                 # weight = max(-1, min(1, conn['weight']))  # Clamp weight between -1 and 1
                 weight = conn["weight"]
                 if weight < 0:
+                    if weight < -1:
+                        weight = -1
                     # Dark red (negative) to purple
                     r = 220
                     g = 20
                     b = int(20 + 235 * (1 + weight))
                 else:
+                    if weight > 1:
+                        weight = 1
                     # Purple to light blue (positive)
                     r = int(220 - 180 * weight)
                     g = int(20 + 180 * weight)
@@ -698,7 +674,9 @@ def index():
     fig = create_attention_weight_fig(
         attention_weights=get_attention_weights(),
         labels1=labels1,
-        labels2=labels2
+        labels2=labels2,
+        n_layers=config.n_layer,
+        n_heads=config.n_head,
     )
 
     card_labels = [chr(65 + i) for i in range(5)]  # ['A', 'B', 'C', 'D', 'E']
@@ -737,7 +715,7 @@ def save_single_cards():
     value_weighting = card_groups.get("valueWeighting", False)
 
     attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
-        GPTConfig44_Complete, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True, value_weighting=value_weighting)
+        config, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True, value_weighting=value_weighting)
 
     if is_correct1:
         sequence1 = sequence1[:-8] + decoded_predictions1
@@ -746,6 +724,8 @@ def save_single_cards():
         attention_weights=attention_weights1,
         labels=sequence1,
         threshold=card_groups.get('threshold', 0.1),
+        n_layers=config.n_layer,
+        n_heads=config.n_head,
     )
 
     return jsonify({
@@ -806,7 +786,7 @@ def save_difference_cards():
     sequence2 = shuffle_input_sequence(sequence2, seed)
 
     attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
-        GPTConfig44_Complete, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True, value_weighting=value_weighting)
+        config, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True, value_weighting=value_weighting)
     print("Got attention weights 1")
 
     # Update the labels to reflect the actual predicted sequence if correct, just different order
@@ -816,7 +796,7 @@ def save_difference_cards():
     # attention_weights2, is_correct2, decoded_predictions2, decoded_targets2 = attention_weights_from_sequence(
     #     GPTConfig44_BalancedSets, sequence2, get_prediction=True)
     attention_weights2, is_correct2, decoded_predictions2, decoded_targets2 = attention_weights_from_sequence(
-        GPTConfig44_Complete, sequence2, tokenizer_path="all_tokenizer.pkl", get_prediction=True, value_weighting=value_weighting)
+        config, sequence2, tokenizer_path="all_tokenizer.pkl", get_prediction=True, value_weighting=value_weighting)
     print("Got attention weights 2")
 
     if is_correct2:
@@ -832,6 +812,8 @@ def save_difference_cards():
         labels1=sequence1,
         labels2=sequence2,
         threshold=card_groups.get('threshold', 0.1),
+        n_layers=config.n_layer,
+        n_heads=config.n_head,
     )
     print("Created attention weight fig")
 
