@@ -6,17 +6,17 @@ from classify import load_model_from_config
 from model import GPTConfig44_Complete
 from data_utils import load_tokenizer
 
-def logit_lens_analysis(model, input_ids):
+def logit_lens_analysis(model, inputs):
     """
     Perform logit lens analysis on the model by projecting intermediate representations
     to vocabulary space using the unembedding matrix (lm_head weights).
     """
-    device = input_ids.device
-    b, t = input_ids.size()
+    device = inputs.device
+    b, t = inputs.size()
     
     # Get position embeddings
     pos = torch.arange(0, t, dtype=torch.long, device=device)
-    tok_emb = model.transformer.wte(input_ids)
+    tok_emb = model.transformer.wte(inputs)
     pos_emb = model.transformer.wpe(pos)
     
     # Initial embedding
@@ -47,9 +47,9 @@ def logit_lens_analysis(model, input_ids):
         post_mlp_logits = model.lm_head(model.transformer.ln_f(x))
         layer_logits.append((f"layer_{i}_mlp", post_mlp_logits))
     
-    # Get final logits
-    final_logits = model.lm_head(model.transformer.ln_f(x))
-    layer_logits.append(("final", final_logits))
+    # # Get final logits
+    # final_logits = model.lm_head(model.transformer.ln_f(x))
+    # layer_logits.append(("final", final_logits))
     
     return layer_logits
 
@@ -63,14 +63,14 @@ def analyze_predictions(layer_logits, model_config, tokenizer, tokenized_input_s
         # Get predictions at each layer
         probs = F.softmax(logits, dim=-1)
         # predictions = torch.argmax(logits, dim=-1)[:, -(model_config.target_size+1):-1]
-        predictions = torch.argmax(logits, dim=-1)[:, -(model_config.target_size):]
+        predictions = torch.argmax(logits, dim=-1)[:, -(model_config.target_size+1):-1]
         targets = tokenized_input_sequence[:, -model_config.target_size:]
 
         mask = targets != model_config.padding_token 
         total_non_mask_count = mask.sum().item()
         
         matches = ((predictions == targets) | ~mask)
-        accuracy = matches.sum().item() / total_non_mask_count
+        accuracy = (matches.sum().item() - (model_config.target_size - total_non_mask_count)) / total_non_mask_count
             
         # Get top k predictions if we have a vocabulary
         
