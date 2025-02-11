@@ -99,7 +99,7 @@ def run_logit_lens(model_config, input_sequence):
         layer_logits = logit_lens_analysis(model, tokenized_input_sequence)
         
         # Analyze how predictions evolve
-        target_indices = input_sequence[:, -model.config.target_size:]  # Assuming these are the targets
+        # target_indices = input_sequence[:, -model.config.target_size:]  # Assuming these are the targets
         results = analyze_predictions(layer_logits)
         breakpoint()
         return results
