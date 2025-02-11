@@ -160,12 +160,14 @@ def visualize_layer_logits(results):
     plt.tight_layout()
     return plt.gcf()
 
-def compare_attention_mlp_logits(layer_logits):
+def compare_attention_mlp_logits(layer_logits, model_config, num_last_tokens=8):
     """
-    Compare logit distributions after attention and MLP operations across layers.
+    Compare logit distributions after attention and MLP operations across layers
+    for the last n tokens in the sequence.
     
     Args:
         layer_logits: List of tuples containing (layer_name, logits)
+        num_last_tokens: Number of last tokens to analyze (default=9)
     
     Returns:
         matplotlib.figure.Figure: The generated figure
@@ -174,29 +176,46 @@ def compare_attention_mlp_logits(layer_logits):
     attn_layers = [(name, logits) for name, logits in layer_logits if 'attn' in name]
     mlp_layers = [(name, logits) for name, logits in layer_logits if 'mlp' in name]
     
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 8))
+    # Create a figure with subplots for each token position
+    fig = plt.figure(figsize=(20, 4 * num_last_tokens))
+
+    x_ticks = np.arange(model_config.vocab_size)
+    tokenizer = load_tokenizer(model_config.tokenizer_path)
+    x_labels = [tokenizer.id_to_token.get(i, str(i)) for i in range(model_config.vocab_size)]
     
-    # Plot logits after attention layers
-    for i, (name, logits) in enumerate(attn_layers):
-        logit_values = logits[0, -1, :].cpu().numpy()
-        ax1.plot(logit_values, alpha=0.5, label=f'Layer {i}')
-    ax1.set_title('Logits After Attention Layers')
-    ax1.set_xlabel('Vocabulary Index')
-    ax1.set_ylabel('Logit Value')
-    ax1.legend()
-    ax1.grid(True)
+    for token_idx in range(num_last_tokens):
+        # Position from the end of sequence
+        pos = -(num_last_tokens - token_idx + 1)
+        
+        # Create subplots for attention and MLP
+        ax1 = plt.subplot(num_last_tokens, 2, 2*token_idx + 1)
+        ax2 = plt.subplot(num_last_tokens, 2, 2*token_idx + 2)
+        
+        # Plot logits after attention layers
+        for i, (name, logits) in enumerate(attn_layers):
+            logit_values = logits[0, pos, :].cpu().numpy()
+            ax1.plot(logit_values, alpha=0.5, label=f'Layer {i}')
+        ax1.set_title(f'Attention Logits (Token Position {pos})')
+        ax1.set_xlabel('Vocabulary Index')
+        ax1.set_ylabel('Logit Value')
+        ax1.legend()
+        ax1.set_xticks(x_ticks)
+        ax1.set_xticklabels(x_labels, rotation=45, ha='right')
+        ax1.grid(True)
+        
+        # Plot logits after MLP layers
+        for i, (name, logits) in enumerate(mlp_layers):
+            logit_values = logits[0, pos, :].cpu().numpy()
+            ax2.plot(logit_values, alpha=0.5, label=f'Layer {i}')
+        ax2.set_title(f'MLP Logits (Token Position {pos})')
+        ax2.set_xlabel('Vocabulary Index')
+        ax2.set_ylabel('Logit Value')
+        ax2.legend()
+        ax2.set_xticks(x_ticks)
+        ax2.set_xticklabels(x_labels, rotation=45, ha='right')
+        ax2.grid(True)
     
-    # Plot logits after MLP layers
-    for i, (name, logits) in enumerate(mlp_layers):
-        logit_values = logits[0, -1, :].cpu().numpy()
-        ax2.plot(logit_values, alpha=0.5, label=f'Layer {i}')
-    ax2.set_title('Logits After MLP Layers')
-    ax2.set_xlabel('Vocabulary Index')
-    ax2.set_ylabel('Logit Value')
-    ax2.legend()
-    ax2.grid(True)
-    
-    plt.suptitle('Comparison of Logit Distributions After Attention vs MLP Operations', y=1.02)
+    plt.suptitle('Comparison of Logit Distributions After Attention vs MLP Operations\nFor Last 9 Tokens', y=1.02)
     plt.tight_layout()
     return plt.gcf()
 
@@ -211,12 +230,13 @@ if __name__ == "__main__":
         ">", "A", "B", "C", ".", "_", "_", "_", "_"
     ]
 
-    results, layer_logits = run_logit_lens(GPTConfig44_Complete(), input_sequence=input1)
+    model_config = GPTConfig44_Complete()
+    results, layer_logits = run_logit_lens(model_config, input_sequence=input1)
     
-    logits_fig = visualize_layer_logits(results)
-    compare_fig = compare_attention_mlp_logits(layer_logits)
+    # logits_fig = visualize_layer_logits(results)
+    compare_fig = compare_attention_mlp_logits(layer_logits, model_config, num_last_tokens=8)
 
-    logits_fig.savefig('COMPLETE_FIGS/logit_lens_results.png', bbox_inches="tight")
+    # logits_fig.savefig('COMPLETE_FIGS/logit_lens_results.png', bbox_inches="tight")
     compare_fig.savefig('COMPLETE_FIGS/logit_lens_comparison.png', bbox_inches="tight")
 
 
