@@ -62,19 +62,20 @@ def analyze_predictions(layer_logits, model_config, tokenizer, tokenized_input_s
     for layer_name, logits in layer_logits:
         # Get predictions at each layer
         probs = F.softmax(logits, dim=-1)
-        predictions = torch.argmax(logits, dim=-1)[:, -(model_config.target_size+1):1]
+        # predictions = torch.argmax(logits, dim=-1)[:, -(model_config.target_size+1):-1]
+        predictions = torch.argmax(logits, dim=-1)[:, -(model_config.target_size):]
         targets = tokenized_input_sequence[:, -model_config.target_size:]
 
         mask = targets != model_config.padding_token 
         total_non_mask_count = mask.sum().item()
-        breakpoint()
+        
         matches = ((predictions == targets) | ~mask)
         accuracy = matches.sum().item() / total_non_mask_count
             
         # Get top k predictions if we have a vocabulary
         
         top_k_values, top_k_indices = torch.topk(probs, k=5, dim=-1)
-        top_k_tokens = [[idx.item() for idx in batch] for batch in top_k_indices]
+        top_k_tokens = [[idx.item() for idx in batch] for batch in top_k_indices[0]]
             
         results.append({
             'layer': layer_name,
