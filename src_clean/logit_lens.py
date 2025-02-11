@@ -103,8 +103,102 @@ def run_logit_lens(model_config, input_sequence):
         # target_indices = input_sequence[:, -model.config.target_size:]  # Assuming these are the targets
         results = analyze_predictions(layer_logits, model_config, tokenizer, tokenized_input_sequence)
         breakpoint()
-        return results
+        return results, layer_logits
     
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+import torch
+import torch.nn.functional as F
+
+def visualize_layer_logits(results):
+    """
+    Create visualizations for layer-wise logit analysis.
+    
+    Args:
+        results: List of dictionaries containing layer-wise analysis results
+    
+    Returns:
+        matplotlib.figure.Figure: The generated figure
+    """
+    # Extract layer names and accuracies
+    layers = [r['layer'] for r in results]
+    accuracies = [r['accuracy'] for r in results]
+    
+    # Create figure with multiple subplots
+    fig = plt.figure(figsize=(15, 10))
+    
+    # 1. Accuracy progression plot
+    plt.subplot(2, 1, 1)
+    plt.plot(accuracies, marker='o')
+    plt.title('Prediction Accuracy Through Layers')
+    plt.xlabel('Layer')
+    plt.ylabel('Accuracy')
+    plt.xticks(range(len(layers)), layers, rotation=45)
+    plt.grid(True)
+    
+    # 2. Top token probability heatmap
+    plt.subplot(2, 1, 2)
+    probs_matrix = []
+    for r in results:
+        # Get probabilities for top 5 tokens of the last position
+        probs = r['probs'][0, -1, :].cpu().numpy()
+        top_k_indices = torch.topk(r['probs'][0, -1, :], k=5)[1].cpu().numpy()
+        top_k_probs = probs[top_k_indices]
+        probs_matrix.append(top_k_probs)
+    
+    probs_matrix = np.array(probs_matrix)
+    sns.heatmap(probs_matrix, 
+                cmap='YlOrRd',
+                xticklabels=['Top 1', 'Top 2', 'Top 3', 'Top 4', 'Top 5'],
+                yticklabels=layers)
+    plt.title('Top-5 Token Probabilities Across Layers')
+    plt.xlabel('Top Predicted Tokens')
+    plt.ylabel('Layer')
+    
+    plt.tight_layout()
+    return plt.gcf()
+
+def compare_attention_mlp_logits(layer_logits):
+    """
+    Compare logit distributions after attention and MLP operations across layers.
+    
+    Args:
+        layer_logits: List of tuples containing (layer_name, logits)
+    
+    Returns:
+        matplotlib.figure.Figure: The generated figure
+    """
+    # Separate attention and MLP layer logits
+    attn_layers = [(name, logits) for name, logits in layer_logits if 'attn' in name]
+    mlp_layers = [(name, logits) for name, logits in layer_logits if 'mlp' in name]
+    
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 8))
+    
+    # Plot logits after attention layers
+    for i, (name, logits) in enumerate(attn_layers):
+        logit_values = logits[0, -1, :].cpu().numpy()
+        ax1.plot(logit_values, alpha=0.5, label=f'Layer {i}')
+    ax1.set_title('Logits After Attention Layers')
+    ax1.set_xlabel('Vocabulary Index')
+    ax1.set_ylabel('Logit Value')
+    ax1.legend()
+    ax1.grid(True)
+    
+    # Plot logits after MLP layers
+    for i, (name, logits) in enumerate(mlp_layers):
+        logit_values = logits[0, -1, :].cpu().numpy()
+        ax2.plot(logit_values, alpha=0.5, label=f'Layer {i}')
+    ax2.set_title('Logits After MLP Layers')
+    ax2.set_xlabel('Vocabulary Index')
+    ax2.set_ylabel('Logit Value')
+    ax2.legend()
+    ax2.grid(True)
+    
+    plt.suptitle('Comparison of Logit Distributions After Attention vs MLP Operations', y=1.02)
+    plt.tight_layout()
+    return plt.gcf()
 
 if __name__ == "__main__":
     seed = 42
@@ -117,5 +211,12 @@ if __name__ == "__main__":
         ">", "A", "B", "C", ".", "_", "_", "_", "_"
     ]
 
-    run_logit_lens(GPTConfig44_Complete(), input_sequence=input1)
+    results, layer_logits = run_logit_lens(GPTConfig44_Complete(), input_sequence=input1)
+    
+    logits_fig = visualize_layer_logits(results)
+    compare_fig = compare_attention_mlp_logits(layer_logits)
+
+    logits_fig.savefig('COMPLETE_FIGS/logit_lens_results.png', bbox_inches="tight")
+    compare_fig.savefig('COMPLETE_FIGS/logit_lens_comparison.png', bbox_inches="tight")
+
 
