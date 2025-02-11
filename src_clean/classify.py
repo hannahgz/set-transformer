@@ -626,6 +626,54 @@ def plot_weights_as_heatmap(weights, savefig_path=None):
         plt.savefig(savefig_path, bbox_inches="tight")
     plt.show()
 
+import torch
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.metrics.pairwise import cosine_similarity
+
+def plot_probe_weight_cosine_sim(probe_config):
+    continuous_to_original = load_continuous_to_original_from_config(
+        probe_config)
+    breakpoint()
+    # Load probe and get weights
+    probe = load_linear_probe_from_config(probe_config)
+    probe_weights = probe.fc.weight.data.detach()  # Shape: [5, 64]
+    
+    # Convert to numpy array if it's a torch tensor
+    if isinstance(probe_weights, torch.Tensor):
+        probe_weights = probe_weights.numpy()
+    
+    # Calculate cosine similarity matrix
+    cosine_sim_matrix = cosine_similarity(probe_weights)
+    
+    # Create heatmap
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(
+        cosine_sim_matrix,
+        annot=True,  # Show values in cells
+        cmap='RdBu_r',  # Red-Blue diverging colormap
+        vmin=-1,  # Minimum value for cosine similarity
+        vmax=1,   # Maximum value for cosine similarity
+        center=0, # Center the colormap at 0
+        square=True,  # Make cells square
+        fmt='.2f'  # Format annotations to 2 decimal places
+    )
+    
+    # Customize the plot
+    plt.title('Cosine Similarity Between Probe Weight Vectors')
+    plt.xlabel('Probe Class Index')
+    plt.ylabel('Probe Class Index')
+    
+    # Add class labels if available
+    if hasattr(probe_config, 'class_names'):
+        class_names = probe_config.class_names
+        plt.xticks(np.arange(len(class_names)) + 0.5, class_names, rotation=45, ha='right')
+        plt.yticks(np.arange(len(class_names)) + 0.5, class_names, rotation=0)
+    
+    plt.tight_layout()
+    return plt.gcf()
+
 
 if __name__ == "__main__":
     seed = 42
@@ -634,6 +682,9 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
+
+    plot_probe_weight_cosine_sim(probe_config=LinearProbeBindingCardAttrConfig_Layer1())
+    
     # avg_similarity_matrix = linear_probe_vector_analysis_average(
     #     model_config=config, 
     #     probe_config=LinearProbeBindingCardAttrConfig_Layer1())
@@ -641,12 +692,12 @@ if __name__ == "__main__":
     # fig = plot_similarity_heatmap(avg_similarity_matrix)
     # fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer1.png", bbox_inches="tight")
 
-    avg_similarity_matrix = linear_probe_vector_analysis_average(
-        model_config=config, 
-        probe_config=LinearProbeBindingCardAttrConfig_Layer0())
+    # avg_similarity_matrix = linear_probe_vector_analysis_average(
+    #     model_config=config, 
+    #     probe_config=LinearProbeBindingCardAttrConfig_Layer0())
     
-    fig = plot_similarity_heatmap(avg_similarity_matrix)
-    fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer0.png", bbox_inches="tight")
+    # fig = plot_similarity_heatmap(avg_similarity_matrix)
+    # fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer0.png", bbox_inches="tight")
 
     # input_sequence = [
     #     "A", "oval", "A", "green", "A", "one", "A", "solid",
