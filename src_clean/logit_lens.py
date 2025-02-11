@@ -102,7 +102,6 @@ def run_logit_lens(model_config, input_sequence):
         # Analyze how predictions evolve
         # target_indices = input_sequence[:, -model.config.target_size:]  # Assuming these are the targets
         results = analyze_predictions(layer_logits, model_config, tokenizer, tokenized_input_sequence)
-        breakpoint()
         return results, layer_logits
     
 
@@ -182,7 +181,8 @@ def compare_attention_mlp_logits(layer_logits, model_config, num_last_tokens=8):
     x_ticks = np.arange(model_config.vocab_size)
     tokenizer = load_tokenizer(model_config.tokenizer_path)
     x_labels = [tokenizer.token_to_id.get(i, str(i)) for i in range(model_config.vocab_size)]
-    
+    breakpoint()
+
     for token_idx in range(num_last_tokens):
         # Position from the end of sequence
         pos = -(num_last_tokens - token_idx + 1)
