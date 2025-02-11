@@ -699,7 +699,10 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
 
-    probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(probe_config=LinearProbeBindingCardAttrConfig_Layer1())
+    probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(
+        model_config=config,
+        probe_config=LinearProbeBindingCardAttrConfig_Layer1())
+    
     probe_weight_cosine_sim_fig.savefig("COMPLETE_FIGS/probe_weight_cosine_sim.png", bbox_inches="tight")
 
     # avg_similarity_matrix = linear_probe_vector_analysis_average(
