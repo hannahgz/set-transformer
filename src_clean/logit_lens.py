@@ -180,7 +180,7 @@ def compare_attention_mlp_logits(layer_logits, model_config, num_last_tokens=8):
 
     x_ticks = np.arange(model_config.vocab_size)
     tokenizer = load_tokenizer(model_config.tokenizer_path)
-    x_labels = [tokenizer.token_to_id.get(i, str(i)) for i in range(model_config.vocab_size)]
+    x_labels = [tokenizer.id_to_token.get(i, str(i)) for i in range(model_config.vocab_size)]
     breakpoint()
 
     for token_idx in range(num_last_tokens):
