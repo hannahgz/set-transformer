@@ -53,7 +53,7 @@ def logit_lens_analysis(model, input_ids):
     
     return layer_logits
 
-def analyze_predictions(layer_logits, target_indices=None, vocab=None):
+def analyze_predictions(layer_logits, model_config, tokenizer, tokenized_input_sequence):
     """
     Analyze how predictions evolve through the layers.
     """
@@ -62,27 +62,27 @@ def analyze_predictions(layer_logits, target_indices=None, vocab=None):
     for layer_name, logits in layer_logits:
         # Get predictions at each layer
         probs = F.softmax(logits, dim=-1)
-        predictions = torch.argmax(logits, dim=-1)
+        predictions = torch.argmax(logits, dim=-1)[:, -(model_config.target_size+1):1]
+        targets = tokenized_input_sequence[:, -model_config.target_size:]
+
+        mask = targets != model_config.padding_token 
+        total_non_mask_count = mask.sum().item()
         
-        # If we have target indices, compute accuracy
-        if target_indices is not None:
-            accuracy = (predictions == target_indices).float().mean().item()
-        else:
-            accuracy = None
+        matches = ((predictions == targets) | ~mask)
+        accuracy = matches.sum().item() / total_non_mask_count
             
         # Get top k predictions if we have a vocabulary
-        if vocab is not None:
-            top_k_values, top_k_indices = torch.topk(probs, k=5, dim=-1)
-            top_k_tokens = [[vocab[idx.item()] for idx in batch] for batch in top_k_indices]
-        else:
-            top_k_tokens = None
+        
+        top_k_values, top_k_indices = torch.topk(probs, k=5, dim=-1)
+        top_k_tokens = [[idx.item() for idx in batch] for batch in top_k_indices]
             
         results.append({
             'layer': layer_name,
             'accuracy': accuracy,
             'top_k': top_k_tokens,
             'logits': logits,
-            'probs': probs
+            'probs': probs,
+            'predictions': tokenizer.decode(predictions[0].cpu().numpy()),
         })
     
     return results
@@ -100,7 +100,7 @@ def run_logit_lens(model_config, input_sequence):
         
         # Analyze how predictions evolve
         # target_indices = input_sequence[:, -model.config.target_size:]  # Assuming these are the targets
-        results = analyze_predictions(layer_logits)
+        results = analyze_predictions(layer_logits, model_config, tokenizer, tokenized_input_sequence)
         breakpoint()
         return results
     
