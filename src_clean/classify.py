@@ -46,6 +46,21 @@ class LinearProbeBindingCardAttrConfig_Layer1:
     input_dim: int = 64
     output_dim: int = 5
 
+@dataclass
+class LinearProbeBindingCardAttrConfig_Layer2:
+    capture_layer: int = 2
+    pred_card_from_attr: bool = True
+    model_type: str = "linear"
+    input_dim: int = 64
+    output_dim: int = 5
+
+@dataclass
+class LinearProbeBindingCardAttrConfig_Layer3:
+    capture_layer: int = 3
+    pred_card_from_attr: bool = True
+    model_type: str = "linear"
+    input_dim: int = 64
+    output_dim: int = 5
 
 def evaluate_model(
         model,
@@ -632,9 +647,14 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics.pairwise import cosine_similarity
 
-def plot_probe_weight_cosine_sim(probe_config):
+def plot_probe_weight_cosine_sim(model_config, probe_config):
     continuous_to_original = load_continuous_to_original_from_config(
         probe_config)
+    tokenizer = load_tokenizer(model_config.tokenizer_path)
+
+    cards = []
+    for i in range(probe_config.output_dim):
+        cards.append(tokenizer.decode([continuous_to_original[i]])[0])
     breakpoint()
     # Load probe and get weights
     probe = load_linear_probe_from_config(probe_config)
@@ -657,19 +677,15 @@ def plot_probe_weight_cosine_sim(probe_config):
         vmax=1,   # Maximum value for cosine similarity
         center=0, # Center the colormap at 0
         square=True,  # Make cells square
-        fmt='.2f'  # Format annotations to 2 decimal places
+        fmt='.2f',  # Format annotations to 2 decimal places,
+        xticklabels=cards,
+        yticklabels=cards,
     )
     
     # Customize the plot
     plt.title('Cosine Similarity Between Probe Weight Vectors')
-    plt.xlabel('Probe Class Index')
-    plt.ylabel('Probe Class Index')
-    
-    # Add class labels if available
-    if hasattr(probe_config, 'class_names'):
-        class_names = probe_config.class_names
-        plt.xticks(np.arange(len(class_names)) + 0.5, class_names, rotation=45, ha='right')
-        plt.yticks(np.arange(len(class_names)) + 0.5, class_names, rotation=0)
+    plt.xlabel('Card for Neuron')
+    plt.ylabel('Card for Neuron')
     
     plt.tight_layout()
     return plt.gcf()
@@ -683,8 +699,25 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
 
-    plot_probe_weight_cosine_sim(probe_config=LinearProbeBindingCardAttrConfig_Layer1())
+    probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(probe_config=LinearProbeBindingCardAttrConfig_Layer1())
+    probe_weight_cosine_sim_fig.savefig("COMPLETE_FIGS/probe_weight_cosine_sim.png", bbox_inches="tight")
+
+    # avg_similarity_matrix = linear_probe_vector_analysis_average(
+    #     model_config=config, 
+    #     probe_config=LinearProbeBindingCardAttrConfig_Layer2())
     
+    # fig = plot_similarity_heatmap(avg_similarity_matrix)
+    # fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer2.png", bbox_inches="tight")
+
+
+    # avg_similarity_matrix = linear_probe_vector_analysis_average(
+    #     model_config=config, 
+    #     probe_config=LinearProbeBindingCardAttrConfig_Layer3())
+    
+    # fig = plot_similarity_heatmap(avg_similarity_matrix)
+    # fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer3.png", bbox_inches="tight")
+
+
     # avg_similarity_matrix = linear_probe_vector_analysis_average(
     #     model_config=config, 
     #     probe_config=LinearProbeBindingCardAttrConfig_Layer1())
