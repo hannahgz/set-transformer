@@ -36,6 +36,8 @@ if __name__ == "__main__":
         ">", "A", "D", "E", "/", "A", "B", "C", "."
     ]
 
+    
+
     lineplot_specific(
         config=config,
         input=test_input,
