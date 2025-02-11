@@ -67,7 +67,7 @@ def analyze_predictions(layer_logits, model_config, tokenizer, tokenized_input_s
 
         mask = targets != model_config.padding_token 
         total_non_mask_count = mask.sum().item()
-        
+        breakpoint()
         matches = ((predictions == targets) | ~mask)
         accuracy = matches.sum().item() / total_non_mask_count
             
