@@ -710,22 +710,22 @@ if __name__ == "__main__":
         model_config=config,
         probe_config=LinearProbeBindingCardAttrConfig_Layer1())
     
-    probe_weight_cosine_sim_fig.savefig("COMPLETE_FIGS/sorted_probe_weight_cosine_sim.png", bbox_inches="tight")
+    # probe_weight_cosine_sim_fig.savefig("COMPLETE_FIGS/sorted_probe_weight_cosine_sim.png", bbox_inches="tight")
 
-    # avg_similarity_matrix = linear_probe_vector_analysis_average(
-    #     model_config=config, 
-    #     probe_config=LinearProbeBindingCardAttrConfig_Layer2())
+    avg_similarity_matrix = linear_probe_vector_analysis_average(
+        model_config=config, 
+        probe_config=LinearProbeBindingCardAttrConfig_Layer2())
     
-    # fig = plot_similarity_heatmap(avg_similarity_matrix)
-    # fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer2.png", bbox_inches="tight")
+    fig = plot_similarity_heatmap(avg_similarity_matrix)
+    fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer2.png", bbox_inches="tight")
 
 
-    # avg_similarity_matrix = linear_probe_vector_analysis_average(
-    #     model_config=config, 
-    #     probe_config=LinearProbeBindingCardAttrConfig_Layer3())
+    avg_similarity_matrix = linear_probe_vector_analysis_average(
+        model_config=config, 
+        probe_config=LinearProbeBindingCardAttrConfig_Layer3())
     
-    # fig = plot_similarity_heatmap(avg_similarity_matrix)
-    # fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer3.png", bbox_inches="tight")
+    fig = plot_similarity_heatmap(avg_similarity_matrix)
+    fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer3.png", bbox_inches="tight")
 
 
     # avg_similarity_matrix = linear_probe_vector_analysis_average(
