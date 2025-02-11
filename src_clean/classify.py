@@ -655,7 +655,7 @@ def plot_probe_weight_cosine_sim(model_config, probe_config):
     cards = []
     for i in range(probe_config.output_dim):
         cards.append(tokenizer.decode([continuous_to_original[i]])[0])
-    breakpoint()
+    
     # Load probe and get weights
     probe = load_linear_probe_from_config(probe_config)
     probe_weights = probe.fc.weight.data.detach()  # Shape: [5, 64]
@@ -666,6 +666,13 @@ def plot_probe_weight_cosine_sim(model_config, probe_config):
     
     # Calculate cosine similarity matrix
     cosine_sim_matrix = cosine_similarity(probe_weights)
+    
+    # Get sorting indices for alphabetical order
+    sorted_indices = sorted(range(len(cards)), key=lambda k: cards[k])
+    
+    # Reorder the similarity matrix and cards
+    cosine_sim_matrix = cosine_sim_matrix[sorted_indices][:, sorted_indices]
+    sorted_cards = sorted(cards)
     
     # Create heatmap
     plt.figure(figsize=(10, 8))
@@ -678,8 +685,8 @@ def plot_probe_weight_cosine_sim(model_config, probe_config):
         center=0, # Center the colormap at 0
         square=True,  # Make cells square
         fmt='.2f',  # Format annotations to 2 decimal places,
-        xticklabels=cards,
-        yticklabels=cards,
+        xticklabels=sorted_cards,
+        yticklabels=sorted_cards,
     )
     
     # Customize the plot
@@ -703,7 +710,7 @@ if __name__ == "__main__":
         model_config=config,
         probe_config=LinearProbeBindingCardAttrConfig_Layer1())
     
-    probe_weight_cosine_sim_fig.savefig("COMPLETE_FIGS/probe_weight_cosine_sim.png", bbox_inches="tight")
+    probe_weight_cosine_sim_fig.savefig("COMPLETE_FIGS/sorted_probe_weight_cosine_sim.png", bbox_inches="tight")
 
     # avg_similarity_matrix = linear_probe_vector_analysis_average(
     #     model_config=config, 
