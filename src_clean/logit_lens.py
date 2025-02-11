@@ -230,13 +230,20 @@ if __name__ == "__main__":
         ">", "A", "B", "C", ".", "_", "_", "_", "_"
     ]
 
+    two_set_test = [
+        "E", "solid", "D", "one", "E", "green", "E", "diamond", "C", "pink", 
+        "D", "green", "B", "blue", "D", "solid", "C", "one", "C", "oval", 
+        "A", "solid", "A", "one", "A", "green", "A", "oval", "E", "one",
+        "B", "one", "B", "oval", "D", "squiggle", "C", "solid", "B", "solid", 
+        ">", "A", "B", "C", "/", "A", "D", "E", "."]
+
     model_config = GPTConfig44_Complete()
-    results, layer_logits = run_logit_lens(model_config, input_sequence=input1)
+    results, layer_logits = run_logit_lens(model_config, input_sequence=two_set_test)
     
-    # logits_fig = visualize_layer_logits(results)
+    logits_fig = visualize_layer_logits(results)
     compare_fig = compare_attention_mlp_logits(layer_logits, model_config, num_last_tokens=8)
 
-    # logits_fig.savefig('COMPLETE_FIGS/logit_lens_results.png', bbox_inches="tight")
-    compare_fig.savefig('COMPLETE_FIGS/logit_lens_comparison.png', bbox_inches="tight")
+    logits_fig.savefig('COMPLETE_FIGS/logit_lens_results_2_set.png', bbox_inches="tight")
+    compare_fig.savefig('COMPLETE_FIGS/logit_lens_comparison_2_set.png', bbox_inches="tight")
 
 
