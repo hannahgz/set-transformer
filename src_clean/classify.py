@@ -456,9 +456,10 @@ def linear_probe_vector_analysis_average(model_config, probe_config, output_path
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     model = load_model_from_config(model_config).to(device)
-    probe = load_linear_probe_from_config(probe_config).to(device)
+    probe = load_linear_probe_from_config(probe_config, capture_layer).to(device)
 
-    continuous_to_original = load_continuous_to_original_from_config(probe_config)
+    continuous_to_original = load_continuous_to_original_from_config(
+        probe_config, capture_layer)
     tokenizer = load_tokenizer(model_config.tokenizer_path)
 
     # Get probe weights
