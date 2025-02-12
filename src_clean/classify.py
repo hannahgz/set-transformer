@@ -348,7 +348,7 @@ def load_model_from_config(config, device=True):
     return model
 
 
-def load_linear_probe_from_config(config):
+def load_linear_probe_from_config(config, capture_layer):
     if config.pred_card_from_attr:
         dataset_name = "card_from_attr"
     else:
@@ -356,18 +356,18 @@ def load_linear_probe_from_config(config):
 
     model = LinearModel(config.input_dim, config.output_dim)
     model.load_state_dict(torch.load(
-        f'{PATH_PREFIX}/complete/classify/{dataset_name}/layer{config.capture_layer}/{config.model_type}.pt')["model"])
+        f'{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/{config.model_type}.pt')["model"])
     model.eval()
     return model
 
 
-def load_continuous_to_original_from_config(config):
+def load_continuous_to_original_from_config(config, capture_layer):
     if config.pred_card_from_attr:
         dataset_name = "card_from_attr"
     else:
         dataset_name = "attr_from_card"
 
-    continuous_to_original_path = f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{config.capture_layer}/continuous_to_original.pkl"
+    continuous_to_original_path = f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/continuous_to_original.pkl"
     with open(continuous_to_original_path, 'rb') as f:
         continuous_to_original = pickle.load(f)
 
@@ -400,10 +400,10 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence, cap
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     model = load_model_from_config(model_config).to(device)
-    probe = load_linear_probe_from_config(probe_config).to(device)
+    probe = load_linear_probe_from_config(probe_config, capture_layer).to(device)
 
     continuous_to_original = load_continuous_to_original_from_config(
-        probe_config)
+        probe_config, capture_layer)
     tokenizer = load_tokenizer(model_config.tokenizer_path)
 
     print("continuous_to_original: ", continuous_to_original)
