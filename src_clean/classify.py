@@ -30,33 +30,7 @@ class LinearModel(nn.Module):
 
 
 @dataclass
-class LinearProbeBindingCardAttrConfig_Layer0:
-    capture_layer: int = 0
-    pred_card_from_attr: bool = True
-    model_type: str = "linear"
-    input_dim: int = 64
-    output_dim: int = 5
-
-
-@dataclass
-class LinearProbeBindingCardAttrConfig_Layer1:
-    capture_layer: int = 1
-    pred_card_from_attr: bool = True
-    model_type: str = "linear"
-    input_dim: int = 64
-    output_dim: int = 5
-
-@dataclass
-class LinearProbeBindingCardAttrConfig_Layer2:
-    capture_layer: int = 2
-    pred_card_from_attr: bool = True
-    model_type: str = "linear"
-    input_dim: int = 64
-    output_dim: int = 5
-
-@dataclass
-class LinearProbeBindingCardAttrConfig_Layer3:
-    capture_layer: int = 3
+class LinearProbeBindingCardAttrConfig:
     pred_card_from_attr: bool = True
     model_type: str = "linear"
     input_dim: int = 64
@@ -420,7 +394,7 @@ def plot_similarity_heatmap(similarity_matrix):
     
     return plt.gcf()
 
-def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
+def linear_probe_vector_analysis(model_config, probe_config, input_sequence, capture_layer):
     similarity_matrix = np.zeros((model_config.n_cards, model_config.n_cards))
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -439,7 +413,7 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
 
     # Get embeddings at specific layer
     _, _, _, layer_embedding, _ = model(
-        tokenized_input_sequence, capture_layer=probe_config.capture_layer)
+        tokenized_input_sequence, capture_layer=capture_layer)
     print("layer_embedding shape: ", layer_embedding.shape)
 
     # Get probe weights
@@ -474,55 +448,59 @@ def linear_probe_vector_analysis(model_config, probe_config, input_sequence):
     return similarity_matrix
             # breakpoint()
 
-def linear_probe_vector_analysis_average(model_config, probe_config):
+def linear_probe_vector_analysis_average(model_config, probe_config, output_path, capture_layer):
     similarity_matrix = np.zeros((model_config.n_cards, model_config.n_cards))
-    similarity_counts = np.zeros((model_config.n_cards, model_config.n_cards))
+    # similarity_counts = np.zeros((model_config.n_cards, model_config.n_cards))
+    similarity_counts = np.ones((model_config.n_cards, model_config.n_cards))
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    model = load_model_from_config(model_config).to(device)
-    probe = load_linear_probe_from_config(probe_config).to(device)
+    # model = load_model_from_config(model_config).to(device)
+    # probe = load_linear_probe_from_config(probe_config).to(device)
 
-    continuous_to_original = load_continuous_to_original_from_config(probe_config)
-    tokenizer = load_tokenizer(model_config.tokenizer_path)
+    # continuous_to_original = load_continuous_to_original_from_config(probe_config)
+    # tokenizer = load_tokenizer(model_config.tokenizer_path)
 
-    # Get probe weights
-    probe_weights = probe.fc.weight.data.detach()  # Shape: [5, 64] for 5-class probe
+    # # Get probe weights
+    # probe_weights = probe.fc.weight.data.detach()  # Shape: [5, 64] for 5-class probe
 
-    dataset = torch.load(model_config.dataset_path)
-    _, val_loader = initialize_loaders(config, dataset)
+    # dataset = torch.load(model_config.dataset_path)
+    # _, val_loader = initialize_loaders(config, dataset)
 
-    for batch_index, batch in enumerate(val_loader):
-        print(f"Batch {batch_index + 1}/{len(val_loader)}")
-        batch = batch.to(device)
-        # layer_embeddings.shape, torch.Size([512, 49, 64])
-        _, _, _, layer_embeddings, _ = model(
-            batch, capture_layer=probe_config.capture_layer)
-        for index, layer_embedding in enumerate(layer_embeddings):
-            # Process each position in the sequence
-            for pos in range(1, model_config.input_size - 1, 2):
-                token_embedding = layer_embedding[pos, :]  # Shape: [64]
-                current_card = tokenizer.decode([batch[index][pos - 1].item()])[0]
+    # for batch_index, batch in enumerate(val_loader):
+    #     print(f"Batch {batch_index + 1}/{len(val_loader)}")
+    #     batch = batch.to(device)
+    #     # layer_embeddings.shape, torch.Size([512, 49, 64])
+    #     _, _, _, layer_embeddings, _ = model(
+    #         batch, capture_layer=capture_layer)
+    #     for index, layer_embedding in enumerate(layer_embeddings):
+    #         # Process each position in the sequence
+    #         for pos in range(1, model_config.input_size - 1, 2):
+    #             token_embedding = layer_embedding[pos, :]  # Shape: [64]
+    #             current_card = tokenizer.decode([batch[index][pos - 1].item()])[0]
 
-                # Compare with each probe dimension
-                for probe_dim in range(probe_weights.shape[0]):
-                    probe_vector = probe_weights[probe_dim]  # Shape: [64]
-                    probe_dim_card = tokenizer.decode([continuous_to_original[probe_dim]])[0]
+    #             # Compare with each probe dimension
+    #             for probe_dim in range(probe_weights.shape[0]):
+    #                 probe_vector = probe_weights[probe_dim]  # Shape: [64]
+    #                 probe_dim_card = tokenizer.decode([continuous_to_original[probe_dim]])[0]
 
-                    # Compute cosine similarity
-                    cosine_sim = F.cosine_similarity(
-                        token_embedding.unsqueeze(0), 
-                        probe_vector.unsqueeze(0)
-                    )
+    #                 # Compute cosine similarity
+    #                 cosine_sim = F.cosine_similarity(
+    #                     token_embedding.unsqueeze(0), 
+    #                     probe_vector.unsqueeze(0)
+    #                 )
 
-                    # Update similarity matrix and counts
-                    row_idx = ord(current_card) - ord('A')
-                    col_idx = ord(probe_dim_card) - ord('A')
-                    similarity_matrix[row_idx, col_idx] += cosine_sim.item()
-                    similarity_counts[row_idx, col_idx] += 1
+    #                 # Update similarity matrix and counts
+    #                 row_idx = ord(current_card) - ord('A')
+    #                 col_idx = ord(probe_dim_card) - ord('A')
+    #                 similarity_matrix[row_idx, col_idx] += cosine_sim.item()
+    #                 similarity_counts[row_idx, col_idx] += 1
 
     # Compute averages
     average_similarity_matrix = similarity_matrix / similarity_counts
+    print("average_similarity_matrix: ", average_similarity_matrix)
+    # Save the matrix
+    np.save(output_path, average_similarity_matrix)
 
     return average_similarity_matrix
 
@@ -706,26 +684,38 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
 
-    probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(
-        model_config=config,
-        probe_config=LinearProbeBindingCardAttrConfig_Layer1())
-    
-    # probe_weight_cosine_sim_fig.savefig("COMPLETE_FIGS/sorted_probe_weight_cosine_sim.png", bbox_inches="tight")
+    for capture_layer in range(4):
 
-    avg_similarity_matrix = linear_probe_vector_analysis_average(
-        model_config=config, 
-        probe_config=LinearProbeBindingCardAttrConfig_Layer2())
+        avg_similarity_matrix = linear_probe_vector_analysis_average(
+            model_config=config, 
+            probe_config=LinearProbeBindingCardAttrConfig(),
+            output_path=f"{PATH_PREFIX}/complete/classify/avg_cosine_similarity_matrix_layer{capture_layer}.npy",
+            capture_layer=capture_layer)
+
+        # fig = plot_similarity_heatmap(avg_similarity_matrix)
+
+        # fig.savefig(f"COMPLETE_FIGS/cosine_sim/avg_cosine_similarity_heatmap_layer{capture_layer}.png", bbox_inches="tight")
+
+    # probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(
+    #     model_config=config,
+    #     probe_config=LinearProbeBindingCardAttrConfig_Layer1())
     
-    fig = plot_similarity_heatmap(avg_similarity_matrix)
-    fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer2.png", bbox_inches="tight")
+    # # probe_weight_cosine_sim_fig.savefig("COMPLETE_FIGS/sorted_probe_weight_cosine_sim.png", bbox_inches="tight")
+
+    # avg_similarity_matrix = linear_probe_vector_analysis_average(
+    #     model_config=config, 
+    #     probe_config=LinearProbeBindingCardAttrConfig_Layer2())
+    
+    # fig = plot_similarity_heatmap(avg_similarity_matrix)
+    # fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer2.png", bbox_inches="tight")
 
 
-    avg_similarity_matrix = linear_probe_vector_analysis_average(
-        model_config=config, 
-        probe_config=LinearProbeBindingCardAttrConfig_Layer3())
+    # avg_similarity_matrix = linear_probe_vector_analysis_average(
+    #     model_config=config, 
+    #     probe_config=LinearProbeBindingCardAttrConfig_Layer3())
     
-    fig = plot_similarity_heatmap(avg_similarity_matrix)
-    fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer3.png", bbox_inches="tight")
+    # fig = plot_similarity_heatmap(avg_similarity_matrix)
+    # fig.savefig("COMPLETE_FIGS/avg_cosine_similarity_heatmap_layer3.png", bbox_inches="tight")
 
 
     # avg_similarity_matrix = linear_probe_vector_analysis_average(
