@@ -660,7 +660,7 @@ def plot_probe_weight_cosine_sim(model_config, probe_config):
     
     # Create heatmap
     plt.figure(figsize=(10, 8))
-    sns.heatmap(
+    ax = sns.heatmap(
         cosine_sim_matrix,
         annot=True,  # Show values in cells
         cmap='RdBu_r',  # Red-Blue diverging colormap
@@ -672,6 +672,8 @@ def plot_probe_weight_cosine_sim(model_config, probe_config):
         xticklabels=sorted_cards,
         yticklabels=sorted_cards,
     )
+
+    ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
     
     # Customize the plot
     plt.title('Cosine Similarity Between Probe Weight Vectors')
@@ -690,25 +692,25 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
 
-    for capture_layer in range(4):
+    # for capture_layer in range(4):
 
-        # avg_similarity_matrix = linear_probe_vector_analysis_average(
-        #     model_config=config, 
-        #     probe_config=LinearProbeBindingCardAttrConfig(),
-        #     output_path=f"{PATH_PREFIX}/complete/classify/avg_cosine_similarity_matrix_layer{capture_layer}.npy",
-        #     capture_layer=capture_layer)
+    #     # avg_similarity_matrix = linear_probe_vector_analysis_average(
+    #     #     model_config=config, 
+    #     #     probe_config=LinearProbeBindingCardAttrConfig(),
+    #     #     output_path=f"{PATH_PREFIX}/complete/classify/avg_cosine_similarity_matrix_layer{capture_layer}.npy",
+    #     #     capture_layer=capture_layer)
 
-        avg_similarity_matrix = np.load(f"{PATH_PREFIX}/complete/classify/avg_cosine_similarity_matrix_layer{capture_layer}.npy")
+    #     avg_similarity_matrix = np.load(f"{PATH_PREFIX}/complete/classify/avg_cosine_similarity_matrix_layer{capture_layer}.npy")
 
-        fig = plot_similarity_heatmap(avg_similarity_matrix, capture_layer)
+    #     fig = plot_similarity_heatmap(avg_similarity_matrix, capture_layer)
 
-        fig.savefig(f"COMPLETE_FIGS/cosine_sim/updated_avg_cosine_similarity_heatmap_layer{capture_layer}.png", bbox_inches="tight")
+    #     fig.savefig(f"COMPLETE_FIGS/cosine_sim/updated_avg_cosine_similarity_heatmap_layer{capture_layer}.png", bbox_inches="tight")
 
-    # probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(
-    #     model_config=config,
-    #     probe_config=LinearProbeBindingCardAttrConfig_Layer1())
+    probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(
+        model_config=config,
+        probe_config=LinearProbeBindingCardAttrConfig())
     
-    # # probe_weight_cosine_sim_fig.savefig("COMPLETE_FIGS/sorted_probe_weight_cosine_sim.png", bbox_inches="tight")
+    probe_weight_cosine_sim_fig.savefig("COMPLETE_FIGS/cosine_sim/sorted_probe_weight_cosine_sim.png", bbox_inches="tight")
 
     # avg_similarity_matrix = linear_probe_vector_analysis_average(
     #     model_config=config, 
