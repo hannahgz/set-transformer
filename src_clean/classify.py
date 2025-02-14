@@ -373,26 +373,31 @@ def load_continuous_to_original_from_config(config, capture_layer):
 
     return continuous_to_original
 
-def plot_similarity_heatmap(similarity_matrix):
+def plot_similarity_heatmap(similarity_matrix, capture_layer):
     cards = ['A', 'B', 'C', 'D', 'E']
     
     plt.figure(figsize=(8, 6))
-    sns.heatmap(similarity_matrix,
-                xticklabels=cards,
-                yticklabels=cards,
-                annot=True,
-                fmt='.3f',
-                cmap='RdYlBu',
-                center=0,
-                square=True,
-                cbar_kws={'label': 'Cosine Similarity'})
+    ax = sns.heatmap(similarity_matrix,
+                     xticklabels=cards,
+                     yticklabels=cards,
+                     annot=True,
+                     fmt='.3f',
+                     cmap='RdYlBu',
+                     center=0,
+                     square=True,
+                     cbar_kws={'label': 'Cosine Similarity'})
 
-    plt.title('Card Cosine Similarities')
+    plt.title(f'Layer {capture_layer}: Cosine Similarities')
     plt.xlabel('Probe Dimension Cards')
     plt.ylabel('Input Sequence Cards')
+    
+    # Adjust y-axis label rotation
+    ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
+    
     plt.tight_layout()
     
     return plt.gcf()
+
 
 def linear_probe_vector_analysis(model_config, probe_config, input_sequence, capture_layer):
     similarity_matrix = np.zeros((model_config.n_cards, model_config.n_cards))
@@ -687,15 +692,17 @@ if __name__ == "__main__":
 
     for capture_layer in range(4):
 
-        avg_similarity_matrix = linear_probe_vector_analysis_average(
-            model_config=config, 
-            probe_config=LinearProbeBindingCardAttrConfig(),
-            output_path=f"{PATH_PREFIX}/complete/classify/avg_cosine_similarity_matrix_layer{capture_layer}.npy",
-            capture_layer=capture_layer)
+        # avg_similarity_matrix = linear_probe_vector_analysis_average(
+        #     model_config=config, 
+        #     probe_config=LinearProbeBindingCardAttrConfig(),
+        #     output_path=f"{PATH_PREFIX}/complete/classify/avg_cosine_similarity_matrix_layer{capture_layer}.npy",
+        #     capture_layer=capture_layer)
 
-        # fig = plot_similarity_heatmap(avg_similarity_matrix)
+        avg_similarity_matrix = np.load(f"{PATH_PREFIX}/complete/classify/avg_cosine_similarity_matrix_layer{capture_layer}.npy")
 
-        # fig.savefig(f"COMPLETE_FIGS/cosine_sim/avg_cosine_similarity_heatmap_layer{capture_layer}.png", bbox_inches="tight")
+        fig = plot_similarity_heatmap(avg_similarity_matrix, capture_layer)
+
+        fig.savefig(f"COMPLETE_FIGS/cosine_sim/updated_avg_cosine_similarity_heatmap_layer{capture_layer}.png", bbox_inches="tight")
 
     # probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(
     #     model_config=config,
