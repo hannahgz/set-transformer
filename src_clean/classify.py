@@ -631,9 +631,9 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics.pairwise import cosine_similarity
 
-def plot_probe_weight_cosine_sim(model_config, probe_config):
+def plot_probe_weight_cosine_sim(model_config, probe_config, capture_layer):
     continuous_to_original = load_continuous_to_original_from_config(
-        probe_config)
+        probe_config, capture_layer=capture_layer)
     tokenizer = load_tokenizer(model_config.tokenizer_path)
 
     cards = []
@@ -641,7 +641,7 @@ def plot_probe_weight_cosine_sim(model_config, probe_config):
         cards.append(tokenizer.decode([continuous_to_original[i]])[0])
     
     # Load probe and get weights
-    probe = load_linear_probe_from_config(probe_config)
+    probe = load_linear_probe_from_config(probe_config, capture_layer)
     probe_weights = probe.fc.weight.data.detach()  # Shape: [5, 64]
     
     # Convert to numpy array if it's a torch tensor
@@ -676,7 +676,7 @@ def plot_probe_weight_cosine_sim(model_config, probe_config):
     ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
     
     # Customize the plot
-    plt.title('Cosine Similarity Between Probe Weight Vectors')
+    plt.title(f'Layer {capture_layer}: Cosine Similarity Between Probe Weight Vectors')
     plt.xlabel('Card for Neuron')
     plt.ylabel('Card for Neuron')
     
@@ -706,16 +706,18 @@ if __name__ == "__main__":
 
     #     fig.savefig(f"COMPLETE_FIGS/cosine_sim/updated_avg_cosine_similarity_heatmap_layer{capture_layer}.png", bbox_inches="tight")
 
-    for capture_layer in range(4):
-        continuous_to_original = load_continuous_to_original_from_config(
-            config=LinearProbeBindingCardAttrConfig, capture_layer=capture_layer)
-        breakpoint()
+    # for capture_layer in range(4):
+    #     continuous_to_original = load_continuous_to_original_from_config(
+    #         config=LinearProbeBindingCardAttrConfig, capture_layer=capture_layer)
+    #     breakpoint()
 
-    # probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(
-    #     model_config=config,
-    #     probe_config=LinearProbeBindingCardAttrConfig())
-    
-    # probe_weight_cosine_sim_fig.savefig("COMPLETE_FIGS/cosine_sim/sorted_probe_weight_cosine_sim.png", bbox_inches="tight")
+    for capture_layer in range(4):
+        probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(
+            model_config=config,
+            probe_config=LinearProbeBindingCardAttrConfig(), 
+            capture_layer=capture_layer)
+        
+        probe_weight_cosine_sim_fig.savefig(f"COMPLETE_FIGS/cosine_sim/sorted_probe_weight_cosine_sim_layer{capture_layer}.png", bbox_inches="tight")
 
     # avg_similarity_matrix = linear_probe_vector_analysis_average(
     #     model_config=config, 
