@@ -706,11 +706,16 @@ if __name__ == "__main__":
 
     #     fig.savefig(f"COMPLETE_FIGS/cosine_sim/updated_avg_cosine_similarity_heatmap_layer{capture_layer}.png", bbox_inches="tight")
 
-    probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(
-        model_config=config,
-        probe_config=LinearProbeBindingCardAttrConfig())
+    for capture_layer in range(4):
+        continuous_to_original = load_continuous_to_original_from_config(
+            probe_config=LinearProbeBindingCardAttrConfig, capture_layer=capture_layer)
+        breakpoint()
+        
+    # probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(
+    #     model_config=config,
+    #     probe_config=LinearProbeBindingCardAttrConfig())
     
-    probe_weight_cosine_sim_fig.savefig("COMPLETE_FIGS/cosine_sim/sorted_probe_weight_cosine_sim.png", bbox_inches="tight")
+    # probe_weight_cosine_sim_fig.savefig("COMPLETE_FIGS/cosine_sim/sorted_probe_weight_cosine_sim.png", bbox_inches="tight")
 
     # avg_similarity_matrix = linear_probe_vector_analysis_average(
     #     model_config=config, 
