@@ -708,9 +708,9 @@ if __name__ == "__main__":
 
     for capture_layer in range(4):
         continuous_to_original = load_continuous_to_original_from_config(
-            probe_config=LinearProbeBindingCardAttrConfig, capture_layer=capture_layer)
+            config=LinearProbeBindingCardAttrConfig, capture_layer=capture_layer)
         breakpoint()
-        
+
     # probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(
     #     model_config=config,
     #     probe_config=LinearProbeBindingCardAttrConfig())
