@@ -31,9 +31,6 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
 
     tokenizer = load_tokenizer(config.tokenizer_path)
 
-    all_flattened_input_embeddings = []
-    all_flattened_target_tokens = []
-
     A_id = tokenizer.token_to_id["A"]
     B_id = tokenizer.token_to_id["B"]
     C_id = tokenizer.token_to_id["C"]
@@ -47,6 +44,8 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
     # batch.shape, torch.Size([512, 49])
     for batch_index, batch in enumerate(val_loader):
         print(f"Batch {batch_index + 1}/{len(val_loader)}")
+        if batch_index % 5 == 0:
+            break
         batch = batch.to(device)
         # captured_embedding.shape, torch.Size([512, 49, 64])
         _, _, _, captured_embedding, _ = model(batch, True, capture_layer)
@@ -80,6 +79,23 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
                     last_attr_embeddings[card_id] = captured_embedding[seq_index, attr_index, :]
                     all_input_embeddings.append(last_attr_embeddings[card_id])
                     all_target_attributes.append(seen_card_dict[card_id])
+
+    # After the loop completes, convert lists to tensors
+    input_embeddings_tensor = torch.stack(all_input_embeddings)  # This will create a tensor of shape [num_samples, embedding_dim]
+    target_attributes_tensor = torch.tensor(all_target_attributes)  # This will create a tensor of shape [num_samples, 4]
+
+    breakpoint()
+    # Save the tensors
+    save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
+    if not os.path.exists(save_path_dir):
+        os.makedirs(save_path_dir)
+
+    torch.save({
+        'input_embeddings': input_embeddings_tensor,
+        'target_attributes': target_attributes_tensor
+    }, f"{save_path_dir}/embeddings_and_attributes.pt")
+
+    return input_embeddings_tensor, target_attributes_tensor
 
 
 # input_embeddings = captured_embedding[:, 0:(config.input_size-1):2, :]
