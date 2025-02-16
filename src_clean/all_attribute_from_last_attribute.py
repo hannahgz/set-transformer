@@ -50,7 +50,6 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
         batch = batch.to(device)
         # captured_embedding.shape, torch.Size([512, 49, 64])
         _, _, _, captured_embedding, _ = model(batch, True, capture_layer)
-        breakpoint()
 
         for seq_index, sequence in enumerate(batch):
             seen_card_dict = {
@@ -70,7 +69,7 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
             }
             
             for card_index, card_id in enumerate(sequence[0:config.input_size:2]):
-                print(f"Card {card_id}, index {card_index}, card {tokenizer.id_to_token[card_id]}")
+                print(f"Card {card_id}, index {card_index}")
                 attr_index = card_index * 2 + 1
                 attr_id = sequence[attr_index]
                 seen_card_dict[card_id].append(attr_id)
