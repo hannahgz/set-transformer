@@ -69,9 +69,8 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
             }
             
             sequence = sequence.tolist()
-            for card_index, card_id in enumerate(sequence[0:config.input_size:2]):
+            for card_index, card_id in enumerate(sequence[0:(config.input_size-1):2]):
                 print(f"Card {card_id}, index {card_index}")
-                breakpoint()
                 attr_index = card_index * 2 + 1
                 attr_id = sequence[attr_index]
                 seen_card_dict[card_id].append(attr_id)
@@ -81,7 +80,6 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
                     last_attr_embeddings[card_id] = captured_embedding[seq_index, attr_index, :]
                     all_input_embeddings.append(last_attr_embeddings[card_id])
                     all_target_attributes.append(seen_card_dict[card_id])
-                breakpoint()
 
 
 # input_embeddings = captured_embedding[:, 0:(config.input_size-1):2, :]
