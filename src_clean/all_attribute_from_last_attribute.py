@@ -40,23 +40,50 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
     D_id = tokenizer.token_to_id["D"]
     E_id = tokenizer.token_to_id["E"]
 
-    seen_card_dict = {
-        A_id: [],
-        B_id: [],
-        C_id: [],
-        D_id: [],
-        E_id: []
-    }
 
+    all_input_embeddings = []
+    all_target_attributes = []
+
+    # batch.shape, torch.Size([512, 49])
     for batch_index, batch in enumerate(val_loader):
         print(f"Batch {batch_index + 1}/{len(val_loader)}")
         batch = batch.to(device)
+        # captured_embedding.shape, torch.Size([512, 49, 64])
         _, _, _, captured_embedding, _ = model(batch, True, capture_layer)
         breakpoint()
 
-        # for seq_index, sequence in enumerate(batch):
-        #     for token_index, token in sequence:
+        for seq_index, sequence in enumerate(batch):
+            seen_card_dict = {
+                A_id: [],
+                B_id: [],
+                C_id: [],
+                D_id: [],
+                E_id: []
+            }
 
+            last_attr_embeddings = {
+                A_id: None,
+                B_id: None,
+                C_id: None,
+                D_id: None,
+                E_id: None
+            }
+            
+            for card_index, card_id in enumerate(sequence[0:config.input_size:2]):
+                print(f"Card {card_id}, index {card_index}, card {tokenizer.id_to_token[card_id]}")
+                attr_index = card_index * 2 + 1
+                attr_id = sequence[attr_index]
+                seen_card_dict[card_id].append(attr_id)
+
+                if len(seen_card_dict[card_id]) == 4:
+                    print(f"Card {card_id}, {tokenizer.id_to_token[card_id]}, seen attributes {seen_card_dict[card_id]}")
+                    last_attr_embeddings[card_id] = captured_embedding[seq_index, attr_index, :]
+                    all_input_embeddings.append(last_attr_embeddings[card_id])
+                    all_target_attributes.append(seen_card_dict[card_id])
+                breakpoint()
+
+
+# input_embeddings = captured_embedding[:, 0:(config.input_size-1):2, :]
 
     #     input_start_index = 1
     #     target_start_index = 0
