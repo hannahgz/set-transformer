@@ -53,7 +53,7 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
         batch = batch.to(device)
         _, _, _, captured_embedding = model(batch, True, capture_layer)
         breakpoint()
-        
+
     #     input_start_index = 1
     #     target_start_index = 0
 
@@ -99,3 +99,16 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
     #     pickle.dump(continuous_to_original, f)
 
     # return combined_input_embeddings, mapped_target_tokens, continuous_to_original
+
+
+if __name__ == "__main__":
+    seed = 42
+    torch.manual_seed(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+
+    config = GPTConfig44_Complete()
+
+    init_all_attr_from_last_atrr_binding_dataset(
+        config=config, 
+        capture_layer=0)
