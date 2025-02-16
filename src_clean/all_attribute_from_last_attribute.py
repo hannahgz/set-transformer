@@ -48,11 +48,15 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
         E_id: []
     }
 
-    for index, batch in enumerate(val_loader):
-        print(f"Batch {index + 1}/{len(val_loader)}")
+    for batch_index, batch in enumerate(val_loader):
+        print(f"Batch {batch_index + 1}/{len(val_loader)}")
         batch = batch.to(device)
-        _, _, _, captured_embedding = model(batch, True, capture_layer)
+        _, _, _, captured_embedding, _ = model(batch, True, capture_layer)
         breakpoint()
+
+        # for seq_index, sequence in enumerate(batch):
+        #     for token_index, token in sequence:
+
 
     #     input_start_index = 1
     #     target_start_index = 0
