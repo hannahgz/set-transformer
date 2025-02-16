@@ -44,8 +44,7 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
     # batch.shape, torch.Size([512, 49])
     for batch_index, batch in enumerate(val_loader):
         print(f"Batch {batch_index + 1}/{len(val_loader)}")
-        if batch_index % 5 == 0:
-            break
+
         batch = batch.to(device)
         # captured_embedding.shape, torch.Size([512, 49, 64])
         _, _, _, captured_embedding, _ = model(batch, True, capture_layer)
@@ -79,6 +78,9 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
                     last_attr_embeddings[card_id] = captured_embedding[seq_index, attr_index, :]
                     all_input_embeddings.append(last_attr_embeddings[card_id])
                     all_target_attributes.append(seen_card_dict[card_id])
+            
+            if (batch_index + 1) % 5 == 0:
+                break
 
     # After the loop completes, convert lists to tensors
     input_embeddings_tensor = torch.stack(all_input_embeddings)  # This will create a tensor of shape [num_samples, embedding_dim]
