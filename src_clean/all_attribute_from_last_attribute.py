@@ -68,8 +68,10 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
                 E_id: None
             }
             
+            sequence = sequence.tolist()
             for card_index, card_id in enumerate(sequence[0:config.input_size:2]):
                 print(f"Card {card_id}, index {card_index}")
+                breakpoint()
                 attr_index = card_index * 2 + 1
                 attr_id = sequence[attr_index]
                 seen_card_dict[card_id].append(attr_id)
