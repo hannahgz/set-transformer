@@ -262,10 +262,15 @@ def train_probe(model, embeddings, target_sequences, model_type, capture_layer, 
             for batch_embeddings, batch_targets in val_loader:
                 outputs = model(batch_embeddings)
                 
-                loss = criterion(
-                    outputs.reshape(-1, model.num_classes),
-                    batch_targets.reshape(-1)
-                )
+                if model_type == "simple":
+                    loss = criterion(
+                        outputs.reshape(-1, model.num_classes),
+                        batch_targets.reshape(-1)
+                    )
+                elif model_type == "sorted":
+                    loss = model.compute_loss(outputs, batch_targets)
+                else:
+                    raise ValueError(f"Invalid model type: {model_type}")
                 
                 val_loss += loss.item()
                 seq_acc, pos_acc, agn_acc = compute_accuracies(outputs, batch_targets)
