@@ -104,7 +104,7 @@ import wandb
 import numpy as np
 
 class SimpleProbe(nn.Module):
-    def __init__(self, embedding_dim, num_classes=12, sequence_length=3):
+    def __init__(self, embedding_dim, num_classes=12, sequence_length=4):
         super().__init__()
         self.linear = nn.Linear(embedding_dim, num_classes * sequence_length)
         self.sequence_length = sequence_length
