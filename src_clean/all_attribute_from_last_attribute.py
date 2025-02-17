@@ -351,6 +351,26 @@ if __name__ == "__main__":
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
+    # for capture_layer in range(4):
+    #     save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
+
+    #     saved_data = torch.load(f'{save_path_dir}/embeddings_and_attributes.pt')
+    #     loaded_embeddings = saved_data['input_embeddings'].to(device)
+    #     loaded_targets = saved_data['target_attributes'].to(device)
+    #     unique_values, _ = torch.unique(loaded_targets, return_inverse=True)
+    #     continuous_targets = torch.searchsorted(unique_values, loaded_targets)
+
+    #     sorted_model = SortedProbe(config.n_embd).to(device)
+    #     train_probe(
+    #         model=sorted_model, 
+    #         embeddings=loaded_embeddings, 
+    #         target_sequences=continuous_targets,
+    #         model_type="sorted",
+    #         capture_layer=capture_layer,
+    #         num_epochs=1,
+    #         )
+        
+
     for capture_layer in range(4):
         save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
 
@@ -360,12 +380,12 @@ if __name__ == "__main__":
         unique_values, _ = torch.unique(loaded_targets, return_inverse=True)
         continuous_targets = torch.searchsorted(unique_values, loaded_targets)
 
-        sorted_model = SortedProbe(config.n_embd).to(device)
+        simple_model = SimpleProbe(config.n_embd).to(device)
         train_probe(
-            model=sorted_model, 
+            model=simple_model, 
             embeddings=loaded_embeddings, 
             target_sequences=continuous_targets,
-            model_type="sorted",
+            model_type="simple",
             capture_layer=capture_layer,
             num_epochs=1,
             )
