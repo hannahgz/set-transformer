@@ -102,6 +102,7 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader, random_split
 import wandb
 import numpy as np
+import itertools
 
 class SimpleProbe(nn.Module):
     def __init__(self, embedding_dim, num_classes=12, sequence_length=4):
@@ -112,6 +113,47 @@ class SimpleProbe(nn.Module):
     
     def forward(self, x):
         return self.linear(x).reshape(-1, self.sequence_length, self.num_classes)
+    
+class PermutationInvariantProbe(nn.Module):
+    def __init__(self, embedding_dim, num_classes=12, sequence_length=4):
+        super().__init__()
+        self.linear = nn.Linear(embedding_dim, num_classes * sequence_length)
+        self.sequence_length = sequence_length
+        self.num_classes = num_classes
+        
+        # Pre-compute all possible permutations
+        self.permutations = list(itertools.permutations(range(sequence_length)))
+    
+    def forward(self, x):
+        # x shape: (batch_size, embedding_dim)
+        # output shape: (batch_size, sequence_length, num_classes)
+        return self.linear(x).reshape(-1, self.sequence_length, self.num_classes)
+    
+    def compute_loss(self, outputs, targets):
+        # outputs: (batch_size, sequence_length, num_classes)
+        # targets: (batch_size, sequence_length)
+        
+        losses = []
+        batch_size = outputs.size(0)
+        
+        # For each possible permutation of the target sequence
+        for perm in self.permutations:
+            # Permute the target sequence
+            perm_targets = targets[:, perm]
+            # Compute cross entropy loss for this permutation
+            loss = nn.functional.cross_entropy(
+                outputs.reshape(-1, self.num_classes),
+                perm_targets.reshape(-1),
+                reduction='none'
+            ).view(batch_size, -1).sum(dim=1)
+            losses.append(loss)
+        
+        # Stack all permutation losses and take minimum for each batch item
+        # This means we consider the prediction correct if it matches ANY permutation
+        stacked_losses = torch.stack(losses, dim=0)
+        min_losses = stacked_losses.min(dim=0).values
+        
+        return min_losses.mean()
 
 def compute_accuracy(outputs, targets):
     """Compute sequence-level accuracy (all positions must match)"""
@@ -119,7 +161,7 @@ def compute_accuracy(outputs, targets):
     correct = (predictions == targets).all(dim=1).float().mean()
     return correct.item()
 
-def train_probe(model, embeddings, target_sequences, num_epochs=100, batch_size=32, val_split=0.2):
+def train_probe(model, embeddings, target_sequences, wandb_name, num_epochs=100, batch_size=32, val_split=0.2):
     """
     Train probe with validation and W&B logging
     
@@ -141,7 +183,8 @@ def train_probe(model, embeddings, target_sequences, num_epochs=100, batch_size=
             "batch_size": batch_size,
             "val_split": val_split,
             "num_epochs": num_epochs
-        }
+        },
+        name=wandb_name
     )
     
     # Split data into train and validation
@@ -227,24 +270,30 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
-    capture_layer = 0
+    # capture_layer = 0
     # init_all_attr_from_last_atrr_binding_dataset(
     #     config=config, 
     #     capture_layer=0)
 
-    save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
+    for capture_layer in [1, 2, 3]:
+        init_all_attr_from_last_atrr_binding_dataset(
+            config=config, 
+            capture_layer=capture_layer)
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    saved_data = torch.load(f'{save_path_dir}/embeddings_and_attributes.pt')
-    loaded_embeddings = saved_data['input_embeddings'].to(device)
-    loaded_targets = saved_data['target_attributes'].to(device)
-    unique_values, _ = torch.unique(loaded_targets, return_inverse=True)
-    continuous_targets = torch.searchsorted(unique_values, loaded_targets)
+    # save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
+
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
+    # saved_data = torch.load(f'{save_path_dir}/embeddings_and_attributes.pt')
+    # loaded_embeddings = saved_data['input_embeddings'].to(device)
+    # loaded_targets = saved_data['target_attributes'].to(device)
+    # unique_values, _ = torch.unique(loaded_targets, return_inverse=True)
+    # continuous_targets = torch.searchsorted(unique_values, loaded_targets)
     
-    model = SimpleProbe(config.n_embd).to(device)
-    
-    # Train with validation and logging
-    train_probe(model, loaded_embeddings, continuous_targets)
+    # # model = SimpleProbe(config.n_embd).to(device)
+    # # train_probe(model, loaded_embeddings, continuous_targets)
+
+    # permutation_invariant_model = PermutationInvariantProbe(config.n_embd).to(device)
+    # train_probe(permutation_invariant_model, loaded_embeddings, continuous_targets)
     
     # # Test example
     # with torch.no_grad():
