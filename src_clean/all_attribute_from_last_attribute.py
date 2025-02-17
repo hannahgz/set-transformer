@@ -239,7 +239,7 @@ if __name__ == "__main__":
     loaded_embeddings = saved_data['input_embeddings'].to(device)
     loaded_targets = saved_data['target_attributes'].to(device)
     
-    model = SimpleProbe(config.n_embd)
+    model = SimpleProbe(config.n_embd).to(device)
     
     # Train with validation and logging
     train_probe(model, loaded_embeddings, loaded_targets)
