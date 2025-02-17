@@ -329,6 +329,7 @@ def train_probe(model, embeddings, target_sequences, model_type, capture_layer, 
             print(f'  Sequence Acc: {val_seq_acc:.4f}')
             print(f'  Position Acc: {val_pos_acc:.4f}')
             print(f'  Agnostic Acc: {val_agn_acc:.4f}\n')
+    wandb.finish()
     
 if __name__ == "__main__":
     seed = 42
