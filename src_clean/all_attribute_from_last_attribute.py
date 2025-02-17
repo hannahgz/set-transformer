@@ -232,7 +232,7 @@ if __name__ == "__main__":
     #     config=config, 
     #     capture_layer=0)
 
-    saved_data = torch.load('embeddings_and_attributes.pt')
+    saved_data = torch.load(f'{PATH_PREFIX}/embeddings_and_attributes.pt')
     loaded_embeddings = saved_data['input_embeddings']
     loaded_targets = saved_data['target_attributes']
     
