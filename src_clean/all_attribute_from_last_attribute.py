@@ -367,7 +367,6 @@ if __name__ == "__main__":
     #         target_sequences=continuous_targets,
     #         model_type="sorted",
     #         capture_layer=capture_layer,
-    #         num_epochs=1,
     #         )
         
 
@@ -387,7 +386,6 @@ if __name__ == "__main__":
             target_sequences=continuous_targets,
             model_type="simple",
             capture_layer=capture_layer,
-            num_epochs=1,
             )
 
     # save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
