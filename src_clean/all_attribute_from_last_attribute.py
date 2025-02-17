@@ -276,6 +276,7 @@ if __name__ == "__main__":
     #     capture_layer=0)
 
     for capture_layer in [1, 2, 3]:
+        print(f"Capture layer {capture_layer}")
         init_all_attr_from_last_atrr_binding_dataset(
             config=config, 
             capture_layer=capture_layer)
