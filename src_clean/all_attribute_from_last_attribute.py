@@ -234,9 +234,10 @@ if __name__ == "__main__":
 
     save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
 
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     saved_data = torch.load(f'{save_path_dir}/embeddings_and_attributes.pt')
-    loaded_embeddings = saved_data['input_embeddings']
-    loaded_targets = saved_data['target_attributes']
+    loaded_embeddings = saved_data['input_embeddings'].to(device)
+    loaded_targets = saved_data['target_attributes'].to(device)
     
     model = SimpleProbe(config.n_embd)
     
