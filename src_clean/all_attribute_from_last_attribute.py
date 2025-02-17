@@ -227,12 +227,14 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
-
+    capture_layer = 0
     # init_all_attr_from_last_atrr_binding_dataset(
     #     config=config, 
     #     capture_layer=0)
 
-    saved_data = torch.load(f'{PATH_PREFIX}/embeddings_and_attributes.pt')
+    save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
+
+    saved_data = torch.load(f'{save_path_dir}/embeddings_and_attributes.pt')
     loaded_embeddings = saved_data['input_embeddings']
     loaded_targets = saved_data['target_attributes']
     
