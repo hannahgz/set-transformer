@@ -238,11 +238,13 @@ if __name__ == "__main__":
     saved_data = torch.load(f'{save_path_dir}/embeddings_and_attributes.pt')
     loaded_embeddings = saved_data['input_embeddings'].to(device)
     loaded_targets = saved_data['target_attributes'].to(device)
+    unique_values, _ = torch.unique(loaded_targets, return_inverse=True)
+    continuous_targets = torch.searchsorted(unique_values, loaded_targets)
     
     model = SimpleProbe(config.n_embd).to(device)
     
     # Train with validation and logging
-    train_probe(model, loaded_embeddings, loaded_targets)
+    train_probe(model, loaded_embeddings, continuous_targets)
     
     # # Test example
     # with torch.no_grad():
