@@ -68,25 +68,22 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
             
             sequence = sequence.tolist()
             for card_index, card_id in enumerate(sequence[0:(config.input_size-1):2]):
-                print(f"Card {card_id}, index {card_index}")
+                # print(f"Card {card_id}, index {card_index}")
                 attr_index = card_index * 2 + 1
                 attr_id = sequence[attr_index]
                 seen_card_dict[card_id].append(attr_id)
 
                 if len(seen_card_dict[card_id]) == 4:
-                    print(f"Card {card_id}, {tokenizer.id_to_token[card_id]}, seen attributes {seen_card_dict[card_id]}")
+                    # print(f"Card {card_id}, {tokenizer.id_to_token[card_id]}, seen attributes {seen_card_dict[card_id]}")
                     last_attr_embeddings[card_id] = captured_embedding[seq_index, attr_index, :]
                     all_input_embeddings.append(last_attr_embeddings[card_id])
                     all_target_attributes.append(seen_card_dict[card_id])
             
-            if (batch_index + 1) % 5 == 0:
-                break
 
     # After the loop completes, convert lists to tensors
     input_embeddings_tensor = torch.stack(all_input_embeddings)  # This will create a tensor of shape [num_samples, embedding_dim]
     target_attributes_tensor = torch.tensor(all_target_attributes)  # This will create a tensor of shape [num_samples, 4]
 
-    breakpoint()
     # Save the tensors
     save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
     if not os.path.exists(save_path_dir):
