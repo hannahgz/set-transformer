@@ -155,13 +155,40 @@ class PermutationInvariantProbe(nn.Module):
         
         return min_losses.mean()
 
-def compute_accuracy(outputs, targets):
-    """Compute sequence-level accuracy (all positions must match)"""
-    predictions = outputs.argmax(dim=-1)
-    correct = (predictions == targets).all(dim=1).float().mean()
-    return correct.item()
+# def compute_accuracy(outputs, targets):
+#     """Compute sequence-level accuracy (all positions must match)"""
+#     predictions = outputs.argmax(dim=-1)
+#     correct = (predictions == targets).all(dim=1).float().mean()
+#     return correct.item()
 
-def train_probe(model, embeddings, target_sequences, wandb_name, num_epochs=100, batch_size=32, val_split=0.2):
+def compute_accuracies(outputs, targets):
+    """
+    Compute sequence-level accuracy with different metrics:
+    1. Strict sequence accuracy (exact position match)
+    2. Position-wise accuracy (average across positions)
+    3. Position-agnostic accuracy (correct elements in any order)
+    """
+    predictions = outputs.argmax(dim=-1)
+    batch_size = predictions.shape[0]
+    
+    # 1. Strict sequence accuracy (all positions must match exactly)
+    sequence_acc = (predictions == targets).all(dim=1).float().mean().item()
+    
+    # 2. Position-wise accuracy (average across positions)
+    position_acc = (predictions == targets).float().mean().item()
+    
+    # 3. Position-agnostic accuracy
+    agnostic_acc = 0
+    for i in range(batch_size):
+        pred_set = set(predictions[i].cpu().tolist())
+        target_set = set(targets[i].cpu().tolist())
+        num_correct = len(pred_set.intersection(target_set))
+        agnostic_acc += num_correct / len(target_set)
+    agnostic_acc = agnostic_acc / batch_size
+    
+    return sequence_acc, position_acc, agnostic_acc
+
+def train_probe(model, embeddings, target_sequences, model_type, capture_layer, num_epochs=100, batch_size=32, val_split=0.2, early_stopping_patience=10):
     """
     Train probe with validation and W&B logging
     
@@ -182,10 +209,17 @@ def train_probe(model, embeddings, target_sequences, wandb_name, num_epochs=100,
             "num_classes": model.num_classes,
             "batch_size": batch_size,
             "val_split": val_split,
-            "num_epochs": num_epochs
+            "num_epochs": num_epochs,
+            "early_stopping_patience": early_stopping_patience,  # Number of epochs to wait before early stopping
         },
-        name=wandb_name
+        name=f"{model_type}_probe_layer{capture_layer}"
     )
+    
+    # Initialize best validation loss and early stopping variables
+    best_val_loss = float('inf')
+    model_save_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/{model_type}_model.pt"
+    patience = wandb.config.early_stopping_patience
+    patience_counter = 0
     
     # Split data into train and validation
     num_val = int(len(embeddings) * val_split)
@@ -206,7 +240,9 @@ def train_probe(model, embeddings, target_sequences, wandb_name, num_epochs=100,
         # Training
         model.train()
         train_loss = 0
-        train_acc = 0
+        train_seq_acc = 0
+        train_pos_acc = 0
+        train_agn_acc = 0
         
         for batch_embeddings, batch_targets in train_loader:
             outputs = model(batch_embeddings)
@@ -221,15 +257,22 @@ def train_probe(model, embeddings, target_sequences, wandb_name, num_epochs=100,
             optimizer.step()
             
             train_loss += loss.item()
-            train_acc += compute_accuracy(outputs, batch_targets)
+            seq_acc, pos_acc, agn_acc = compute_accuracies(outputs, batch_targets)
+            train_seq_acc += seq_acc
+            train_pos_acc += pos_acc
+            train_agn_acc += agn_acc
         
         train_loss /= len(train_loader)
-        train_acc /= len(train_loader)
+        train_seq_acc /= len(train_loader)
+        train_pos_acc /= len(train_loader)
+        train_agn_acc /= len(train_loader)
         
         # Validation
         model.eval()
         val_loss = 0
-        val_acc = 0
+        val_seq_acc = 0
+        val_pos_acc = 0
+        val_agn_acc = 0
         
         with torch.no_grad():
             for batch_embeddings, batch_targets in val_loader:
@@ -241,28 +284,63 @@ def train_probe(model, embeddings, target_sequences, wandb_name, num_epochs=100,
                 )
                 
                 val_loss += loss.item()
-                val_acc += compute_accuracy(outputs, batch_targets)
+                seq_acc, pos_acc, agn_acc = compute_accuracies(outputs, batch_targets)
+                val_seq_acc += seq_acc
+                val_pos_acc += pos_acc
+                val_agn_acc += agn_acc
         
         val_loss /= len(val_loader)
-        val_acc /= len(val_loader)
+        val_seq_acc /= len(val_loader)
+        val_pos_acc /= len(val_loader)
+        val_agn_acc /= len(val_loader)
+        
+        # Save model if validation loss improves
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            patience_counter = 0  # Reset patience counter
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'val_loss': val_loss,
+                'val_sequence_acc': val_seq_acc,
+                'val_position_acc': val_pos_acc,
+                'val_agnostic_acc': val_agn_acc
+            }, model_save_path)
+            wandb.save(model_save_path)  # Save to W&B as well
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                print(f'\nEarly stopping triggered after {epoch + 1} epochs!')
+                print(f'Best validation loss: {best_val_loss:.4f}')
+                break
         
         # Log metrics
         wandb.log({
             "epoch": epoch,
             "train_loss": train_loss,
-            "train_acc": train_acc,
+            "train_sequence_acc": train_seq_acc,
+            "train_position_acc": train_pos_acc,
+            "train_agnostic_acc": train_agn_acc,
             "val_loss": val_loss,
-            "val_acc": val_acc
+            "val_sequence_acc": val_seq_acc,
+            "val_position_acc": val_pos_acc,
+            "val_agnostic_acc": val_agn_acc
         })
         
-        if (epoch + 1) % 10 == 0:
-            print(f'Epoch [{epoch+1}/{num_epochs}]')
-            print(f'Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}')
-            print(f'Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}\n')
+        if (epoch) % 10 == 0:
+            print(f'Epoch [{epoch}/{num_epochs}]')
+            print(f'Train Loss: {train_loss:.4f}')
+            print(f'Train Metrics:')
+            print(f'  Sequence Acc: {train_seq_acc:.4f}')
+            print(f'  Position Acc: {train_pos_acc:.4f}')
+            print(f'  Agnostic Acc: {train_agn_acc:.4f}')
+            print(f'Val Loss: {val_loss:.4f}')
+            print(f'Val Metrics:')
+            print(f'  Sequence Acc: {val_seq_acc:.4f}')
+            print(f'  Position Acc: {val_pos_acc:.4f}')
+            print(f'  Agnostic Acc: {val_agn_acc:.4f}\n')
     
-    wandb.finish()
-    
-
 if __name__ == "__main__":
     seed = 42
     torch.manual_seed(seed)
@@ -275,11 +353,31 @@ if __name__ == "__main__":
     #     config=config, 
     #     capture_layer=0)
 
-    for capture_layer in [1, 2, 3]:
-        print(f"Capture layer {capture_layer}")
-        init_all_attr_from_last_atrr_binding_dataset(
-            config=config, 
-            capture_layer=capture_layer)
+    # for capture_layer in [1, 2, 3]:
+    #     print(f"Capture layer {capture_layer}")
+    #     init_all_attr_from_last_atrr_binding_dataset(
+    #         config=config, 
+    #         capture_layer=capture_layer)
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    for capture_layer in range(4):
+        save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
+
+        saved_data = torch.load(f'{save_path_dir}/embeddings_and_attributes.pt')
+        loaded_embeddings = saved_data['input_embeddings'].to(device)
+        loaded_targets = saved_data['target_attributes'].to(device)
+        unique_values, _ = torch.unique(loaded_targets, return_inverse=True)
+        continuous_targets = torch.searchsorted(unique_values, loaded_targets)
+
+        permutation_invariant_model = PermutationInvariantProbe(config.n_embd).to(device)
+        train_probe(
+            model=permutation_invariant_model, 
+            embeddings=loaded_embeddings, 
+            target_sequences=continuous_targets,
+            model_type="permutation_invariant",
+            capture_layer=capture_layer,
+            num_epochs=1)
 
     # save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
 
