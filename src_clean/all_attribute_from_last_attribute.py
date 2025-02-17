@@ -351,7 +351,7 @@ if __name__ == "__main__":
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    for capture_layer in range(4):
+    for capture_layer in [2,3]:
         save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
 
         saved_data = torch.load(f'{save_path_dir}/embeddings_and_attributes.pt')
