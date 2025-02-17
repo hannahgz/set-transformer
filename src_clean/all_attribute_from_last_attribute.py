@@ -97,54 +97,128 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
     return input_embeddings_tensor, target_attributes_tensor
 
 
-# input_embeddings = captured_embedding[:, 0:(config.input_size-1):2, :]
+import torch
+import torch.nn as nn
+from torch.utils.data import TensorDataset, DataLoader, random_split
+import wandb
+import numpy as np
 
-    #     input_start_index = 1
-    #     target_start_index = 0
+class SimpleProbe(nn.Module):
+    def __init__(self, embedding_dim, num_classes=12, sequence_length=3):
+        super().__init__()
+        self.linear = nn.Linear(embedding_dim, num_classes * sequence_length)
+        self.sequence_length = sequence_length
+        self.num_classes = num_classes
+    
+    def forward(self, x):
+        return self.linear(x).reshape(-1, self.sequence_length, self.num_classes)
 
-    #     # Get every other embedding in the input sequence starting from input_start_index, representing either all attribute or card embeddings
-    #     # input_embeddings.shape, torch.Size([512, 20, 64]), [batch size, sequence length, embedding size]
-    #     input_embeddings = captured_embedding[:, input_start_index:(
-    #         config.input_size-1):2, :]
-    #     # flattened_input_embeddings.shape, torch.Size([10240, 64]), [batch size * sequence length, embedding size]
-    #     flattened_input_embeddings = input_embeddings.reshape(-1, 64)
+def compute_accuracy(outputs, targets):
+    """Compute sequence-level accuracy (all positions must match)"""
+    predictions = outputs.argmax(dim=-1)
+    correct = (predictions == targets).all(dim=1).float().mean()
+    return correct.item()
 
-    #     # Get every other token in the input starting from index target_start_index, representing either all the card tokens or attribute tokens
-    #     # target_tokens.shape, torch.Size([512, 20])
-    #     target_tokens = batch[:, target_start_index:(config.input_size - 1):2]
-    #     # flattened_target_tokens.shape, torch.Size([10240])
-    #     flattened_target_tokens = target_tokens.reshape(-1)
-
-    #     # Append the flattened tensors to the respective lists
-    #     all_flattened_input_embeddings.append(flattened_input_embeddings)
-    #     all_flattened_target_tokens.append(flattened_target_tokens)
-
-    # combined_input_embeddings = torch.cat(
-    #     all_flattened_input_embeddings, dim=0)
-
-    # combined_target_tokens = torch.cat(all_flattened_target_tokens, dim=0)
-    # mapped_target_tokens, continuous_to_original = map_non_continuous_vals_to_continuous(
-    #     combined_target_tokens)
-
-    # # Create the directory structure if it doesn't exist
-    # base_dir = f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}"
-    # os.makedirs(base_dir, exist_ok=True)
-
-    # input_embeddings_path = f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/input_embeddings.pt"
-    # mapped_target_tokens_path = f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/continuous_target_tokens.pt"
-    # continuous_to_original_path = f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/continuous_to_original.pkl"
-
-    # # Save the combined_input_embeddings tensor
-    # torch.save(combined_input_embeddings, input_embeddings_path)
-
-    # # Save the mapped_target_attributes tensor
-    # torch.save(mapped_target_tokens, mapped_target_tokens_path)
-
-    # with open(continuous_to_original_path, "wb") as f:
-    #     pickle.dump(continuous_to_original, f)
-
-    # return combined_input_embeddings, mapped_target_tokens, continuous_to_original
-
+def train_probe(model, embeddings, target_sequences, num_epochs=100, batch_size=32, val_split=0.2):
+    """
+    Train probe with validation and W&B logging
+    
+    Args:
+        model: SimpleProbe model
+        embeddings: tensor of shape (num_samples, embedding_dim)
+        target_sequences: tensor of shape (num_samples, sequence_length)
+        num_epochs: number of training epochs
+        batch_size: batch size for training
+        val_split: fraction of data to use for validation
+    """
+    # Initialize W&B
+    wandb.init(
+        project="sequence-probe",
+        config={
+            "embedding_dim": embeddings.shape[1],
+            "sequence_length": model.sequence_length,
+            "num_classes": model.num_classes,
+            "batch_size": batch_size,
+            "val_split": val_split,
+            "num_epochs": num_epochs
+        }
+    )
+    
+    # Split data into train and validation
+    num_val = int(len(embeddings) * val_split)
+    num_train = len(embeddings) - num_val
+    
+    train_dataset, val_dataset = random_split(
+        TensorDataset(embeddings, target_sequences),
+        [num_train, num_val]
+    )
+    
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size)
+    
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    
+    for epoch in range(num_epochs):
+        # Training
+        model.train()
+        train_loss = 0
+        train_acc = 0
+        
+        for batch_embeddings, batch_targets in train_loader:
+            outputs = model(batch_embeddings)
+            
+            loss = criterion(
+                outputs.reshape(-1, model.num_classes),
+                batch_targets.reshape(-1)
+            )
+            
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            
+            train_loss += loss.item()
+            train_acc += compute_accuracy(outputs, batch_targets)
+        
+        train_loss /= len(train_loader)
+        train_acc /= len(train_loader)
+        
+        # Validation
+        model.eval()
+        val_loss = 0
+        val_acc = 0
+        
+        with torch.no_grad():
+            for batch_embeddings, batch_targets in val_loader:
+                outputs = model(batch_embeddings)
+                
+                loss = criterion(
+                    outputs.reshape(-1, model.num_classes),
+                    batch_targets.reshape(-1)
+                )
+                
+                val_loss += loss.item()
+                val_acc += compute_accuracy(outputs, batch_targets)
+        
+        val_loss /= len(val_loader)
+        val_acc /= len(val_loader)
+        
+        # Log metrics
+        wandb.log({
+            "epoch": epoch,
+            "train_loss": train_loss,
+            "train_acc": train_acc,
+            "val_loss": val_loss,
+            "val_acc": val_acc
+        })
+        
+        if (epoch + 1) % 10 == 0:
+            print(f'Epoch [{epoch+1}/{num_epochs}]')
+            print(f'Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}')
+            print(f'Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}\n')
+    
+    wandb.finish()
+    
 
 if __name__ == "__main__":
     seed = 42
@@ -154,6 +228,22 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
 
-    init_all_attr_from_last_atrr_binding_dataset(
-        config=config, 
-        capture_layer=0)
+    # init_all_attr_from_last_atrr_binding_dataset(
+    #     config=config, 
+    #     capture_layer=0)
+
+    saved_data = torch.load('embeddings_and_attributes.pt')
+    loaded_embeddings = saved_data['input_embeddings']
+    loaded_targets = saved_data['target_attributes']
+    
+    model = SimpleProbe(config.n_embd)
+    
+    # Train with validation and logging
+    train_probe(model, loaded_embeddings, loaded_targets)
+    
+    # # Test example
+    # with torch.no_grad():
+    #     test_embedding = torch.randn(1, config)
+    #     output = model(test_embedding)
+    #     predicted_sequence = output.argmax(dim=-1)
+    #     print(f"Predicted sequence: {predicted_sequence[0]}")
