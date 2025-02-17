@@ -114,46 +114,25 @@ class SimpleProbe(nn.Module):
     def forward(self, x):
         return self.linear(x).reshape(-1, self.sequence_length, self.num_classes)
     
-class PermutationInvariantProbe(nn.Module):
+class SortedProbe(nn.Module):
     def __init__(self, embedding_dim, num_classes=12, sequence_length=4):
         super().__init__()
         self.linear = nn.Linear(embedding_dim, num_classes * sequence_length)
         self.sequence_length = sequence_length
         self.num_classes = num_classes
-        
-        # Pre-compute all possible permutations
-        self.permutations = list(itertools.permutations(range(sequence_length)))
     
     def forward(self, x):
-        # x shape: (batch_size, embedding_dim)
-        # output shape: (batch_size, sequence_length, num_classes)
         return self.linear(x).reshape(-1, self.sequence_length, self.num_classes)
     
     def compute_loss(self, outputs, targets):
-        # outputs: (batch_size, sequence_length, num_classes)
-        # targets: (batch_size, sequence_length)
+        # Sort the target sequences - this gives us a consistent ordering
+        sorted_targets, _ = torch.sort(targets, dim=-1)
         
-        losses = []
-        batch_size = outputs.size(0)
-        
-        # For each possible permutation of the target sequence
-        for perm in self.permutations:
-            # Permute the target sequence
-            perm_targets = targets[:, perm]
-            # Compute cross entropy loss for this permutation
-            loss = nn.functional.cross_entropy(
-                outputs.reshape(-1, self.num_classes),
-                perm_targets.reshape(-1),
-                reduction='none'
-            ).view(batch_size, -1).sum(dim=1)
-            losses.append(loss)
-        
-        # Stack all permutation losses and take minimum for each batch item
-        # This means we consider the prediction correct if it matches ANY permutation
-        stacked_losses = torch.stack(losses, dim=0)
-        min_losses = stacked_losses.min(dim=0).values
-        
-        return min_losses.mean()
+        # Regular cross entropy on the sorted targets
+        return nn.functional.cross_entropy(
+            outputs.reshape(-1, self.num_classes),
+            sorted_targets.reshape(-1)
+        )
 
 # def compute_accuracy(outputs, targets):
 #     """Compute sequence-level accuracy (all positions must match)"""
@@ -247,10 +226,15 @@ def train_probe(model, embeddings, target_sequences, model_type, capture_layer, 
         for batch_embeddings, batch_targets in train_loader:
             outputs = model(batch_embeddings)
             
-            loss = criterion(
-                outputs.reshape(-1, model.num_classes),
-                batch_targets.reshape(-1)
-            )
+            if model_type == "simple":
+                loss = criterion(
+                    outputs.reshape(-1, model.num_classes),
+                    batch_targets.reshape(-1)
+                )
+            elif model_type == "sorted":
+                loss = model.compute_loss(outputs, batch_targets)
+            else:
+                raise ValueError(f"Invalid model type: {model_type}")
             
             optimizer.zero_grad()
             loss.backward()
@@ -370,14 +354,15 @@ if __name__ == "__main__":
         unique_values, _ = torch.unique(loaded_targets, return_inverse=True)
         continuous_targets = torch.searchsorted(unique_values, loaded_targets)
 
-        permutation_invariant_model = PermutationInvariantProbe(config.n_embd).to(device)
+        sorted_model = SortedProbe(config.n_embd).to(device)
         train_probe(
-            model=permutation_invariant_model, 
+            model=sorted_model, 
             embeddings=loaded_embeddings, 
             target_sequences=continuous_targets,
-            model_type="permutation_invariant",
+            model_type="sorted",
             capture_layer=capture_layer,
-            num_epochs=1)
+            num_epochs=1,
+            )
 
     # save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
 
