@@ -398,8 +398,8 @@ def predict_from_probe(config, capture_layer, batch_size=32):
             all_targets.append(batch_targets)
     
     # Concatenate all batches
-    all_predictions = torch.cat(all_predictions)
-    all_targets = torch.cat(all_targets)
+    # all_predictions = torch.cat(all_predictions)
+    # all_targets = torch.cat(all_targets)
     
     # Compute specialized accuracies
     accuracy_stats = compute_position_and_token_accuracies(all_predictions, all_targets)
@@ -428,12 +428,12 @@ def compute_position_and_token_accuracies(predictions, targets):
     device = predictions.device
     
     # Initialize position accuracies tensor
-    position_accuracies = torch.zeros(seq_length, device=device)
+    position_accuracies = np.zeros(seq_length, device=device)
     
     # Get unique tokens
-    unique_tokens = torch.unique(targets)
+    unique_tokens = np.unique(targets)
     token_stats = {
-        token.item(): {
+        token: {
             'correct': 0,
             'total': 0
         }
@@ -454,6 +454,15 @@ def compute_position_and_token_accuracies(predictions, targets):
             if target_token in pred_seq:
                 position_accuracies[target_pos] += 1
                 token_stats[target_token]['correct'] += 1
+
+        if i % 10000 == 0:
+            print(f"Current position_accuracies:")
+            for pos in position_accuracies:
+                print(f"Accuracy of pos {pos}: {position_accuracies[pos] / (i + 1)}")
+            
+            print(f"Current token_stats:")
+            for token, stats in token_stats.items():
+                print(f"Token {token}: {stats['correct']} / {stats['total']}")
     
     # Convert counts to accuracies
     for pos in position_accuracies:
