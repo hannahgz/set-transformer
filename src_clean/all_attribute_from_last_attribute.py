@@ -551,6 +551,85 @@ def analyze_probe_weights(probe_config, capture_layer):
         'reshaped_bias': reshaped_bias
     }
 
+
+def new_analyze_probe_weights(probe_config, capture_layer):
+    probe_model = load_linear_probe_(probe_config, capture_layer)
+
+    weights = probe_model.linear.weight.data  # Shape: (48, embedding_dim)
+    bias = probe_model.linear.bias.data      # Shape: (48,)
+
+
+    # Reshape weights to match the model's output structure
+    # Original output shape: (-1, 4, 12)
+    # So weights should be viewed as (4, 12, embedding_dim)
+    reshaped_weights = weights.view(4, 12, -1)
+    reshaped_bias = bias.view(4, 12)
+
+    # Analyze class-wise patterns
+    class_cosine_sim = torch.zeros((12, 12))
+    for i in range(12):
+        for j in range(12):
+            # Flatten weights for each class and compute correlation
+            class_i = reshaped_weights[:, i, :].flatten()
+            class_j = reshaped_weights[:, j, :].flatten()
+            cosine_sim = F.cosine_similarity(class_i, class_j, dim=0)
+            class_cosine_sim[i, j] = cosine_sim
+    
+    all_weight_cosine_sim = F.cosine_similarity(weights, weights, dim=1)
+    breakpoint()
+
+    return {
+        'class_cosine_sim': class_cosine_sim,
+        'all_weight_cosine_sim': all_weight_cosine_sim
+    }
+
+def plot_new_weight_analysis(analysis_results, tokenizer_path, save_path):
+    """
+    Create visualizations for the new weight analysis with cosine similarities
+    Args:
+        analysis_results: dictionary containing the new analysis results
+        tokenizer_path: path to the tokenizer
+        save_path: path to save the figure
+    """
+    plt.figure(figsize=(15, 6))
+    
+    # 1. Class-wise cosine similarity heatmap (reordered)
+    plt.subplot(1, 2, 1)
+    reordered_labels, reordered_correlations = reorder_results(
+        analysis_results['class_cosine_sim'], 
+        tokenizer_path
+    )
+    sns.heatmap(
+        reordered_correlations.numpy(),
+        cmap='RdBu', 
+        center=0,
+        xticklabels=reordered_labels,
+        yticklabels=reordered_labels
+    )
+    plt.title('Class-wise Cosine Similarities')
+    plt.xticks(rotation=45, ha='right')
+    plt.yticks(rotation=0)
+    
+    # 2. All weights cosine similarity heatmap
+    plt.subplot(1, 2, 2)
+    sns.heatmap(
+        analysis_results['all_weight_cosine_sim'].numpy(),
+        cmap='RdBu', 
+        center=0,
+        xticklabels=range(48),
+        yticklabels=range(48)
+    )
+    plt.title('All Weights Cosine Similarities')
+    
+    plt.tight_layout()
+    
+    # Save the figure
+    if not os.path.exists(os.path.dirname(save_path)):
+        os.makedirs(os.path.dirname(save_path))
+    plt.savefig(save_path, bbox_inches="tight")
+    return plt.gcf()
+
+
 def plot_weight_analysis(analysis_results, tokenizer_path):
     """
     Create visualizations for the weight analysis
@@ -664,21 +743,32 @@ if __name__ == "__main__":
 
     capture_layer = 2
     # analysis_results = analyze_probe_weights(probe_config=SortedProbeConfig(), capture_layer=capture_layer)
-    save_analysis_results = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/weight_analysis.pkl"
+    # save_analysis_results = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/weight_analysis.pkl"
+
+    # new_save_analysis_results = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/new_weight_analysis.pkl"
+    new_analysis_results = new_analyze_probe_weights(probe_config=SortedProbeConfig(), capture_layer=capture_layer)
+    plot_new_weight_analysis(new_analysis_results, config.tokenizer_path, f"COMPLETE_FIGS/all_attr_from_last_attr/layer{capture_layer}_weight_analysis_cosine_sim.png")
+
     # if not os.path.exists(os.path.dirname(save_analysis_results)):
     #     os.makedirs(os.path.dirname(save_analysis_results))
 
     # with open(save_analysis_results, 'wb') as f:
     #     pickle.dump(analysis_results, f)
 
-    with open(save_analysis_results, 'rb') as f:
-        analysis_results = pickle.load(f)
+    # with open(save_analysis_results, 'rb') as f:
+    #     analysis_results = pickle.load(f)
 
-    fig = plot_weight_analysis(analysis_results, tokenizer_path=config.tokenizer_path)
-    save_fig_path = f"COMPLETE_FIGS/all_attr_from_last_attr/layer{capture_layer}_weight_analysis_reordered.png"
-    if not os.path.exists(os.path.dirname(save_fig_path)):
-        os.makedirs(os.path.dirname(save_fig_path))
-    fig.savefig(save_fig_path, bbox_inches="tight")
+    # with open(save_analysis_results, 'wb') as f:
+    #     pickle.dump(analysis_results, f)
+
+    # with open(new_save_analysis_results, 'rb') as f:
+    #     new_analysis_results = pickle.load(f)
+
+    # fig = plot_weight_analysis(analysis_results, tokenizer_path=config.tokenizer_path)
+    # save_fig_path = f"COMPLETE_FIGS/all_attr_from_last_attr/layer{capture_layer}_weight_analysis_reordered.png"
+    # if not os.path.exists(os.path.dirname(save_fig_path)):
+    #     os.makedirs(os.path.dirname(save_fig_path))
+    # fig.savefig(save_fig_path, bbox_inches="tight")
     
     # results = predict_from_probe(SortedProbeConfig(), capture_layer=capture_layer, batch_size=32)
     # Save results stats as pkl
