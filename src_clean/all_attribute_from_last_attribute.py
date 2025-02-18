@@ -623,7 +623,7 @@ if __name__ == "__main__":
     capture_layer = 2
     analysis_results = analyze_probe_weights(probe_config=SortedProbeConfig(), capture_layer=capture_layer)
     fig = plot_weight_analysis(analysis_results)
-    save_fig_path = f"{PATH_PREFIX}/COMPLETE_FIGS/all_attr_from_last_attr/layer{capture_layer}_weight_analysis.png"
+    save_fig_path = f"COMPLETE_FIGS/all_attr_from_last_attr/layer{capture_layer}_weight_analysis.png"
     if not os.path.exists(os.path.dirname(save_fig_path)):
         os.makedirs(os.path.dirname(save_fig_path))
     fig.savefig(save_fig_path, bbox_inches="tight")
