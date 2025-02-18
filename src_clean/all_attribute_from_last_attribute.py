@@ -514,7 +514,7 @@ if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     capture_layer = 2
-    results = predict_from_probe(SortedProbeConfig(), capture_layer=capture_layer, batch_size=32)
+    # results = predict_from_probe(SortedProbeConfig(), capture_layer=capture_layer, batch_size=32)
     # Save results stats as pkl
     results_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/sorted_accuracy_stats.pkl"
     convert_results_stats_to_readable_form(results_path, config.tokenizer_path)
