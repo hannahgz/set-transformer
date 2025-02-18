@@ -394,12 +394,13 @@ def predict_from_probe(config, capture_layer, batch_size=32):
             predictions = outputs.argmax(dim=-1)  # Shape: (batch_size, 4)
             
             # Store predictions and targets
-            all_predictions.append(predictions)
-            all_targets.append(batch_targets)
+            all_predictions.extend(predictions.cpu().numpy())
+            all_targets.extend(batch_targets.cpu().numpy())
     
-    # Concatenate all batches
-    # all_predictions = torch.cat(all_predictions)
-    # all_targets = torch.cat(all_targets)
+    breakpoint()
+    # Convert to numpy arrays
+    all_predictions = np.array(all_predictions)
+    all_targets = np.array(all_targets)
     
     # Compute specialized accuracies
     accuracy_stats = compute_position_and_token_accuracies(all_predictions, all_targets)
