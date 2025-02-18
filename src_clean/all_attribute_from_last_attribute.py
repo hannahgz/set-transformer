@@ -424,6 +424,7 @@ def compute_position_and_token_accuracies(predictions, targets):
     
     # Get unique tokens
     unique_tokens = np.unique(targets)
+    print("unique_tokens", unique_tokens)
     token_stats = {
         token: {
             'correct': 0,
@@ -461,22 +462,15 @@ def compute_position_and_token_accuracies(predictions, targets):
     for pos in range(4):
         position_accuracies[pos] = position_accuracies[pos] / total_sequences
     
-    # Calculate token accuracies
-    token_accuracies = {
-        token: {
-            'correct': stats['correct'],
-            'total': stats['total'],
-            'accuracy': float(stats['correct'] / stats['total'])
-        }
-        for token, stats in token_stats.items()
-    }
+    for token in unique_tokens:
+        token_stats[token] = token_stats[token]['correct'] / token_stats[token]['total']
     
     print(f"Position accuracies: {position_accuracies}")
-    print(f"Token accuracies: {token_accuracies}")
+    print(f"Token accuracies: {token_stats}")
 
     return {
         'position_accuracies': position_accuracies,
-        'token_accuracies': token_accuracies
+        'token_accuracies': token_stats
     }
     
 if __name__ == "__main__":
