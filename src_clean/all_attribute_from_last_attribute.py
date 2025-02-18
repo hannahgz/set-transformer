@@ -579,7 +579,7 @@ def plot_weight_analysis(analysis_results):
     plt.subplot(2, 2, 3)
     weight_mags = analysis_results['weight_stats']['weight_magnitudes']
     for pos in range(4):
-        plt.hist(weight_mags[pos].flatten().numpy(), 
+        plt.hist(weight_mags[pos].flatten().cpu().numpy(), 
                 alpha=0.5, 
                 label=f'Position {pos}',
                 bins=30)
@@ -590,7 +590,7 @@ def plot_weight_analysis(analysis_results):
     
     # 4. L2 norms heatmap
     plt.subplot(2, 2, 4)
-    sns.heatmap(analysis_results['weight_stats']['l2_norm_per_position'].numpy(),
+    sns.heatmap(analysis_results['weight_stats']['l2_norm_per_position'].cpu().numpy(),
                 cmap='viridis',
                 xticklabels=range(12),
                 yticklabels=range(4))
