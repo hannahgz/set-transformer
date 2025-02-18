@@ -423,8 +423,9 @@ def compute_position_and_token_accuracies(predictions, targets):
     position_accuracies = [0, 0, 0, 0]
     
     # Get unique tokens
-    unique_tokens = np.unique(targets)
+    unique_tokens = [int(x) for x in np.unique(targets)]
     print("unique_tokens", unique_tokens)
+    breakpoint()
     token_stats = {
         token: {
             'correct': 0,
