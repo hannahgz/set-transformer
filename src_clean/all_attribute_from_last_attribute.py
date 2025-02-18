@@ -412,23 +412,13 @@ def predict_from_probe(config, capture_layer, batch_size=32):
 
 
 def compute_position_and_token_accuracies(predictions, targets):
-    """
-    Compute position-wise and token-wise accuracies using PyTorch tensors.
-    
-    Args:
-        predictions: tensor of shape (batch_size, 4)
-        targets: tensor of shape (batch_size, 4)
-    
-    Returns:
-        dict: Dictionary containing position and token accuracies
-    """
     print("Computing accuracies...")
-    total_sequences, seq_length = predictions.shape
+    total_sequences = len(predictions)
+    seq_length = len(predictions[0])
     print(f"Processing {total_sequences} total sequences with length {seq_length}")
-    device = predictions.device
     
     # Initialize position accuracies tensor
-    position_accuracies = np.zeros(seq_length, device=device)
+    position_accuracies = np.zeros(seq_length)
     
     # Get unique tokens
     unique_tokens = np.unique(targets)
