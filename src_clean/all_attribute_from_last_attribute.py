@@ -569,11 +569,17 @@ def plot_weight_analysis(analysis_results, tokenizer_path):
     plt.title('Position-wise Weight Correlations')
     
     # 2. Class correlations heatmap
+    reordered_labels, reordered_correlations = reorder_results(analysis_results['class_correlations'], tokenizer_path)
     plt.subplot(2, 2, 2)
-    sns.heatmap(analysis_results['class_correlations'].numpy(),
+    sns.heatmap(reordered_correlations.numpy(),
                 cmap='RdBu', center=0,
-                xticklabels=tokenizer.decode([ 1,  3,  5,  6,  8,  9, 11, 15, 17, 18, 19, 20]),
-                yticklabels=tokenizer.decode([ 1,  3,  5,  6,  8,  9, 11, 15, 17, 18, 19, 20]))
+                xticklabels=reordered_labels,
+                yticklabels=reordered_labels)
+    
+    # sns.heatmap(analysis_results['class_correlations'].numpy(),
+    #             cmap='RdBu', center=0,
+    #             xticklabels=tokenizer.decode([ 1,  3,  5,  6,  8,  9, 11, 15, 17, 18, 19, 20]),
+    #             yticklabels=tokenizer.decode([ 1,  3,  5,  6,  8,  9, 11, 15, 17, 18, 19, 20]))
     plt.title('Class-wise Weight Correlations')
     
     # 3. Weight magnitude distribution per position
@@ -599,6 +605,41 @@ def plot_weight_analysis(analysis_results, tokenizer_path):
     
     plt.tight_layout()
     return plt.gcf()
+
+
+def reorder_results(to_reorder, tokenizer_path):
+    shapes = ["oval", "squiggle", "diamond"]
+    colors = ["green", "blue", "pink"]
+    numbers = ["one", "two", "three"]
+    shadings = ["solid", "striped", "open"]
+    tokenizer = load_tokenizer(tokenizer_path)
+    # Token IDs to decode
+    token_ids = [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]
+    
+    # First, get the decoded labels
+    decoded_labels = tokenizer.decode(token_ids)
+    
+    # Create the desired order
+    desired_order = shapes + colors + numbers + shadings
+    
+    # Create mapping from current positions to desired positions
+    current_to_desired = {label: i for i, label in enumerate(desired_order)}
+    current_positions = {label: i for i, label in enumerate(decoded_labels)}
+    
+    # Create reordering indices
+    reorder_indices = []
+    for label in desired_order:
+        if label in current_positions:
+            reorder_indices.append(current_positions[label])
+            
+    # Convert to tensor for indexing
+    reorder_indices = torch.tensor(reorder_indices)
+    
+    # Reorder the correlation matrix
+    reordered = to_reorder[reorder_indices][:, reorder_indices]
+    ordered_labels = desired_order
+
+    return ordered_labels, reordered
     
     
 if __name__ == "__main__":
@@ -622,19 +663,19 @@ if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     capture_layer = 2
-    analysis_results = analyze_probe_weights(probe_config=SortedProbeConfig(), capture_layer=capture_layer)
+    # analysis_results = analyze_probe_weights(probe_config=SortedProbeConfig(), capture_layer=capture_layer)
     save_analysis_results = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/weight_analysis.pkl"
-    if not os.path.exists(os.path.dirname(save_analysis_results)):
-        os.makedirs(os.path.dirname(save_analysis_results))
+    # if not os.path.exists(os.path.dirname(save_analysis_results)):
+    #     os.makedirs(os.path.dirname(save_analysis_results))
 
-    with open(save_analysis_results, 'wb') as f:
-        pickle.dump(analysis_results, f)
+    # with open(save_analysis_results, 'wb') as f:
+    #     pickle.dump(analysis_results, f)
 
-    # with open(save_analysis_results, 'rb') as f:
-    #     analysis_results = pickle.load
+    with open(save_analysis_results, 'rb') as f:
+        analysis_results = pickle.load
 
     fig = plot_weight_analysis(analysis_results, tokenizer_path=config.tokenizer_path)
-    save_fig_path = f"COMPLETE_FIGS/all_attr_from_last_attr/layer{capture_layer}_weight_analysis.png"
+    save_fig_path = f"COMPLETE_FIGS/all_attr_from_last_attr/layer{capture_layer}_weight_analysis_reordered.png"
     if not os.path.exists(os.path.dirname(save_fig_path)):
         os.makedirs(os.path.dirname(save_fig_path))
     fig.savefig(save_fig_path, bbox_inches="tight")
