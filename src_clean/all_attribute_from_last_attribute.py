@@ -627,7 +627,13 @@ if __name__ == "__main__":
     if not os.path.exists(os.path.dirname(save_analysis_results)):
         os.makedirs(os.path.dirname(save_analysis_results))
 
-    fig = plot_weight_analysis(analysis_results)
+    with open(save_analysis_results, 'wb') as f:
+        pickle.dump(analysis_results, f)
+
+    # with open(save_analysis_results, 'rb') as f:
+    #     analysis_results = pickle.load
+
+    fig = plot_weight_analysis(analysis_results, tokenizer_path=config.tokenizer_path)
     save_fig_path = f"COMPLETE_FIGS/all_attr_from_last_attr/layer{capture_layer}_weight_analysis.png"
     if not os.path.exists(os.path.dirname(save_fig_path)):
         os.makedirs(os.path.dirname(save_fig_path))
