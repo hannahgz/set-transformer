@@ -424,8 +424,7 @@ def compute_position_and_token_accuracies(predictions, targets):
     
     # Get unique tokens
     unique_tokens = [int(x) for x in np.unique(targets)]
-    print("unique_tokens", unique_tokens)
-    breakpoint()
+
     token_stats = {
         token: {
             'correct': 0,
@@ -473,6 +472,26 @@ def compute_position_and_token_accuracies(predictions, targets):
         'position_accuracies': position_accuracies,
         'token_accuracies': token_stats
     }
+
+def convert_results_stats_to_readable_form(results_path, tokenizer_path):
+    tokenizer = load_tokenizer(tokenizer_path)
+    breakpoint()
+    # Load results stats from pkl
+    with open(results_path, 'rb') as f:
+        results_stats = pickle.load(f)
+    mapping_values = [ 1,  3,  5,  6,  8,  9, 11, 15, 17, 18, 19, 20]
+
+    token_accuracies = results_stats['token_accuracies']
+
+    mapped_token_accuracies = {}
+
+    for token_id, token_acc in token_accuracies.items():
+        token = mapping_values[token_id]
+        mapped_token_accuracies[tokenizer.id_to_token[token]] = token_acc
+
+    print(mapped_token_accuracies)
+    return mapped_token_accuracies
+    
     
 if __name__ == "__main__":
     seed = 42
@@ -498,10 +517,13 @@ if __name__ == "__main__":
     results = predict_from_probe(SortedProbeConfig(), capture_layer=capture_layer, batch_size=32)
     # Save results stats as pkl
     results_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/sorted_accuracy_stats.pkl"
-    if not os.path.exists(os.path.dirname(results_path)):
-        os.makedirs(os.path.dirname(results_path))
-    with open(results_path, 'wb') as f:
-        pickle.dump(results["stats"], f)
+    convert_results_stats_to_readable_form(results_path, config.tokenizer_path)
+    # if not os.path.exists(os.path.dirname(results_path)):
+    #     os.makedirs(os.path.dirname(results_path))
+    # with open(results_path, 'wb') as f:
+    #     pickle.dump(results["stats"], f)
+
+    
 
     # for capture_layer in [2,3]:
     #     save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
