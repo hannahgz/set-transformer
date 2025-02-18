@@ -494,7 +494,15 @@ if __name__ == "__main__":
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    predict_from_probe(SortedProbeConfig(), capture_layer=2, batch_size=32)
+    capture_layer = 2
+    results = predict_from_probe(SortedProbeConfig(), capture_layer=capture_layer, batch_size=32)
+    # Save results stats as pkl
+    results_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/sorted_accuracy_stats.pkl"
+    if not os.path.exists(os.path.dirname(results_path)):
+        os.makedirs(os.path.dirname(results_path))
+    with open(results_path, 'wb') as f:
+        pickle.dump(results["stats"], f)
+
     # for capture_layer in [2,3]:
     #     save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
 
