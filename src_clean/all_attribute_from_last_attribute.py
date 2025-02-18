@@ -376,10 +376,13 @@ def predict_from_probe(config, capture_layer, batch_size=32):
     saved_data = torch.load(f'{dataset_path}/embeddings_and_attributes.pt')
     
     embeddings = saved_data['input_embeddings'].to(device)
-    target_attributes = saved_data['target_attributes'].to(device)
+
+    loaded_targets = saved_data['target_attributes'].to(device)
+    unique_values, _ = torch.unique(loaded_targets, return_inverse=True)
+    continuous_targets = torch.searchsorted(unique_values, loaded_targets)
     
     # Create DataLoader for batch processing
-    dataset = TensorDataset(embeddings, target_attributes)
+    dataset = TensorDataset(embeddings, continuous_targets)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
     
     all_predictions = []
@@ -447,8 +450,7 @@ def compute_position_and_token_accuracies(predictions, targets):
                 position_accuracies[target_pos] += 1
                 token_stats[target_token]['correct'] += 1
 
-        # if (i + 1) % 10000 == 0:
-        if (i + 1) % 10 == 0:
+        if (i + 1) % 10000 == 0:
             print(f"Current position_accuracies:")
             print(f"Total sequences: {i + 1}")
             for pos in range(4):
