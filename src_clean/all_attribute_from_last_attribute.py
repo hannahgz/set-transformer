@@ -399,9 +399,6 @@ def predict_from_probe(config, capture_layer, batch_size=32):
             # Store predictions and targets
             all_predictions.extend(predictions.cpu().numpy())
             all_targets.extend(batch_targets.cpu().numpy())
-
-            if len(all_predictions) > 100:
-                break
     
     # Convert to numpy arrays
     all_predictions = np.array(all_predictions)
