@@ -330,6 +330,289 @@ def train_probe(model, embeddings, target_sequences, model_type, capture_layer, 
             print(f'  Position Acc: {val_pos_acc:.4f}')
             print(f'  Agnostic Acc: {val_agn_acc:.4f}\n')
     wandb.finish()
+
+
+@dataclass
+class SortedProbeConfig:
+    model_type: str = "sorted"
+    input_dim: int = 64
+    num_classes: int = 12
+    sequence_length: int = 4
+
+def load_linear_probe_(config, capture_layer):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    probe = SortedProbe(
+        embedding_dim=config.input_dim, 
+        num_classes=config.num_classes, 
+        sequence_length=config.sequence_length).to(device)
+    
+    probe_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/{model_type}_model.pt"
+
+    probe.load_state_dict(torch.load(probe_path)["model_state_dict"])
+    probe.eval()
+    return probe
+
+def predict_from_probe(config, capture_layer, batch_size=32):
+    """
+    Analyze predictions from a trained probe model using PyTorch tensors.
+    
+    Args:
+        config: Configuration object with model parameters
+        capture_layer: Layer number to analyze
+        batch_size: Batch size for processing predictions
+    
+    Returns:
+        dict: Dictionary containing prediction results and statistics
+    """
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    # Load the probe model
+    probe = load_linear_probe_(config, capture_layer)
+    probe.eval()
+    
+    # Load the dataset
+    dataset_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
+    saved_data = torch.load(f'{dataset_path}/embeddings_and_attributes.pt')
+    
+    embeddings = saved_data['input_embeddings'].to(device)
+    target_attributes = saved_data['target_attributes'].to(device)
+    
+    # Create DataLoader for batch processing
+    dataset = TensorDataset(embeddings, target_attributes)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
+    
+    all_predictions = []
+    all_targets = []
+    
+    # Process batches
+    with torch.no_grad():
+        for batch_embeddings, batch_targets in dataloader:
+            print(f"Batch {len(all_predictions) + 1}/{len(dataloader)}")
+            # Get model predictions
+            outputs = probe(batch_embeddings)
+            predictions = outputs.argmax(dim=-1)
+            
+            # Store predictions and targets
+            all_predictions.append(predictions)
+            all_targets.append(batch_targets)
+    
+    # Concatenate all batches
+    all_predictions = torch.cat(all_predictions)
+    all_targets = torch.cat(all_targets)
+    
+    # Compute specialized accuracies
+    accuracy_stats = compute_position_and_token_accuracies(all_predictions, all_targets)
+
+    breakpoint()
+    
+    return {
+        'predictions': all_predictions,
+        'target_attributes': all_targets,
+        'stats': accuracy_stats
+    }
+
+
+def compute_position_and_token_accuracies(predictions, targets):
+    """
+    Compute position-wise and token-wise accuracies using PyTorch tensors.
+    
+    Args:
+        predictions: tensor of shape (batch_size, sequence_length)
+        targets: tensor of shape (batch_size, sequence_length)
+    
+    Returns:
+        dict: Dictionary containing position and token accuracies
+    """
+    print("Computing accuracies...")
+    batch_size, seq_length = predictions.shape
+    device = predictions.device
+    
+    # Initialize position accuracies tensor
+    position_accuracies = torch.zeros(seq_length, device=device)
+    
+    # Get unique tokens
+    unique_tokens = torch.unique(targets)
+    token_stats = {
+        token.item(): {
+            'correct': 0,
+            'total': 0
+        }
+        for token in unique_tokens
+    }
+
+    # Process each sequence using tensor operations
+    for i in range(batch_size):
+        print(f"Sequence {i + 1}/{batch_size}")
+        pred_seq = predictions[i]
+        target_seq = targets[i]
+        
+        # For each target token, check if it appears anywhere in prediction
+        # We can do this efficiently using broadcasting
+        matches = (pred_seq.unsqueeze(-1) == target_seq.unsqueeze(0))  # shape: (seq_length, seq_length)
+        any_match = matches.any(dim=0)  # shape: (seq_length,)
+        position_accuracies += any_match.float()
+        
+        # Update token statistics
+        for token in unique_tokens:
+            token_mask = (target_seq == token)
+            token_count = token_mask.sum().item()
+            token_stats[token.item()]['total'] += token_count
+            
+            if token_count > 0:
+                correct_count = (any_match & token_mask).sum().item()
+                token_stats[token.item()]['correct'] += correct_count
+    
+    # Convert counts to accuracies
+    position_accuracies = position_accuracies / batch_size
+    
+    # Calculate token accuracies
+    token_accuracies = {
+        token: {
+            'correct': stats['correct'],
+            'total': stats['total'],
+            'accuracy': float(stats['correct'] / stats['total'])
+        }
+        for token, stats in token_stats.items()
+    }
+    
+    breakpoint()
+
+    return {
+        'position_accuracies': {pos: acc.item() for pos, acc in enumerate(position_accuracies)},
+        'token_accuracies': token_accuracies
+    }
+
+# def compute_position_and_token_accuracies(predictions, targets):
+#     """
+#     Compute position-wise and token-wise accuracies.
+    
+#     For position accuracy:
+#     - For each prediction position, track what positions in the target sequence 
+#       the predicted token came from
+#     - A prediction is "correct" if it appears anywhere in the target sequence
+    
+#     For token accuracy:
+#     - For each unique token in targets, track how often it appears in predictions
+    
+#     Args:
+#         predictions: numpy array of shape (batch_size, sequence_length)
+#         targets: numpy array of shape (batch_size, sequence_length)
+    
+#     Returns:
+#         dict: Dictionary containing position and token accuracies
+#     """
+#     print("Computing accuracies...")
+#     batch_size, seq_length = predictions.shape
+    
+#     # Initialize accuracy count for each target position
+#     position_accuracies = {pos: 0 for pos in range(seq_length)}
+    
+#     # Initialize token tracking
+#     unique_tokens = np.unique(targets)
+#     token_stats = {
+#         token: {
+#             'correct': 0,
+#             'total': 0
+#         }
+#         for token in unique_tokens
+#     }
+
+#     # Process each sequence
+#     for i in range(batch_size):
+#         print(f"Sequence {i + 1}/{batch_size}")
+#         pred_seq = predictions[i]
+#         target_seq = targets[i]
+        
+#         # For each target position
+#         for target_pos, target_token in enumerate(target_seq):
+#             # If this target token appears anywhere in prediction,
+#             # increment the accuracy for this position
+#             token_stats[target_token]['total'] += 1
+
+#             if target_token in pred_seq:
+#                 position_accuracies[target_pos] += 1
+#                 token_stats[target_token]['correct'] += 1
+    
+#     # Convert counts to accuracies
+#     for pos in position_accuracies:
+#         position_accuracies[pos] = position_accuracies[pos] / batch_size
+    
+#     # Calculate token accuracies
+#     token_accuracies = {
+#         token: {
+#             'correct': stats['correct'],
+#             'total': stats['total'],
+#             'accuracy': float(stats['correct'] / stats['total'])
+#         }
+#         for token, stats in token_stats.items()
+#     }
+    
+#     return {
+#         'position_accuracies': position_accuracies,
+#         'token_accuracies': token_accuracies
+#     }
+
+# def predict_from_probe(config, capture_layer, batch_size=32):
+#     """
+#     Analyze predictions from a trained probe model.
+    
+#     Args:
+#         config: Configuration object with model parameters
+#         capture_layer: Layer number to analyze
+#         batch_size: Batch size for processing predictions
+    
+#     Returns:
+#         dict: Dictionary containing prediction results and statistics
+#     """
+#     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+#     # Load the probe model
+#     probe = load_linear_probe_(config, capture_layer)
+#     probe.eval()
+    
+#     # Load the dataset
+#     dataset_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
+#     saved_data = torch.load(f'{dataset_path}/embeddings_and_attributes.pt')
+    
+#     embeddings = saved_data['input_embeddings'].to(device)
+#     target_attributes = saved_data['target_attributes'].to(device)
+    
+#     # Create DataLoader for batch processing
+#     dataset = TensorDataset(embeddings, target_attributes)
+#     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
+    
+#     all_predictions = []
+#     all_targets = []
+    
+#     # Process batches
+#     with torch.no_grad():
+#         for batch_embeddings, batch_targets in dataloader:
+#             print(f"Batch {len(all_predictions) + 1}/{len(dataloader)}")
+#             # Get model predictions
+#             outputs = probe(batch_embeddings)
+#             predictions = outputs.argmax(dim=-1)
+            
+#             # Store predictions and targets
+#             all_predictions.extend(predictions.cpu().numpy())
+#             all_targets.extend(batch_targets.cpu().numpy())
+    
+#     # Convert to numpy arrays
+#     all_predictions = np.array(all_predictions)
+#     all_targets = np.array(all_targets)
+    
+#     # Compute specialized accuracies
+#     accuracy_stats = compute_position_and_token_accuracies(all_predictions, all_targets)
+    
+#     breakpoint()
+
+#     return {
+#         'predictions': all_predictions,
+#         'target_attributes': all_targets,
+#         'stats': accuracy_stats
+#     }
+
+
     
 if __name__ == "__main__":
     seed = 42
@@ -351,6 +634,7 @@ if __name__ == "__main__":
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
+    predict_from_probe(SortedProbeConfig(), capture_layer=2, batch_size=32)
     # for capture_layer in [2,3]:
     #     save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
 
@@ -370,23 +654,23 @@ if __name__ == "__main__":
     #         )
         
 
-    for capture_layer in [3]:
-        save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
+    # for capture_layer in [3]:
+    #     save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
 
-        saved_data = torch.load(f'{save_path_dir}/embeddings_and_attributes.pt')
-        loaded_embeddings = saved_data['input_embeddings'].to(device)
-        loaded_targets = saved_data['target_attributes'].to(device)
-        unique_values, _ = torch.unique(loaded_targets, return_inverse=True)
-        continuous_targets = torch.searchsorted(unique_values, loaded_targets)
+    #     saved_data = torch.load(f'{save_path_dir}/embeddings_and_attributes.pt')
+    #     loaded_embeddings = saved_data['input_embeddings'].to(device)
+    #     loaded_targets = saved_data['target_attributes'].to(device)
+    #     unique_values, _ = torch.unique(loaded_targets, return_inverse=True)
+    #     continuous_targets = torch.searchsorted(unique_values, loaded_targets)
 
-        simple_model = SimpleProbe(config.n_embd).to(device)
-        train_probe(
-            model=simple_model, 
-            embeddings=loaded_embeddings, 
-            target_sequences=continuous_targets,
-            model_type="simple",
-            capture_layer=capture_layer,
-            )
+    #     simple_model = SimpleProbe(config.n_embd).to(device)
+    #     train_probe(
+    #         model=simple_model, 
+    #         embeddings=loaded_embeddings, 
+    #         target_sequences=continuous_targets,
+    #         model_type="simple",
+    #         capture_layer=capture_layer,
+    #         )
 
     # save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
 
