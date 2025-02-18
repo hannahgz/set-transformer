@@ -397,7 +397,6 @@ def predict_from_probe(config, capture_layer, batch_size=32):
             all_predictions.extend(predictions.cpu().numpy())
             all_targets.extend(batch_targets.cpu().numpy())
     
-    breakpoint()
     # Convert to numpy arrays
     all_predictions = np.array(all_predictions)
     all_targets = np.array(all_targets)
@@ -414,8 +413,7 @@ def predict_from_probe(config, capture_layer, batch_size=32):
 
 def compute_position_and_token_accuracies(predictions, targets):
     print("Computing accuracies...")
-    total_sequences = len(predictions)
-    seq_length = len(predictions[0])
+    total_sequences, seq_length = predictions.shape
     print(f"Processing {total_sequences} total sequences with length {seq_length}")
     
     # Initialize position accuracies tensor
