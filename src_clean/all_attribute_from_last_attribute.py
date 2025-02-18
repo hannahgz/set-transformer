@@ -475,7 +475,7 @@ def compute_position_and_token_accuracies(predictions, targets):
 
 def convert_results_stats_to_readable_form(results_path, tokenizer_path):
     tokenizer = load_tokenizer(tokenizer_path)
-    breakpoint()
+
     # Load results stats from pkl
     with open(results_path, 'rb') as f:
         results_stats = pickle.load(f)
@@ -491,6 +491,69 @@ def convert_results_stats_to_readable_form(results_path, tokenizer_path):
 
     print(mapped_token_accuracies)
     return mapped_token_accuracies
+
+
+def analyze_probe_weights(probe_config, capture_layer):
+    """
+    Analyze the weights of a SortedProbe model
+    Args:
+        probe_model: trained SortedProbe model
+    """
+    # Get the weights from the linear layer
+
+    probe_model = load_linear_probe_(probe_config, capture_layer)
+
+    weights = probe_model.linear.weight.data  # Shape: (48, embedding_dim)
+    bias = probe_model.linear.bias.data      # Shape: (48,)
+
+    breakpoint()
+
+    # Reshape weights to match the model's output structure
+    # Original output shape: (-1, 4, 12)
+    # So weights should be viewed as (4, 12, embedding_dim)
+    reshaped_weights = weights.view(4, 12, -1)
+    reshaped_bias = bias.view(4, 12)
+    
+    breakpoint()
+
+    # Compute statistics for each position and class
+    weight_stats = {
+        'mean_per_position': torch.mean(reshaped_weights, dim=(1, 2)),  # Average across classes and embedding
+        'std_per_position': torch.std(reshaped_weights, dim=(1, 2)),   # Std across classes and embedding
+        'mean_per_class': torch.mean(reshaped_weights, dim=(0, 2)),    # Average across positions and embedding
+        'l2_norm_per_position': torch.norm(reshaped_weights, dim=2),    # L2 norm for each position-class pair
+        'weight_magnitudes': torch.abs(reshaped_weights),               # Absolute values of weights
+    }
+    breakpoint()
+    
+    # Analyze position-wise patterns
+    position_correlations = torch.zeros((4, 4))
+    for i in range(4):
+        for j in range(4):
+            # Flatten weights for each position and compute correlation
+            pos_i = reshaped_weights[i].flatten()
+            pos_j = reshaped_weights[j].flatten()
+            correlation = torch.corrcoef(torch.stack([pos_i, pos_j]))[0, 1]
+            position_correlations[i, j] = correlation
+            
+    # Analyze class-wise patterns
+    class_correlations = torch.zeros((12, 12))
+    for i in range(12):
+        for j in range(12):
+            # Flatten weights for each class and compute correlation
+            class_i = reshaped_weights[:, i, :].flatten()
+            class_j = reshaped_weights[:, j, :].flatten()
+            correlation = torch.corrcoef(torch.stack([class_i, class_j]))[0, 1]
+            class_correlations[i, j] = correlation
+    
+    breakpoint()
+    return {
+        'weight_stats': weight_stats,
+        'position_correlations': position_correlations,
+        'class_correlations': class_correlations,
+        'reshaped_weights': reshaped_weights,
+        'reshaped_bias': reshaped_bias
+    }
     
     
 if __name__ == "__main__":
@@ -514,10 +577,12 @@ if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     capture_layer = 2
+    analyze_probe_weights(probe_config=SortedProbeConfig(), capture_layer=capture_layer)
+    
     # results = predict_from_probe(SortedProbeConfig(), capture_layer=capture_layer, batch_size=32)
     # Save results stats as pkl
-    results_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/sorted_accuracy_stats.pkl"
-    convert_results_stats_to_readable_form(results_path, config.tokenizer_path)
+    # results_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/sorted_accuracy_stats.pkl"
+    # convert_results_stats_to_readable_form(results_path, config.tokenizer_path)
     # if not os.path.exists(os.path.dirname(results_path)):
     #     os.makedirs(os.path.dirname(results_path))
     # with open(results_path, 'wb') as f:
