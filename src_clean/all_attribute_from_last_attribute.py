@@ -390,13 +390,12 @@ def predict_from_probe(config, capture_layer, batch_size=32):
         for batch_embeddings, batch_targets in dataloader:
             print(f"Batch {len(all_predictions) + 1}/{len(dataloader)}")
             outputs = probe(batch_embeddings)  # Shape: (batch_size, sequence_length, num_classes)
-            outputs = outputs.reshape(-1, 4, 12)  # Ensure shape is (batch_size, 4, 12)
+            outputs = outputs.reshape(-1, config.sequence_length, config.num_classes)  # Ensure shape is (batch_size, 4, 12)
             predictions = outputs.argmax(dim=-1)  # Shape: (batch_size, 4)
-            breakpoint()
+            
             # Store predictions and targets
             all_predictions.append(predictions)
-            all_targets.append(batch_targets.reshape(-1, 4))
-            breakpoint()
+            all_targets.append(batch_targets)
     
     # Concatenate all batches
     all_predictions = torch.cat(all_predictions)
@@ -424,7 +423,8 @@ def compute_position_and_token_accuracies(predictions, targets):
         dict: Dictionary containing position and token accuracies
     """
     print("Computing accuracies...")
-    batch_size, seq_length = predictions.shape
+    total_sequences, seq_length = predictions.shape
+    print(f"Processing {total_sequences} total sequences with length {seq_length}")
     device = predictions.device
     
     # Initialize position accuracies tensor
@@ -441,28 +441,23 @@ def compute_position_and_token_accuracies(predictions, targets):
     }
 
     # Process each sequence using tensor operations
-    for i in range(batch_size):
-        print(f"Sequence {i + 1}/{batch_size}")
+    for i in range(total_sequences):
+        print(f"Sequence {i + 1}/{total_sequences}")
         pred_seq = predictions[i]
         target_seq = targets[i]
-        
-        # For each target token, check if it appears anywhere in prediction
-        matches = (pred_seq.unsqueeze(-1) == target_seq.unsqueeze(0))  # shape: (4, 4)
-        any_match = matches.any(dim=0)  # shape: (4,)
-        position_accuracies += any_match.float()
-        
-        # Update token statistics
-        for token in unique_tokens:
-            token_mask = (target_seq == token)
-            token_count = token_mask.sum().item()
-            token_stats[token.item()]['total'] += token_count
-            
-            if token_count > 0:
-                correct_count = (any_match & token_mask).sum().item()
-                token_stats[token.item()]['correct'] += correct_count
+
+        # For each target position
+        for target_pos, target_token in enumerate(target_seq):
+            # If this target token appears anywhere in prediction,
+            # increment the accuracy for this position
+            token_stats[target_token]['total'] += 1
+            if target_token in pred_seq:
+                position_accuracies[target_pos] += 1
+                token_stats[target_token]['correct'] += 1
     
     # Convert counts to accuracies
-    position_accuracies = position_accuracies / batch_size
+    for pos in position_accuracies:
+        position_accuracies[pos] = position_accuracies[pos] / total_sequences
     
     # Calculate token accuracies
     token_accuracies = {
@@ -474,8 +469,11 @@ def compute_position_and_token_accuracies(predictions, targets):
         for token, stats in token_stats.items()
     }
     
+    print(f"Position accuracies: {position_accuracies}")
+    print(f"Token accuracies: {token_accuracies}")
+
     return {
-        'position_accuracies': {pos: acc.item() for pos, acc in enumerate(position_accuracies)},
+        'position_accuracies': position_accuracies,
         'token_accuracies': token_accuracies
     }
     
