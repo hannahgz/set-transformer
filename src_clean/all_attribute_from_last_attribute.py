@@ -387,8 +387,8 @@ def predict_from_probe(config, capture_layer, batch_size=32):
     
     # Process batches
     with torch.no_grad():
-        for batch_embeddings, batch_targets in dataloader:
-            print(f"Batch {len(all_predictions) + 1}/{len(dataloader)}")
+        for index, (batch_embeddings, batch_targets) in enumerate(dataloader):
+            print(f"Batch {index + 1}/{len(dataloader)}")
             outputs = probe(batch_embeddings)  # Shape: (batch_size, sequence_length, num_classes)
             outputs = outputs.reshape(-1, config.sequence_length, config.num_classes)  # Ensure shape is (batch_size, 4, 12)
             predictions = outputs.argmax(dim=-1)  # Shape: (batch_size, 4)
@@ -396,6 +396,9 @@ def predict_from_probe(config, capture_layer, batch_size=32):
             # Store predictions and targets
             all_predictions.extend(predictions.cpu().numpy())
             all_targets.extend(batch_targets.cpu().numpy())
+
+            if len(all_predictions) > 100:
+                break
     
     # Convert to numpy arrays
     all_predictions = np.array(all_predictions)
@@ -417,7 +420,7 @@ def compute_position_and_token_accuracies(predictions, targets):
     print(f"Processing {total_sequences} total sequences with length {seq_length}")
     
     # Initialize position accuracies tensor
-    position_accuracies = np.zeros(seq_length)
+    position_accuracies = [0, 0, 0, 0]
     
     # Get unique tokens
     unique_tokens = np.unique(targets)
@@ -444,9 +447,11 @@ def compute_position_and_token_accuracies(predictions, targets):
                 position_accuracies[target_pos] += 1
                 token_stats[target_token]['correct'] += 1
 
-        if i % 10000 == 0:
+        # if (i + 1) % 10000 == 0:
+        if (i + 1) % 10 == 0:
             print(f"Current position_accuracies:")
-            for pos in position_accuracies:
+            print(f"Total sequences: {i + 1}")
+            for pos in range(4):
                 print(f"Accuracy of pos {pos}: {position_accuracies[pos] / (i + 1)}")
             
             print(f"Current token_stats:")
@@ -454,7 +459,7 @@ def compute_position_and_token_accuracies(predictions, targets):
                 print(f"Token {token}: {stats['correct']} / {stats['total']}")
     
     # Convert counts to accuracies
-    for pos in position_accuracies:
+    for pos in range(4):
         position_accuracies[pos] = position_accuracies[pos] / total_sequences
     
     # Calculate token accuracies
