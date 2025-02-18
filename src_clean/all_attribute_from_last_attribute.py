@@ -347,7 +347,7 @@ def load_linear_probe_(config, capture_layer):
         num_classes=config.num_classes, 
         sequence_length=config.sequence_length).to(device)
     
-    probe_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/{model_type}_model.pt"
+    probe_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/{config.model_type}_model.pt"
 
     probe.load_state_dict(torch.load(probe_path)["model_state_dict"])
     probe.eval()
@@ -405,7 +405,7 @@ def predict_from_probe(config, capture_layer, batch_size=32):
     accuracy_stats = compute_position_and_token_accuracies(all_predictions, all_targets)
 
     breakpoint()
-    
+
     return {
         'predictions': all_predictions,
         'target_attributes': all_targets,
