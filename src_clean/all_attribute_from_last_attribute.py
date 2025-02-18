@@ -506,7 +506,6 @@ def analyze_probe_weights(probe_config, capture_layer):
     weights = probe_model.linear.weight.data  # Shape: (48, embedding_dim)
     bias = probe_model.linear.bias.data      # Shape: (48,)
 
-    breakpoint()
 
     # Reshape weights to match the model's output structure
     # Original output shape: (-1, 4, 12)
@@ -514,7 +513,6 @@ def analyze_probe_weights(probe_config, capture_layer):
     reshaped_weights = weights.view(4, 12, -1)
     reshaped_bias = bias.view(4, 12)
     
-    breakpoint()
 
     # Compute statistics for each position and class
     weight_stats = {
@@ -524,7 +522,6 @@ def analyze_probe_weights(probe_config, capture_layer):
         'l2_norm_per_position': torch.norm(reshaped_weights, dim=2),    # L2 norm for each position-class pair
         'weight_magnitudes': torch.abs(reshaped_weights),               # Absolute values of weights
     }
-    breakpoint()
     
     # Analyze position-wise patterns
     position_correlations = torch.zeros((4, 4))
@@ -546,7 +543,6 @@ def analyze_probe_weights(probe_config, capture_layer):
             correlation = torch.corrcoef(torch.stack([class_i, class_j]))[0, 1]
             class_correlations[i, j] = correlation
     
-    breakpoint()
     return {
         'weight_stats': weight_stats,
         'position_correlations': position_correlations,
@@ -554,6 +550,54 @@ def analyze_probe_weights(probe_config, capture_layer):
         'reshaped_weights': reshaped_weights,
         'reshaped_bias': reshaped_bias
     }
+
+def plot_weight_analysis(analysis_results):
+    """
+    Create visualizations for the weight analysis
+    Args:
+        analysis_results: dictionary containing the analysis results
+    """
+    plt.figure(figsize=(15, 12))
+    
+    # 1. Position correlations heatmap
+    plt.subplot(2, 2, 1)
+    sns.heatmap(analysis_results['position_correlations'].numpy(),
+                cmap='RdBu', center=0,
+                xticklabels=range(4),
+                yticklabels=range(4))
+    plt.title('Position-wise Weight Correlations')
+    
+    # 2. Class correlations heatmap
+    plt.subplot(2, 2, 2)
+    sns.heatmap(analysis_results['class_correlations'].numpy(),
+                cmap='RdBu', center=0,
+                xticklabels=range(12),
+                yticklabels=range(12))
+    plt.title('Class-wise Weight Correlations')
+    
+    # 3. Weight magnitude distribution per position
+    plt.subplot(2, 2, 3)
+    weight_mags = analysis_results['weight_stats']['weight_magnitudes']
+    for pos in range(4):
+        plt.hist(weight_mags[pos].flatten().numpy(), 
+                alpha=0.5, 
+                label=f'Position {pos}',
+                bins=30)
+    plt.legend()
+    plt.title('Weight Magnitude Distribution by Position')
+    plt.xlabel('Magnitude')
+    plt.ylabel('Count')
+    
+    # 4. L2 norms heatmap
+    plt.subplot(2, 2, 4)
+    sns.heatmap(analysis_results['weight_stats']['l2_norm_per_position'].numpy(),
+                cmap='viridis',
+                xticklabels=range(12),
+                yticklabels=range(4))
+    plt.title('L2 Norm of Weights (Position vs Class)')
+    
+    plt.tight_layout()
+    return plt.gcf()
     
     
 if __name__ == "__main__":
@@ -577,7 +621,12 @@ if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     capture_layer = 2
-    analyze_probe_weights(probe_config=SortedProbeConfig(), capture_layer=capture_layer)
+    analysis_results = analyze_probe_weights(probe_config=SortedProbeConfig(), capture_layer=capture_layer)
+    fig = plot_weight_analysis(analysis_results)
+    save_fig_path = f"{PATH_PREFIX}/COMPLETE_FIGS/all_attr_from_last_attr/layer{capture_layer}_weight_analysis.png"
+    if not os.path.exists(os.path.dirname(save_fig_path)):
+        os.makedirs(os.path.dirname(save_fig_path))
+    fig.savefig(save_fig_path, bbox_inches="tight")
     
     # results = predict_from_probe(SortedProbeConfig(), capture_layer=capture_layer, batch_size=32)
     # Save results stats as pkl
