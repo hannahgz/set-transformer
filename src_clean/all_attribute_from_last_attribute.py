@@ -575,7 +575,12 @@ def new_analyze_probe_weights(probe_config, capture_layer):
             cosine_sim = F.cosine_similarity(class_i, class_j, dim=0)
             class_cosine_sim[i, j] = cosine_sim
     
-    all_weight_cosine_sim = F.cosine_similarity(weights, weights, dim=1)
+    # Compute pairwise cosine similarity for all weights (48, 48)
+    all_weight_cosine_sim = torch.zeros((48, 48))
+    for i in range(48):
+        for j in range(48):
+            cosine_sim = F.cosine_similarity(weights[i:i+1], weights[j:j+1], dim=1)
+            all_weight_cosine_sim[i, j] = cosine_sim
     breakpoint()
 
     return {
