@@ -551,12 +551,13 @@ def analyze_probe_weights(probe_config, capture_layer):
         'reshaped_bias': reshaped_bias
     }
 
-def plot_weight_analysis(analysis_results):
+def plot_weight_analysis(analysis_results, tokenizer_path):
     """
     Create visualizations for the weight analysis
     Args:
         analysis_results: dictionary containing the analysis results
     """
+    tokenizer = load_tokenizer(tokenizer_path)
     plt.figure(figsize=(15, 12))
     
     # 1. Position correlations heatmap
@@ -571,8 +572,8 @@ def plot_weight_analysis(analysis_results):
     plt.subplot(2, 2, 2)
     sns.heatmap(analysis_results['class_correlations'].numpy(),
                 cmap='RdBu', center=0,
-                xticklabels=range(12),
-                yticklabels=range(12))
+                xticklabels=tokenizer.decode([ 1,  3,  5,  6,  8,  9, 11, 15, 17, 18, 19, 20]),
+                yticklabels=tokenizer.decode([ 1,  3,  5,  6,  8,  9, 11, 15, 17, 18, 19, 20]))
     plt.title('Class-wise Weight Correlations')
     
     # 3. Weight magnitude distribution per position
@@ -592,7 +593,7 @@ def plot_weight_analysis(analysis_results):
     plt.subplot(2, 2, 4)
     sns.heatmap(analysis_results['weight_stats']['l2_norm_per_position'].cpu().numpy(),
                 cmap='viridis',
-                xticklabels=range(12),
+                xticklabels=tokenizer.decode([ 1,  3,  5,  6,  8,  9, 11, 15, 17, 18, 19, 20]),
                 yticklabels=range(4))
     plt.title('L2 Norm of Weights (Position vs Class)')
     
@@ -622,6 +623,10 @@ if __name__ == "__main__":
 
     capture_layer = 2
     analysis_results = analyze_probe_weights(probe_config=SortedProbeConfig(), capture_layer=capture_layer)
+    save_analysis_results = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/weight_analysis.pkl"
+    if not os.path.exists(os.path.dirname(save_analysis_results)):
+        os.makedirs(os.path.dirname(save_analysis_results))
+
     fig = plot_weight_analysis(analysis_results)
     save_fig_path = f"COMPLETE_FIGS/all_attr_from_last_attr/layer{capture_layer}_weight_analysis.png"
     if not os.path.exists(os.path.dirname(save_fig_path)):
