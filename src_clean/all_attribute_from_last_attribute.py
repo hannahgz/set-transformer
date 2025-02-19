@@ -948,13 +948,24 @@ if __name__ == "__main__":
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    capture_layer = 2
+    # capture_layer = 2
+    # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
+    #     print(f"Training binary probe for attribute {attribute_id}")
+    #     train_binary_probe(
+    #         capture_layer=capture_layer,
+    #         attribute_id=attribute_id,
+    #     )
+
     for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
-        print(f"Training binary probe for attribute {attribute_id}")
-        train_binary_probe(
-            capture_layer=capture_layer,
-            attribute_id=attribute_id,
-        )
+        for capture_layer in [0, 1, 3]:
+            print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
+            construct_binary_dataset(attribute_id, capture_layer)
+            init_binary_dataset(attribute_id, capture_layer)
+            train_binary_probe(
+                capture_layer=capture_layer,
+                attribute_id=attribute_id,
+            )
+
     # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
     #     print("Constructing binary dataset for attribute", attribute_id)
     #     # construct_binary_dataset(attribute_id, capture_layer)
