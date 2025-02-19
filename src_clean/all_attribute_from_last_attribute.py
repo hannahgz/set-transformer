@@ -97,6 +97,26 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
     return input_embeddings_tensor, target_attributes_tensor
 
 
+def construct_binary_dataset(attribute_id, capture_layer):
+    load_existing_dataset_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/embeddings_and_attributes.pt"
+    saved_data = torch.load(load_existing_dataset_path)
+
+    input_embeddings = saved_data['input_embeddings']
+    target_attributes = saved_data['target_attributes']
+
+    binary_targets = []
+    for sample in range(len(target_attributes)):
+        if attribute_id in target_attributes[sample]:
+            binary_targets.append(1)
+        else:
+            binary_targets.append(0)
+        breakpoint()
+
+    torch.save({
+        'input_embeddings': input_embeddings,
+        'binary_targets': torch.tensor(binary_targets)
+    }, f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/binary_dataset_{attribute_id}.pt")
+
 import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader, random_split
@@ -133,6 +153,27 @@ class SortedProbe(nn.Module):
             outputs.reshape(-1, self.num_classes),
             sorted_targets.reshape(-1)
         )
+
+class BinaryProbe(nn.Module):
+    def __init__(self, embedding_dim=64):
+        super().__init__()
+        self.linear = nn.Linear(embedding_dim, 1)
+        self.sigmoid = nn.Sigmoid()
+    
+    def forward(self, x):
+        # x shape: (batch_size, embedding_dim)
+        logits = self.linear(x)
+        probs = self.sigmoid(logits)
+        return probs
+    
+    def predict(self, x, threshold=0.5):
+        # Returns binary predictions (0 or 1)
+        probs = self.forward(x)
+        return (probs >= threshold).float()
+    
+    def compute_loss(self, outputs, targets):
+        # Binary cross entropy loss
+        return nn.functional.binary_cross_entropy(outputs, targets)
 
 # def compute_accuracy(outputs, targets):
 #     """Compute sequence-level accuracy (all positions must match)"""
@@ -747,12 +788,17 @@ if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     capture_layer = 2
+
+    for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
+        print("Constructing binary dataset for attribute", attribute_id)
+        construct_binary_dataset(attribute_id, capture_layer)
+
     # analysis_results = analyze_probe_weights(probe_config=SortedProbeConfig(), capture_layer=capture_layer)
     # save_analysis_results = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/weight_analysis.pkl"
 
     # new_save_analysis_results = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/new_weight_analysis.pkl"
-    new_analysis_results = new_analyze_probe_weights(probe_config=SortedProbeConfig(), capture_layer=capture_layer)
-    plot_new_weight_analysis(new_analysis_results, config.tokenizer_path, f"COMPLETE_FIGS/all_attr_from_last_attr/layer{capture_layer}_weight_analysis_cosine_sim.png")
+    # new_analysis_results = new_analyze_probe_weights(probe_config=SortedProbeConfig(), capture_layer=capture_layer)
+    # plot_new_weight_analysis(new_analysis_results, config.tokenizer_path, f"COMPLETE_FIGS/all_attr_from_last_attr/layer{capture_layer}_weight_analysis_cosine_sim.png")
 
     # if not os.path.exists(os.path.dirname(save_analysis_results)):
     #     os.makedirs(os.path.dirname(save_analysis_results))
