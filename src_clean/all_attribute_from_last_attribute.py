@@ -176,18 +176,7 @@ class BinaryProbe(nn.Module):
         # Binary cross entropy loss
         return nn.functional.binary_cross_entropy(outputs, targets)
 
-
-def train_binary_probe(
-    capture_layer,
-    attribute_id,
-    embedding_dim=64,
-    batch_size=32,
-    learning_rate=1e-3,
-    num_epochs=100,
-    patience=10,
-    val_split=0.2,
-    device='cuda' if torch.cuda.is_available() else 'cpu'
-):
+def init_binary_dataset(attribute_id, capture_layer, val_split=0.2, batch_size=32):
     # Load the binary dataset
     dataset_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/binary_dataset_{attribute_id}.pt"
     data = torch.load(dataset_path)
@@ -212,14 +201,42 @@ def train_binary_probe(
     # Create data loaders
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size)
-    
+
+    dataset_save_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/attr_{attribute_id}/binary_dataloader.pt"
+    if not os.path.exists(os.path.dirname(dataset_save_path)):
+        os.makedirs(os.path.dirname(dataset_save_path))
+    # Save val and train laoder
+    torch.save({
+        'train_loader': train_loader,
+        'val_loader': val_loader
+    }, dataset_save_path)
+
+def load_binary_dataloader(attribute_id, capture_layer):
+    dataset_save_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/attr_{attribute_id}/binary_dataloader.pt"
+    saved_data = torch.load(dataset_save_path)
+    return saved_data['train_loader'], saved_data['val_loader']
+
+def train_binary_probe(
+    capture_layer,
+    attribute_id,
+    embedding_dim=64,
+    batch_size=32,
+    learning_rate=1e-3,
+    num_epochs=100,
+    patience=10,
+    val_split=0.2,
+    device='cuda' if torch.cuda.is_available() else 'cpu'
+): 
+    # Load the binary dataset
+    train_loader, val_loader = load_binary_dataloader(attribute_id, capture_layer)
+
     # Initialize model, optimizer, and move to device
     model = BinaryProbe(embedding_dim=embedding_dim).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     
     # Initialize wandb
     wandb.init(
-        project="binary-probe-training",
+        project="binary-probe-training-all-attr",
         config={
             "learning_rate": learning_rate,
             "batch_size": batch_size,
@@ -227,7 +244,8 @@ def train_binary_probe(
             "capture_layer": capture_layer,
             "attribute_id": attribute_id,
             "val_split": val_split
-        }
+        },
+        name=f"attr_{attribute_id}_layer{capture_layer}"
     )
     
     # Early stopping variables
@@ -314,8 +332,7 @@ def train_binary_probe(
     # Save the best model
     model.load_state_dict(best_model_state)
     torch.save(model.state_dict(), 
-               f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/binary_probe_{attribute_id}.pt")
-    
+               f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/attr_{attribute_id}/binary_probe_model.pt")
     wandb.finish()
     return model
 
@@ -935,7 +952,12 @@ if __name__ == "__main__":
 
     for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
         print("Constructing binary dataset for attribute", attribute_id)
-        construct_binary_dataset(attribute_id, capture_layer)
+        # construct_binary_dataset(attribute_id, capture_layer)
+        init_binary_dataset(attribute_id, capture_layer)
+
+    # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
+    #     print("Constructing binary dataset for attribute", attribute_id)
+    #     construct_binary_dataset(attribute_id, capture_layer)
 
     # analysis_results = analyze_probe_weights(probe_config=SortedProbeConfig(), capture_layer=capture_layer)
     # save_analysis_results = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/weight_analysis.pkl"
