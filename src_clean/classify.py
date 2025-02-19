@@ -684,6 +684,65 @@ def plot_probe_weight_cosine_sim(model_config, probe_config, capture_layer):
     return plt.gcf()
 
 
+def plot_probe_weight_cosine_sim_mean_centroid(model_config, probe_config, capture_layer):
+    continuous_to_original = load_continuous_to_original_from_config(
+        probe_config, capture_layer=capture_layer)
+    tokenizer = load_tokenizer(model_config.tokenizer_path)
+
+    cards = []
+    for i in range(probe_config.output_dim):
+        cards.append(tokenizer.decode([continuous_to_original[i]])[0])
+    
+    # Load probe and get weights
+    probe = load_linear_probe_from_config(probe_config, capture_layer)
+    probe_weights = probe.fc.weight.data.detach()  # Shape: [5, 64]
+    
+    # Convert to numpy array if it's a torch tensor
+    if isinstance(probe_weights, torch.Tensor):
+        probe_weights = probe_weights.numpy()
+    
+    # Calculate the centroid (mean) of the weight vectors
+    centroid = np.mean(probe_weights, axis=0)
+    
+    # Normalize weights by subtracting the centroid
+    normalized_weights = probe_weights - centroid
+    
+    # Calculate cosine similarity matrix using normalized weights
+    cosine_sim_matrix = cosine_similarity(normalized_weights)
+    
+    # Get sorting indices for alphabetical order
+    sorted_indices = sorted(range(len(cards)), key=lambda k: cards[k])
+    
+    # Reorder the similarity matrix and cards
+    cosine_sim_matrix = cosine_sim_matrix[sorted_indices][:, sorted_indices]
+    sorted_cards = sorted(cards)
+    
+    # Create heatmap
+    plt.figure(figsize=(10, 8))
+    ax = sns.heatmap(
+        cosine_sim_matrix,
+        annot=True,  # Show values in cells
+        cmap='RdBu_r',  # Red-Blue diverging colormap
+        vmin=-1,  # Minimum value for cosine similarity
+        vmax=1,   # Maximum value for cosine similarity
+        center=0, # Center the colormap at 0
+        square=True,  # Make cells square
+        fmt='.2f',  # Format annotations to 2 decimal places,
+        xticklabels=sorted_cards,
+        yticklabels=sorted_cards,
+    )
+
+    ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
+    
+    # Customize the plot
+    plt.title(f'Layer {capture_layer}: Cosine Similarity Between Normalized Probe Weight Vectors')
+    plt.xlabel('Card for Neuron')
+    plt.ylabel('Card for Neuron')
+    
+    plt.tight_layout()
+    return plt.gcf()
+
+
 if __name__ == "__main__":
     seed = 42
     torch.manual_seed(seed)
@@ -712,12 +771,17 @@ if __name__ == "__main__":
     #     breakpoint()
 
     for capture_layer in range(4):
-        probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(
+        # probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(
+        #     model_config=config,
+        #     probe_config=LinearProbeBindingCardAttrConfig(), 
+        #     capture_layer=capture_layer)
+        plot_probe_weight_cosine_sim_mean_centroid = plot_probe_weight_cosine_sim_mean_centroid(
             model_config=config,
-            probe_config=LinearProbeBindingCardAttrConfig(), 
-            capture_layer=capture_layer)
-        
-        probe_weight_cosine_sim_fig.savefig(f"COMPLETE_FIGS/cosine_sim/sorted_probe_weight_cosine_sim_layer{capture_layer}.png", bbox_inches="tight")
+            probe_config=LinearProbeBindingCardAttrConfig(),
+            capture_layer=capture_layer
+        )
+        plot_probe_weight_cosine_sim_mean_centroid.savefig(f"COMPLETE_FIGS/cosine_sim/centroid_sorted_probe_weight_cosine_sim_layer{capture_layer}.png", bbox_inches="tight")
+        # probe_weight_cosine_sim_fig.savefig(f"COMPLETE_FIGS/cosine_sim/sorted_probe_weight_cosine_sim_layer{capture_layer}.png", bbox_inches="tight")
 
     # avg_similarity_matrix = linear_probe_vector_analysis_average(
     #     model_config=config, 
