@@ -106,12 +106,13 @@ def construct_binary_dataset(attribute_id, capture_layer):
 
     binary_targets = []
     for sample in range(len(target_attributes)):
+        if sample % 1000 == 0:
+            print(f"Processing sample {sample}/{len(target_attributes)}")
         if attribute_id in target_attributes[sample]:
             binary_targets.append(1)
         else:
             binary_targets.append(0)
-        breakpoint()
-
+        
     torch.save({
         'input_embeddings': input_embeddings,
         'binary_targets': torch.tensor(binary_targets).float()
