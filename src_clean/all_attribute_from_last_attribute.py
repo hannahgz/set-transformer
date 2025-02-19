@@ -114,7 +114,7 @@ def construct_binary_dataset(attribute_id, capture_layer):
 
     torch.save({
         'input_embeddings': input_embeddings,
-        'binary_targets': torch.tensor(binary_targets)
+        'binary_targets': torch.tensor(binary_targets).float()
     }, f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/binary_dataset_{attribute_id}.pt")
 
 import torch
@@ -174,6 +174,149 @@ class BinaryProbe(nn.Module):
     def compute_loss(self, outputs, targets):
         # Binary cross entropy loss
         return nn.functional.binary_cross_entropy(outputs, targets)
+
+
+def train_binary_probe(
+    capture_layer,
+    attribute_id,
+    embedding_dim=64,
+    batch_size=32,
+    learning_rate=1e-3,
+    num_epochs=100,
+    patience=10,
+    val_split=0.2,
+    device='cuda' if torch.cuda.is_available() else 'cpu'
+):
+    # Load the binary dataset
+    dataset_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/binary_dataset_{attribute_id}.pt"
+    data = torch.load(dataset_path)
+    
+    input_embeddings = data['input_embeddings']
+    binary_targets = data['binary_targets']
+    
+    # Create the full dataset
+    dataset = TensorDataset(input_embeddings, binary_targets)
+    
+    # Calculate split sizes
+    val_size = int(len(dataset) * val_split)
+    train_size = len(dataset) - val_size
+    
+    # Split the dataset
+    train_dataset, val_dataset = random_split(
+        dataset, 
+        [train_size, val_size],
+        generator=torch.Generator().manual_seed(42)
+    )
+    
+    # Create data loaders
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size)
+    
+    # Initialize model, optimizer, and move to device
+    model = BinaryProbe(embedding_dim=embedding_dim).to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    
+    # Initialize wandb
+    wandb.init(
+        project="binary-probe-training",
+        config={
+            "learning_rate": learning_rate,
+            "batch_size": batch_size,
+            "embedding_dim": embedding_dim,
+            "capture_layer": capture_layer,
+            "attribute_id": attribute_id,
+            "val_split": val_split
+        }
+    )
+    
+    # Early stopping variables
+    best_val_loss = float('inf')
+    patience_counter = 0
+    best_model_state = None
+    
+    # Training loop
+    for epoch in range(num_epochs):
+        # Training phase
+        model.train()
+        train_loss = 0
+        train_correct = 0
+        train_total = 0
+        
+        for batch_embeddings, batch_targets in train_loader:
+            batch_embeddings = batch_embeddings.to(device)
+            batch_targets = batch_targets.to(device)
+            
+            # Forward pass
+            outputs = model(batch_embeddings).squeeze()
+            loss = model.compute_loss(outputs, batch_targets)
+            
+            # Backward pass
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            
+            # Calculate accuracy
+            predictions = model.predict(batch_embeddings).squeeze()
+            train_correct += (predictions == batch_targets).sum().item()
+            train_total += batch_targets.size(0)
+            train_loss += loss.item()
+        
+        # Validation phase
+        model.eval()
+        val_loss = 0
+        val_correct = 0
+        val_total = 0
+        
+        with torch.no_grad():
+            for batch_embeddings, batch_targets in val_loader:
+                batch_embeddings = batch_embeddings.to(device)
+                batch_targets = batch_targets.to(device)
+                
+                outputs = model(batch_embeddings).squeeze()
+                loss = model.compute_loss(outputs, batch_targets)
+                
+                predictions = model.predict(batch_embeddings).squeeze()
+                val_correct += (predictions == batch_targets).sum().item()
+                val_total += batch_targets.size(0)
+                val_loss += loss.item()
+        
+        # Calculate average losses and accuracies
+        avg_train_loss = train_loss / len(train_loader)
+        avg_val_loss = val_loss / len(val_loader)
+        train_accuracy = train_correct / train_total
+        val_accuracy = val_correct / val_total
+        
+        # Log metrics
+        wandb.log({
+            "epoch": epoch,
+            "train_loss": avg_train_loss,
+            "val_loss": avg_val_loss,
+            "train_accuracy": train_accuracy,
+            "val_accuracy": val_accuracy
+        })
+        
+        print(f"Epoch {epoch+1}/{num_epochs}")
+        print(f"Train Loss: {avg_train_loss:.4f}, Train Accuracy: {train_accuracy:.4f}")
+        print(f"Val Loss: {avg_val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}")
+        
+        # Early stopping check
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            patience_counter = 0
+            best_model_state = model.state_dict()
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                print(f"Early stopping triggered after {epoch+1} epochs")
+                break
+    
+    # Save the best model
+    model.load_state_dict(best_model_state)
+    torch.save(model.state_dict(), 
+               f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/binary_probe_{attribute_id}.pt")
+    
+    wandb.finish()
+    return model
 
 # def compute_accuracy(outputs, targets):
 #     """Compute sequence-level accuracy (all positions must match)"""
