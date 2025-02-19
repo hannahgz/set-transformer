@@ -775,12 +775,12 @@ if __name__ == "__main__":
         #     model_config=config,
         #     probe_config=LinearProbeBindingCardAttrConfig(), 
         #     capture_layer=capture_layer)
-        plot_probe_weight_cosine_sim_mean_centroid = plot_probe_weight_cosine_sim_mean_centroid(
+        probe_weight_cosine_sim_mean_centroid = plot_probe_weight_cosine_sim_mean_centroid(
             model_config=config,
             probe_config=LinearProbeBindingCardAttrConfig(),
             capture_layer=capture_layer
         )
-        plot_probe_weight_cosine_sim_mean_centroid.savefig(f"COMPLETE_FIGS/cosine_sim/centroid_sorted_probe_weight_cosine_sim_layer{capture_layer}.png", bbox_inches="tight")
+        probe_weight_cosine_sim_mean_centroid.savefig(f"COMPLETE_FIGS/cosine_sim/centroid_sorted_probe_weight_cosine_sim_layer{capture_layer}.png", bbox_inches="tight")
         # probe_weight_cosine_sim_fig.savefig(f"COMPLETE_FIGS/cosine_sim/sorted_probe_weight_cosine_sim_layer{capture_layer}.png", bbox_inches="tight")
 
     # avg_similarity_matrix = linear_probe_vector_analysis_average(
