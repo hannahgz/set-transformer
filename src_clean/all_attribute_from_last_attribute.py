@@ -983,12 +983,14 @@ def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-pro
     num_runs = len(layer_runs)
     colors = plt.cm.rainbow(np.linspace(0, 1, num_runs))
     
+    tokenizer = load_tokenizer(tokenizer_path)
     for run, color in zip(layer_runs, colors):
         # Extract attribute ID from run name
         attr_match = re.search(r'attr_(\d+)_', run.name)
         attr_id = attr_match.group(1) if attr_match else 'unknown'
         
-        label = map_continuous_id_to_attr_name(int(attr_id), tokenizer_path)
+        # label = map_continuous_id_to_attr_name(int(attr_id), tokenizer_path)
+        label = tokenizer.id_to_token[int(attr_id)]
         # Convert run history to pandas DataFrame
         history = pd.DataFrame(run.history())
         
