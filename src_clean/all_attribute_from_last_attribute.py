@@ -958,15 +958,46 @@ def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-pro
     
     # Filter runs for the specified layer
     # The pattern now looks for layer followed by digits at the end of the name
+    # layer_runs = []
+    # for run in runs:
+    #     match = re.search(r'layer(\d+)$', run.name)
+    #     if match and int(match.group(1)) == target_layer:
+    #         layer_runs.append(run)
+    
+    # if not layer_runs:
+    #     print(f"No runs found for layer {target_layer}")
+    #     return
+
+    # Define the desired attribute order
+    shapes = ["oval", "squiggle", "diamond"]
+    colors = ["green", "blue", "pink"]
+    numbers = ["one", "two", "three"]
+    shadings = ["solid", "striped", "open"]
+    desired_order = shapes + colors + numbers + shadings
+    
+    # Filter runs for the specified layer and create a mapping for sorting
     layer_runs = []
+    run_order_mapping = {}
+    tokenizer = load_tokenizer(tokenizer_path)
+    
     for run in runs:
         match = re.search(r'layer(\d+)$', run.name)
         if match and int(match.group(1)) == target_layer:
-            layer_runs.append(run)
+            # Extract attribute ID from run name
+            attr_match = re.search(r'attr_(\d+)_', run.name)
+            if attr_match:
+                attr_id = int(attr_match.group(1))
+                attr_name = tokenizer.id_to_token[attr_id]
+                # Get the position in the desired order
+                try:
+                    order_index = desired_order.index(attr_name)
+                    run_order_mapping[run] = order_index
+                    layer_runs.append(run)
+                except ValueError:
+                    continue
     
-    if not layer_runs:
-        print(f"No runs found for layer {target_layer}")
-        return
+    # Sort the layer runs based on the desired order
+    layer_runs.sort(key=lambda x: run_order_mapping[x])
     
     # Rest of the plotting code remains the same...
     sns.set_style("darkgrid")
