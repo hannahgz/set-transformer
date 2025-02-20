@@ -991,6 +991,7 @@ def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-pro
         label = map_continuous_id_to_attr_name(int(attr_id), tokenizer_path)
         # Convert run history to pandas DataFrame
         history = pd.DataFrame(run.history())
+        breakpoint()
         
         # Plot training loss
         ax1[0].plot(history['step'], history['train_loss'], 
