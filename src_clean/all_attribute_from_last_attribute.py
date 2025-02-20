@@ -1047,11 +1047,11 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
-    plot_metrics_by_layer(
-        target_layer=2,
-        tokenizer_path=config.tokenizer_path,
-        entity="hazhou",
-    )
+    # plot_metrics_by_layer(
+    #     target_layer=2,
+    #     tokenizer_path=config.tokenizer_path,
+    #     entity="hazhou",
+    # )
     # capture_layer = 0
     # init_all_attr_from_last_atrr_binding_dataset(
     #     config=config, 
