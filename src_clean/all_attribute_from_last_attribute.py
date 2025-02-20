@@ -941,7 +941,7 @@ import seaborn as sns
 import re
 import numpy as np
 
-def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-probe-training-all-attr", entity="your-wandb-username"):
+def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-probe-training-all-attr", entity="hazhou-harvard"):
     """
     Create two separate plots: one for losses and one for accuracies, for runs from a specific layer.
     
@@ -983,7 +983,6 @@ def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-pro
     num_runs = len(layer_runs)
     colors = plt.cm.rainbow(np.linspace(0, 1, num_runs))
     
-    tokenizer = load_tokenizer(tokenizer_path)
     for run, color in zip(layer_runs, colors):
         # Extract attribute ID from run name
         attr_match = re.search(r'attr_(\d+)_', run.name)
@@ -1050,7 +1049,6 @@ if __name__ == "__main__":
     plot_metrics_by_layer(
         target_layer=1,
         tokenizer_path=config.tokenizer_path,
-        entity="hazhou",
     )
     # capture_layer = 0
     # init_all_attr_from_last_atrr_binding_dataset(
