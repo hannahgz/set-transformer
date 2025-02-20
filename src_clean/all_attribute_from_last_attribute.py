@@ -927,6 +927,118 @@ def reorder_results(to_reorder, tokenizer_path):
 
     return ordered_labels, reordered
     
+def map_continuous_id_to_attr_name(continuous_id, tokenizer_path):
+    tokenizer = load_tokenizer(tokenizer_path)
+    original = [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]
+    target_value = original[continuous_id]
+    return tokenizer.id_to_token[target_value]
+
+
+import wandb
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import re
+import numpy as np
+
+def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-probe-training-all-attr", entity="your-wandb-username"):
+    """
+    Create two separate plots: one for losses and one for accuracies, for runs from a specific layer.
+    
+    Args:
+        target_layer (int): The layer number to filter runs for
+        project_name (str): Name of the W&B project
+        entity (str): Your W&B username
+    """
+    # Initialize wandb
+    api = wandb.Api()
+    
+    # Get all runs from your project
+    runs = api.runs(f"{entity}/{project_name}")
+    
+    # Filter runs for the specified layer
+    # The pattern now looks for layer followed by digits at the end of the name
+    layer_runs = []
+    for run in runs:
+        match = re.search(r'layer(\d+)$', run.name)
+        if match and int(match.group(1)) == target_layer:
+            layer_runs.append(run)
+    
+    if not layer_runs:
+        print(f"No runs found for layer {target_layer}")
+        return
+    
+    # Rest of the plotting code remains the same...
+    plt.style.use('seaborn')
+    
+    # Create first figure for losses
+    fig1, ax1 = plt.subplots(1, 2, figsize=(15, 5))
+    fig1.suptitle(f'Training and Validation Losses for Layer {target_layer}', fontsize=14)
+    
+    # Create second figure for accuracies
+    fig2, ax2 = plt.subplots(1, 2, figsize=(15, 5))
+    fig2.suptitle(f'Training and Validation Accuracies for Layer {target_layer}', fontsize=14)
+    
+    # Color map for different attributes
+    num_runs = len(layer_runs)
+    colors = plt.cm.rainbow(np.linspace(0, 1, num_runs))
+    
+    tokenizer = load_tokenizer(tokenizer_path)
+    for run, color in zip(layer_runs, colors):
+        # Extract attribute ID from run name
+        attr_match = re.search(r'attr_(\d+)_', run.name)
+        attr_id = attr_match.group(1) if attr_match else 'unknown'
+        
+        label = map_continuous_id_to_attr_name(int(attr_id), tokenizer_path)
+        # Convert run history to pandas DataFrame
+        history = pd.DataFrame(run.history())
+        
+        # Plot training loss
+        ax1[0].plot(history['step'], history['train_loss'], 
+                   label=f'{label}', color=color)
+        ax1[0].set_title('Training Loss')
+        ax1[0].set_xlabel('Epoch')
+        ax1[0].set_ylabel('Loss')
+        
+        # Plot validation loss
+        ax1[1].plot(history['step'], history['val_loss'], 
+                   label=f'{label}', color=color)
+        ax1[1].set_title('Validation Loss')
+        ax1[1].set_xlabel('Epoch')
+        ax1[1].set_ylabel('Loss')
+        
+        # Plot training accuracy
+        ax2[0].plot(history['step'], history['train_accuracy'], 
+                   label=f'{label}', color=color)
+        ax2[0].set_title('Training Accuracy')
+        ax2[0].set_xlabel('Epoch')
+        ax2[0].set_ylabel('Accuracy')
+        
+        # Plot validation accuracy
+        ax2[1].plot(history['step'], history['val_accuracy'], 
+                   label=f'{label}', color=color)
+        ax2[1].set_title('Validation Accuracy')
+        ax2[1].set_xlabel('Epoch')
+        ax2[1].set_ylabel('Accuracy')
+    
+    # Add legends
+    for ax in ax1:
+        ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    for ax in ax2:
+        ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    
+    # Adjust layouts
+    fig1.tight_layout()
+    fig2.tight_layout()
+    
+    save_path = f"COMPLETE_FIGS/attr_from_last_attr_binding/layer{target_layer}"
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    # Save figures
+    fig1.savefig(f'{save_path}/losses.png', dpi=300, bbox_inches='tight')
+    fig2.savefig(f'{save_path}/accuracies.png', dpi=300, bbox_inches='tight')
+    
+    plt.show()
     
 if __name__ == "__main__":
     seed = 42
@@ -935,6 +1047,11 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
+    plot_metrics_by_layer(
+        target_layer=2,
+        tokenizer_path=config.tokenizer_path,
+        entity="hazhou",
+    )
     # capture_layer = 0
     # init_all_attr_from_last_atrr_binding_dataset(
     #     config=config, 
@@ -946,7 +1063,7 @@ if __name__ == "__main__":
     #         config=config, 
     #         capture_layer=capture_layer)
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
 
     # capture_layer = 2
     # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
@@ -965,16 +1082,16 @@ if __name__ == "__main__":
     #         patience=5,
     #     )
 
-    for attribute_id in [5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
-        capture_layer = 0
-        print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
-        construct_binary_dataset(attribute_id, capture_layer)
-        init_binary_dataset(attribute_id, capture_layer)
-        train_binary_probe(
-            capture_layer=capture_layer,
-            attribute_id=attribute_id,
-            patience=5,
-        )
+    # for attribute_id in [5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
+    #     capture_layer = 0
+    #     print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
+    #     construct_binary_dataset(attribute_id, capture_layer)
+    #     init_binary_dataset(attribute_id, capture_layer)
+    #     train_binary_probe(
+    #         capture_layer=capture_layer,
+    #         attribute_id=attribute_id,
+    #         patience=5,
+    #     )
 
     # for attribute_id in [3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
     #     capture_layer = 1
