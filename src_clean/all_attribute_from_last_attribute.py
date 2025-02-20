@@ -1047,11 +1047,11 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
-    # plot_metrics_by_layer(
-    #     target_layer=2,
-    #     tokenizer_path=config.tokenizer_path,
-    #     entity="hazhou",
-    # )
+    plot_metrics_by_layer(
+        target_layer=1,
+        tokenizer_path=config.tokenizer_path,
+        entity="hazhou",
+    )
     # capture_layer = 0
     # init_all_attr_from_last_atrr_binding_dataset(
     #     config=config, 
@@ -1073,14 +1073,14 @@ if __name__ == "__main__":
     #         attribute_id=attribute_id,
     #     )
 
-    for attribute_id in [17, 18, 19, 20]:
-        capture_layer = 2
-        print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
-        train_binary_probe(
-            capture_layer=capture_layer,
-            attribute_id=attribute_id,
-            patience=5,
-        )
+    # for attribute_id in [17, 18, 19, 20]:
+    #     capture_layer = 2
+    #     print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
+    #     train_binary_probe(
+    #         capture_layer=capture_layer,
+    #         attribute_id=attribute_id,
+    #         patience=5,
+    #     )
 
     # for attribute_id in [17, 18, 19, 20]:
     #     capture_layer = 0
