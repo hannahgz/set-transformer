@@ -991,31 +991,30 @@ def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-pro
         label = map_continuous_id_to_attr_name(int(attr_id), tokenizer_path)
         # Convert run history to pandas DataFrame
         history = pd.DataFrame(run.history())
-        breakpoint()
         
         # Plot training loss
-        ax1[0].plot(history['step'], history['train_loss'], 
+        ax1[0].plot(history['epoch'], history['train_loss'], 
                    label=f'{label}', color=color)
         ax1[0].set_title('Training Loss')
         ax1[0].set_xlabel('Epoch')
         ax1[0].set_ylabel('Loss')
         
         # Plot validation loss
-        ax1[1].plot(history['step'], history['val_loss'], 
+        ax1[1].plot(history['epoch'], history['val_loss'], 
                    label=f'{label}', color=color)
         ax1[1].set_title('Validation Loss')
         ax1[1].set_xlabel('Epoch')
         ax1[1].set_ylabel('Loss')
         
         # Plot training accuracy
-        ax2[0].plot(history['step'], history['train_accuracy'], 
+        ax2[0].plot(history['epoch'], history['train_accuracy'], 
                    label=f'{label}', color=color)
         ax2[0].set_title('Training Accuracy')
         ax2[0].set_xlabel('Epoch')
         ax2[0].set_ylabel('Accuracy')
         
         # Plot validation accuracy
-        ax2[1].plot(history['step'], history['val_accuracy'], 
+        ax2[1].plot(history['epoch'], history['val_accuracy'], 
                    label=f'{label}', color=color)
         ax2[1].set_title('Validation Accuracy')
         ax2[1].set_xlabel('Epoch')
