@@ -969,7 +969,7 @@ def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-pro
         return
     
     # Rest of the plotting code remains the same...
-    plt.style.use('seaborn')
+    sns.set_style("darkgrid")
     
     # Create first figure for losses
     fig1, ax1 = plt.subplots(1, 2, figsize=(15, 5))
