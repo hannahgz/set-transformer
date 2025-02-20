@@ -956,16 +956,16 @@ if __name__ == "__main__":
     #         attribute_id=attribute_id,
     #     )
 
-    # for attribute_id in [6, 8, 9, 11, 15, 17, 18, 19, 20]:
-    #     capture_layer = 2
-    #     print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
-    #     construct_binary_dataset(attribute_id, capture_layer)
-    #     init_binary_dataset(attribute_id, capture_layer)
-    #     train_binary_probe(
-    #         capture_layer=capture_layer,
-    #         attribute_id=attribute_id,
-    #         patience=5,
-    #     )
+    for attribute_id in [6, 8, 9, 11, 15, 17, 18, 19, 20]:
+        capture_layer = 2
+        print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
+        construct_binary_dataset(attribute_id, capture_layer)
+        init_binary_dataset(attribute_id, capture_layer)
+        train_binary_probe(
+            capture_layer=capture_layer,
+            attribute_id=attribute_id,
+            patience=5,
+        )
 
     # for attribute_id in [5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
     #     capture_layer = 0
@@ -978,16 +978,16 @@ if __name__ == "__main__":
     #         patience=5,
     #     )
 
-    for attribute_id in [3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
-        capture_layer = 1
-        print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
-        construct_binary_dataset(attribute_id, capture_layer)
-        init_binary_dataset(attribute_id, capture_layer)
-        train_binary_probe(
-            capture_layer=capture_layer,
-            attribute_id=attribute_id,
-            patience=5,
-        )
+    # for attribute_id in [3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
+    #     capture_layer = 1
+    #     print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
+    #     construct_binary_dataset(attribute_id, capture_layer)
+    #     init_binary_dataset(attribute_id, capture_layer)
+    #     train_binary_probe(
+    #         capture_layer=capture_layer,
+    #         attribute_id=attribute_id,
+    #         patience=5,
+    #     )
 
     # for attribute_id in [3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
     #     capture_layer = 3
