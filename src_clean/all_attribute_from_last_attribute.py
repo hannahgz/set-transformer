@@ -1083,8 +1083,16 @@ if __name__ == "__main__":
     #     target_layer=1,
     #     tokenizer_path=config.tokenizer_path,
     # )
+    # plot_metrics_by_layer(
+    #     target_layer=3,
+    #     tokenizer_path=config.tokenizer_path,
+    # )
     plot_metrics_by_layer(
-        target_layer=3,
+        target_layer=2,
+        tokenizer_path=config.tokenizer_path,
+    )
+    plot_metrics_by_layer(
+        target_layer=0,
         tokenizer_path=config.tokenizer_path,
     )
     # capture_layer = 0
