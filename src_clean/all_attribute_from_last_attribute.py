@@ -1088,22 +1088,13 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
-    # plot_metrics_by_layer(
-    #     target_layer=1,
-    #     tokenizer_path=config.tokenizer_path,
-    # )
-    # plot_metrics_by_layer(
-    #     target_layer=3,
-    #     tokenizer_path=config.tokenizer_path,
-    # )
-    # plot_metrics_by_layer(
-    #     target_layer=2,
-    #     tokenizer_path=config.tokenizer_path,
-    # )
-    # plot_metrics_by_layer(
-    #     target_layer=0,
-    #     tokenizer_path=config.tokenizer_path,
-    # )
+
+    for target_layer in range(4):
+        plot_metrics_by_layer(
+            target_layer=target_layer,
+            tokenizer_path=config.tokenizer_path,
+        )
+
     # capture_layer = 0
     # init_all_attr_from_last_atrr_binding_dataset(
     #     config=config, 
