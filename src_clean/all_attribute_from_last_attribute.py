@@ -1038,6 +1038,10 @@ def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-pro
         ax1[1].set_title('Validation Loss')
         ax1[1].set_xlabel('Epoch')
         ax1[1].set_ylabel('Loss')
+
+        # Set y-axis ranges
+        ax1[0].set_ylim(0, 0.5)  # Set loss range from 0 to 0.5
+        ax1[1].set_ylim(0, 0.5)  # Set loss range from 0 to 0.5
         
         # Plot training accuracy
         ax2[0].plot(history['epoch'], history['train_accuracy'], 
@@ -1052,12 +1056,17 @@ def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-pro
         ax2[1].set_title('Validation Accuracy')
         ax2[1].set_xlabel('Epoch')
         ax2[1].set_ylabel('Accuracy')
+
+        ax2[0].set_ylim(0.7, 1)  # Set accuracy range from 0.7 to 1
+        ax2[1].set_ylim(0.7, 1)  # Set accuracy range from 0.7 to 1
     
     # Add legends
-    for ax in ax1:
-        ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-    for ax in ax2:
-        ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    for index, ax in enumerate(ax1):
+        if index == 1:
+            ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    for index, ax in enumerate(ax2):
+        if index == 1:
+            ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
     
     # Adjust layouts
     fig1.tight_layout()
@@ -1087,14 +1096,14 @@ if __name__ == "__main__":
     #     target_layer=3,
     #     tokenizer_path=config.tokenizer_path,
     # )
-    plot_metrics_by_layer(
-        target_layer=2,
-        tokenizer_path=config.tokenizer_path,
-    )
-    plot_metrics_by_layer(
-        target_layer=0,
-        tokenizer_path=config.tokenizer_path,
-    )
+    # plot_metrics_by_layer(
+    #     target_layer=2,
+    #     tokenizer_path=config.tokenizer_path,
+    # )
+    # plot_metrics_by_layer(
+    #     target_layer=0,
+    #     tokenizer_path=config.tokenizer_path,
+    # )
     # capture_layer = 0
     # init_all_attr_from_last_atrr_binding_dataset(
     #     config=config, 
