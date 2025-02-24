@@ -198,24 +198,8 @@ if __name__ == "__main__":
     #         patience=5
     #     )
 
-    for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
-        capture_layer = 1
-        print(
-            f"binary probe for attribute {attribute_id}, layer {capture_layer}")
-
-        init_attr_from_answer(config, capture_layer, val_loader, GPT_model)
-        init_binary_probe_data(attribute_id, capture_layer)
-
-        train_binary_probe(
-            capture_layer=capture_layer,
-            attribute_id=attribute_id,
-            project="attr_from_answer",
-            model_save_path=f"{PATH_PREFIX}/attr_from_answer/layer{capture_layer}/binary_probe_model.pt",
-            patience=5
-        )
-
     # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
-    #     capture_layer = 2
+    #     capture_layer = 1
     #     print(
     #         f"binary probe for attribute {attribute_id}, layer {capture_layer}")
 
@@ -229,6 +213,22 @@ if __name__ == "__main__":
     #         model_save_path=f"{PATH_PREFIX}/attr_from_answer/layer{capture_layer}/binary_probe_model.pt",
     #         patience=5
     #     )
+
+    for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
+        capture_layer = 2
+        print(
+            f"binary probe for attribute {attribute_id}, layer {capture_layer}")
+
+        init_attr_from_answer(config, capture_layer, val_loader, GPT_model)
+        init_binary_probe_data(attribute_id, capture_layer)
+
+        train_binary_probe(
+            capture_layer=capture_layer,
+            attribute_id=attribute_id,
+            project="attr_from_answer",
+            model_save_path=f"{PATH_PREFIX}/attr_from_answer/layer{capture_layer}/binary_probe_model.pt",
+            patience=5
+        )
 
     # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
     #     capture_layer = 3
