@@ -154,14 +154,14 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
-    dataset = torch.load(config.dataset_path)
-    train_loader, val_loader = initialize_loaders(config, dataset)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # dataset = torch.load(config.dataset_path)
+    # train_loader, val_loader = initialize_loaders(config, dataset)
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    GPT_model = GPT(config).to(device)
-    checkpoint = torch.load(config.filename, weights_only=False)
-    GPT_model.load_state_dict(checkpoint["model"])
-    GPT_model.eval()
+    # GPT_model = GPT(config).to(device)
+    # checkpoint = torch.load(config.filename, weights_only=False)
+    # GPT_model.load_state_dict(checkpoint["model"])
+    # GPT_model.eval()
 
     project = "attr_from_answer"
     plot_all_layers_metrics(
