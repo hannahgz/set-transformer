@@ -1215,7 +1215,7 @@ def plot_all_layers_metrics(layers, tokenizer_path, project_name="binary-probe-t
     fig_val_acc.tight_layout()
     
     # Create save directory
-    save_path = "COMPLETE_FIGS/attr_from_last_attr_binding/consolidated"
+    save_path = f"COMPLETE_FIGS/{project_name}/consolidated"
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     
