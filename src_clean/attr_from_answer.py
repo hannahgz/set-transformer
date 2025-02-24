@@ -100,7 +100,6 @@ def init_attr_from_answer(config, capture_layer, val_loader, model):
                         set_counts.append(2)
                     all_input_embeddings.append(current_embedding)
                     all_target_attributes.append(seen_card_dict[card_id])
-                breakpoint()
 
     # After the loop completes, convert lists to tensors
     input_embeddings_tensor = torch.stack(all_input_embeddings)
@@ -164,22 +163,24 @@ if __name__ == "__main__":
     GPT_model.load_state_dict(checkpoint["model"])
     GPT_model.eval()
 
-    for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
-        for capture_layer in range(4):
-            print(
-                f"binary probe for attribute {attribute_id}, layer {capture_layer}")
+    # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
+    #     for capture_layer in range(4):
+    attribute_id = 1
+    capture_layer = 0
+    print(
+        f"binary probe for attribute {attribute_id}, layer {capture_layer}")
 
-            init_attr_from_answer(config, capture_layer, val_loader, GPT_model)
-            init_binary_probe_data(attribute_id, capture_layer)
+    init_attr_from_answer(config, capture_layer, val_loader, GPT_model)
+    init_binary_probe_data(attribute_id, capture_layer)
 
-            train_binary_probe(
-                capture_layer=capture_layer,
-                attribute_id=attribute_id,
-                project="attr_from_answer",
-                model_save_path=f"{PATH_PREFIX}/attr_from_answer/layer{capture_layer}/binary_probe_model.pt",
-                patience=5,
-                num_epochs=5
-            )
+    train_binary_probe(
+        capture_layer=capture_layer,
+        attribute_id=attribute_id,
+        project="attr_from_answer",
+        model_save_path=f"{PATH_PREFIX}/attr_from_answer/layer{capture_layer}/binary_probe_model.pt",
+        patience=5,
+        num_epochs=5
+    )
 
     # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
     #     capture_layer = 0

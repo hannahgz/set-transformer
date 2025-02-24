@@ -1084,6 +1084,126 @@ def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-pro
     
     plt.show()
 
+def plot_all_layers_metrics(layers, tokenizer_path, project_name="binary-probe-training-all-attr", entity="hazhou-harvard"):
+    """
+    Create two figures: one for all losses and one for all accuracies across specified layers.
+    Each figure contains subplots for each layer.
+    
+    Args:
+        layers (list): List of layer numbers to plot
+        tokenizer_path (str): Path to the tokenizer
+        project_name (str): Name of the W&B project
+        entity (str): Your W&B username
+    """
+    # Initialize wandb
+    api = wandb.Api()
+    
+    # Get all runs from your project
+    runs = api.runs(f"{entity}/{project_name}")
+    
+    # Define the desired attribute order
+    shapes = ["oval", "squiggle", "diamond"]
+    colors = ["green", "blue", "pink"]
+    numbers = ["one", "two", "three"]
+    shadings = ["solid", "striped", "open"]
+    desired_order = shapes + colors + numbers + shadings
+    
+    # Create figures with subplots
+    fig_losses, axes_losses = plt.subplots(2, 2, figsize=(20, 15))
+    fig_accuracies, axes_accuracies = plt.subplots(2, 2, figsize=(20, 15))
+    
+    # Flatten axes for easier iteration
+    axes_losses = axes_losses.flatten()
+    axes_accuracies = axes_accuracies.flatten()
+    
+    # Set style
+    sns.set_style("darkgrid")
+    
+    tokenizer = load_tokenizer(tokenizer_path)
+    
+    # Process each layer
+    for layer_idx, target_layer in enumerate(layers):
+        # Filter and sort runs for current layer
+        layer_runs = []
+        run_order_mapping = {}
+        
+        for run in runs:
+            match = re.search(r'layer(\d+)$', run.name)
+            if match and int(match.group(1)) == target_layer:
+                attr_match = re.search(r'attr_(\d+)_', run.name)
+                if attr_match:
+                    attr_id = int(attr_match.group(1))
+                    attr_name = tokenizer.id_to_token[attr_id]
+                    try:
+                        order_index = desired_order.index(attr_name)
+                        run_order_mapping[run] = order_index
+                        layer_runs.append(run)
+                    except ValueError:
+                        continue
+        
+        # Sort runs based on desired order
+        layer_runs.sort(key=lambda x: run_order_mapping[x])
+        
+        # Color map for different attributes
+        num_runs = len(layer_runs)
+        colors = plt.cm.rainbow(np.linspace(0, 1, num_runs))
+        
+        # Plot for each run
+        for run, color in zip(layer_runs, colors):
+            # Extract attribute ID and get label
+            attr_match = re.search(r'attr_(\d+)_', run.name)
+            attr_id = attr_match.group(1) if attr_match else 'unknown'
+            label = tokenizer.id_to_token[int(attr_id)]
+            
+            # Convert run history to pandas DataFrame
+            history = pd.DataFrame(run.history())
+            
+            # Plot losses
+            axes_losses[layer_idx].plot(history['epoch'], history['train_loss'], 
+                                      label=f'{label} (train)', color=color, linestyle='-')
+            axes_losses[layer_idx].plot(history['epoch'], history['val_loss'], 
+                                      label=f'{label} (val)', color=color, linestyle='--')
+            axes_losses[layer_idx].set_title(f'Layer {target_layer} Losses')
+            axes_losses[layer_idx].set_xlabel('Epoch')
+            axes_losses[layer_idx].set_ylabel('Loss')
+            axes_losses[layer_idx].set_ylim(0, 0.5)
+            
+            # Plot accuracies
+            axes_accuracies[layer_idx].plot(history['epoch'], history['train_accuracy'], 
+                                          label=f'{label} (train)', color=color, linestyle='-')
+            axes_accuracies[layer_idx].plot(history['epoch'], history['val_accuracy'], 
+                                          label=f'{label} (val)', color=color, linestyle='--')
+            axes_accuracies[layer_idx].set_title(f'Layer {target_layer} Accuracies')
+            axes_accuracies[layer_idx].set_xlabel('Epoch')
+            axes_accuracies[layer_idx].set_ylabel('Accuracy')
+            axes_accuracies[layer_idx].set_ylim(0.7, 1)
+        
+        # Add legends
+        axes_losses[layer_idx].legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        axes_accuracies[layer_idx].legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    
+    # Set main titles
+    fig_losses.suptitle('Training and Validation Losses Across Layers', fontsize=16)
+    fig_accuracies.suptitle('Training and Validation Accuracies Across Layers', fontsize=16)
+    
+    # Adjust layouts
+    fig_losses.tight_layout()
+    fig_accuracies.tight_layout()
+    
+    # Create save directory
+    save_path = "COMPLETE_FIGS/attr_from_last_attr_binding/consolidated"
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    
+    # Save figures
+    fig_losses.savefig(f'{save_path}/all_layers_losses.png', dpi=300, bbox_inches='tight')
+    fig_accuracies.savefig(f'{save_path}/all_layers_accuracies.png', dpi=300, bbox_inches='tight')
+    
+    plt.show()
+
+# Usage example:
+# plot_all_layers_metrics([8, 9, 10, 11], "path/to/tokenizer")
+
 def load_embeddings_and_probe(layer, attribute_id, path_prefix):
     """Load embeddings and binary probe for a specific layer and attribute"""
     # Load embeddings
@@ -1165,11 +1285,15 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
 
-    for target_layer in range(4):
-        plot_metrics_by_layer(
-            target_layer=target_layer,
-            tokenizer_path=config.tokenizer_path,
-        )
+    # for target_layer in range(4):
+    #     plot_metrics_by_layer(
+    #         target_layer=target_layer,
+    #         tokenizer_path=config.tokenizer_path,
+    #     )
+
+    plot_all_layers_metrics(
+        layers=[0, 1, 2, 3],
+        tokenizer_path=config.tokenizer_path,)
 
     # capture_layer = 0
     # init_all_attr_from_last_atrr_binding_dataset(
