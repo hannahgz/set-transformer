@@ -1086,8 +1086,11 @@ def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-pro
 
 def plot_all_layers_metrics(layers, tokenizer_path, project_name="binary-probe-training-all-attr", entity="hazhou-harvard"):
     """
-    Create two figures: one for all losses and one for all accuracies across specified layers.
-    Each figure contains subplots for each layer.
+    Create four figures:
+    1. Training losses across all layers
+    2. Validation losses across all layers
+    3. Training accuracies across all layers
+    4. Validation accuracies across all layers
     
     Args:
         layers (list): List of layer numbers to plot
@@ -1108,13 +1111,17 @@ def plot_all_layers_metrics(layers, tokenizer_path, project_name="binary-probe-t
     shadings = ["solid", "striped", "open"]
     desired_order = shapes + colors + numbers + shadings
     
-    # Create figures with subplots
-    fig_losses, axes_losses = plt.subplots(2, 2, figsize=(20, 15))
-    fig_accuracies, axes_accuracies = plt.subplots(2, 2, figsize=(20, 15))
+    # Create four figures
+    fig_train_loss, axes_train_loss = plt.subplots(2, 2, figsize=(20, 15))
+    fig_val_loss, axes_val_loss = plt.subplots(2, 2, figsize=(20, 15))
+    fig_train_acc, axes_train_acc = plt.subplots(2, 2, figsize=(20, 15))
+    fig_val_acc, axes_val_acc = plt.subplots(2, 2, figsize=(20, 15))
     
     # Flatten axes for easier iteration
-    axes_losses = axes_losses.flatten()
-    axes_accuracies = axes_accuracies.flatten()
+    axes_train_loss = axes_train_loss.flatten()
+    axes_val_loss = axes_val_loss.flatten()
+    axes_train_acc = axes_train_acc.flatten()
+    axes_val_acc = axes_val_acc.flatten()
     
     # Set style
     sns.set_style("darkgrid")
@@ -1158,37 +1165,55 @@ def plot_all_layers_metrics(layers, tokenizer_path, project_name="binary-probe-t
             # Convert run history to pandas DataFrame
             history = pd.DataFrame(run.history())
             
-            # Plot losses
-            axes_losses[layer_idx].plot(history['epoch'], history['train_loss'], 
-                                      label=f'{label} (train)', color=color, linestyle='-')
-            axes_losses[layer_idx].plot(history['epoch'], history['val_loss'], 
-                                      label=f'{label} (val)', color=color, linestyle='--')
-            axes_losses[layer_idx].set_title(f'Layer {target_layer} Losses')
-            axes_losses[layer_idx].set_xlabel('Epoch')
-            axes_losses[layer_idx].set_ylabel('Loss')
-            axes_losses[layer_idx].set_ylim(0, 0.5)
+            # Plot training loss
+            axes_train_loss[layer_idx].plot(history['epoch'], history['train_loss'], 
+                                          label=label, color=color)
+            axes_train_loss[layer_idx].set_title(f'Layer {target_layer} Training Loss')
+            axes_train_loss[layer_idx].set_xlabel('Epoch')
+            axes_train_loss[layer_idx].set_ylabel('Loss')
+            axes_train_loss[layer_idx].set_ylim(0, 0.5)
             
-            # Plot accuracies
-            axes_accuracies[layer_idx].plot(history['epoch'], history['train_accuracy'], 
-                                          label=f'{label} (train)', color=color, linestyle='-')
-            axes_accuracies[layer_idx].plot(history['epoch'], history['val_accuracy'], 
-                                          label=f'{label} (val)', color=color, linestyle='--')
-            axes_accuracies[layer_idx].set_title(f'Layer {target_layer} Accuracies')
-            axes_accuracies[layer_idx].set_xlabel('Epoch')
-            axes_accuracies[layer_idx].set_ylabel('Accuracy')
-            axes_accuracies[layer_idx].set_ylim(0.7, 1)
+            # Plot validation loss
+            axes_val_loss[layer_idx].plot(history['epoch'], history['val_loss'], 
+                                        label=label, color=color)
+            axes_val_loss[layer_idx].set_title(f'Layer {target_layer} Validation Loss')
+            axes_val_loss[layer_idx].set_xlabel('Epoch')
+            axes_val_loss[layer_idx].set_ylabel('Loss')
+            axes_val_loss[layer_idx].set_ylim(0, 0.5)
+            
+            # Plot training accuracy
+            axes_train_acc[layer_idx].plot(history['epoch'], history['train_accuracy'], 
+                                         label=label, color=color)
+            axes_train_acc[layer_idx].set_title(f'Layer {target_layer} Training Accuracy')
+            axes_train_acc[layer_idx].set_xlabel('Epoch')
+            axes_train_acc[layer_idx].set_ylabel('Accuracy')
+            axes_train_acc[layer_idx].set_ylim(0.7, 1)
+            
+            # Plot validation accuracy
+            axes_val_acc[layer_idx].plot(history['epoch'], history['val_accuracy'], 
+                                       label=label, color=color)
+            axes_val_acc[layer_idx].set_title(f'Layer {target_layer} Validation Accuracy')
+            axes_val_acc[layer_idx].set_xlabel('Epoch')
+            axes_val_acc[layer_idx].set_ylabel('Accuracy')
+            axes_val_acc[layer_idx].set_ylim(0.7, 1)
         
         # Add legends
-        axes_losses[layer_idx].legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-        axes_accuracies[layer_idx].legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        axes_train_loss[layer_idx].legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        axes_val_loss[layer_idx].legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        axes_train_acc[layer_idx].legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        axes_val_acc[layer_idx].legend(bbox_to_anchor=(1.05, 1), loc='upper left')
     
     # Set main titles
-    fig_losses.suptitle('Training and Validation Losses Across Layers', fontsize=16)
-    fig_accuracies.suptitle('Training and Validation Accuracies Across Layers', fontsize=16)
+    fig_train_loss.suptitle('Training Losses Across Layers', fontsize=16)
+    fig_val_loss.suptitle('Validation Losses Across Layers', fontsize=16)
+    fig_train_acc.suptitle('Training Accuracies Across Layers', fontsize=16)
+    fig_val_acc.suptitle('Validation Accuracies Across Layers', fontsize=16)
     
     # Adjust layouts
-    fig_losses.tight_layout()
-    fig_accuracies.tight_layout()
+    fig_train_loss.tight_layout()
+    fig_val_loss.tight_layout()
+    fig_train_acc.tight_layout()
+    fig_val_acc.tight_layout()
     
     # Create save directory
     save_path = "COMPLETE_FIGS/attr_from_last_attr_binding/consolidated"
@@ -1196,10 +1221,15 @@ def plot_all_layers_metrics(layers, tokenizer_path, project_name="binary-probe-t
         os.makedirs(save_path)
     
     # Save figures
-    fig_losses.savefig(f'{save_path}/all_layers_losses.png', dpi=300, bbox_inches='tight')
-    fig_accuracies.savefig(f'{save_path}/all_layers_accuracies.png', dpi=300, bbox_inches='tight')
+    fig_train_loss.savefig(f'{save_path}/all_layers_train_loss.png', dpi=300, bbox_inches='tight')
+    fig_val_loss.savefig(f'{save_path}/all_layers_val_loss.png', dpi=300, bbox_inches='tight')
+    fig_train_acc.savefig(f'{save_path}/all_layers_train_acc.png', dpi=300, bbox_inches='tight')
+    fig_val_acc.savefig(f'{save_path}/all_layers_val_acc.png', dpi=300, bbox_inches='tight')
     
     plt.show()
+
+# Usage example:
+# plot_all_layers_metrics([8, 9, 10, 11], "path/to/tokenizer")
 
 # Usage example:
 # plot_all_layers_metrics([8, 9, 10, 11], "path/to/tokenizer")
