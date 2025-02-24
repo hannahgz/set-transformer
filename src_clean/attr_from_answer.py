@@ -21,30 +21,30 @@ from tokenizer import load_tokenizer
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 
-def init_attr_from_predict_token(config, capture_layer):
-    dataset = torch.load(config.dataset_path)
-    train_loader, val_loader = initialize_loaders(config, dataset)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+# def init_attr_from_predict_token(config, capture_layer):
+#     dataset = torch.load(config.dataset_path)
+#     train_loader, val_loader = initialize_loaders(config, dataset)
+#     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    model = GPT(config).to(device)
-    checkpoint = torch.load(config.filename, weights_only=False)
-    model.load_state_dict(checkpoint["model"])
-    model.eval()
+#     model = GPT(config).to(device)
+#     checkpoint = torch.load(config.filename, weights_only=False)
+#     model.load_state_dict(checkpoint["model"])
+#     model.eval()
 
-    tokenizer = load_tokenizer(config.tokenizer_path)
+#     tokenizer = load_tokenizer(config.tokenizer_path)
 
-    predict_id = tokenizer.token_to_id[">"]
+#     predict_id = tokenizer.token_to_id[">"]
 
 
-def init_attr_from_answer(config, capture_layer):
-    dataset = torch.load(config.dataset_path)
-    train_loader, val_loader = initialize_loaders(config, dataset)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+def init_attr_from_answer(config, capture_layer, val_loader, model):
+    # dataset = torch.load(config.dataset_path)
+    # train_loader, val_loader = initialize_loaders(config, dataset)
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    model = GPT(config).to(device)
-    checkpoint = torch.load(config.filename, weights_only=False)
-    model.load_state_dict(checkpoint["model"])
-    model.eval()
+    # model = GPT(config).to(device)
+    # checkpoint = torch.load(config.filename, weights_only=False)
+    # model.load_state_dict(checkpoint["model"])
+    # model.eval()
 
     tokenizer = load_tokenizer(config.tokenizer_path)
 
@@ -53,6 +53,7 @@ def init_attr_from_answer(config, capture_layer):
     C_id = tokenizer.token_to_id["C"]
     D_id = tokenizer.token_to_id["D"]
     E_id = tokenizer.token_to_id["E"]
+    no_set_id = tokenizer.token_to_id["*"]
 
     all_input_embeddings = []
     all_target_attributes = []
@@ -82,7 +83,10 @@ def init_attr_from_answer(config, capture_layer):
                 attr_id = sequence[attr_index]
                 seen_card_dict[card_id].append(attr_id)
 
-            for card_index in range(config.input_size):
+            if no_set_id in sequence:
+                continue
+
+            for card_index in range(config.input_size, config.block_size - 1):
                 card_id = sequence[card_index]
 
                 if card_id in [A_id, B_id, C_id, D_id, E_id]:
@@ -151,13 +155,21 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
+    dataset = torch.load(config.dataset_path)
+    train_loader, val_loader = initialize_loaders(config, dataset)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    GPT_model = GPT(config).to(device)
+    checkpoint = torch.load(config.filename, weights_only=False)
+    GPT_model.load_state_dict(checkpoint["model"])
+    GPT_model.eval()
 
     for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
         for capture_layer in range(4):
             print(
                 f"binary probe for attribute {attribute_id}, layer {capture_layer}")
 
-            init_attr_from_answer(config, capture_layer)
+            init_attr_from_answer(config, capture_layer, val_loader, GPT_model)
             init_binary_probe_data(attribute_id, capture_layer)
 
             train_binary_probe(
@@ -165,4 +177,70 @@ if __name__ == "__main__":
                 attribute_id=attribute_id,
                 project="attr_from_answer",
                 model_save_path=f"{PATH_PREFIX}/attr_from_answer/layer{capture_layer}/binary_probe_model.pt",
+                patience=5,
+                num_epochs=5
             )
+
+    # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
+    #     capture_layer = 0
+    #     print(
+    #         f"binary probe for attribute {attribute_id}, layer {capture_layer}")
+
+    #     init_attr_from_answer(config, capture_layer, val_loader, GPT_model)
+    #     init_binary_probe_data(attribute_id, capture_layer)
+
+    #     train_binary_probe(
+    #         capture_layer=capture_layer,
+    #         attribute_id=attribute_id,
+    #         project="attr_from_answer",
+    #         model_save_path=f"{PATH_PREFIX}/attr_from_answer/layer{capture_layer}/binary_probe_model.pt",
+    #         patience=5
+    #     )
+
+    # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
+    #     capture_layer = 1
+    #     print(
+    #         f"binary probe for attribute {attribute_id}, layer {capture_layer}")
+
+    #     init_attr_from_answer(config, capture_layer, val_loader, GPT_model)
+    #     init_binary_probe_data(attribute_id, capture_layer)
+
+    #     train_binary_probe(
+    #         capture_layer=capture_layer,
+    #         attribute_id=attribute_id,
+    #         project="attr_from_answer",
+    #         model_save_path=f"{PATH_PREFIX}/attr_from_answer/layer{capture_layer}/binary_probe_model.pt",
+    #         patience=5
+    #     )
+
+    # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
+    #     capture_layer = 2
+    #     print(
+    #         f"binary probe for attribute {attribute_id}, layer {capture_layer}")
+
+    #     init_attr_from_answer(config, capture_layer, val_loader, GPT_model)
+    #     init_binary_probe_data(attribute_id, capture_layer)
+
+    #     train_binary_probe(
+    #         capture_layer=capture_layer,
+    #         attribute_id=attribute_id,
+    #         project="attr_from_answer",
+    #         model_save_path=f"{PATH_PREFIX}/attr_from_answer/layer{capture_layer}/binary_probe_model.pt",
+    #         patience=5
+    #     )
+
+    # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
+    #     capture_layer = 3
+    #     print(
+    #         f"binary probe for attribute {attribute_id}, layer {capture_layer}")
+
+    #     init_attr_from_answer(config, capture_layer, val_loader, GPT_model)
+    #     init_binary_probe_data(attribute_id, capture_layer)
+
+    #     train_binary_probe(
+    #         capture_layer=capture_layer,
+    #         attribute_id=attribute_id,
+    #         project="attr_from_answer",
+    #         model_save_path=f"{PATH_PREFIX}/attr_from_answer/layer{capture_layer}/binary_probe_model.pt",
+    #         patience=5
+    #     )
