@@ -164,10 +164,11 @@ if __name__ == "__main__":
     GPT_model.eval()
 
     project = "attr_from_answer"
-    # plot_all_layers_metrics(
-    #     layers=[0, 1, 2, 3],
-    #     tokenizer_path=config.tokenizer_path,
-    #     )
+    plot_all_layers_metrics(
+        layers=[0, 1, 2, 3],
+        tokenizer_path=config.tokenizer_path,
+        project_name=project,
+        )
     
     # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
     #     for capture_layer in range(4):
@@ -189,21 +190,21 @@ if __name__ == "__main__":
     # )
 
     # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
-    for attribute_id in [18, 19, 20]:
-        capture_layer = 0
-        print(
-            f"binary probe for attribute {attribute_id}, layer {capture_layer}")
+    # for attribute_id in [18, 19, 20]:
+    #     capture_layer = 0
+    #     print(
+    #         f"binary probe for attribute {attribute_id}, layer {capture_layer}")
 
-        init_attr_from_answer(config, capture_layer, val_loader, GPT_model)
-        init_binary_probe_data(attribute_id, capture_layer)
-        init_binary_dataset(attribute_id, capture_layer, project)
+    #     init_attr_from_answer(config, capture_layer, val_loader, GPT_model)
+    #     init_binary_probe_data(attribute_id, capture_layer)
+    #     init_binary_dataset(attribute_id, capture_layer, project)
 
-        train_binary_probe(
-            capture_layer=capture_layer,
-            attribute_id=attribute_id,
-            project=project,
-            patience=5
-        )
+    #     train_binary_probe(
+    #         capture_layer=capture_layer,
+    #         attribute_id=attribute_id,
+    #         project=project,
+    #         patience=5
+    #     )
 
     # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
     #     capture_layer = 1
