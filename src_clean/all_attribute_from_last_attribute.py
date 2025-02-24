@@ -219,6 +219,8 @@ def load_binary_dataloader(attribute_id, capture_layer):
 def train_binary_probe(
     capture_layer,
     attribute_id,
+    project,
+    model_save_path,
     embedding_dim=64,
     batch_size=32,
     learning_rate=1e-3,
@@ -236,7 +238,7 @@ def train_binary_probe(
     
     # Initialize wandb
     wandb.init(
-        project="binary-probe-training-all-attr",
+        project=project,
         config={
             "learning_rate": learning_rate,
             "batch_size": batch_size,
@@ -331,8 +333,9 @@ def train_binary_probe(
     
     # Save the best model
     model.load_state_dict(best_model_state)
-    torch.save(model.state_dict(), 
-               f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/attr_{attribute_id}/binary_probe_model.pt")
+    # torch.save(model.state_dict(), 
+    #            f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/attr_{attribute_id}/binary_probe_model.pt")
+    torch.save(model.state_dict(), model_save_path)
     wandb.finish()
     return model
 
@@ -1080,6 +1083,79 @@ def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-pro
     fig2.savefig(f'{save_path}/accuracies.png', dpi=300, bbox_inches='tight')
     
     plt.show()
+
+def load_embeddings_and_probe(layer, attribute_id, path_prefix):
+    """Load embeddings and binary probe for a specific layer and attribute"""
+    # Load embeddings
+    embeddings_path = f"{path_prefix}/all_attr_from_last_attr_binding/layer{layer}/embeddings_and_attributes.pt"
+    embeddings_data = torch.load(embeddings_path)
+    embeddings = embeddings_data['input_embeddings']
+    
+    # Load binary probe
+    probe_path = f"{path_prefix}/all_attr_from_last_attr_binding/layer{layer}/attr_{attribute_id}/binary_probe_model.pt"
+    probe_weights = torch.load(probe_path)
+    
+    return embeddings, probe_weights
+
+def compute_average_cosine_similarity(embeddings, probe_weights):
+    """Compute average cosine similarity between embeddings and probe weights"""
+    # Extract linear layer weights from probe state dict
+    linear_weights = probe_weights['linear.weight'].squeeze()
+    
+    # Compute cosine similarity for each embedding
+    similarities = []
+    for emb in embeddings:
+        sim = F.cosine_similarity(emb.unsqueeze(0), linear_weights.unsqueeze(0))
+        similarities.append(sim.item())
+    
+    # Return average similarity
+    return np.mean(similarities)
+
+def create_cosine_similarity_heatmap(path_prefix, layers, attributes, tokenizer_path, save_path=None):
+    """Create heatmap of cosine similarities across layers and attributes"""
+    # Initialize similarity matrix
+    similarity_matrix = np.zeros((len(attributes), len(layers)))
+    
+    # Load tokenizer for attribute names
+    tokenizer = load_tokenizer(tokenizer_path)
+    
+    # Compute similarities for each layer and attribute
+    for i, attr_id in enumerate(attributes):
+        for j, layer in enumerate(layers):
+            try:
+                embeddings, probe_weights = load_embeddings_and_probe(layer, attr_id, path_prefix)
+                similarity = compute_average_cosine_similarity(embeddings, probe_weights)
+                similarity_matrix[i, j] = similarity
+            except Exception as e:
+                print(f"Error processing layer {layer}, attribute {attr_id}: {e}")
+                similarity_matrix[i, j] = np.nan
+    
+    # Create attribute labels using tokenizer
+    attr_labels = [tokenizer.id_to_token[attr_id] for attr_id in attributes]
+    
+    # Create heatmap
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(
+        similarity_matrix,
+        xticklabels=[f'Layer {l}' for l in layers],
+        yticklabels=attr_labels,
+        cmap='viridis',
+        annot=True,
+        fmt='.3f'
+    )
+    
+    plt.title('Average Cosine Similarities Across Layers and Attributes')
+    plt.xlabel('Layers')
+    plt.ylabel('Attributes')
+    
+    # Save figure if path provided
+    if save_path:
+        save_dir = os.path.dirname(save_path)
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        plt.savefig(save_path, bbox_inches='tight', dpi=300)
+    
+    return plt.gcf()
     
 if __name__ == "__main__":
     seed = 42
