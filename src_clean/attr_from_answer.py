@@ -154,6 +154,26 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
+
+    tokenizer = load_tokenizer(config.tokenizer_path)
+    for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
+        for capture_layer in range(4):
+            binary_dataset_path = f"{PATH_PREFIX}/attr_from_answer/layer{capture_layer}/binary_dataset_{attribute_id}.pt"
+            if os.path.exists(binary_dataset_path):
+                data = torch.load(binary_dataset_path)
+                binary_targets = data['binary_targets']
+                positive_samples = torch.sum(binary_targets).item()
+                total_samples = len(binary_targets)
+                negative_samples = total_samples - positive_samples
+                positive_percentage = (positive_samples / total_samples) * 100
+                negative_percentage = (negative_samples / total_samples) * 100
+
+                print(f"Layer {capture_layer}, Attribute {tokenizer.id_to_token(attribute_id)}, {attribute_id}, :")
+                print(f"Positive samples: {positive_samples} ({positive_percentage:.2f}%)")
+                print(f"Negative samples: {negative_samples} ({negative_percentage:.2f}%)")
+            else:
+                print(f"Dataset for layer {capture_layer}, attribute {attribute_id} not found.")
+                
     # dataset = torch.load(config.dataset_path)
     # train_loader, val_loader = initialize_loaders(config, dataset)
     # device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -163,14 +183,14 @@ if __name__ == "__main__":
     # GPT_model.load_state_dict(checkpoint["model"])
     # GPT_model.eval()
 
-    project = "attr_from_answer"
-    plot_all_layers_metrics(
-        layers=[0, 1, 2, 3],
-        tokenizer_path=config.tokenizer_path,
-        project_name=project,
-        loss_range=[0, 0.63],
-        acc_range=[0.65, 1]
-        )
+    # project = "attr_from_answer"
+    # plot_all_layers_metrics(
+    #     layers=[0, 1, 2, 3],
+    #     tokenizer_path=config.tokenizer_path,
+    #     project_name=project,
+    #     loss_range=[0, 0.63],
+    #     acc_range=[0.65, 1]
+    #     )
     
     # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
     #     for capture_layer in range(4):
