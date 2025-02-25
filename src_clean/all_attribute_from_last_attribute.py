@@ -1292,6 +1292,8 @@ def compute_similarity_matrix(layers, attributes, project, save_matrix_path=None
         if not os.path.exists(os.path.dirname(save_matrix_path)):
             os.makedirs(os.path.dirname(save_matrix_path))
         np.save(save_matrix_path, similarity_matrix)
+
+    return similarity_matrix
     
 def create_cosine_similarity_heatmap(layers, attributes, tokenizer_path, similarity_matrix, project, save_path=None):
     # Load tokenizer for attribute names
@@ -1367,7 +1369,7 @@ if __name__ == "__main__":
     save_fig_path = f"COMPLETE_FIGS/attr_from_last_attr_binding/similarity_heatmap.png"
 
     sim_matrix = compute_similarity_matrix(layers, attributes, project, save_matrix_path=save_matrix_path)
-    # create_cosine_similarity_heatmap(layers, attributes, config.tokenizer_path, sim_matrix, project, save_fig_path)
+    create_cosine_similarity_heatmap(layers, attributes, config.tokenizer_path, sim_matrix, project, save_fig_path)
 
     # for target_layer in range(4):
     #     plot_metrics_by_layer(
