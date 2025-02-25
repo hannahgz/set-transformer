@@ -1511,7 +1511,7 @@ if __name__ == "__main__":
     project = "Attribute From Last Attribute"
     run_layer_probe_similarity_analysis(
         project=project,
-        layers=[1, 2, 3, 4],
+        layers=range(4),
         attributes=[6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11],
         tokenizer_path=config.tokenizer_path
     )
