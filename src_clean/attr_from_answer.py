@@ -168,7 +168,7 @@ if __name__ == "__main__":
                 positive_percentage = (positive_samples / total_samples) * 100
                 negative_percentage = (negative_samples / total_samples) * 100
 
-                print(f"Layer {capture_layer}, Attribute {tokenizer.id_to_token(attribute_id)}, {attribute_id}, :")
+                print(f"Layer {capture_layer}, Attribute {tokenizer.id_to_token[attribute_id]}, {attribute_id}, :")
                 print(f"Positive samples: {positive_samples} ({positive_percentage:.2f}%)")
                 print(f"Negative samples: {negative_samples} ({negative_percentage:.2f}%)")
             else:
