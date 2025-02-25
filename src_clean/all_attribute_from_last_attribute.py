@@ -1256,7 +1256,8 @@ def compute_average_cosine_similarity(embeddings, probe_weights):
     
     # Compute cosine similarity for each embedding
     similarities = []
-    for emb in embeddings:
+    for index, emb in enumerate(embeddings):
+        print(f"Processing embedding {index + 1}/{len(embeddings)}")
         sim = F.cosine_similarity(emb.unsqueeze(0), linear_weights.unsqueeze(0))
         similarities.append(sim.item())
     
@@ -1276,6 +1277,7 @@ def compute_similarity_matrix(layers, attributes, project, save_matrix_path=None
             print(f"Processing layer {layer}")
             try:
                 embeddings, probe_weights = load_embeddings_and_probe(layer, attr_id, project)
+                print(f"Embeddings shape: {embeddings.shape}")
                 if probe_weights is None:
                     similarity = 0
                 else:
