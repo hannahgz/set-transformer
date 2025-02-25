@@ -146,6 +146,96 @@ def init_binary_probe_data(attribute_id, capture_layer):
         'binary_targets': torch.tensor(binary_targets).float()
     }, f"{PATH_PREFIX}/attr_from_answer/layer{capture_layer}/binary_dataset_{attribute_id}.pt")
 
+def load_embeddings_and_probe(layer, attribute_id, project):
+    """Load embeddings and binary probe for a specific layer and attribute"""
+    # Load embeddings
+    embeddings_path = f"{PATH_PREFIX}/{project}/layer{layer}/embeddings_and_attributes.pt"
+    embeddings_data = torch.load(embeddings_path)
+    embeddings = embeddings_data['input_embeddings']
+    
+    # Load binary probe
+    probe_path = f"{PATH_PREFIX}/{project}/layer{layer}/attr_{attribute_id}/binary_probe_model.pt"
+    if not os.path.exists(probe_path):
+        probe_weights = None
+    else:
+        probe_weights = torch.load(probe_path)
+    
+    return embeddings, probe_weights
+
+def compute_average_cosine_similarity(embeddings, probe_weights):
+    """Compute average cosine similarity between embeddings and probe weights"""
+    # Extract linear layer weights from probe state dict
+    linear_weights = probe_weights['linear.weight'].squeeze()
+    
+    # Compute cosine similarity for each embedding
+    similarities = []
+    for index, emb in enumerate(embeddings):
+        if index % 100000 == 0:
+            print(f"Processing embedding {index + 1}/{len(embeddings)}")
+        sim = F.cosine_similarity(emb.unsqueeze(0), linear_weights.unsqueeze(0))
+        similarities.append(sim.item())
+    
+    # Return average similarity
+    return np.mean(similarities)
+
+
+def compute_similarity_matrix(layers, attributes, project, save_matrix_path=None):
+    """Create heatmap of cosine similarities across layers and attributes"""
+    # Initialize similarity matrix
+    similarity_matrix = np.zeros((len(attributes), len(layers)))
+    
+    # Compute similarities for each layer and attribute
+    for i, attr_id in enumerate(attributes):
+        print(f"Processing attribute {attr_id}")
+        for j, layer in enumerate(layers):
+            print(f"Processing layer {layer}")
+            try:
+                embeddings, probe_weights = load_embeddings_and_probe(layer, attr_id, project)
+                print(f"Embeddings shape: {embeddings.shape}")
+                if probe_weights is None:
+                    similarity = 0
+                else:
+                    similarity = compute_average_cosine_similarity(embeddings, probe_weights)
+                similarity_matrix[i, j] = similarity
+            except Exception as e:
+                print(f"Error processing layer {layer}, attribute {attr_id}: {e}")
+                similarity_matrix[i, j] = np.nan
+
+    if save_matrix_path:
+        if not os.path.exists(os.path.dirname(save_matrix_path)):
+            os.makedirs(os.path.dirname(save_matrix_path))
+        np.save(save_matrix_path, similarity_matrix)
+    
+def create_cosine_similarity_heatmap(layers, attributes, tokenizer_path, similarity_matrix, project, save_path=None):
+    # Load tokenizer for attribute names
+    tokenizer = load_tokenizer(tokenizer_path)
+
+    # Create attribute labels using tokenizer
+    attr_labels = [tokenizer.id_to_token[attr_id] for attr_id in attributes]
+    
+    # Create heatmap
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(
+        similarity_matrix,
+        xticklabels=[f'Layer {l}' for l in layers],
+        yticklabels=attr_labels,
+        cmap='viridis',
+        annot=True,
+        fmt='.3f'
+    )
+    
+    plt.title(f'{project}: Average Cosine Sim')
+    plt.xlabel('Layers')
+    plt.ylabel('Attributes')
+    
+    # Save figure if path provided
+    if save_path:
+        save_dir = os.path.dirname(save_path)
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        plt.savefig(save_path, bbox_inches='tight', dpi=300)
+    
+    return plt.gcf()
 
 if __name__ == "__main__":
     seed = 42
@@ -155,24 +245,33 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
 
-    tokenizer = load_tokenizer(config.tokenizer_path)
-    for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
-        for capture_layer in range(4):
-            binary_dataset_path = f"{PATH_PREFIX}/attr_from_answer/layer{capture_layer}/binary_dataset_{attribute_id}.pt"
-            if os.path.exists(binary_dataset_path):
-                data = torch.load(binary_dataset_path)
-                binary_targets = data['binary_targets']
-                positive_samples = torch.sum(binary_targets).item()
-                total_samples = len(binary_targets)
-                negative_samples = total_samples - positive_samples
-                positive_percentage = (positive_samples / total_samples) * 100
-                negative_percentage = (negative_samples / total_samples) * 100
+    layers = range(4)
+    attributes = [3, 10, 11, 1, 8, 9, 5, 2, 7, 4, 0, 6]
+    project = "attr_from_answer"
+    save_matrix_path = f"{PATH_PREFIX}/{project}/similarity_matrix.npy"
+    save_fig_path = f"COMPLETE_FIGS/{project}/similarity_heatmap.png"
 
-                print(f"Layer {capture_layer}, Attribute {tokenizer.id_to_token[attribute_id]}, {attribute_id}, :")
-                print(f"Positive samples: {positive_samples} ({positive_percentage:.2f}%)")
-                print(f"Negative samples: {negative_samples} ({negative_percentage:.2f}%)")
-            else:
-                print(f"Dataset for layer {capture_layer}, attribute {attribute_id} not found.")
+    sim_matrix = compute_similarity_matrix(layers, attributes, project, save_matrix_path=None)
+    create_cosine_similarity_heatmap(layers, attributes, config.tokenizer_path, sim_matrix, project, save_fig_path)
+
+    # tokenizer = load_tokenizer(config.tokenizer_path)
+    # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
+    #     for capture_layer in range(4):
+    #         binary_dataset_path = f"{PATH_PREFIX}/attr_from_answer/layer{capture_layer}/binary_dataset_{attribute_id}.pt"
+    #         if os.path.exists(binary_dataset_path):
+    #             data = torch.load(binary_dataset_path)
+    #             binary_targets = data['binary_targets']
+    #             positive_samples = torch.sum(binary_targets).item()
+    #             total_samples = len(binary_targets)
+    #             negative_samples = total_samples - positive_samples
+    #             positive_percentage = (positive_samples / total_samples) * 100
+    #             negative_percentage = (negative_samples / total_samples) * 100
+
+    #             print(f"Layer {capture_layer}, Attribute {tokenizer.id_to_token[attribute_id]}, {attribute_id}, :")
+    #             print(f"Positive samples: {positive_samples} ({positive_percentage:.2f}%)")
+    #             print(f"Negative samples: {negative_samples} ({negative_percentage:.2f}%)")
+    #         else:
+    #             print(f"Dataset for layer {capture_layer}, attribute {attribute_id} not found.")
                 
     # dataset = torch.load(config.dataset_path)
     # train_loader, val_loader = initialize_loaders(config, dataset)
