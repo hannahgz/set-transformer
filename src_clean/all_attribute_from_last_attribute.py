@@ -1289,7 +1289,7 @@ def compute_similarity_matrix(layers, attributes, project, save_matrix_path=None
                 similarity_matrix[i, j] = np.nan
 
     if save_matrix_path:
-        if os.path.exists(os.path.dirname(save_matrix_path)):
+        if not os.path.exists(os.path.dirname(save_matrix_path)):
             os.makedirs(os.path.dirname(save_matrix_path))
         np.save(save_matrix_path, similarity_matrix)
     
