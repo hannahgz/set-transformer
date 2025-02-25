@@ -1233,15 +1233,15 @@ def plot_all_layers_metrics(layers, tokenizer_path, loss_range = [0, 0.5], acc_r
 # Usage example:
 # plot_all_layers_metrics([8, 9, 10, 11], "path/to/tokenizer")
 
-def load_embeddings_and_probe(layer, attribute_id, path_prefix):
+def load_embeddings_and_probe(layer, attribute_id, project):
     """Load embeddings and binary probe for a specific layer and attribute"""
     # Load embeddings
-    embeddings_path = f"{path_prefix}/all_attr_from_last_attr_binding/layer{layer}/embeddings_and_attributes.pt"
+    embeddings_path = f"{PATH_PREFIX}/{project}/layer{layer}/embeddings_and_attributes.pt"
     embeddings_data = torch.load(embeddings_path)
     embeddings = embeddings_data['input_embeddings']
     
     # Load binary probe
-    probe_path = f"{path_prefix}/all_attr_from_last_attr_binding/layer{layer}/attr_{attribute_id}/binary_probe_model.pt"
+    probe_path = f"{PATH_PREFIX}/{project}/layer{layer}/attr_{attribute_id}/binary_probe_model.pt"
     probe_weights = torch.load(probe_path)
     
     return embeddings, probe_weights
@@ -1260,25 +1260,32 @@ def compute_average_cosine_similarity(embeddings, probe_weights):
     # Return average similarity
     return np.mean(similarities)
 
-def create_cosine_similarity_heatmap(path_prefix, layers, attributes, tokenizer_path, save_path=None):
+
+def compute_similarity_matrix(layers, attributes, project, save_matrix_path=None):
     """Create heatmap of cosine similarities across layers and attributes"""
     # Initialize similarity matrix
     similarity_matrix = np.zeros((len(attributes), len(layers)))
-    
-    # Load tokenizer for attribute names
-    tokenizer = load_tokenizer(tokenizer_path)
     
     # Compute similarities for each layer and attribute
     for i, attr_id in enumerate(attributes):
         for j, layer in enumerate(layers):
             try:
-                embeddings, probe_weights = load_embeddings_and_probe(layer, attr_id, path_prefix)
+                embeddings, probe_weights = load_embeddings_and_probe(layer, attr_id, project)
                 similarity = compute_average_cosine_similarity(embeddings, probe_weights)
                 similarity_matrix[i, j] = similarity
             except Exception as e:
                 print(f"Error processing layer {layer}, attribute {attr_id}: {e}")
                 similarity_matrix[i, j] = np.nan
+
+    if save_matrix_path:
+        if os.path.exists(os.path.dirname(save_matrix_path)):
+            os.makedirs(os.path.dirname(save_matrix_path))
+        np.save(save_matrix_path, similarity_matrix)
     
+def create_cosine_similarity_heatmap(layers, attributes, tokenizer_path, similarity_matrix, project, save_path=None):
+    # Load tokenizer for attribute names
+    tokenizer = load_tokenizer(tokenizer_path)
+
     # Create attribute labels using tokenizer
     attr_labels = [tokenizer.id_to_token[attr_id] for attr_id in attributes]
     
@@ -1293,7 +1300,7 @@ def create_cosine_similarity_heatmap(path_prefix, layers, attributes, tokenizer_
         fmt='.3f'
     )
     
-    plt.title('Average Cosine Similarities Across Layers and Attributes')
+    plt.title(f'{project}: Average Cosine Sim')
     plt.xlabel('Layers')
     plt.ylabel('Attributes')
     
@@ -1332,6 +1339,8 @@ def test_reorder_results(tokenizer_path):
             reorder_indices.append(current_positions[label])
     breakpoint()
 
+    # [3, 10, 11, 1, 8, 9, 5, 2, 7, 4, 0, 6] ORDERED VERSION TO USE
+
 if __name__ == "__main__":
     seed = 42
     torch.manual_seed(seed)
@@ -1340,12 +1349,21 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
 
+    layers = range(4)
+    attributes = [3, 10, 11, 1, 8, 9, 5, 2, 7, 4, 0, 6]
+    project = "binary-probe-training-all-attr"
+    save_matrix_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/similarity_matrix.npy"
+    save_fig_path = f"COMPLETE_FIGS/attr_from_last_attr_binding/similarity_heatmap.png"
+
+    sim_matrix = compute_similarity_matrix(layers, attributes, project, save_matrix_path=None)
+    create_cosine_similarity_heatmap(layers, attributes, config.tokenizer_path, sim_matrix, project, save_fig_path)
+
     # for target_layer in range(4):
     #     plot_metrics_by_layer(
     #         target_layer=target_layer,
     #         tokenizer_path=config.tokenizer_path,
     #     )
-    test_reorder_results(config.tokenizer_path)
+    
     # plot_all_layers_metrics(
     #     layers=[0, 1, 2, 3],
     #     tokenizer_path=config.tokenizer_path,)
