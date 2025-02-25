@@ -1306,6 +1306,29 @@ def create_cosine_similarity_heatmap(path_prefix, layers, attributes, tokenizer_
     
     return plt.gcf()
     
+def test_reorder_results(attr_labels=[1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]):
+    """Reorder matrix rows and labels according to attribute type"""
+    shapes = ["oval", "squiggle", "diamond"]
+    colors = ["green", "blue", "pink"]
+    numbers = ["one", "two", "three"]
+    shadings = ["solid", "striped", "open"]
+    
+    # Create the desired order
+    desired_order = shapes + colors + numbers + shadings
+    
+    # Create mapping from current positions to desired positions
+    current_positions = {label: i for i, label in enumerate(attr_labels)}
+    
+    # Create reordering indices
+    reorder_indices = []
+    ordered_labels = []
+    
+    for label in desired_order:
+        if label in current_positions:
+            reorder_indices.append(current_positions[label])
+            ordered_labels.append(label)
+    breakpoint()
+
 if __name__ == "__main__":
     seed = 42
     torch.manual_seed(seed)
@@ -1319,10 +1342,10 @@ if __name__ == "__main__":
     #         target_layer=target_layer,
     #         tokenizer_path=config.tokenizer_path,
     #     )
-
-    plot_all_layers_metrics(
-        layers=[0, 1, 2, 3],
-        tokenizer_path=config.tokenizer_path,)
+    test_reorder_results()
+    # plot_all_layers_metrics(
+    #     layers=[0, 1, 2, 3],
+    #     tokenizer_path=config.tokenizer_path,)
 
     # capture_layer = 0
     # init_all_attr_from_last_atrr_binding_dataset(
