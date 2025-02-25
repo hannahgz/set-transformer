@@ -1257,7 +1257,7 @@ def compute_average_cosine_similarity(embeddings, probe_weights):
     # Compute cosine similarity for each embedding
     similarities = []
     for index, emb in enumerate(embeddings):
-        print(f"Processing embedding {index + 1}/{len(embeddings)}")
+        # print(f"Processing embedding {index + 1}/{len(embeddings)}")
         sim = F.cosine_similarity(emb.unsqueeze(0), linear_weights.unsqueeze(0))
         similarities.append(sim.item())
     
