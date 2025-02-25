@@ -742,6 +742,70 @@ def plot_probe_weight_cosine_sim_mean_centroid(model_config, probe_config, captu
     plt.tight_layout()
     return plt.gcf()
 
+def plot_probe_weight_pca(model_config, probe_config, capture_layer, n_components=2):
+    continuous_to_original = load_continuous_to_original_from_config(
+        probe_config, capture_layer=capture_layer)
+    tokenizer = load_tokenizer(model_config.tokenizer_path)
+
+    # Get card labels
+    cards = []
+    for i in range(probe_config.output_dim):
+        cards.append(tokenizer.decode([continuous_to_original[i]])[0])
+    
+    # Load probe and get weights
+    probe = load_linear_probe_from_config(probe_config, capture_layer)
+    probe_weights = probe.fc.weight.data.detach()  # Shape: [output_dim, hidden_size]
+    
+    # Convert to numpy array if it's a torch tensor
+    if isinstance(probe_weights, torch.Tensor):
+        probe_weights = probe_weights.numpy()
+    
+    # Apply PCA
+    from sklearn.decomposition import PCA
+    pca = PCA(n_components=n_components)
+    pca_result = pca.fit_transform(probe_weights)
+    
+    # Create the visualization
+    plt.figure(figsize=(10, 8))
+    
+    # For 2D PCA
+    if n_components == 2:
+        plt.scatter(pca_result[:, 0], pca_result[:, 1], alpha=0.8)
+        
+        # Add labels
+        for i, card in enumerate(cards):
+            plt.annotate(card, (pca_result[i, 0], pca_result[i, 1]), 
+                         fontsize=12, alpha=0.8)
+        
+        plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]:.2%} variance)')
+        plt.ylabel(f'PC2 ({pca.explained_variance_ratio_[1]:.2%} variance)')
+        
+    # For 3D PCA
+    elif n_components == 3:
+        from mpl_toolkits.mplot3d import Axes3D
+        ax = plt.figure(figsize=(10, 8)).add_subplot(111, projection='3d')
+        
+        ax.scatter(pca_result[:, 0], pca_result[:, 1], pca_result[:, 2], alpha=0.8)
+        
+        # Add labels
+        for i, card in enumerate(cards):
+            ax.text(pca_result[i, 0], pca_result[i, 1], pca_result[i, 2], card, 
+                    fontsize=12, alpha=0.8)
+        
+        ax.set_xlabel(f'PC1 ({pca.explained_variance_ratio_[0]:.2%})')
+        ax.set_ylabel(f'PC2 ({pca.explained_variance_ratio_[1]:.2%})')
+        ax.set_zlabel(f'PC3 ({pca.explained_variance_ratio_[2]:.2%})')
+    
+    plt.title(f'Layer {capture_layer}: PCA of Probe Weight Vectors')
+    plt.grid(alpha=0.3)
+    plt.tight_layout()
+    
+    # Print additional information about the PCA
+    print(f"Total explained variance: {sum(pca.explained_variance_ratio_):.2%}")
+    for i in range(n_components):
+        print(f"PC{i+1} explained variance: {pca.explained_variance_ratio_[i]:.2%}")
+    
+    return plt.gcf(), pca
 
 if __name__ == "__main__":
     seed = 42
@@ -751,6 +815,23 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
 
+    n_components = 2
+    for layer in range(4):
+        fig, pca = plot_probe_weight_pca(
+            model_config=config, 
+            probe_config=LinearProbeBindingCardAttrConfig, 
+            capture_layer=layer, 
+            n_components=n_components)
+        fig.savefig(f"COMPLETE_FIGS/pca/probe_weight_vectors_layer{layer}_n_components_{n_components}.png", bbox_inches="tight")
+
+    n_components = 3
+    for layer in range(4):
+        fig, pca = plot_probe_weight_pca(
+            model_config=config, 
+            probe_config=LinearProbeBindingCardAttrConfig, 
+            capture_layer=layer, 
+            n_components=n_components)
+        fig.savefig(f"COMPLETE_FIGS/pca/probe_weight_vectors_layer{layer}_n_components_{n_components}.png", bbox_inches="tight")
     # for capture_layer in range(4):
 
     #     # avg_similarity_matrix = linear_probe_vector_analysis_average(
@@ -770,18 +851,18 @@ if __name__ == "__main__":
     #         config=LinearProbeBindingCardAttrConfig, capture_layer=capture_layer)
     #     breakpoint()
 
-    for capture_layer in range(4):
-        # probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(
-        #     model_config=config,
-        #     probe_config=LinearProbeBindingCardAttrConfig(), 
-        #     capture_layer=capture_layer)
-        probe_weight_cosine_sim_mean_centroid = plot_probe_weight_cosine_sim_mean_centroid(
-            model_config=config,
-            probe_config=LinearProbeBindingCardAttrConfig(),
-            capture_layer=capture_layer
-        )
-        probe_weight_cosine_sim_mean_centroid.savefig(f"COMPLETE_FIGS/cosine_sim/centroid_sorted_probe_weight_cosine_sim_layer{capture_layer}.png", bbox_inches="tight")
-        # probe_weight_cosine_sim_fig.savefig(f"COMPLETE_FIGS/cosine_sim/sorted_probe_weight_cosine_sim_layer{capture_layer}.png", bbox_inches="tight")
+    # for capture_layer in range(4):
+    #     # probe_weight_cosine_sim_fig = plot_probe_weight_cosine_sim(
+    #     #     model_config=config,
+    #     #     probe_config=LinearProbeBindingCardAttrConfig(), 
+    #     #     capture_layer=capture_layer)
+    #     probe_weight_cosine_sim_mean_centroid = plot_probe_weight_cosine_sim_mean_centroid(
+    #         model_config=config,
+    #         probe_config=LinearProbeBindingCardAttrConfig(),
+    #         capture_layer=capture_layer
+    #     )
+    #     probe_weight_cosine_sim_mean_centroid.savefig(f"COMPLETE_FIGS/cosine_sim/centroid_sorted_probe_weight_cosine_sim_layer{capture_layer}.png", bbox_inches="tight")
+    #     # probe_weight_cosine_sim_fig.savefig(f"COMPLETE_FIGS/cosine_sim/sorted_probe_weight_cosine_sim_layer{capture_layer}.png", bbox_inches="tight")
 
     # avg_similarity_matrix = linear_probe_vector_analysis_average(
     #     model_config=config, 
