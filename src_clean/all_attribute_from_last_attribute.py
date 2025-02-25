@@ -1236,12 +1236,12 @@ def plot_all_layers_metrics(layers, tokenizer_path, loss_range = [0, 0.5], acc_r
 def load_embeddings_and_probe(layer, attribute_id, project):
     """Load embeddings and binary probe for a specific layer and attribute"""
     # Load embeddings
-    embeddings_path = f"{PATH_PREFIX}/{project}/layer{layer}/embeddings_and_attributes.pt"
+    embeddings_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{layer}/embeddings_and_attributes.pt"
     embeddings_data = torch.load(embeddings_path)
     embeddings = embeddings_data['input_embeddings']
     
     # Load binary probe
-    probe_path = f"{PATH_PREFIX}/{project}/layer{layer}/attr_{attribute_id}/binary_probe_model.pt"
+    probe_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{layer}/attr_{attribute_id}/binary_probe_model.pt"
     probe_weights = torch.load(probe_path)
     
     return embeddings, probe_weights
