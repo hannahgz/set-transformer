@@ -1242,7 +1242,10 @@ def load_embeddings_and_probe(layer, attribute_id, project):
     
     # Load binary probe
     probe_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{layer}/attr_{attribute_id}/binary_probe_model.pt"
-    probe_weights = torch.load(probe_path)
+    if not os.path.exists(probe_path):
+        probe_weights = None
+    else:
+        probe_weights = torch.load(probe_path)
     
     return embeddings, probe_weights
 
@@ -1271,7 +1274,10 @@ def compute_similarity_matrix(layers, attributes, project, save_matrix_path=None
         for j, layer in enumerate(layers):
             try:
                 embeddings, probe_weights = load_embeddings_and_probe(layer, attr_id, project)
-                similarity = compute_average_cosine_similarity(embeddings, probe_weights)
+                if probe_weights is None:
+                    similarity = 0
+                else:
+                    similarity = compute_average_cosine_similarity(embeddings, probe_weights)
                 similarity_matrix[i, j] = similarity
             except Exception as e:
                 print(f"Error processing layer {layer}, attribute {attr_id}: {e}")
