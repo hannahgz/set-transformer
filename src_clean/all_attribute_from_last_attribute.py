@@ -1271,7 +1271,9 @@ def compute_similarity_matrix(layers, attributes, project, save_matrix_path=None
     
     # Compute similarities for each layer and attribute
     for i, attr_id in enumerate(attributes):
+        print(f"Processing attribute {attr_id}")
         for j, layer in enumerate(layers):
+            print(f"Processing layer {layer}")
             try:
                 embeddings, probe_weights = load_embeddings_and_probe(layer, attr_id, project)
                 if probe_weights is None:
