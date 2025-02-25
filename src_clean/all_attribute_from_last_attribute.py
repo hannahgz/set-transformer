@@ -1354,6 +1354,153 @@ def test_reorder_results(tokenizer_path):
 
     # [3, 10, 11, 1, 8, 9, 5, 2, 7, 4, 0, 6] ORDERED VERSION TO USE
 
+def load_probe_weights(layer, attribute_id):
+    """Load binary probe weights for a specific layer and attribute"""
+    probe_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{layer}/attr_{attribute_id}/binary_probe_model.pt"
+    if not os.path.exists(probe_path):
+        return None
+    else:
+        return torch.load(probe_path)['linear.weight'].squeeze()
+
+def compute_probe_similarity_per_layer(layer, attributes, save_matrix_path=None):
+    """Create matrix of cosine similarities between probe weights for a specific layer"""
+    # Initialize dictionary to store probe weights
+    probe_weights_dict = {}
+    
+    # Load all probe weights for this layer
+    for attr_id in attributes:
+        try:
+            weights = load_probe_weights(layer, attr_id)
+            if weights is not None:
+                probe_weights_dict[attr_id] = weights
+                print(f"Loaded probe weights for layer {layer}, attribute {attr_id}")
+            else:
+                print(f"No probe weights found for layer {layer}, attribute {attr_id}")
+        except Exception as e:
+            print(f"Error loading probe weights for layer {layer}, attribute {attr_id}: {e}")
+    
+    # Initialize similarity matrix
+    attr_ids = list(probe_weights_dict.keys())
+    n = len(attr_ids)
+    similarity_matrix = np.zeros((n, n))
+    
+    # Compute cosine similarities between all pairs of probe weights
+    for i, attr_i in enumerate(attr_ids):
+        for j, attr_j in enumerate(attr_ids):
+            if i == j:
+                similarity_matrix[i, j] = 1.0  # Same weights, perfect similarity
+            else:
+                # Compute cosine similarity between probe weights
+                weights_i = probe_weights_dict[attr_i]
+                weights_j = probe_weights_dict[attr_j]
+                sim = F.cosine_similarity(weights_i.unsqueeze(0), weights_j.unsqueeze(0))
+                similarity_matrix[i, j] = sim.item()
+    
+    # Create a DataFrame for easier interpretation
+    import pandas as pd
+    sim_df = pd.DataFrame(similarity_matrix, index=attr_ids, columns=attr_ids)
+    
+    if save_matrix_path:
+        if not os.path.exists(os.path.dirname(save_matrix_path)):
+            os.makedirs(os.path.dirname(save_matrix_path))
+        np.save(save_matrix_path, similarity_matrix)
+        sim_df.to_csv(f"{save_matrix_path.replace('.npy', '.csv')}")
+
+    return similarity_matrix, sim_df, attr_ids
+
+def create_probe_similarity_heatmap_per_layer(layer, similarity_matrix, attr_ids, tokenizer_path, project, save_path=None):
+    """Create heatmap of cosine similarities between probe weights for a specific layer"""
+    # Load tokenizer for attribute names
+    tokenizer = load_tokenizer(tokenizer_path)
+    
+    # Create labels for the heatmap using attribute tokens
+    labels = [tokenizer.id_to_token[attr_id] for attr_id in attr_ids]
+    
+    # Create heatmap
+    plt.figure(figsize=(12, 10))
+    sns.heatmap(
+        similarity_matrix,
+        xticklabels=labels,
+        yticklabels=labels,
+        cmap='viridis',
+        annot=True,  # Setting to True as the matrix should be smaller now
+        fmt='.2f',
+        vmin=-1,
+        vmax=1
+    )
+    
+    plt.title(f'{project}: Layer {layer} Probe Weights Cosine Similarity')
+    plt.xlabel('Attribute')
+    plt.ylabel('Attribute')
+    plt.xticks(rotation=90)
+    plt.yticks(rotation=0)
+    
+    # Save figure if path provided
+    if save_path:
+        save_dir = os.path.dirname(save_path)
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        plt.savefig(save_path, bbox_inches='tight', dpi=300)
+    
+    return plt.gcf()
+
+def run_layer_probe_similarity_analysis(project, layers, attributes, tokenizer_path):
+    """Run probe similarity analysis for each layer separately"""
+    results = {}
+    tokenizer = load_tokenizer(tokenizer_path)
+    for layer in layers:
+        print(f"\nProcessing Layer {layer}")
+        matrix_save_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{layer}_probe_similarity_matrix.npy"
+        heatmap_save_path = f"COMPLETE_FIGS/attr_from_last_attr_binding/layer{layer}_probe_similarity_heatmap.png"
+        
+        # Compute similarity matrix for this layer
+        similarity_matrix, sim_df, attr_ids = compute_probe_similarity_per_layer(
+            layer, attributes, save_matrix_path=matrix_save_path
+        )
+        
+        # Create and save heatmap for this layer
+        heatmap = create_probe_similarity_heatmap_per_layer(
+            layer, similarity_matrix, attr_ids, tokenizer_path, project, save_path=heatmap_save_path
+        )
+        
+        # Store results
+        results[layer] = {
+            'similarity_matrix': similarity_matrix,
+            'dataframe': sim_df,
+            'attribute_ids': attr_ids,
+            'heatmap': heatmap
+        }
+        
+        # Print some statistics for this layer
+        if len(attr_ids) > 1:
+            # Extract upper triangle (excluding diagonal)
+            upper_tri = np.triu(similarity_matrix, k=1)
+            valid_values = upper_tri[upper_tri != 0]
+            
+            if len(valid_values) > 0:
+                print(f"Layer {layer} Statistics:")
+                print(f"  Mean similarity: {np.mean(valid_values):.4f}")
+                print(f"  Max similarity: {np.max(valid_values):.4f}")
+                print(f"  Min similarity: {np.min(valid_values):.4f}")
+                
+                # Find max similarity pair
+                max_idx = np.unravel_index(np.argmax(upper_tri), upper_tri.shape)
+                attr1 = tokenizer.id_to_token[attr_ids[max_idx[0]]]
+                attr2 = tokenizer.id_to_token[attr_ids[max_idx[1]]]
+                max_sim = upper_tri[max_idx]
+                print(f"  Most similar pair: {attr1} ↔ {attr2} ({max_sim:.4f})")
+    
+    print("\nCompleted analysis for all layers")
+    return results
+
+# Example usage:
+# results = run_layer_probe_similarity_analysis(
+#     project="your_project_name",
+#     layers=[1, 2, 3, 4],
+#     attributes=[list of attribute IDs],
+#     tokenizer_path="path/to/tokenizer"
+# )
+
 if __name__ == "__main__":
     seed = 42
     torch.manual_seed(seed)
@@ -1361,15 +1508,22 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
+    project = "Attribute From Last Attribute"
+    run_layer_probe_similarity_analysis(
+        project=project,
+        layers=[1, 2, 3, 4],
+        attributes=[6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11],
+        tokenizer_path=config.tokenizer_path
+    )
     # test_reorder_results(config.tokenizer_path)
-    layers = range(4)
-    attributes = [6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11]
-    project = "binary-probe-training-all-attr"
-    save_matrix_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/similarity_matrix.npy"
-    save_fig_path = f"COMPLETE_FIGS/attr_from_last_attr_binding/similarity_heatmap.png"
+    # layers = range(4)
+    # attributes = [6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11]
+    # project = "binary-probe-training-all-attr"
+    # save_matrix_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/similarity_matrix.npy"
+    # save_fig_path = f"COMPLETE_FIGS/attr_from_last_attr_binding/similarity_heatmap.png"
 
-    sim_matrix = compute_similarity_matrix(layers, attributes, project, save_matrix_path=save_matrix_path)
-    create_cosine_similarity_heatmap(layers, attributes, config.tokenizer_path, sim_matrix, project, save_fig_path)
+    # sim_matrix = compute_similarity_matrix(layers, attributes, project, save_matrix_path=save_matrix_path)
+    # create_cosine_similarity_heatmap(layers, attributes, config.tokenizer_path, sim_matrix, project, save_fig_path)
 
     # for target_layer in range(4):
     #     plot_metrics_by_layer(
