@@ -1349,7 +1349,7 @@ def test_reorder_results(tokenizer_path):
     reorder_indices = []
     for label in desired_order:
         if label in current_positions:
-            reorder_indices.append(current_positions[label])
+            reorder_indices.append(token_ids[current_positions[label]])
     breakpoint()
 
     # [3, 10, 11, 1, 8, 9, 5, 2, 7, 4, 0, 6] ORDERED VERSION TO USE
