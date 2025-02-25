@@ -1083,7 +1083,7 @@ def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-pro
     
     plt.show()
 
-def plot_all_layers_metrics(layers, tokenizer_path, project_name="binary-probe-training-all-attr", entity="hazhou-harvard"):
+def plot_all_layers_metrics(layers, tokenizer_path, loss_range = [0, 0.5], acc_range = [0.7, 1], project_name="binary-probe-training-all-attr", entity="hazhou-harvard"):
     """
     Create four figures:
     1. Training losses across all layers
@@ -1170,7 +1170,7 @@ def plot_all_layers_metrics(layers, tokenizer_path, project_name="binary-probe-t
             axes_train_loss[layer_idx].set_title(f'Layer {target_layer} Training Loss')
             axes_train_loss[layer_idx].set_xlabel('Epoch')
             axes_train_loss[layer_idx].set_ylabel('Loss')
-            axes_train_loss[layer_idx].set_ylim(0, 0.5)
+            axes_train_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
             
             # Plot validation loss
             axes_val_loss[layer_idx].plot(history['epoch'], history['val_loss'], 
@@ -1178,7 +1178,7 @@ def plot_all_layers_metrics(layers, tokenizer_path, project_name="binary-probe-t
             axes_val_loss[layer_idx].set_title(f'Layer {target_layer} Validation Loss')
             axes_val_loss[layer_idx].set_xlabel('Epoch')
             axes_val_loss[layer_idx].set_ylabel('Loss')
-            axes_val_loss[layer_idx].set_ylim(0, 0.5)
+            axes_val_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
             
             # Plot training accuracy
             axes_train_acc[layer_idx].plot(history['epoch'], history['train_accuracy'], 
@@ -1186,7 +1186,7 @@ def plot_all_layers_metrics(layers, tokenizer_path, project_name="binary-probe-t
             axes_train_acc[layer_idx].set_title(f'Layer {target_layer} Training Accuracy')
             axes_train_acc[layer_idx].set_xlabel('Epoch')
             axes_train_acc[layer_idx].set_ylabel('Accuracy')
-            axes_train_acc[layer_idx].set_ylim(0.7, 1)
+            axes_train_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
             
             # Plot validation accuracy
             axes_val_acc[layer_idx].plot(history['epoch'], history['val_accuracy'], 
@@ -1194,7 +1194,7 @@ def plot_all_layers_metrics(layers, tokenizer_path, project_name="binary-probe-t
             axes_val_acc[layer_idx].set_title(f'Layer {target_layer} Validation Accuracy')
             axes_val_acc[layer_idx].set_xlabel('Epoch')
             axes_val_acc[layer_idx].set_ylabel('Accuracy')
-            axes_val_acc[layer_idx].set_ylim(0.7, 1)
+            axes_val_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
         
         # Add legends
         axes_train_loss[layer_idx].legend(bbox_to_anchor=(1.05, 1), loc='upper left')

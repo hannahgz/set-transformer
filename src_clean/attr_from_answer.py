@@ -168,6 +168,8 @@ if __name__ == "__main__":
         layers=[0, 1, 2, 3],
         tokenizer_path=config.tokenizer_path,
         project_name=project,
+        loss_range=[0.43, 0.63],
+        acc_range=[0.65, 0.81]
         )
     
     # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
