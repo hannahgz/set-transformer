@@ -1361,12 +1361,12 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     config = GPTConfig44_Complete()
-    test_reorder_results(config.tokenizer_path)
-    # layers = range(4)
-    # attributes = [3, 10, 11, 1, 8, 9, 5, 2, 7, 4, 0, 6]
-    # project = "binary-probe-training-all-attr"
-    # save_matrix_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/similarity_matrix.npy"
-    # save_fig_path = f"COMPLETE_FIGS/attr_from_last_attr_binding/similarity_heatmap.png"
+    # test_reorder_results(config.tokenizer_path)
+    layers = range(4)
+    attributes = [6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11]
+    project = "binary-probe-training-all-attr"
+    save_matrix_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/similarity_matrix.npy"
+    save_fig_path = f"COMPLETE_FIGS/attr_from_last_attr_binding/similarity_heatmap.png"
 
     # sim_matrix = compute_similarity_matrix(layers, attributes, project, save_matrix_path=save_matrix_path)
     # create_cosine_similarity_heatmap(layers, attributes, config.tokenizer_path, sim_matrix, project, save_fig_path)

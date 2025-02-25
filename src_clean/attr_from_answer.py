@@ -248,7 +248,7 @@ if __name__ == "__main__":
     config = GPTConfig44_Complete()
 
     layers = range(4)
-    attributes = [3, 10, 11, 1, 8, 9, 5, 2, 7, 4, 0, 6]
+    attributes = [6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11]
     project = "attr_from_answer"
     save_matrix_path = f"{PATH_PREFIX}/{project}/similarity_matrix.npy"
     save_fig_path = f"COMPLETE_FIGS/{project}/similarity_heatmap.png"
