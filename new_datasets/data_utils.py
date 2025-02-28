@@ -139,9 +139,8 @@ def generate_combinations(target_size, pad_symbol, n_cards, random_order=False, 
 
         target_seq = get_target_seq(
                 combination, target_size, pad_symbol, shuffled_card_vectors)
-        # random.seed(42)
+        
         for i in range(random_iterations):
-            # random.seed(42 + i)
             # Randomize the array
             if random_order:
                 random.shuffle(shuffled_tuple_array)
