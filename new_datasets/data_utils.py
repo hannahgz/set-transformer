@@ -210,6 +210,8 @@ def initialize_triples_datasets(config):
     dataset = BalancedTriplesSetDataset(
         no_set_sequences, one_set_sequences, two_set_sequences)
 
+    breakpoint()
+    
     if config.dataset_path:
         torch.save(dataset, config.dataset_path)
     return dataset
@@ -274,11 +276,9 @@ if __name__ == "__main__":
 
         if not os.path.exists(os.path.dirname(dataset_path)):
             os.makedirs(os.path.dirname(dataset_path))
-            
-        breakpoint()
 
-        # print("Initializing triples dataset")
-        # initialize_triples_datasets(
-        #     config = config
-        # )
+        print("Initializing triples dataset")
+        initialize_triples_datasets(
+            config = config
+        )
 
