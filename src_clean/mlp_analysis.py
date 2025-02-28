@@ -163,9 +163,9 @@ def visualize_mlp_weights(mlp_weights, save_dir):
 
 if __name__ == "__main__":
     config = GPTConfig44_Complete()
-    # print("Extracting mlp weights")
-    # model, mlp_weights = load_model_and_extract_mlp_weights(config)
+    print("Extracting mlp weights")
+    model, mlp_weights = load_model_and_extract_mlp_weights(config)
 
-    mlp_weights = torch.load(f"{PATH_PREFIX}/mlp_triples_card_randomization_tuple_randomization_layers_4_heads_4.pt")
+    # mlp_weights = torch.load(f"{PATH_PREFIX}/mlp_triples_card_randomization_tuple_randomization_layers_4_heads_4.pt")
     breakpoint()
     # visualize_mlp_weights(mlp_weights, f"COMPLETE_FIGS/mlp")
