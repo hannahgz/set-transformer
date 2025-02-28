@@ -29,6 +29,7 @@ def load_model_and_extract_mlp_weights(config):
     # Extract MLP weights from each layer
     mlp_weights = {}
     for i, block in enumerate(model.transformer.h):
+        print(f"Layer {i}")
         layer_weights = {
             'c_fc': block.mlp.c_fc.weight.detach().cpu().numpy(),  # Expansion weights
             'c_proj': block.mlp.c_proj.weight.detach().cpu().numpy()  # Projection weights
