@@ -1,5 +1,5 @@
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
@@ -8,129 +8,7 @@ import os
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 @dataclass
-class GPTConfig44:
-    lr: float = 1e-3
-    epochs: int = 100
-    batch_size: int = 64
-    n_layer: int = 4
-    n_head: int = 4
-    n_embd: int = 64
-    patience: int = 5
-    eval_freq: int = 0
-    dropout: float = 0.0
-    n_cards: int = 5
-    block_size: int = 49
-    vocab_size: int = 22
-    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
-    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
-    target_size: int = 8
-    pad_symbol: str = "_"
-    out_dir: str = ""
-    filename: str = "causal_full_run_random_layers_4_heads_4.pt"
-    end_of_seq_token: int = 13
-    padding_token: int = 14
-
-
-@dataclass
-class GPTConfig44_BalancedSets:
-    lr: float = 1e-3
-    epochs: int = 100
-    batch_size: int = 64
-    n_layer: int = 4
-    n_head: int = 4
-    n_embd: int = 64
-    patience: int = 5
-    eval_freq: int = 0
-    dropout: float = 0.0
-    n_cards: int = 5
-    block_size: int = 49
-    vocab_size: int = 22
-    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
-    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
-    target_size: int = 8
-    pad_symbol: str = "_"
-    out_dir: str = ""
-    filename: str = "larger_causal_balanced_random_layers_4_heads_4.pt"
-    end_of_seq_token: int = 13
-    padding_token: int = 14
-
-@dataclass
-class GPTConfig44_Final:
-    lr: float = 1e-3
-    epochs: int = 100
-    batch_size: int = 64
-    n_layer: int = 4
-    n_head: int = 4
-    n_embd: int = 64
-    patience: int = 5
-    eval_freq: int = 0
-    dropout: float = 0.0
-    n_cards: int = 5
-    block_size: int = 49
-    vocab_size: int = 22
-    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
-    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
-    target_size: int = 8
-    pad_symbol: str = "_"
-    out_dir: str = ""
-    filename: str = "final_causal_balanced_layers_4_heads_4.pt"
-    end_of_seq_token: int = 13
-    padding_token: int = 14
-
-@dataclass
-class GPTConfig44_FinalLR:
-    lr: float = 1e-3
-    epochs: int = 100
-    batch_size: int = 64
-    n_layer: int = 4
-    n_head: int = 4
-    n_embd: int = 64
-    patience: int = 5
-    eval_freq: int = 0
-    dropout: float = 0.0
-    n_cards: int = 5
-    block_size: int = 49
-    vocab_size: int = 22
-    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
-    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
-    target_size: int = 8
-    pad_symbol: str = "_"
-    out_dir: str = ""
-    filename: str = "final_lr_causal_balanced_layers_4_heads_4.pt"
-    end_of_seq_token: int = 13
-    padding_token: int = 14
-
-@dataclass
-class GPTConfig44_Equal:
-    lr: float = 4e-4  # Base learning rate
-    epochs: int = 25  # Reduced epochs due to large dataset
-    batch_size: int = 512  # Increased for better throughput
-    patience: int = 4  # Early stopping patience
-    eval_freq: int = 10000  # Evaluate every 2000 steps
-    # lr: float = 1e-3
-    # epochs: int = 100
-    # batch_size: int = 256
-    # patience: int = 5
-    # eval_freq: int = 0
-    n_layer: int = 4
-    n_head: int = 4
-    n_embd: int = 64
-    dropout: float = 0.0
-    n_cards: int = 5
-    block_size: int = 49
-    vocab_size: int = 22
-    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
-    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
-    target_size: int = 8
-    pad_symbol: str = "_"
-    out_dir: str = ""
-    filename: str = "equal_causal_balanced_layers_4_heads_4.pt"
-    end_of_seq_token: int = 13
-    padding_token: int = 14
-
-
-@dataclass
-class GPTConfig44_Complete:
+class GPTConfig44_Seeded:
     lr: float = 4e-4  # Base learning rate
     epochs: int = 25  # Reduced epochs due to large dataset
     batch_size: int = 512  # Increased for better throughput
@@ -148,63 +26,19 @@ class GPTConfig44_Complete:
     target_size: int = 8
     pad_symbol: str = "_"
     out_dir: str = ""
+    dataset_path: str = field(init=False)
+    filename: str = field(init=False)
     tokenizer_path: str = f"{PATH_PREFIX}/all_tokenizer.pkl"
-    dataset_path: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_dataset.pth"
-    filename: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
     end_of_seq_token: int = 13
     padding_token: int = 14
+    seed: int
 
-@dataclass
-class GPTConfig24_Complete:
-    lr: float = 4e-4  # Base learning rate
-    epochs: int = 25  # Reduced epochs due to large dataset
-    batch_size: int = 512  # Increased for better throughput
-    patience: int = 4  # Early stopping patience
-    eval_freq: int = 10000  # Evaluate every 2000 steps
-    n_layer: int = 2
-    n_head: int = 4
-    n_embd: int = 64
-    dropout: float = 0.0
-    n_cards: int = 5
-    block_size: int = 49
-    vocab_size: int = 22
-    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
-    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
-    target_size: int = 8
-    pad_symbol: str = "_"
-    out_dir: str = ""
-    tokenizer_path: str = f"{PATH_PREFIX}/all_tokenizer.pkl"
-    dataset_path: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_dataset.pth"
-    filename: str = "triples_card_randomization_tuple_randomization_layers_2_heads_4.pt"
-    end_of_seq_token: int = 13
-    padding_token: int = 14
-
-
-@dataclass
-class GPTConfig34_Complete:
-    lr: float = 4e-4  # Base learning rate
-    epochs: int = 25  # Reduced epochs due to large dataset
-    batch_size: int = 512  # Increased for better throughput
-    patience: int = 4  # Early stopping patience
-    eval_freq: int = 10000  # Evaluate every 2000 steps
-    n_layer: int = 3
-    n_head: int = 4
-    n_embd: int = 64
-    dropout: float = 0.0
-    n_cards: int = 5
-    block_size: int = 49
-    vocab_size: int = 22
-    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
-    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
-    target_size: int = 8
-    pad_symbol: str = "_"
-    out_dir: str = ""
-    tokenizer_path: str = f"{PATH_PREFIX}/all_tokenizer.pkl"
-    dataset_path: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_dataset.pth"
-    filename: str = "triples_card_randomization_tuple_randomization_layers_3_heads_4.pt"
-    end_of_seq_token: int = 13
-    padding_token: int = 14
-
+    # dataset_path: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_dataset.pth"
+    # filename: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
+    def __post_init__(self):
+        # Dynamically set paths using the seed
+        self.dataset_path = f"{PATH_PREFIX}/{self.seed}/triples_card_randomization_tuple_randomization_dataset.pth"
+        self.filename = f"{PATH_PREFIX}/{self.seed}/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
 
 class LayerNorm(nn.Module):
     """LayerNorm but with an optional bias. PyTorch doesn't support simply bias=False"""
