@@ -11,6 +11,7 @@ import time
 import pickle
 import numpy as np
 from model import GPTConfig44_Seeded
+import os
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
@@ -269,6 +270,11 @@ if __name__ == "__main__":
         np.random.seed(curr_seed)
 
         config = GPTConfig44_Seeded(seed = curr_seed)
+        dataset_path = config.dataset_path
+
+        if not os.path.exists(os.path.dirname(dataset_path)):
+            os.makedirs(os.path.dirname(dataset_path))
+            
         breakpoint()
 
         # print("Initializing triples dataset")
