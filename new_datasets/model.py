@@ -37,8 +37,8 @@ class GPTConfig44_Seeded:
     # filename: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
     def __post_init__(self):
         # Dynamically set paths using the seed
-        self.dataset_path = f"{PATH_PREFIX}/{self.seed}/triples_card_randomization_tuple_randomization_dataset.pth"
-        self.filename = f"{PATH_PREFIX}/{self.seed}/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
+        self.dataset_path = f"{PATH_PREFIX}/seed{self.seed}/triples_card_randomization_tuple_randomization_dataset.pth"
+        self.filename = f"{PATH_PREFIX}/seed{self.seed}/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
 
 class LayerNorm(nn.Module):
     """LayerNorm but with an optional bias. PyTorch doesn't support simply bias=False"""
