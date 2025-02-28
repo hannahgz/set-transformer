@@ -9,6 +9,7 @@ PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 @dataclass
 class GPTConfig44_Seeded:
+    seed: int
     lr: float = 4e-4  # Base learning rate
     epochs: int = 25  # Reduced epochs due to large dataset
     batch_size: int = 512  # Increased for better throughput
@@ -31,7 +32,6 @@ class GPTConfig44_Seeded:
     tokenizer_path: str = f"{PATH_PREFIX}/all_tokenizer.pkl"
     end_of_seq_token: int = 13
     padding_token: int = 14
-    seed: int
 
     # dataset_path: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_dataset.pth"
     # filename: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
