@@ -3,8 +3,6 @@ import torch
 from torch import optim
 import wandb
 from model import GPT
-# from model import GPTConfig24, GPTConfig42, GPTConfig44, GPTConfig, add_causal_masking, GPTConfig48, GPTConfig44_Patience20, GPTConfig44_AttrFirst
-from model import GPTConfig44_Equal
 from model import add_causal_masking
 from data_utils import initialize_loaders, initialize_triples_datasets
 import random
@@ -196,8 +194,9 @@ def evaluate_val_loss(model, val_loader, optimizer, best_val_loss, val_losses, c
             "best_val_loss": best_val_loss,
             "config": config,
         }
-        print(f"saving checkpoint to {PATH_PREFIX}")
-        torch.save(checkpoint, f"{PATH_PREFIX}/{config.filename}")
+        
+        # torch.save(checkpoint, f"{PATH_PREFIX}/{config.filename}")
+        torch.save(checkpoint, config.filename)
 
     return avg_val_loss, best_val_loss
 
