@@ -196,8 +196,9 @@ def evaluate_val_loss(model, val_loader, optimizer, best_val_loss, val_losses, c
             "best_val_loss": best_val_loss,
             "config": config,
         }
-        print(f"saving checkpoint to {PATH_PREFIX}")
-        torch.save(checkpoint, f"{PATH_PREFIX}/{config.filename}")
+    
+        # torch.save(checkpoint, f"{PATH_PREFIX}/{config.filename}")
+        torch.save(checkpoint, config.filename)
 
     return avg_val_loss, best_val_loss
 

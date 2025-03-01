@@ -10,10 +10,6 @@ PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 if __name__ == "__main__":
     # small_combinations = run()
-    seed = 42
-    torch.manual_seed(seed)
-    random.seed(seed)
-    np.random.seed(seed)
 
     # Attempt to improve model accuracy
 
@@ -23,6 +19,10 @@ if __name__ == "__main__":
     
     curr_seed = 1
     config = GPTConfig44_Seeded(seed = curr_seed)
+
+    torch.manual_seed(config.seed)
+    random.seed(config.seed)
+    np.random.seed(config.seed)
 
     run(
         config,
