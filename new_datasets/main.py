@@ -17,7 +17,7 @@ if __name__ == "__main__":
     # config = GPTConfig24_Complete()
     # config = GPTConfig34_Complete()
     
-    curr_seed = 1
+    curr_seed = 2
     config = GPTConfig44_Seeded(seed = curr_seed)
 
     torch.manual_seed(config.seed)
