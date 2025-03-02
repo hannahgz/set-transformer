@@ -41,6 +41,38 @@ class GPTConfig44_Seeded:
         self.filename = f"{PATH_PREFIX}/seed{self.seed}/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
 
 @dataclass
+class GPTConfig44_SeededOrigDataset:
+    seed: int
+    lr: float = 4e-4  # Base learning rate
+    epochs: int = 25  # Reduced epochs due to large dataset
+    batch_size: int = 512  # Increased for better throughput
+    patience: int = 4  # Early stopping patience
+    eval_freq: int = 10000  # Evaluate every 2000 steps
+    n_layer: int = 4
+    n_head: int = 4
+    n_embd: int = 64
+    dropout: float = 0.0
+    n_cards: int = 5
+    block_size: int = 49
+    vocab_size: int = 22
+    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
+    target_size: int = 8
+    pad_symbol: str = "_"
+    out_dir: str = ""
+    dataset_path: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_dataset.pth"
+    filename: str = field(init=False)
+    tokenizer_path: str = f"{PATH_PREFIX}/all_tokenizer.pkl"
+    end_of_seq_token: int = 13
+    padding_token: int = 14
+
+    # dataset_path: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_dataset.pth"
+    # filename: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
+    def __post_init__(self):
+        # Dynamically set paths using the seed
+        self.filename = f"{PATH_PREFIX}/seed{self.seed}/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
+
+@dataclass
 class GPTConfig44_Complete:
     lr: float = 4e-4  # Base learning rate
     epochs: int = 25  # Reduced epochs due to large dataset
