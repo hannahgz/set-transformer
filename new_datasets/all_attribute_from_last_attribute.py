@@ -202,8 +202,7 @@ def init_binary_dataset(attribute_id, capture_layer, project, config, val_split=
     val_loader = DataLoader(val_dataset, batch_size=batch_size)
 
     dataset_save_path = f"{PATH_PREFIX}/{project}/seed{config.seed}/layer{capture_layer}/attr_{attribute_id}/binary_dataloader.pt"
-    if not os.path.exists(os.path.dirname(dataset_save_path)):
-        os.makedirs(os.path.dirname(dataset_save_path))
+    os.makedirs(dataset_save_path, exist_ok=True, parents=True)
     # Save val and train laoder
     torch.save({
         'train_loader': train_loader,
@@ -237,7 +236,7 @@ def train_binary_probe(
     
     # Initialize wandb
     wandb.init(
-        project=project,
+        project=project + str(config.seed),
         config={
             "learning_rate": learning_rate,
             "batch_size": batch_size,
@@ -334,7 +333,7 @@ def train_binary_probe(
     model.load_state_dict(best_model_state)
 
     torch.save(model.state_dict(), 
-               f"{PATH_PREFIX}/{project}/layer{capture_layer}/attr_{attribute_id}/binary_probe_model.pt")
+               f"{PATH_PREFIX}/{project}/seed{config.seed}/layer{capture_layer}/attr_{attribute_id}/binary_probe_model.pt")
     wandb.finish()
     return model
 
@@ -1348,23 +1347,23 @@ if __name__ == "__main__":
     project = "attr_from_last_attr_binding_seeded"
     config = GPTConfig44_SeededOrigDataset(seed=curr_seed)
     
-    # init_all_attr_from_last_atrr_binding_dataset(
-    #     config=config,
-    #     capture_layer=capture_layer,
-    #     project=project)
+    init_all_attr_from_last_atrr_binding_dataset(
+        config=config,
+        capture_layer=capture_layer,
+        project=project)
 
-    for attribute_id in [6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11]:
-        capture_layer = 2
-        print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
-        construct_binary_dataset(attribute_id, capture_layer, config, project)
-        init_binary_dataset(attribute_id, capture_layer, project=project, config=config)
-        train_binary_probe(
-            capture_layer=capture_layer,
-            attribute_id=attribute_id,
-            project=project,
-            config=config,
-            patience=5,
-        )
+    # for attribute_id in [6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11]:
+    #     capture_layer = 2
+    #     print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
+    #     construct_binary_dataset(attribute_id, capture_layer, config, project)
+    #     init_binary_dataset(attribute_id, capture_layer, project=project, config=config)
+    #     train_binary_probe(
+    #         capture_layer=capture_layer,
+    #         attribute_id=attribute_id,
+    #         project=project,
+    #         config=config,
+    #         patience=5,
+    #     )
 
     # config = GPTConfig44_Complete()
     # project = "Attribute From Last Attribute"
