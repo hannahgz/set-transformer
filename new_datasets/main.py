@@ -10,21 +10,22 @@ PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 if __name__ == "__main__":
 
+    # for curr_seed in [100, 200, 300, 400, 500]:
 
-    for curr_seed in [100, 200, 300, 400, 500]:
-        seed_dir_path = f"{PATH_PREFIX}/seed{curr_seed}"
-        if not os.path.exists(seed_dir_path):
-            os.makedirs(seed_dir_path)
-        
-        torch.manual_seed(curr_seed)
-        random.seed(curr_seed)
-        np.random.seed(curr_seed)
+    curr_seed = 100
+    seed_dir_path = f"{PATH_PREFIX}/seed{curr_seed}"
+    if not os.path.exists(seed_dir_path):
+        os.makedirs(seed_dir_path)
+    
+    torch.manual_seed(curr_seed)
+    random.seed(curr_seed)
+    np.random.seed(curr_seed)
 
-        config = GPTConfig44_SeededOrigDataset(seed = curr_seed)
-        run(
-            config,
-            dataset_path=config.dataset_path
-        )
+    config = GPTConfig44_SeededOrigDataset(seed = curr_seed)
+    run(
+        config,
+        dataset_path=config.dataset_path
+    )
         
 
     # seed = 42
