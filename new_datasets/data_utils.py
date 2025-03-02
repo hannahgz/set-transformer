@@ -211,13 +211,13 @@ def initialize_triples_datasets(config):
         no_set_sequences, one_set_sequences, two_set_sequences)
 
     breakpoint()
-    
+
     if config.dataset_path:
         torch.save(dataset, config.dataset_path)
     return dataset
 
 
-def initialize_loaders(config, dataset):
+def initialize_loaders(dataset):
     train_size = int(0.99 * len(dataset))
 
     # make validation set a lot smaller TODO, revisit how large val set this leaves us with
@@ -229,9 +229,9 @@ def initialize_loaders(config, dataset):
     print("train_size: ", train_size, " val_size: ", val_size)
 
     train_loader = DataLoader(
-        train_dataset, batch_size=config.batch_size, shuffle=True)
+        train_dataset, batch_size=512, shuffle=True)
     val_loader = DataLoader(
-        val_dataset, batch_size=config.batch_size, shuffle=False)
+        val_dataset, batch_size=512, shuffle=False)
     return train_loader, val_loader
 
 def split_data(X, y, test_size=0.2, val_size=0.2, random_state=42):
