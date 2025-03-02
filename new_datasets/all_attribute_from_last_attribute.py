@@ -96,8 +96,8 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer, project)
     return input_embeddings_tensor, target_attributes_tensor
 
 
-def construct_binary_dataset(attribute_id, capture_layer, config):
-    load_existing_dataset_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/seed{config.seed}/layer{capture_layer}/embeddings_and_attributes.pt"
+def construct_binary_dataset(attribute_id, capture_layer, config, project):
+    load_existing_dataset_path = f"{PATH_PREFIX}/{project}/seed{config.seed}/layer{capture_layer}/embeddings_and_attributes.pt"
     saved_data = torch.load(load_existing_dataset_path)
 
     input_embeddings = saved_data['input_embeddings']
@@ -115,7 +115,7 @@ def construct_binary_dataset(attribute_id, capture_layer, config):
     torch.save({
         'input_embeddings': input_embeddings,
         'binary_targets': torch.tensor(binary_targets).float()
-    }, f"{PATH_PREFIX}/all_attr_from_last_attr_binding/seed{config.seed}/layer{capture_layer}/binary_dataset_{attribute_id}.pt")
+    }, f"{PATH_PREFIX}/{project}/seed{config.seed}/layer{capture_layer}/binary_dataset_{attribute_id}.pt")
 
 import torch
 import torch.nn as nn
@@ -370,170 +370,6 @@ def compute_accuracies(outputs, targets):
     agnostic_acc = agnostic_acc / batch_size
     
     return sequence_acc, position_acc, agnostic_acc
-
-def train_probe(model, embeddings, target_sequences, model_type, capture_layer, config, num_epochs=100, batch_size=32, val_split=0.2, early_stopping_patience=10):
-    """
-    Train probe with validation and W&B logging
-    
-    Args:
-        model: SimpleProbe model
-        embeddings: tensor of shape (num_samples, embedding_dim)
-        target_sequences: tensor of shape (num_samples, sequence_length)
-        num_epochs: number of training epochs
-        batch_size: batch size for training
-        val_split: fraction of data to use for validation
-    """
-    # Initialize W&B
-    wandb.init(
-        project="sequence-probe",
-        config={
-            "embedding_dim": embeddings.shape[1],
-            "sequence_length": model.sequence_length,
-            "num_classes": model.num_classes,
-            "batch_size": batch_size,
-            "val_split": val_split,
-            "num_epochs": num_epochs,
-            "early_stopping_patience": early_stopping_patience,  # Number of epochs to wait before early stopping
-        },
-        name=f"{model_type}_probe_layer{capture_layer}"
-    )
-    
-    # Initialize best validation loss and early stopping variables
-    best_val_loss = float('inf')
-    model_save_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/seed{config.seed}/layer{capture_layer}/{model_type}_model.pt"
-    patience = wandb.config.early_stopping_patience
-    patience_counter = 0
-    
-    # Split data into train and validation
-    num_val = int(len(embeddings) * val_split)
-    num_train = len(embeddings) - num_val
-    
-    train_dataset, val_dataset = random_split(
-        TensorDataset(embeddings, target_sequences),
-        [num_train, num_val]
-    )
-    
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size)
-    
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    
-    for epoch in range(num_epochs):
-        # Training
-        model.train()
-        train_loss = 0
-        train_seq_acc = 0
-        train_pos_acc = 0
-        train_agn_acc = 0
-        
-        for batch_embeddings, batch_targets in train_loader:
-            outputs = model(batch_embeddings)
-            
-            if model_type == "simple":
-                loss = criterion(
-                    outputs.reshape(-1, model.num_classes),
-                    batch_targets.reshape(-1)
-                )
-            elif model_type == "sorted":
-                loss = model.compute_loss(outputs, batch_targets)
-            else:
-                raise ValueError(f"Invalid model type: {model_type}")
-            
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            
-            train_loss += loss.item()
-            seq_acc, pos_acc, agn_acc = compute_accuracies(outputs, batch_targets)
-            train_seq_acc += seq_acc
-            train_pos_acc += pos_acc
-            train_agn_acc += agn_acc
-        
-        train_loss /= len(train_loader)
-        train_seq_acc /= len(train_loader)
-        train_pos_acc /= len(train_loader)
-        train_agn_acc /= len(train_loader)
-        
-        # Validation
-        model.eval()
-        val_loss = 0
-        val_seq_acc = 0
-        val_pos_acc = 0
-        val_agn_acc = 0
-        
-        with torch.no_grad():
-            for batch_embeddings, batch_targets in val_loader:
-                outputs = model(batch_embeddings)
-                
-                if model_type == "simple":
-                    loss = criterion(
-                        outputs.reshape(-1, model.num_classes),
-                        batch_targets.reshape(-1)
-                    )
-                elif model_type == "sorted":
-                    loss = model.compute_loss(outputs, batch_targets)
-                else:
-                    raise ValueError(f"Invalid model type: {model_type}")
-                
-                val_loss += loss.item()
-                seq_acc, pos_acc, agn_acc = compute_accuracies(outputs, batch_targets)
-                val_seq_acc += seq_acc
-                val_pos_acc += pos_acc
-                val_agn_acc += agn_acc
-        
-        val_loss /= len(val_loader)
-        val_seq_acc /= len(val_loader)
-        val_pos_acc /= len(val_loader)
-        val_agn_acc /= len(val_loader)
-        
-        # Save model if validation loss improves
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            patience_counter = 0  # Reset patience counter
-            torch.save({
-                'epoch': epoch,
-                'model_state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                'val_loss': val_loss,
-                'val_sequence_acc': val_seq_acc,
-                'val_position_acc': val_pos_acc,
-                'val_agnostic_acc': val_agn_acc
-            }, model_save_path)
-            wandb.save(model_save_path)  # Save to W&B as well
-        else:
-            patience_counter += 1
-            if patience_counter >= patience:
-                print(f'\nEarly stopping triggered after {epoch + 1} epochs!')
-                print(f'Best validation loss: {best_val_loss:.4f}')
-                break
-        
-        # Log metrics
-        wandb.log({
-            "epoch": epoch,
-            "train_loss": train_loss,
-            "train_sequence_acc": train_seq_acc,
-            "train_position_acc": train_pos_acc,
-            "train_agnostic_acc": train_agn_acc,
-            "val_loss": val_loss,
-            "val_sequence_acc": val_seq_acc,
-            "val_position_acc": val_pos_acc,
-            "val_agnostic_acc": val_agn_acc
-        })
-        
-        if (epoch) % 10 == 0:
-            print(f'Epoch [{epoch}/{num_epochs}]')
-            print(f'Train Loss: {train_loss:.4f}')
-            print(f'Train Metrics:')
-            print(f'  Sequence Acc: {train_seq_acc:.4f}')
-            print(f'  Position Acc: {train_pos_acc:.4f}')
-            print(f'  Agnostic Acc: {train_agn_acc:.4f}')
-            print(f'Val Loss: {val_loss:.4f}')
-            print(f'Val Metrics:')
-            print(f'  Sequence Acc: {val_seq_acc:.4f}')
-            print(f'  Position Acc: {val_pos_acc:.4f}')
-            print(f'  Agnostic Acc: {val_agn_acc:.4f}\n')
-    wandb.finish()
 
 
 @dataclass
@@ -1509,26 +1345,26 @@ if __name__ == "__main__":
 
     capture_layer = 2
     curr_seed = 200
-    project = "all_attr_from_last_attr_binding_seeded"
+    project = "attr_from_last_attr_binding_seeded"
     config = GPTConfig44_SeededOrigDataset(seed=curr_seed)
     
-    init_all_attr_from_last_atrr_binding_dataset(
-        config=config,
-        capture_layer=capture_layer,
-        project=project)
+    # init_all_attr_from_last_atrr_binding_dataset(
+    #     config=config,
+    #     capture_layer=capture_layer,
+    #     project=project)
 
-    # for attribute_id in [6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11]:
-    #     capture_layer = 2
-    #     print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
-    #     construct_binary_dataset(attribute_id, capture_layer)
-    #     init_binary_dataset(attribute_id, capture_layer, project=project, config=config)
-    #     train_binary_probe(
-    #         capture_layer=capture_layer,
-    #         attribute_id=attribute_id,
-    #         project=project,
-    #         config=config,
-    #         patience=5,
-    #     )
+    for attribute_id in [6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11]:
+        capture_layer = 2
+        print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
+        construct_binary_dataset(attribute_id, capture_layer, config, project)
+        init_binary_dataset(attribute_id, capture_layer, project=project, config=config)
+        train_binary_probe(
+            capture_layer=capture_layer,
+            attribute_id=attribute_id,
+            project=project,
+            config=config,
+            patience=5,
+        )
 
     # config = GPTConfig44_Complete()
     # project = "Attribute From Last Attribute"
