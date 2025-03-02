@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     # for curr_seed in [100, 200, 300, 400, 500]:
 
-    curr_seed = 200
+    curr_seed = 300
     seed_dir_path = f"{PATH_PREFIX}/seed{curr_seed}"
     if not os.path.exists(seed_dir_path):
         os.makedirs(seed_dir_path)
