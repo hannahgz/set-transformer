@@ -11,7 +11,7 @@
 SEED=$1
 
 # Load your environment
-source $(mamba info --base)/etc/profile.d/mamba.sh
+eval "$(/n/sw/Mambaforge-23.3.1-1/bin/conda shell.bash hook)"
 mamba activate initial
 
 # Change to your working directory
