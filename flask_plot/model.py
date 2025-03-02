@@ -5,7 +5,7 @@ import torch.nn as nn
 from torch.nn import functional as F
 import os
 
-PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
+PATH_PREFIX = "/Users/I835284/Desktop/thesis/set-transformer/src/models"
 
 @dataclass
 class GPTConfig44_Seeded:
@@ -121,7 +121,7 @@ class GPTConfig34_Complete:
     filename: str = "triples_card_randomization_tuple_randomization_layers_3_heads_4.pt"
     end_of_seq_token: int = 13
     padding_token: int = 14
-    
+
 class LayerNorm(nn.Module):
     """LayerNorm but with an optional bias. PyTorch doesn't support simply bias=False"""
 

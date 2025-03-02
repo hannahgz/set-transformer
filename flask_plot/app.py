@@ -15,7 +15,7 @@ app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
-PATH_PREFIX = "/Users/I835284/Desktop/thesis/set-transformer/src"
+PATH_PREFIX = "/Users/I835284/Desktop/thesis/set-transformer/src/models"
 
 # Card attributes
 shapes = ["oval", "squiggle", "diamond"]
@@ -720,7 +720,7 @@ def save_single_cards():
         config = GPTConfig44_SeededOrigDataset(seed=100)
     else:
         config = GPTConfig44_Complete()
-        
+
     attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
         config, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True, value_weighting=value_weighting)
 
