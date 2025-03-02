@@ -15,7 +15,7 @@ app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
-PATH_PREFIX = "/Users/I835284/Desktop/thesis/set-transformer/flask_plot/models"
+PATH_PREFIX = "/Users/hannahzhou/Desktop/thesis/set-transformer/flask_plot/models"
 
 # Card attributes
 shapes = ["oval", "squiggle", "diamond"]
@@ -268,7 +268,7 @@ def attention_weights_from_sequence(
     model.load_state_dict(checkpoint["model"])
     print("Loaded model")
 
-    tokenizer = load_tokenizer(tokenizer_path)
+    tokenizer = load_tokenizer(config.tokenizer_path)
     input = torch.tensor(tokenizer.encode(input))
     sequences = input.unsqueeze(0)
 

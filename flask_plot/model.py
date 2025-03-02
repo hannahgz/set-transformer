@@ -5,7 +5,7 @@ import torch.nn as nn
 from torch.nn import functional as F
 import os
 
-PATH_PREFIX = "/Users/I835284/Desktop/thesis/set-transformer/flask_plot/models"
+PATH_PREFIX = "/Users/hannahzhou/Desktop/thesis/set-transformer/flask_plot/models"
 
 @dataclass
 class GPTConfig44_Seeded:
