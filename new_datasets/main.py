@@ -15,6 +15,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         curr_seed = int(sys.argv[1])
+        print("curr_seed: ", curr_seed)
     else:
         raise ValueError("Seed value must be provided as a command line argument")
 
