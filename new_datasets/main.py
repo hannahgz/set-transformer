@@ -5,6 +5,7 @@ import random
 import numpy as np
 from set_transformer_small import run, calculate_accuracy
 import os
+import sys
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
@@ -12,7 +13,11 @@ if __name__ == "__main__":
 
     # for curr_seed in [100, 200, 300, 400, 500]:
 
-    curr_seed = 200
+    if len(sys.argv) > 1:
+        curr_seed = int(sys.argv[1])
+    else:
+        raise ValueError("Seed value must be provided as a command line argument")
+
     seed_dir_path = f"{PATH_PREFIX}/seed{curr_seed}"
     if not os.path.exists(seed_dir_path):
         os.makedirs(seed_dir_path)
