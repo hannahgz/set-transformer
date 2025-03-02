@@ -194,6 +194,16 @@
                         <option value="3">3</option>
                         <option value="4">4</option>
                     </select>
+
+                    <label for="model-select">Model:</label>
+                    <select id="model-select">
+                        <option value="1">Model 1</option>
+                        <option value="100">Model 100</option>
+                        <option value="200">Model 200</option>
+                        <option value="300">Model 300</option>
+                        <option value="400">Model 400</option>
+                    </select>
+
                     <div class="checkbox-container">
                         <input type="checkbox" id="value-weighting" checked>
                         <label for="value-weighting">Value weighting</label>
@@ -255,6 +265,19 @@
             });
         });
 
+        // document.getElementById('model-select').addEventListener('change', function() {
+        //     const modelNum = parseInt(this.value);
+        //     // const layers = parseInt(document.getElementById('layer-select').value);
+            
+        //     fetch('/change_model_config', {
+        //         method: 'POST',
+        //         headers: {'Content-Type': 'application/json'},
+        //         body: JSON.stringify({
+        //             model_num: modelNum
+        //         })
+        //     });
+        // });
+
         function updatePredictionInfo(prediction_results, group_num) {
             const groupPrediction = document.getElementById(`group${group_num}-prediction`);
             const [sequence, is_correct, decoded_predictions, decoded_targets] = prediction_results[group_num]
@@ -299,10 +322,12 @@
 
             const seed = parseInt(document.getElementById('seed-input').value) || 0;
             const valueWeighting = document.getElementById('value-weighting').checked;
+            const modelNum = parseInt(document.getElementById('model-select').value);
+
             fetch('/save_difference_cards', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({group1: group1Cards, group2: group2Cards, threshold, seed, valueWeighting})
+                body: JSON.stringify({group1: group1Cards, group2: group2Cards, threshold, seed, valueWeighting, model_num: modelNum})
             })
             .then(response => response.json())
             .then(data => {
@@ -337,10 +362,12 @@
 
             const seed = parseInt(document.getElementById('seed-input').value) || 0;
             const valueWeighting = document.getElementById('value-weighting').checked;
+            const modelNum = parseInt(document.getElementById('model-select').value);
+
             fetch('/save_single_cards', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({group1: group1Cards, threshold, seed, valueWeighting})
+                body: JSON.stringify({group1: group1Cards, threshold, seed, valueWeighting, model_num: modelNum})
             })
             .then(response => response.json())
             .then(data => {

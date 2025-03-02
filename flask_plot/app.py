@@ -7,7 +7,7 @@ from typing import List, Tuple
 from dataclasses import dataclass
 import torch
 import os
-from model import GPT, GPTConfig44_Complete, GPTConfig34_Complete
+from model import GPT, GPTConfig44_Complete, GPTConfig34_Complete, GPTConfig44_SeededOrigDataset
 from tokenizer import load_tokenizer
 import random
 
@@ -714,6 +714,13 @@ def save_single_cards():
     sequence1 = shuffle_input_sequence(sequence1, seed)
     value_weighting = card_groups.get("valueWeighting", False)
 
+    global config
+    model_num = card_groups.get('model_num', 1)
+    if model_num == 100:
+        config = GPTConfig44_SeededOrigDataset(seed=100)
+    else:
+        config = GPTConfig44_Complete()
+        
     attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
         config, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True, value_weighting=value_weighting)
 
@@ -785,6 +792,13 @@ def save_difference_cards():
     sequence1 = shuffle_input_sequence(sequence1, seed)
     sequence2 = shuffle_input_sequence(sequence2, seed)
 
+    global config
+    model_num = card_groups.get('model_num', 1)
+    if model_num == 100:
+        config = GPTConfig44_SeededOrigDataset(seed=100)
+    else:
+        config = GPTConfig44_Complete()
+  
     attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
         config, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True, value_weighting=value_weighting)
     print("Got attention weights 1")
@@ -837,6 +851,17 @@ def change_config():
     else:
         config = GPTConfig44_Complete()
     return jsonify({"status": "success"})
+
+
+# @app.route('/change_model_config', methods=['POST'])
+# def change_model_config():
+#     global config
+#     model_num = request.json.get('model_num', 1)
+#     if model_num == 1:
+#         config = GPTConfig44_Complete()
+#     elif model_num == 100:
+#         config = GPTConfig44_SeededOrigDataset(seed=100)
+#     return jsonify({"status": "success"})
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000)
