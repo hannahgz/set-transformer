@@ -218,7 +218,7 @@ def model_accuracy(config, model, train_loader, val_loader):
 
 def run(config, dataset_path, load_model=False, should_wandb_log=True):
     dataset = torch.load(dataset_path)
-    train_loader, val_loader = initialize_loaders(config, dataset)
+    train_loader, val_loader = initialize_loaders(dataset)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
 
@@ -344,7 +344,7 @@ def run(config, dataset_path, load_model=False, should_wandb_log=True):
 def analyze_embeddings(config, dataset_name, model_path, capture_layer):
     dataset_path = f"{PATH_PREFIX}/{dataset_name}.pth"
     dataset = torch.load(dataset_path)
-    train_loader, val_loader = initialize_loaders(config, dataset)
+    train_loader, val_loader = initialize_loaders(dataset)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
     model = GPT(config).to(device)
@@ -410,7 +410,7 @@ def opp_analyze_embeddings(config, dataset_name, capture_layer):
     # TODO: this needs to be fixed to load the actual model in
     dataset_path = f"{PATH_PREFIX}/{dataset_name}.pth"
     dataset = torch.load(dataset_path)
-    train_loader, val_loader = initialize_loaders(config, dataset)
+    train_loader, val_loader = initialize_loaders(dataset)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
 
@@ -471,7 +471,7 @@ def opp_analyze_embeddings(config, dataset_name, capture_layer):
 def get_raw_input_embeddings(config, dataset_name, capture_layer):
     dataset_path = f"{PATH_PREFIX}/{dataset_name}.pth"
     dataset = torch.load(dataset_path)
-    train_loader, val_loader = initialize_loaders(config, dataset)
+    train_loader, val_loader = initialize_loaders(dataset)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = GPT(config).to(device)
 
