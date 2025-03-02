@@ -13,31 +13,31 @@ if __name__ == "__main__":
 
     # for curr_seed in [100, 200, 300, 400, 500]:
 
-    if len(sys.argv) > 1:
-        curr_seed = int(sys.argv[1])
-        print("curr_seed: ", curr_seed)
-    else:
-        raise ValueError("Seed value must be provided as a command line argument")
+    # if len(sys.argv) > 1:
+    #     curr_seed = int(sys.argv[1])
+    #     print("curr_seed: ", curr_seed)
+    # else:
+    #     raise ValueError("Seed value must be provided as a command line argument")
 
-    seed_dir_path = f"{PATH_PREFIX}/seed{curr_seed}"
-    if not os.path.exists(seed_dir_path):
-        os.makedirs(seed_dir_path)
+    # seed_dir_path = f"{PATH_PREFIX}/seed{curr_seed}"
+    # if not os.path.exists(seed_dir_path):
+    #     os.makedirs(seed_dir_path)
     
-    torch.manual_seed(curr_seed)
-    random.seed(curr_seed)
-    np.random.seed(curr_seed)
+    # torch.manual_seed(curr_seed)
+    # random.seed(curr_seed)
+    # np.random.seed(curr_seed)
 
-    config = GPTConfig44_SeededOrigDataset(seed = curr_seed)
-    run(
-        config,
-        dataset_path=config.dataset_path
-    )
+    # config = GPTConfig44_SeededOrigDataset(seed = curr_seed)
+    # run(
+    #     config,
+    #     dataset_path=config.dataset_path
+    # )
         
 
-    # seed = 42
-    # torch.manual_seed(seed)
-    # random.seed(seed)
-    # np.random.seed(seed)
+    seed = 42
+    torch.manual_seed(seed)
+    random.seed(seed)
+    np.random.seed(seed)
 
     # small_combinations = run()
 
@@ -107,32 +107,29 @@ if __name__ == "__main__":
     #     print(f"Val accuracy for orig model on dataset with seed {curr_seed}: ", val_accuracy)
 
 
-    # # PIPELINE - Calculate accuracy for complete model on base random dataset, ORIGINAL DATASET
-    # device = "cuda" if torch.cuda.is_available() else "cpu"
-    # dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
-    # dataset = torch.load(dataset_path)
-    # train_loader, val_loader = initialize_loaders(dataset)
+    # PIPELINE - Calculate accuracy for complete model on base random dataset, ORIGINAL DATASET
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
+    dataset = torch.load(dataset_path)
+    train_loader, val_loader = initialize_loaders(dataset)
 
-    # print("Validation accuracy on base random dataset with seed 42")
+    print("Validation accuracy on base random dataset with seed 42")
     # for curr_seed in [1, 2, 3, 4]:
-    #     config = GPTConfig44_Seeded(seed = curr_seed)
+    for curr_seed in [100, 200, 300, 400, 42]:
+        config = GPTConfig44_SeededOrigDataset(seed = curr_seed)
 
-    #     # torch.manual_seed(config.seed)
-    #     # random.seed(config.seed)
-    #     # np.random.seed(config.seed)
+        model = GPT(config).to(device)
+        checkpoint = torch.load(f"{config.filename}", weights_only=False)
+        model.load_state_dict(checkpoint["model"])
 
-    #     model = GPT(config).to(device)
-    #     checkpoint = torch.load(f"{config.filename}", weights_only=False)
-    #     model.load_state_dict(checkpoint["model"])
-
-    #     val_accuracy = calculate_accuracy(
-    #         model=model, 
-    #         dataloader=val_loader,
-    #         config=config, 
-    #         tokenizer_path=config.tokenizer_path,
-    #         save_incorrect_path=f'{PATH_PREFIX}/seed{curr_seed}/complete_baserandom_val_incorrect_predictions_orig_seed_42.txt',
-    #         breakdown=True)
-    #     print(f"Val accuracy for seed {curr_seed}: ", val_accuracy)
+        val_accuracy = calculate_accuracy(
+            model=model, 
+            dataloader=val_loader,
+            config=config, 
+            tokenizer_path=config.tokenizer_path,
+            save_incorrect_path=f'{PATH_PREFIX}/seed{curr_seed}/complete_baserandom_val_incorrect_predictions_orig_seed_42.txt',
+            breakdown=True)
+        print(f"Val accuracy for seed {curr_seed}: ", val_accuracy)
 
 
 
