@@ -11,7 +11,7 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 from data_utils import split_data
 from tokenizer import load_tokenizer
-from model import GPT, GPTConfig44_Complete
+from model import GPT, GPTConfig44_Complete, GPTConfig44_SeededOrigDataset
 from data_utils import initialize_loaders
 from dataclasses import dataclass
 from torch.nn import functional as F
@@ -19,7 +19,7 @@ from tokenizer import load_tokenizer
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
-def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
+def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer, project):
     dataset = torch.load(config.dataset_path)
     train_loader, val_loader = initialize_loaders(config, dataset)
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -85,9 +85,8 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
     target_attributes_tensor = torch.tensor(all_target_attributes)  # This will create a tensor of shape [num_samples, 4]
 
     # Save the tensors
-    save_path_dir = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
-    if not os.path.exists(save_path_dir):
-        os.makedirs(save_path_dir)
+    save_path_dir = f"{PATH_PREFIX}/{project}/seed{config.seed}/layer{capture_layer}"
+    os.makedirs(save_path_dir, exist_ok=True, parents=True)
 
     torch.save({
         'input_embeddings': input_embeddings_tensor,
@@ -97,8 +96,8 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer):
     return input_embeddings_tensor, target_attributes_tensor
 
 
-def construct_binary_dataset(attribute_id, capture_layer):
-    load_existing_dataset_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/embeddings_and_attributes.pt"
+def construct_binary_dataset(attribute_id, capture_layer, config):
+    load_existing_dataset_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/seed{config.seed}/layer{capture_layer}/embeddings_and_attributes.pt"
     saved_data = torch.load(load_existing_dataset_path)
 
     input_embeddings = saved_data['input_embeddings']
@@ -116,7 +115,7 @@ def construct_binary_dataset(attribute_id, capture_layer):
     torch.save({
         'input_embeddings': input_embeddings,
         'binary_targets': torch.tensor(binary_targets).float()
-    }, f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/binary_dataset_{attribute_id}.pt")
+    }, f"{PATH_PREFIX}/all_attr_from_last_attr_binding/seed{config.seed}/layer{capture_layer}/binary_dataset_{attribute_id}.pt")
 
 import torch
 import torch.nn as nn
@@ -176,9 +175,9 @@ class BinaryProbe(nn.Module):
         # Binary cross entropy loss
         return nn.functional.binary_cross_entropy(outputs, targets)
 
-def init_binary_dataset(attribute_id, capture_layer, parent_folder, val_split=0.2, batch_size=32):
+def init_binary_dataset(attribute_id, capture_layer, project, config, val_split=0.2, batch_size=32):
     # Load the binary dataset
-    dataset_path = f"{PATH_PREFIX}/{parent_folder}/layer{capture_layer}/binary_dataset_{attribute_id}.pt"
+    dataset_path = f"{PATH_PREFIX}/{project}/seed{config.seed}/layer{capture_layer}/binary_dataset_{attribute_id}.pt"
     data = torch.load(dataset_path)
     
     input_embeddings = data['input_embeddings']
@@ -202,7 +201,7 @@ def init_binary_dataset(attribute_id, capture_layer, parent_folder, val_split=0.
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size)
 
-    dataset_save_path = f"{PATH_PREFIX}/{parent_folder}/layer{capture_layer}/attr_{attribute_id}/binary_dataloader.pt"
+    dataset_save_path = f"{PATH_PREFIX}/{project}/seed{config.seed}/layer{capture_layer}/attr_{attribute_id}/binary_dataloader.pt"
     if not os.path.exists(os.path.dirname(dataset_save_path)):
         os.makedirs(os.path.dirname(dataset_save_path))
     # Save val and train laoder
@@ -211,8 +210,8 @@ def init_binary_dataset(attribute_id, capture_layer, parent_folder, val_split=0.
         'val_loader': val_loader
     }, dataset_save_path)
 
-def load_binary_dataloader(attribute_id, capture_layer, parent_folder):
-    dataset_save_path = f"{PATH_PREFIX}/{parent_folder}/layer{capture_layer}/attr_{attribute_id}/binary_dataloader.pt"
+def load_binary_dataloader(attribute_id, capture_layer, project, config):
+    dataset_save_path = f"{PATH_PREFIX}/{project}/seed{config.seed}/layer{capture_layer}/attr_{attribute_id}/binary_dataloader.pt"
     saved_data = torch.load(dataset_save_path)
     return saved_data['train_loader'], saved_data['val_loader']
 
@@ -220,6 +219,7 @@ def train_binary_probe(
     capture_layer,
     attribute_id,
     project,
+    config,
     embedding_dim=64,
     batch_size=32,
     learning_rate=1e-3,
@@ -229,7 +229,7 @@ def train_binary_probe(
     device='cuda' if torch.cuda.is_available() else 'cpu'
 ): 
     # Load the binary dataset
-    train_loader, val_loader = load_binary_dataloader(attribute_id, capture_layer, project)
+    train_loader, val_loader = load_binary_dataloader(attribute_id, capture_layer, project, config)
 
     # Initialize model, optimizer, and move to device
     model = BinaryProbe(embedding_dim=embedding_dim).to(device)
@@ -371,7 +371,7 @@ def compute_accuracies(outputs, targets):
     
     return sequence_acc, position_acc, agnostic_acc
 
-def train_probe(model, embeddings, target_sequences, model_type, capture_layer, num_epochs=100, batch_size=32, val_split=0.2, early_stopping_patience=10):
+def train_probe(model, embeddings, target_sequences, model_type, capture_layer, config, num_epochs=100, batch_size=32, val_split=0.2, early_stopping_patience=10):
     """
     Train probe with validation and W&B logging
     
@@ -400,7 +400,7 @@ def train_probe(model, embeddings, target_sequences, model_type, capture_layer, 
     
     # Initialize best validation loss and early stopping variables
     best_val_loss = float('inf')
-    model_save_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/{model_type}_model.pt"
+    model_save_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/seed{config.seed}/layer{capture_layer}/{model_type}_model.pt"
     patience = wandb.config.early_stopping_patience
     patience_counter = 0
     
@@ -551,7 +551,7 @@ def load_linear_probe_(config, capture_layer):
         num_classes=config.num_classes, 
         sequence_length=config.sequence_length).to(device)
     
-    probe_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}/{config.model_type}_model.pt"
+    probe_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/seed{config.seed}/layer{capture_layer}/{config.model_type}_model.pt"
 
     probe.load_state_dict(torch.load(probe_path)["model_state_dict"])
     probe.eval()
@@ -576,7 +576,7 @@ def predict_from_probe(config, capture_layer, batch_size=32):
     probe.eval()
     
     # Load the dataset
-    dataset_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{capture_layer}"
+    dataset_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/seed{config.seed}/layer{capture_layer}"
     saved_data = torch.load(f'{dataset_path}/embeddings_and_attributes.pt')
     
     embeddings = saved_data['input_embeddings'].to(device)
@@ -1233,15 +1233,15 @@ def plot_all_layers_metrics(layers, tokenizer_path, loss_range = [0, 0.5], acc_r
 # Usage example:
 # plot_all_layers_metrics([8, 9, 10, 11], "path/to/tokenizer")
 
-def load_embeddings_and_probe(layer, attribute_id, project):
+def load_embeddings_and_probe(layer, attribute_id, config):
     """Load embeddings and binary probe for a specific layer and attribute"""
     # Load embeddings
-    embeddings_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{layer}/embeddings_and_attributes.pt"
+    embeddings_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/seed{config.seed}/layer{layer}/embeddings_and_attributes.pt"
     embeddings_data = torch.load(embeddings_path)
     embeddings = embeddings_data['input_embeddings']
     
     # Load binary probe
-    probe_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{layer}/attr_{attribute_id}/binary_probe_model.pt"
+    probe_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/seed{config.seed}/layer{layer}/attr_{attribute_id}/binary_probe_model.pt"
     if not os.path.exists(probe_path):
         probe_weights = None
     else:
@@ -1354,9 +1354,9 @@ def test_reorder_results(tokenizer_path):
 
     # [3, 10, 11, 1, 8, 9, 5, 2, 7, 4, 0, 6] ORDERED VERSION TO USE
 
-def load_probe_weights(layer, attribute_id):
+def load_probe_weights(layer, attribute_id, config):
     """Load binary probe weights for a specific layer and attribute"""
-    probe_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/layer{layer}/attr_{attribute_id}/binary_probe_model.pt"
+    probe_path = f"{PATH_PREFIX}/all_attr_from_last_attr_binding/seed{config.seed}/layer{layer}/attr_{attribute_id}/binary_probe_model.pt"
     if not os.path.exists(probe_path):
         return None
     else:
@@ -1507,14 +1507,37 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    config = GPTConfig44_Complete()
-    project = "Attribute From Last Attribute"
-    run_layer_probe_similarity_analysis(
-        project=project,
-        layers=range(4),
-        attributes=[6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11],
-        tokenizer_path=config.tokenizer_path
-    )
+    capture_layer = 2
+    curr_seed = 200
+    project = "all_attr_from_last_attr_binding_seeded"
+    config = GPTConfig44_SeededOrigDataset(seed=curr_seed)
+    
+    init_all_attr_from_last_atrr_binding_dataset(
+        config=config,
+        capture_layer=capture_layer,
+        project=project)
+
+    # for attribute_id in [6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11]:
+    #     capture_layer = 2
+    #     print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
+    #     construct_binary_dataset(attribute_id, capture_layer)
+    #     init_binary_dataset(attribute_id, capture_layer, project=project, config=config)
+    #     train_binary_probe(
+    #         capture_layer=capture_layer,
+    #         attribute_id=attribute_id,
+    #         project=project,
+    #         config=config,
+    #         patience=5,
+    #     )
+
+    # config = GPTConfig44_Complete()
+    # project = "Attribute From Last Attribute"
+    # run_layer_probe_similarity_analysis(
+    #     project=project,
+    #     layers=range(4),
+    #     attributes=[6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11],
+    #     tokenizer_path=config.tokenizer_path
+    # )
     # test_reorder_results(config.tokenizer_path)
     # layers = range(4)
     # attributes = [6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11]
