@@ -1,4 +1,5 @@
 from model import GPTConfig44_Complete, GPT
+from data_utils import initialize_loaders
 import torch
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -160,13 +161,94 @@ def visualize_mlp_weights(mlp_weights, save_dir):
                 plt.savefig(os.path.join(layer_dir, f"{weight_name}_pca_cols.png"))
                 plt.close()
 
+import torch
+import numpy as np
+import matplotlib.pyplot as plt
+from collections import defaultdict
+
+def analyze_concept_neurons(model, data_loader, target_neurons):
+    """
+    Perform dataset traversal to find inputs that maximally and minimally activate specific neurons in layer 3.
+    
+    Parameters:
+        model: The GPT model
+        data_loader: DataLoader yielding batches of input sequences compatible with the model
+        target_neurons: List of neuron indices to analyze (those with highest norms)
+        device: Device to run the model on
+    
+    Returns:
+        top_k_inputs: Dictionary mapping neuron indices to their top 10 activating inputs
+        bottom_k_inputs: Dictionary mapping neuron indices to their bottom 10 activating inputs
+    """
+    model.eval()
+    
+    # Initialize tracking structures
+    neuron_activations = {neuron: [] for neuron in target_neurons}
+    top_k_inputs = {neuron: [] for neuron in target_neurons}  # Store top 10 activating inputs for each neuron
+    bottom_k_inputs = {neuron: [] for neuron in target_neurons}  # Store bottom 10 activating inputs for each neuron
+    
+    # Process each batch in the data loader
+    for batch_idx, batch in enumerate(data_loader):
+        if batch_idx % 10 == 0:
+            print(f"Processing batch {batch_idx}/{len(data_loader)}")
+        
+        batch = batch.to(device)
+        batch_size = batch.shape[0]
+        
+        # Forward pass with capture_layer=3 to get layer 3 activations
+        with torch.no_grad():
+            _, _, _, layer_3_activations, _ = model(batch, capture_layer=3)
+            
+            # For each sequence in the batch, extract final position's activations
+            for seq_idx in range(batch_size):
+                # Extract final position's activations for this sequence
+                # Shape: [hidden_size]
+                final_pos_activations = layer_3_activations[seq_idx, -1, :]
+                
+                # Check each target neuron's activation
+                for neuron in target_neurons:
+                    activation = final_pos_activations[neuron].item()
+                    # Store (activation, batch_idx, seq_idx) to track which input caused this activation
+                    neuron_activations[neuron].append((activation, batch_idx, seq_idx, batch[seq_idx].clone().cpu()))
+    
+    # Sort activations and keep top-k and bottom-k for each neuron
+    for neuron in target_neurons:
+        # Sort by activation value (descending for top-k)
+        sorted_activations = sorted(neuron_activations[neuron], key=lambda x: x[0], reverse=True)
+        
+        # Store top 10 activations
+        top_k = sorted_activations[:10]
+        top_k_inputs[neuron] = [(act, input_seq) for act, _, _, input_seq in top_k]
+        
+        # Store bottom 10 activations
+        bottom_k = sorted_activations[-10:]  # Get last 10 elements (lowest activations)
+        bottom_k_inputs[neuron] = [(act, input_seq) for act, _, _, input_seq in bottom_k]
+    
+    return top_k_inputs, bottom_k_inputs
 
 if __name__ == "__main__":
+    # config = GPTConfig44_Complete()
+    # print("Extracting mlp weights")
+    # model, mlp_weights = load_model_and_extract_mlp_weights(config)
+    # mlp_weights_save_path = f"{PATH_PREFIX}/mlp_triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
+    # torch.save(mlp_weights, mlp_weights_save_path)
+
+    # mlp_weights = torch.load(f"{PATH_PREFIX}/mlp_triples_card_randomization_tuple_randomization_layers_4_heads_4.pt")
+    # visualize_mlp_weights(mlp_weights, f"COMPLETE_FIGS/mlp")
+
     config = GPTConfig44_Complete()
-    print("Extracting mlp weights")
-    model, mlp_weights = load_model_and_extract_mlp_weights(config)
-    mlp_weights_save_path = f"{PATH_PREFIX}/mlp_triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
-    torch.save(mlp_weights, mlp_weights_save_path)
+    # Load the checkpoint
+    checkpoint = torch.load(config.filename, weights_only = False)
     
-    mlp_weights = torch.load(f"{PATH_PREFIX}/mlp_triples_card_randomization_tuple_randomization_layers_4_heads_4.pt")
-    visualize_mlp_weights(mlp_weights, f"COMPLETE_FIGS/mlp")
+    # Create the model architecture
+    model = GPT(config).to(device)
+    
+    # Load the weights
+    model.load_state_dict(checkpoint['model'])
+    model.eval()  # Set to evaluation mode
+
+    dataset = torch.load(config.dataset_path)
+    _, val_loader = initialize_loaders(config, dataset)
+
+    target_neurons = [5, 13, 20, 36, 60]
+    top_k_inputs, bottom_k_inputs = analyze_concept_neurons(model, val_loader, target_neurons)
