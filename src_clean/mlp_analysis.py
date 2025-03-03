@@ -165,6 +165,7 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import defaultdict
+import pickle
 
 def analyze_concept_neurons(model, data_loader, target_neurons):
     """
@@ -252,3 +253,22 @@ if __name__ == "__main__":
 
     target_neurons = [5, 13, 20, 36, 60]
     top_k_inputs, bottom_k_inputs = analyze_concept_neurons(model, val_loader, target_neurons)
+
+    # Save top_k_inputs and bottom_k_inputs as pickle files
+    with open(f"top_k_inputs.pkl", "wb") as f:
+        pickle.dump(top_k_inputs, f)
+
+    with open(f"bottom_k_inputs.pkl", "wb") as f:
+        pickle.dump(bottom_k_inputs, f)
+
+    print("Top-k Inputs:")
+    for neuron, inputs in top_k_inputs.items():
+        print(f"Neuron {neuron}:")
+        for activation, input_seq in inputs:
+            print(f"Activation: {activation}")
+            print(f"Input Sequence: {input_seq}")
+            print()
+    
+    breakpoint()
+
+

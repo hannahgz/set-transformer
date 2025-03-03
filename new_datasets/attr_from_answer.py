@@ -116,10 +116,25 @@ if __name__ == "__main__":
     curr_seed = 200
     config = GPTConfig44_SeededOrigDataset(seed=curr_seed)
     project = "attr_from_answer"
+    # for capture_layer in range(4):
+    #     init_attr_from_answer(config, capture_layer=capture_layer, project=project)
+    #     # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
+    #     for attribute_id in [1, 3, 5]:
+    #         print(f"Layer {capture_layer}, Attribute {attribute_id}")
+    #         construct_binary_dataset(attribute_id, capture_layer, config, project)
+    #         init_binary_dataset(attribute_id, capture_layer, project=project, config=config)
+    #         train_binary_probe(
+    #             capture_layer=capture_layer,
+    #             attribute_id=attribute_id,
+    #             project=project,
+    #             config=config,
+    #             patience=5,
+    #         )
+
     for capture_layer in range(4):
-        init_attr_from_answer(config, capture_layer=capture_layer, project=project)
+        # init_attr_from_answer(config, capture_layer=capture_layer, project=project)
         # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
-        for attribute_id in [1, 3, 5]:
+        for attribute_id in [6, 8, 9, 11]:
             print(f"Layer {capture_layer}, Attribute {attribute_id}")
             construct_binary_dataset(attribute_id, capture_layer, config, project)
             init_binary_dataset(attribute_id, capture_layer, project=project, config=config)
@@ -130,6 +145,21 @@ if __name__ == "__main__":
                 config=config,
                 patience=5,
             )
+
+    # for capture_layer in range(4):
+    #     # init_attr_from_answer(config, capture_layer=capture_layer, project=project)
+    #     # for attribute_id in [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]:
+    #     for attribute_id in [15, 17, 18, 19, 20]:
+    #         print(f"Layer {capture_layer}, Attribute {attribute_id}")
+    #         construct_binary_dataset(attribute_id, capture_layer, config, project)
+    #         init_binary_dataset(attribute_id, capture_layer, project=project, config=config)
+    #         train_binary_probe(
+    #             capture_layer=capture_layer,
+    #             attribute_id=attribute_id,
+    #             project=project,
+    #             config=config,
+    #             patience=5,
+    #         )
             
     # config = GPTConfig44_Complete()
 
