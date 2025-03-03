@@ -1367,20 +1367,7 @@ if __name__ == "__main__":
     #         patience=5,
     #     )
 
-    for attribute_id in [17, 18, 9, 5]:
-        capture_layer = 2
-        print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
-        construct_binary_dataset(attribute_id, capture_layer, config, project)
-        init_binary_dataset(attribute_id, capture_layer, project=project, config=config)
-        train_binary_probe(
-            capture_layer=capture_layer,
-            attribute_id=attribute_id,
-            project=project,
-            config=config,
-            patience=5,
-        )
-
-    # for attribute_id in [15, 8, 1, 11]:
+    # for attribute_id in [17, 18, 9, 5]:
     #     capture_layer = 2
     #     print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
     #     construct_binary_dataset(attribute_id, capture_layer, config, project)
@@ -1392,6 +1379,19 @@ if __name__ == "__main__":
     #         config=config,
     #         patience=5,
     #     )
+
+    for attribute_id in [15, 8, 1, 11]:
+        capture_layer = 2
+        print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
+        construct_binary_dataset(attribute_id, capture_layer, config, project)
+        init_binary_dataset(attribute_id, capture_layer, project=project, config=config)
+        train_binary_probe(
+            capture_layer=capture_layer,
+            attribute_id=attribute_id,
+            project=project,
+            config=config,
+            patience=5,
+        )
 
     # config = GPTConfig44_Complete()
     # project = "Attribute From Last Attribute"
