@@ -1,5 +1,6 @@
 from model import GPTConfig44_Complete, GPT
-from data_utils import initialize_loaders
+from data_utils import initialize_loaders, pretty_print_input
+from tokenizer import load_tokenizer
 import torch
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -227,8 +228,155 @@ def analyze_concept_neurons(model, data_loader, target_neurons):
     
     return top_k_inputs, bottom_k_inputs
 
+def plot_neuron_activation_histograms(model, data_loader, target_neurons, num_bins=50, figsize=(15, 10), save_pkl=True, output_dir='./'):
+    """
+    Compute and plot histograms of activations for specified neurons.
+    
+    Parameters:
+        model: The GPT model
+        data_loader: DataLoader yielding batches of input sequences compatible with the model
+        target_neurons: List of neuron indices to analyze
+        device: Device to run the model on
+        num_bins: Number of bins for the histogram
+        figsize: Figure size as (width, height)
+        save_pkl: Whether to save the neuron activations to a pickle file
+        output_dir: Directory to save the pickle file in
+    
+    Returns:
+        fig: The matplotlib figure object containing the histograms
+        neuron_activations: Dictionary mapping neuron indices to their activation values
+    """
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import torch
+    import pickle
+    import os
+    from datetime import datetime
+    
+    model.eval()
+    
+    # Initialize tracking structures for activations
+    neuron_activations = {neuron: [] for neuron in target_neurons}
+    
+    # Process each batch in the data loader
+    print(f"Computing activations for {len(target_neurons)} neurons...")
+    for batch_idx, batch in enumerate(data_loader):
+        if batch_idx % 10 == 0:
+            print(f"Processing batch {batch_idx}/{len(data_loader)}")
+        
+        batch = batch.to(device)
+        batch_size = batch.shape[0]
+        
+        # Forward pass with capture_layer=3 to get layer 3 activations
+        with torch.no_grad():
+            _, _, _, layer_3_activations, _ = model(batch, capture_layer=3)
+            
+            # For each sequence in the batch, extract final position's activations
+            for seq_idx in range(batch_size):
+                # Extract final position's activations for this sequence
+                final_pos_activations = layer_3_activations[seq_idx, -1, :]
+                
+                # Record activation for each target neuron
+                for neuron in target_neurons:
+                    activation = final_pos_activations[neuron].item()
+                    neuron_activations[neuron].append(activation)
+    
+    # Save neuron activations to pickle file if requested
+    if save_pkl:
+        # Make sure the output directory exists
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Create timestamp for the filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        pkl_filename = os.path.join(output_dir, f"neuron_activations_{timestamp}.pkl")
+        
+        # Save the activations to a pickle file
+        with open(pkl_filename, 'wb') as f:
+            pickle.dump(neuron_activations, f)
+        
+        print(f"Saved neuron activations to {pkl_filename}")
+    
+    # Calculate rows and columns for subplot grid
+    n_neurons = len(target_neurons)
+    n_cols = min(3, n_neurons)  # At most 3 columns
+    n_rows = (n_neurons + n_cols - 1) // n_cols  # Ceiling division
+    
+    # Create figure and subplots
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize)
+    
+    # Flatten axes array for easy indexing if there are multiple subplots
+    if n_neurons > 1:
+        if n_rows > 1 and n_cols > 1:
+            axes = axes.flatten()
+        elif n_rows == 1 or n_cols == 1:
+            axes = np.array([axes]).flatten()  # Handle case of 1D array
+    else:
+        axes = [axes]  # Make it iterable when there's only one subplot
+    
+    print("Plotting histograms...")
+    # Plot histogram for each neuron
+    for i, neuron in enumerate(target_neurons):
+        # Extract activation values
+        activations = neuron_activations[neuron]
+        
+        # Calculate histogram statistics
+        mean_act = np.mean(activations)
+        median_act = np.median(activations)
+        std_act = np.std(activations)
+        min_act = np.min(activations)
+        max_act = np.max(activations)
+        
+        # Plot histogram
+        axes[i].hist(activations, bins=num_bins, alpha=0.7, color='skyblue', edgecolor='black')
+        axes[i].axvline(mean_act, color='red', linestyle='dashed', linewidth=1, label=f'Mean: {mean_act:.3f}')
+        axes[i].axvline(median_act, color='green', linestyle='dashed', linewidth=1, label=f'Median: {median_act:.3f}')
+        
+        # Set titles and labels
+        axes[i].set_title(f'Neuron {neuron} Activations')
+        axes[i].set_xlabel('Activation Value')
+        axes[i].set_ylabel('Frequency')
+        axes[i].legend()
+        
+        # Add text with activation statistics
+        text_info = (f'μ = {mean_act:.3f}\nσ = {std_act:.3f}\n'
+                     f'Min = {min_act:.3f}\nMax = {max_act:.3f}')
+        axes[i].text(0.95, 0.95, text_info, transform=axes[i].transAxes, 
+                     fontsize=10, va='top', ha='right', 
+                     bbox={'facecolor': 'white', 'alpha': 0.5, 'pad': 5})
+    
+    # Remove any unused subplots
+    for i in range(n_neurons, len(axes)):
+        fig.delaxes(axes[i])
+    
+    plt.tight_layout()
+    print(f"Done! Plotted histograms for {len(target_neurons)} neurons.")
+    
+    return fig, neuron_activations
+
 if __name__ == "__main__":
-    # config = GPTConfig44_Complete()
+    config = GPTConfig44_Complete()
+
+    dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
+    dataset = torch.load(dataset_path)
+    _, val_loader = initialize_loaders(config, dataset)
+
+    target_neurons = [5, 13, 20, 36, 60]
+
+    # Create the model architecture
+    model = GPT(config).to(device)
+    checkpoint = torch.load(config.filename, weights_only = False)
+    # Load the weights
+    model.load_state_dict(checkpoint['model'])
+    model.eval()  # Set to evaluation mode
+
+    fig, neuron_acts = plot_neuron_activation_histograms(
+        model, 
+        val_loader, 
+        target_neurons
+    )
+    plt.savefig('COMPLETE_FIGS/mlp/neuron_activation_histograms.png', dpi=300, bbox_inches="tight")
+    # plt.show()
+
     # print("Extracting mlp weights")
     # model, mlp_weights = load_model_and_extract_mlp_weights(config)
     # mlp_weights_save_path = f"{PATH_PREFIX}/mlp_triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"
@@ -237,38 +385,71 @@ if __name__ == "__main__":
     # mlp_weights = torch.load(f"{PATH_PREFIX}/mlp_triples_card_randomization_tuple_randomization_layers_4_heads_4.pt")
     # visualize_mlp_weights(mlp_weights, f"COMPLETE_FIGS/mlp")
 
-    config = GPTConfig44_Complete()
-    # Load the checkpoint
-    checkpoint = torch.load(config.filename, weights_only = False)
+    # config = GPTConfig44_Complete()
+    # # Load the checkpoint
+    # checkpoint = torch.load(config.filename, weights_only = False)
     
-    # Create the model architecture
-    model = GPT(config).to(device)
+    # # Create the model architecture
+    # model = GPT(config).to(device)
     
-    # Load the weights
-    model.load_state_dict(checkpoint['model'])
-    model.eval()  # Set to evaluation mode
+    # # Load the weights
+    # model.load_state_dict(checkpoint['model'])
+    # model.eval()  # Set to evaluation mode
 
-    dataset = torch.load(config.dataset_path)
-    _, val_loader = initialize_loaders(config, dataset)
+    # dataset = torch.load(config.dataset_path)
+    # _, val_loader = initialize_loaders(config, dataset)
 
-    target_neurons = [5, 13, 20, 36, 60]
-    top_k_inputs, bottom_k_inputs = analyze_concept_neurons(model, val_loader, target_neurons)
+    # target_neurons = [5, 13, 20, 36, 60]
+    # top_k_inputs, bottom_k_inputs = analyze_concept_neurons(model, val_loader, target_neurons)
 
-    # Save top_k_inputs and bottom_k_inputs as pickle files
-    with open(f"top_k_inputs.pkl", "wb") as f:
-        pickle.dump(top_k_inputs, f)
+    # # Save top_k_inputs and bottom_k_inputs as pickle files
+    # with open(f"top_k_inputs.pkl", "wb") as f:
+    #     pickle.dump(top_k_inputs, f)
 
-    with open(f"bottom_k_inputs.pkl", "wb") as f:
-        pickle.dump(bottom_k_inputs, f)
+    # with open(f"bottom_k_inputs.pkl", "wb") as f:
+    #     pickle.dump(bottom_k_inputs, f)
 
-    print("Top-k Inputs:")
-    for neuron, inputs in top_k_inputs.items():
-        print(f"Neuron {neuron}:")
-        for activation, input_seq in inputs:
-            print(f"Activation: {activation}")
-            print(f"Input Sequence: {input_seq}")
-            print()
+    # print("Top-k Inputs:")
+    # for neuron, inputs in top_k_inputs.items():
+    #     print(f"Neuron {neuron}:")
+    #     for activation, input_seq in inputs:
+    #         print(f"Activation: {activation}")
+    #         print(f"Input Sequence: {input_seq}")
+    #         print()
     
-    breakpoint()
+    # breakpoint()
+
+
+    # config = GPTConfig44_Complete()
+    # # Load top_k_inputs and bottom_k_inputs from pickle files
+    # with open("top_k_inputs.pkl", "rb") as f:
+    #     top_k_inputs = pickle.load(f)
+
+    # with open("bottom_k_inputs.pkl", "rb") as f:
+    #     bottom_k_inputs = pickle.load(f)
+
+    # tokenizer = load_tokenizer("all_tokenizer.pkl")
+    # for neuron, inputs in top_k_inputs.items():
+    #     print(f"Neuron {neuron}:")
+    #     for activation, input_seq in inputs:
+    #         input_seq = input_seq.tolist()
+    #         print(f"Activation: {activation}")
+    #         tokenized_seq = tokenizer.decode(input_seq)
+    #         print(pretty_print_input(tokenized_seq))
+    #         print(f"Sets: {tokenized_seq[41:]}")
+    #         # print()
+
+    # print()
+    # for neuron, inputs in bottom_k_inputs.items():
+    #     print(f"Neuron {neuron}:")
+    #     for activation, input_seq in inputs:
+    #         input_seq = input_seq.tolist()
+    #         print(f"Activation: {activation}")
+    #         tokenized_seq = tokenizer.decode(input_seq)
+    #         print(pretty_print_input(tokenized_seq))
+    #         print(f"Sets: {tokenized_seq[41:]}")
+    #         # print()
+
+    
 
 
