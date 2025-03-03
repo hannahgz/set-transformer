@@ -201,9 +201,11 @@ def init_binary_dataset(attribute_id, capture_layer, project, config, val_split=
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size)
 
-    dataset_save_path = f"{PATH_PREFIX}/{project}/seed{config.seed}/layer{capture_layer}/attr_{attribute_id}/binary_dataloader.pt"
-    os.makedirs(dataset_save_path, exist_ok=True)
-    # Save val and train laoder
+    dataset_dir = f"{PATH_PREFIX}/{project}/seed{config.seed}/layer{capture_layer}/attr_{attribute_id}"
+    os.makedirs(dataset_dir, exist_ok=True)
+
+    # Then save to the file
+    dataset_save_path = f"{dataset_dir}/binary_dataloader.pt"
     torch.save({
         'train_loader': train_loader,
         'val_loader': val_loader
