@@ -122,8 +122,7 @@ if __name__ == "__main__":
         tokenizer_path=config.tokenizer_path,
         project_name=project + str(curr_seed),
         loss_range=[0, 0.65],
-        acc_range=[0.65, 1],
-        seed=curr_seed
+        acc_range=[0.65, 1]
     )
 
     # for capture_layer in range(4):

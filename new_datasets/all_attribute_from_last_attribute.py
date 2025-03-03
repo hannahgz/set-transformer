@@ -920,7 +920,7 @@ def plot_metrics_by_layer(target_layer, tokenizer_path, project_name="binary-pro
     
     plt.show()
 
-def plot_all_layers_metrics(layers, tokenizer_path, seed, loss_range = [0, 0.5], acc_range = [0.7, 1], project_name="binary-probe-training-all-attr", entity="hazhou-harvard"):
+def plot_all_layers_metrics(layers, tokenizer_path, loss_range = [0, 0.5], acc_range = [0.7, 1], project_name="binary-probe-training-all-attr", entity="hazhou-harvard"):
     """
     Create four figures:
     1. Training losses across all layers
@@ -1052,7 +1052,7 @@ def plot_all_layers_metrics(layers, tokenizer_path, seed, loss_range = [0, 0.5],
     fig_val_acc.tight_layout()
     
     # Create save directory
-    save_path = f"COMPLETE_FIGS/{project_name}/seed{seed}/consolidated"
+    save_path = f"COMPLETE_FIGS/{project_name}/consolidated"
     os.makedirs(save_path, exist_ok=True)
     
     # Save figures
