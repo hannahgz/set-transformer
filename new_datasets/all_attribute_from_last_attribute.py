@@ -1358,23 +1358,10 @@ if __name__ == "__main__":
     project = "attr_from_last_attr_binding_seeded"
     config = GPTConfig44_SeededOrigDataset(seed=curr_seed)
     
-    # for attribute_id in [3, 17, 18]:
-    #     for capture_layer in [0, 1, 3]:
-    #         if attribute_id == 3 and capture_layer == 0:
-    #             continue
-    #         print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
-    #         construct_binary_dataset(attribute_id, capture_layer, config, project)
-    #         init_binary_dataset(attribute_id, capture_layer, project=project, config=config)
-    #         train_binary_probe(
-    #             capture_layer=capture_layer,
-    #             attribute_id=attribute_id,
-    #             project=project,
-    #             config=config,
-    #             patience=5,
-    #         )
-
-    for attribute_id in [9, 5, 15]:
+    for attribute_id in [3, 17, 18]:
         for capture_layer in [0, 1, 3]:
+            if attribute_id == 3 and capture_layer == 0:
+                continue
             print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
             construct_binary_dataset(attribute_id, capture_layer, config, project)
             init_binary_dataset(attribute_id, capture_layer, project=project, config=config)
@@ -1385,6 +1372,19 @@ if __name__ == "__main__":
                 config=config,
                 patience=5,
             )
+
+    # for attribute_id in [9, 5, 15]:
+    #     for capture_layer in [0, 1, 3]:
+    #         print(f"Training binary probe for attribute {attribute_id}, layer {capture_layer}")
+    #         construct_binary_dataset(attribute_id, capture_layer, config, project)
+    #         init_binary_dataset(attribute_id, capture_layer, project=project, config=config)
+    #         train_binary_probe(
+    #             capture_layer=capture_layer,
+    #             attribute_id=attribute_id,
+    #             project=project,
+    #             config=config,
+    #             patience=5,
+    #         )
 
     # for attribute_id in [8, 1, 11]:
     #     for capture_layer in [0, 1, 3]:
