@@ -228,7 +228,7 @@ def analyze_concept_neurons(model, data_loader, target_neurons):
     
     return top_k_inputs, bottom_k_inputs
 
-def plot_neuron_activation_histograms(model, data_loader, target_neurons, num_bins=50, figsize=(15, 10), save_pkl=True, output_dir='./'):
+def plot_neuron_activation_histograms(model, data_loader, target_neurons, config, set_filtering = None, num_bins=50, figsize=(15, 10), save_pkl=True, output_dir='./'):
     """
     Compute and plot histograms of activations for specified neurons.
     
@@ -258,6 +258,10 @@ def plot_neuron_activation_histograms(model, data_loader, target_neurons, num_bi
     # Initialize tracking structures for activations
     neuron_activations = {neuron: [] for neuron in target_neurons}
     
+    tokenizer = load_tokenizer(config.tokenizer_path)
+    no_set_token = tokenizer.token_to_id["*"]
+    two_set_token = tokenizer.token_to_id["/"]
+
     # Process each batch in the data loader
     print(f"Computing activations for {len(target_neurons)} neurons...")
     for batch_idx, batch in enumerate(data_loader):
@@ -274,6 +278,15 @@ def plot_neuron_activation_histograms(model, data_loader, target_neurons, num_bi
             # For each sequence in the batch, extract final position's activations
             for seq_idx in range(batch_size):
                 # Extract final position's activations for this sequence
+                if set_filtering == 0:
+                    if no_set_token not in batch[seq_idx]:
+                        continue
+                elif set_filtering == 1:
+                    if no_set_token in batch[seq_idx] or two_set_token in batch[seq_idx]:
+                        continue
+                elif set_filtering == 2:
+                    if two_set_token not in batch[seq_idx]:
+                        continue
                 final_pos_activations = layer_3_activations[seq_idx, -1, :]
                 
                 # Record activation for each target neuron
@@ -360,7 +373,7 @@ if __name__ == "__main__":
     dataset = torch.load(dataset_path)
     _, val_loader = initialize_loaders(config, dataset)
 
-    target_neurons = [5, 13, 20, 36, 60]
+    target_neurons = range(64)
 
     # Create the model architecture
     model = GPT(config).to(device)
@@ -369,12 +382,16 @@ if __name__ == "__main__":
     model.load_state_dict(checkpoint['model'])
     model.eval()  # Set to evaluation mode
 
+
+    set_filtering = 0
     fig, neuron_acts = plot_neuron_activation_histograms(
         model, 
         val_loader, 
-        target_neurons
+        target_neurons,
+        config,
+        set_filtering = set_filtering,
     )
-    plt.savefig('COMPLETE_FIGS/mlp/neuron_activation_histograms.png', dpi=300, bbox_inches="tight")
+    plt.savefig(f'COMPLETE_FIGS/mlp/neuron_activation_histograms_set{set_filtering}.png', dpi=300, bbox_inches="tight")
     # plt.show()
 
     # print("Extracting mlp weights")
