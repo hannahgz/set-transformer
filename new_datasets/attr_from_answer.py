@@ -23,7 +23,7 @@ PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
 def init_attr_from_answer(config, capture_layer, project):
     dataset = torch.load(config.dataset_path)
-    train_loader, val_loader = initialize_loaders(config, dataset)
+    train_loader, val_loader = initialize_loaders(dataset)
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     model = GPT(config).to(device)
