@@ -86,7 +86,7 @@ def init_all_attr_from_last_atrr_binding_dataset(config, capture_layer, project)
 
     # Save the tensors
     save_path_dir = f"{PATH_PREFIX}/{project}/seed{config.seed}/layer{capture_layer}"
-    os.makedirs(save_path_dir, exist_ok=True, parents=True)
+    os.makedirs(save_path_dir, exist_ok=True)
 
     torch.save({
         'input_embeddings': input_embeddings_tensor,
@@ -202,7 +202,7 @@ def init_binary_dataset(attribute_id, capture_layer, project, config, val_split=
     val_loader = DataLoader(val_dataset, batch_size=batch_size)
 
     dataset_save_path = f"{PATH_PREFIX}/{project}/seed{config.seed}/layer{capture_layer}/attr_{attribute_id}/binary_dataloader.pt"
-    os.makedirs(dataset_save_path, exist_ok=True, parents=True)
+    os.makedirs(dataset_save_path, exist_ok=True)
     # Save val and train laoder
     torch.save({
         'train_loader': train_loader,
