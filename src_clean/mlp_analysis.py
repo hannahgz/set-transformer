@@ -228,7 +228,7 @@ def analyze_concept_neurons(model, data_loader, target_neurons):
     
     return top_k_inputs, bottom_k_inputs
 
-def plot_neuron_activation_histograms(model, data_loader, target_neurons, config, set_filtering = None, num_bins=50, figsize=(15, 10), save_pkl=True, output_dir='./'):
+def plot_neuron_activation_histograms(model, data_loader, target_neurons, config, set_filtering = None, num_bins=50, figsize=(60, 40), save_pkl=True, output_dir='./'):
     """
     Compute and plot histograms of activations for specified neurons.
     
@@ -311,7 +311,7 @@ def plot_neuron_activation_histograms(model, data_loader, target_neurons, config
     
     # Calculate rows and columns for subplot grid
     n_neurons = len(target_neurons)
-    n_cols = min(3, n_neurons)  # At most 3 columns
+    n_cols = min(4, n_neurons)  # At most 3 columns
     n_rows = (n_neurons + n_cols - 1) // n_cols  # Ceiling division
     
     # Create figure and subplots
@@ -383,15 +383,15 @@ if __name__ == "__main__":
     model.eval()  # Set to evaluation mode
 
 
-    set_filtering = 0
-    fig, neuron_acts = plot_neuron_activation_histograms(
-        model, 
-        val_loader, 
-        target_neurons,
-        config,
-        set_filtering = set_filtering,
-    )
-    plt.savefig(f'COMPLETE_FIGS/mlp/neuron_activation_histograms_set{set_filtering}.png', dpi=300, bbox_inches="tight")
+    for set_filtering in [0, 1, 2]:
+        fig, neuron_acts = plot_neuron_activation_histograms(
+            model, 
+            val_loader, 
+            target_neurons,
+            config,
+            set_filtering = set_filtering,
+        )
+        plt.savefig(f'COMPLETE_FIGS/mlp/neuron_activation_histograms_set{set_filtering}.png', dpi=300, bbox_inches="tight")
     # plt.show()
 
     # print("Extracting mlp weights")
