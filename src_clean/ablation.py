@@ -246,7 +246,7 @@ def embedding_ablation_study_layer(model, base_input, target_layer, tokenizer,
 
     # Determine top_k tokens to display in the plots
     top_k = 10
-    token_indices = torch.argsort(base_probs, descending=True)[
+    base_token_indices = torch.argsort(base_probs, descending=True)[
         :top_k].cpu().numpy()
 
     # Create a grid of subplots based on sequence length
@@ -259,15 +259,20 @@ def embedding_ablation_study_layer(model, base_input, target_layer, tokenizer,
 
     # First subplot is for base prediction
     ax_base = fig.add_subplot(grid_size, grid_size, 1)
-    token_labels = tokenizer.decode(token_indices)
+
+    # Create individual token labels instead of a single string
+    base_token_labels = [tokenizer.decode([idx]) for idx in base_token_indices]
 
     # Plot base probabilities
-    base_values = base_probs[token_indices].cpu().numpy()
-    ax_base.bar(token_labels, base_values)
+    base_values = base_probs[base_token_indices].cpu().numpy()
+    ax_base.bar(base_token_labels, base_values)
     ax_base.set_title('Base Prediction')
     ax_base.set_xlabel('Token')
     ax_base.set_ylabel('Probability')
     ax_base.tick_params(axis='x', rotation=45)
+
+    # Store KL divergences for a possible summary plot
+    kl_divergences = []
 
     # Now run ablation for each position in the sequence
     for position_to_ablate in range(sequence_length):
@@ -332,6 +337,8 @@ def embedding_ablation_study_layer(model, base_input, target_layer, tokenizer,
                 reduction='batchmean'
             ).item()
 
+            kl_divergences.append(kl_div)
+
             # Add subplot for this position
             # +2 because base is at position 1
             ax = fig.add_subplot(grid_size, grid_size, position_to_ablate + 2)
@@ -339,7 +346,10 @@ def embedding_ablation_study_layer(model, base_input, target_layer, tokenizer,
             # Get top tokens for this modified distribution
             modified_token_indices = torch.argsort(modified_probs, descending=True)[
                 :top_k].cpu().numpy()
-            modified_token_labels = [tokenizer.decode(modified_token_indices)]
+
+            # Create individual token labels for each token
+            modified_token_labels = [tokenizer.decode(
+                [idx]) for idx in modified_token_indices]
             modified_values = modified_probs[modified_token_indices].cpu(
             ).numpy()
 
@@ -354,7 +364,15 @@ def embedding_ablation_study_layer(model, base_input, target_layer, tokenizer,
 
     plt.tight_layout()
 
-    return fig
+    # Create an additional figure showing KL divergence by position
+    kl_fig = plt.figure(figsize=(10, 6))
+    ax_kl = kl_fig.add_subplot(111)
+    ax_kl.bar(range(sequence_length), kl_divergences)
+    ax_kl.set_title(f'KL Divergence by Position (Layer {target_layer})')
+    ax_kl.set_xlabel('Position')
+    ax_kl.set_ylabel('KL Divergence')
+
+    return fig, kl_fig
 
 
 def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positions_to_ablate, tokenizer, target_pos=41, noise_scale=1.0, replace_with_zeros=False):
@@ -444,7 +462,7 @@ if __name__ == "__main__":
         ablate_type = "zeros"
 
     for target_layer in range(4):
-        layer_fig = embedding_ablation_study_layer(
+        layer_fig, kl_fig = embedding_ablation_study_layer(
             model=model,
             base_input=base_input,
             target_layer=target_layer,
