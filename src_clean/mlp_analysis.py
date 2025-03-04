@@ -168,7 +168,7 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import pickle
 
-def analyze_concept_neurons(model, data_loader, target_neurons):
+def analyze_concept_neurons(model, data_loader, target_neurons, capture_layer):
     """
     Perform dataset traversal to find inputs that maximally and minimally activate specific neurons in layer 3.
     
@@ -197,15 +197,14 @@ def analyze_concept_neurons(model, data_loader, target_neurons):
         batch = batch.to(device)
         batch_size = batch.shape[0]
         
-        # Forward pass with capture_layer=3 to get layer 3 activations
         with torch.no_grad():
-            _, _, _, layer_3_activations, _ = model(batch, capture_layer=3)
+            _, _, _, layer_activations, _ = model(batch, capture_layer=capture_layer)
             
             # For each sequence in the batch, extract final position's activations
             for seq_idx in range(batch_size):
                 # Extract final position's activations for this sequence
                 # Shape: [hidden_size]
-                final_pos_activations = layer_3_activations[seq_idx, -1, :]
+                final_pos_activations = layer_activations[seq_idx, -1, :]
                 
                 # Check each target neuron's activation
                 for neuron in target_neurons:
@@ -763,13 +762,63 @@ def init_neuron_activations(model, data_loader, target_neurons, config, capture_
     breakpoint()
 
 if __name__ == "__main__":
+    config = GPTConfig44_Complete()
+    # Load the checkpoint
+    checkpoint = torch.load(config.filename, weights_only = False)
+    
+    # Create the model architecture
+    model = GPT(config).to(device)
+    
+    # Load the weights
+    model.load_state_dict(checkpoint['model'])
+    model.eval()  # Set to evaluation mode
+
+    dataset = torch.load(config.dataset_path)
+    _, val_loader = initialize_loaders(config, dataset)
+
+    target_neurons = [2, 4, 12, 19, 34, 36, 37, 43, 54, 60]
+    top_k_inputs, bottom_k_inputs = analyze_concept_neurons(
+        model, 
+        val_loader, 
+        target_neurons, 
+        capture_layer=0)
+    
+    tokenizer = load_tokenizer("all_tokenizer.pkl")
+    
+    # Sort them to ensure consistent order
+    for neuron in sorted(target_neurons):
+        print(f"Neuron {neuron}:")
+        
+        # Print top k inputs for this neuron if available
+        print(f"  Top activations:")
+        for activation, input_seq in top_k_inputs[neuron]:
+            input_seq = input_seq.tolist()
+            print(f"  Activation: {activation}")
+            tokenized_seq = tokenizer.decode(input_seq)
+            print(f"  {pretty_print_input(tokenized_seq)}")
+            print(f"  Sets: {tokenized_seq[41:]}")
+            print()  # Add a blank line between items
+        
+        # Print bottom k inputs for this neuron if available
+        print(f"  Bottom activations:")
+        for activation, input_seq in bottom_k_inputs[neuron]:
+            input_seq = input_seq.tolist()
+            print(f"  Activation: {activation}")
+            tokenized_seq = tokenizer.decode(input_seq)
+            print(f"  {pretty_print_input(tokenized_seq)}")
+            print(f"  Sets: {tokenized_seq[41:]}")
+            print()  # Add a blank line between items
+        
+        print("-" * 50)  # Add a separator between neurons
+
+
     # config = GPTConfig44_Complete()
 
     # dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
     # dataset = torch.load(dataset_path)
     # _, val_loader = initialize_loaders(config, dataset)
 
-    target_neurons = range(64)
+    # target_neurons = range(64)
 
     # # Create the model architecture
     # model = GPT(config).to(device)
@@ -781,15 +830,15 @@ if __name__ == "__main__":
     # for capture_layer in range(4):
     #     init_neuron_activations(model, val_loader, target_neurons, config, capture_layer=capture_layer, set_filtering=None)
 
-    for capture_layer in range(4):
-        for target_sets in [0, 1, 2]:
-            print(f"Layer {capture_layer}, Set {target_sets}")
-            fig, neuron_acts = plot_neuron_activation_histograms_overlap_preloaded(
-                target_neurons,
-                capture_layer=capture_layer,
-                set_filtering=target_sets,
-            )
-            plt.savefig(f'COMPLETE_FIGS/mlp/layer_{capture_layer}/neuron_activation_histograms_set{target_sets}.png', dpi=300, bbox_inches="tight")
+    # for capture_layer in range(4):
+    #     for target_sets in [0, 1, 2]:
+    #         print(f"Layer {capture_layer}, Set {target_sets}")
+    #         fig, neuron_acts = plot_neuron_activation_histograms_overlap_preloaded(
+    #             target_neurons,
+    #             capture_layer=capture_layer,
+    #             set_filtering=target_sets,
+    #         )
+    #         plt.savefig(f'COMPLETE_FIGS/mlp/layer_{capture_layer}/neuron_activation_histograms_set{target_sets}.png', dpi=300, bbox_inches="tight")
 
     # for set_filtering in [0, 1, 2]:
     #     fig, neuron_acts = plot_neuron_activation_histograms(
