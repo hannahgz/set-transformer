@@ -202,7 +202,7 @@ def embedding_ablation_study(model, base_input, target_layer, position_to_ablate
     return results
 
 
-def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positions_to_ablate, target_pos=41, noise_scale=1.0, replace_with_zeros=False):
+def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positions_to_ablate, tokenizer, target_pos=41, noise_scale=1.0, replace_with_zeros=False):
     """
     Performs embedding ablation across multiple layers and positions,
     creating a heatmap visualization of KL divergence.
@@ -228,7 +228,7 @@ def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positi
         for j, position in enumerate(positions_to_ablate):
             print(f"Layer {layer}, Position {position}")
             result = embedding_ablation_study(
-                model, base_input, layer, position,
+                model, base_input, layer, position, tokenizer,
                 target_pos, noise_scale, replace_with_zeros
             )
             layer_results[position] = result
@@ -304,6 +304,7 @@ if __name__ == "__main__":
         base_input=base_input,
         layers_to_ablate=[0, 1, 2, 3],
         positions_to_ablate=range(40),
+        tokenizer=tokenizer,
         target_pos=41,
         noise_scale=1.0,
         replace_with_zeros=replace_with_zeros)
