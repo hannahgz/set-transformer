@@ -74,7 +74,7 @@ from model import GPTConfig44_Complete, GPT
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def embedding_ablation_study(model, base_input, target_layer, position_to_ablate, tokenizer, target_pos=41, noise_scale=1.0, replace_with_zeros=False):
+def embedding_ablation_study(model, base_input, target_layer, position_to_ablate, tokenizer, target_pos=41, noise_scale=1.0, replace_with_zeros=False, generate_fig = False):
     """
     Performs an ablation study by replacing embeddings at a specific layer and position
     with either noise or zeros, then measuring the impact on model predictions.
@@ -169,35 +169,38 @@ def embedding_ablation_study(model, base_input, target_layer, position_to_ablate
             'modified_probs': modified_probs.cpu().numpy()
         }
 
-        # Create visualizations
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+    if not generate_fig:
+        return results
+    
+    # Create visualizations
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
 
-        # Plot probability distributions
-        top_k = 10  # Show top-k tokens
-        token_indices = torch.argsort(base_probs, descending=True)[
-            :top_k].cpu().numpy()
+    # Plot probability distributions
+    top_k = 10  # Show top-k tokens
+    token_indices = torch.argsort(base_probs, descending=True)[
+        :top_k].cpu().numpy()
 
-        # Convert token IDs to string labels if possible (placeholder)
-        # token_labels = [str(idx) for idx in token_indices]
-        token_labels = tokenizer.decode(token_indices)
+    # Convert token IDs to string labels if possible (placeholder)
+    # token_labels = [str(idx) for idx in token_indices]
+    token_labels = tokenizer.decode(token_indices)
 
-        # Plot base probabilities
-        base_values = base_probs[token_indices].cpu().numpy()
-        ax1.bar(token_labels, base_values)
-        ax1.set_title('Base Prediction Probabilities')
-        ax1.set_xlabel('Token ID')
-        ax1.set_ylabel('Probability')
+    # Plot base probabilities
+    base_values = base_probs[token_indices].cpu().numpy()
+    ax1.bar(token_labels, base_values)
+    ax1.set_title('Base Prediction Probabilities')
+    ax1.set_xlabel('Token ID')
+    ax1.set_ylabel('Probability')
 
-        # Plot modified probabilities for the same tokens
-        modified_values = modified_probs[token_indices].cpu().numpy()
-        ax2.bar(token_labels, modified_values)
-        ax2.set_title(
-            f'Modified Prediction Probabilities (Layer {target_layer}, Pos {position_to_ablate})')
-        ax2.set_xlabel('Token ID')
-        ax2.set_ylabel('Probability')
+    # Plot modified probabilities for the same tokens
+    modified_values = modified_probs[token_indices].cpu().numpy()
+    ax2.bar(token_labels, modified_values)
+    ax2.set_title(
+        f'Modified Prediction Probabilities (Layer {target_layer}, Pos {position_to_ablate})')
+    ax2.set_xlabel('Token ID')
+    ax2.set_ylabel('Probability')
 
-        plt.tight_layout()
-        results['figure'] = fig
+    plt.tight_layout()
+    results['figure'] = fig
 
     return results
 
@@ -236,9 +239,9 @@ def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positi
         results[layer] = layer_results
 
     # Create heatmap visualization
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(20, 16))
 
-    sns.heatmap(kl_matrix, annot=True, fmt=".4f", cmap="viridis",
+    sns.heatmap(kl_matrix, annot=True, fmt=".2f", cmap="viridis",
                 xticklabels=positions_to_ablate, yticklabels=layers_to_ablate)
 
     plt.xlabel('Sequence Position')
@@ -308,8 +311,6 @@ if __name__ == "__main__":
         target_pos=41,
         noise_scale=1.0,
         replace_with_zeros=replace_with_zeros)
-    
-    breakpoint()
 
     # Save the heatmap figure
     fig_save_path = f"COMPLETE_FIGS/ablation_study"
@@ -317,10 +318,10 @@ if __name__ == "__main__":
     comprehensive_results['heatmap_figure'].savefig(
         os.path.join(fig_save_path, f"embedding_ablation_heatmap_ablate_type_{ablate_type}.png"), bbox_inches="tight")
     
-    # Save the KL divergence matrix
-    matrix_path = f"results/ablation_study"
-    os.makedirs(matrix_path, exist_ok=True)
-    np.save(os.path.join(matrix_path, f"kl_divergence_matrix_ablate_type_{ablate_type}.npy"), comprehensive_results['kl_matrix'])
+    # # Save the KL divergence matrix
+    # matrix_path = f"results/ablation_study"
+    # os.makedirs(matrix_path, exist_ok=True)
+    # np.save(os.path.join(matrix_path, f"kl_divergence_matrix_ablate_type_{ablate_type}.npy"), comprehensive_results['kl_matrix'])
 
     # fig_save_path = f"COMPLETE_FIGS/ablation_study/layer_{target_layer}/ablate_type_{ablate_type}"
     # os.makedirs(fig_save_path, exist_ok=True)
