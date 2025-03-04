@@ -763,20 +763,20 @@ def init_neuron_activations(model, data_loader, target_neurons, config, capture_
     breakpoint()
 
 if __name__ == "__main__":
-    config = GPTConfig44_Complete()
+    # config = GPTConfig44_Complete()
 
-    dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
-    dataset = torch.load(dataset_path)
-    _, val_loader = initialize_loaders(config, dataset)
+    # dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
+    # dataset = torch.load(dataset_path)
+    # _, val_loader = initialize_loaders(config, dataset)
 
     target_neurons = range(64)
 
-    # Create the model architecture
-    model = GPT(config).to(device)
-    checkpoint = torch.load(config.filename, weights_only = False)
-    # Load the weights
-    model.load_state_dict(checkpoint['model'])
-    model.eval()  # Set to evaluation mode
+    # # Create the model architecture
+    # model = GPT(config).to(device)
+    # checkpoint = torch.load(config.filename, weights_only = False)
+    # # Load the weights
+    # model.load_state_dict(checkpoint['model'])
+    # model.eval()  # Set to evaluation mode
 
     # for capture_layer in range(4):
     #     init_neuron_activations(model, val_loader, target_neurons, config, capture_layer=capture_layer, set_filtering=None)
