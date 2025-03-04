@@ -92,7 +92,7 @@ def embedding_ablation_study(model, base_input, target_layer, position_to_ablate
         Dictionary with results including KL divergence and visualization
     """
     results = {}
-    target_pos -= 1 # 0-indexed, predicts result at first position
+    target_pos -= 1  # 0-indexed, predicts result at first position
 
     # Step 1: Get the base model prediction
     base_logits, _, _, _, _ = model(base_input, get_loss=True)
@@ -276,26 +276,49 @@ if __name__ == "__main__":
     encoded_seq = tokenizer.encode(input_seq)
 
     # Convert the list to a PyTorch tensor and add batch dimension
-    base_input = torch.tensor(encoded_seq, dtype=torch.long).unsqueeze(0).to(device)
+    base_input = torch.tensor(
+        encoded_seq, dtype=torch.long).unsqueeze(0).to(device)
 
     target_layer = 0
     position_to_ablate = 2
     replace_with_zeros = False
 
-    results = embedding_ablation_study(
+    ablate_type = "noise"
+    if replace_with_zeros:
+        ablate_type = "zeros"
+
+    # results = embedding_ablation_study(
+    #     model=model,
+    #     base_input=base_input,
+    #     target_layer=target_layer,
+    #     position_to_ablate=position_to_ablate,
+    #     tokenizer=tokenizer,
+    #     target_pos=41,
+    #     noise_scale=1.0,
+    #     replace_with_zeros=replace_with_zeros)
+    # breakpoint()
+
+    comprehensive_results = comprehensive_embedding_ablation(
         model=model,
         base_input=base_input,
-        target_layer=target_layer,
-        position_to_ablate=position_to_ablate,
-        tokenizer=tokenizer,
+        layers_to_ablate=[0, 1, 2, 3],
+        positions_to_ablate=range(40),
         target_pos=41,
         noise_scale=1.0,
         replace_with_zeros=replace_with_zeros)
+    
     breakpoint()
 
-    # ablate_type = "noise"
-    # if replace_with_zeros:
-    #     ablate_type = "zeros"
+    # Save the heatmap figure
+    fig_save_path = f"COMPLETE_FIGS/ablation_study"
+    os.makedirs(fig_save_path, exist_ok=True)
+    comprehensive_results['heatmap_figure'].savefig(
+        os.path.join(fig_save_path, f"embedding_ablation_heatmap_ablate_type_{ablate_type}.png"), bbox_inches="tight")
+    
+    # Save the KL divergence matrix
+    matrix_path = f"results/ablation_study"
+    os.makedirs(matrix_path, exist_ok=True)
+    np.save(os.path.join(matrix_path, f"kl_divergence_matrix_ablate_type_{ablate_type}.npy"), comprehensive_results['kl_matrix'])
 
     # fig_save_path = f"COMPLETE_FIGS/ablation_study/layer_{target_layer}/ablate_type_{ablate_type}"
     # os.makedirs(fig_save_path, exist_ok=True)
