@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import os
+import random
 from torch.nn import functional as F
 from tokenizer import load_tokenizer
 from model import GPTConfig44_Complete, GPT
@@ -405,7 +406,6 @@ def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positi
                 model, base_input, layer, position, tokenizer,
                 target_pos, noise_scale, replace_with_zeros
             )
-            breakpoint()
             layer_results[position] = result
             kl_matrix[i, j] = result['kl_div']
         results[layer] = layer_results
@@ -429,6 +429,11 @@ def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positi
 
 
 if __name__ == "__main__":
+    seed = 42
+    torch.manual_seed(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+
     config = GPTConfig44_Complete()
     checkpoint = torch.load(config.filename, weights_only=False)
 
@@ -478,24 +483,22 @@ if __name__ == "__main__":
     #     layer_fig.savefig(
     #         os.path.join(fig_save_path, f"embedding_ablation_layer_{target_layer}_ablate_type_{ablate_type}.png"), bbox_inches="tight")
 
-    # print(f"Layer {target_layer}, Position {position_to_ablate}")
-    # results = embedding_ablation_study(
-    #     model=model,
-    #     base_input=base_input,
-    #     target_layer=target_layer,
-    #     position_to_ablate=position_to_ablate,
-    #     tokenizer=tokenizer,
-    #     target_pos=41,
-    #     noise_scale=1.0,
-    #     replace_with_zeros=replace_with_zeros,
-    #     generate_fig=True)
+    print(f"Layer {target_layer}, Position {position_to_ablate}")
+    results = embedding_ablation_study(
+        model=model,
+        base_input=base_input,
+        target_layer=target_layer,
+        position_to_ablate=position_to_ablate,
+        tokenizer=tokenizer,
+        target_pos=41,
+        noise_scale=1.0,
+        replace_with_zeros=replace_with_zeros,
+        generate_fig=True)
 
-    # fig_save_path = f"COMPLETE_FIGS/ablation_study/layer_{target_layer}/ablate_type_{ablate_type}"
-    # os.makedirs(fig_save_path, exist_ok=True)
-    # results["figure"].savefig(
-    #     os.path.join(fig_save_path, f"embedding_ablation_position_{position_to_ablate}.png"), bbox_inches="tight")
-
-    # breakpoint()
+    fig_save_path = f"COMPLETE_FIGS/ablation_study/layer_{target_layer}/ablate_type_{ablate_type}"
+    os.makedirs(fig_save_path, exist_ok=True)
+    results["figure"].savefig(
+        os.path.join(fig_save_path, f"embedding_ablation_position_{position_to_ablate}.png"), bbox_inches="tight")
 
     # for target_layer in range(4):
     #     for position_to_ablate in range(40):
