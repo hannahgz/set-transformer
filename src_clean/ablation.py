@@ -202,7 +202,7 @@ def embedding_ablation_study(model, base_input, target_layer, position_to_ablate
         # Get top tokens for this modified distribution
         modified_token_indices = torch.argsort(modified_probs, descending=True)[
             :top_k].cpu().numpy()
-        modified_token_labels = [tokenizer.decode(modified_token_indices)]
+        modified_token_labels = tokenizer.decode(modified_token_indices)
         modified_values = modified_probs[modified_token_indices].cpu().numpy()
 
         ax2.bar(modified_token_labels, modified_values)
