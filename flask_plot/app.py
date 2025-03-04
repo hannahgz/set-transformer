@@ -15,7 +15,7 @@ app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
-PATH_PREFIX = "/Users/hannahzhou/Desktop/thesis/set-transformer/flask_plot/models"
+PATH_PREFIX = "models"
 
 # Card attributes
 shapes = ["oval", "squiggle", "diamond"]
