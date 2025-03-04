@@ -778,18 +778,18 @@ if __name__ == "__main__":
     model.load_state_dict(checkpoint['model'])
     model.eval()  # Set to evaluation mode
 
-    for capture_layer in range(4):
-        init_neuron_activations(model, val_loader, target_neurons, config, capture_layer=capture_layer, set_filtering=None)
-
     # for capture_layer in range(4):
-    #     for target_sets in [0, 1, 2]:
-    #         print(f"Layer {capture_layer}, Set {target_sets}")
-    #         fig, neuron_acts = plot_neuron_activation_histograms_overlap_preloaded(
-    #             target_neurons,
-    #             capture_layer=capture_layer,
-    #             set_filtering=target_sets,
-    #         )
-    #         plt.savefig(f'COMPLETE_FIGS/mlp/layer_{capture_layer}/neuron_activation_histograms_set{target_sets}.png', dpi=300, bbox_inches="tight")
+    #     init_neuron_activations(model, val_loader, target_neurons, config, capture_layer=capture_layer, set_filtering=None)
+
+    for capture_layer in range(4):
+        for target_sets in [0, 1, 2]:
+            print(f"Layer {capture_layer}, Set {target_sets}")
+            fig, neuron_acts = plot_neuron_activation_histograms_overlap_preloaded(
+                target_neurons,
+                capture_layer=capture_layer,
+                set_filtering=target_sets,
+            )
+            plt.savefig(f'COMPLETE_FIGS/mlp/layer_{capture_layer}/neuron_activation_histograms_set{target_sets}.png', dpi=300, bbox_inches="tight")
 
     # for set_filtering in [0, 1, 2]:
     #     fig, neuron_acts = plot_neuron_activation_histograms(
