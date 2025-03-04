@@ -761,6 +761,61 @@ def init_neuron_activations(model, data_loader, target_neurons, config, capture_
     print(f"Saved neuron activations to {pkl_filename}")
     breakpoint()
 
+def save_neuron_activations_to_txt(target_neurons, top_k_inputs, bottom_k_inputs, tokenizer, capture_layer, output_dir='./'):
+    """
+    Save neuron activation analysis to a text file.
+    
+    Parameters:
+        target_neurons (list): List of neuron indices to analyze
+        top_k_inputs (dict): Dictionary mapping neuron indices to their top activations
+        bottom_k_inputs (dict): Dictionary mapping neuron indices to their bottom activations
+        tokenizer: Tokenizer object for decoding input sequences
+        output_dir (str): Directory to save the text file in
+    
+    Returns:
+        str: Path to the saved text file
+    """
+    import os
+    from datetime import datetime
+    
+    # Create output directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Create filename with timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    txt_filename = os.path.join(output_dir, f"layer{capture_layer}_neuron_activations_analysis_{timestamp}.txt")
+    
+    # Open a file to write the output
+    with open(txt_filename, 'w') as f:
+        # Sort neurons to ensure consistent order
+        for neuron in sorted(target_neurons):
+            f.write(f"Neuron {neuron}:\n")
+            
+            # Write top k inputs for this neuron
+            f.write(f"  Top activations:\n")
+            for activation, input_seq in top_k_inputs[neuron]:
+                input_seq = input_seq.tolist()
+                f.write(f"  Activation: {activation}\n")
+                tokenized_seq = tokenizer.decode(input_seq)
+                f.write(f"  {pretty_print_input(tokenized_seq)}\n")
+                f.write(f"  Sets: {tokenized_seq[41:]}\n")
+                f.write("\n")  # Add a blank line between items
+            
+            # Write bottom k inputs for this neuron
+            f.write(f"  Bottom activations:\n")
+            for activation, input_seq in bottom_k_inputs[neuron]:
+                input_seq = input_seq.tolist()
+                f.write(f"  Activation: {activation}\n")
+                tokenized_seq = tokenizer.decode(input_seq)
+                f.write(f"  {pretty_print_input(tokenized_seq)}\n")
+                f.write(f"  Sets: {tokenized_seq[41:]}\n")
+                f.write("\n")  # Add a blank line between items
+            
+            f.write("-" * 50 + "\n")  # Add a separator between neurons
+    
+    print(f"Saved neuron activations analysis to {txt_filename}")
+    return txt_filename
+
 if __name__ == "__main__":
     config = GPTConfig44_Complete()
     # Load the checkpoint
@@ -773,15 +828,20 @@ if __name__ == "__main__":
     model.load_state_dict(checkpoint['model'])
     model.eval()  # Set to evaluation mode
 
-    dataset = torch.load(config.dataset_path)
+    # dataset = torch.load(config.dataset_path)
+    # _, val_loader = initialize_loaders(config, dataset)
+
+    dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
+    dataset = torch.load(dataset_path)
     _, val_loader = initialize_loaders(config, dataset)
 
+    capture_layer = 0
     target_neurons = [2, 4, 12, 19, 34, 36, 37, 43, 54, 60]
     top_k_inputs, bottom_k_inputs = analyze_concept_neurons(
         model, 
         val_loader, 
         target_neurons, 
-        capture_layer=0)
+        capture_layer=capture_layer)
     
     tokenizer = load_tokenizer("all_tokenizer.pkl")
     
@@ -811,6 +871,14 @@ if __name__ == "__main__":
         
         print("-" * 50)  # Add a separator between neurons
 
+    txt_file = save_neuron_activations_to_txt(
+        target_neurons,
+        top_k_inputs,
+        bottom_k_inputs,
+        tokenizer,
+        capture_layer=capture_layer,
+        output_dir='./',
+    )
 
     # config = GPTConfig44_Complete()
 
