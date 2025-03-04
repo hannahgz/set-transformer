@@ -690,7 +690,7 @@ if __name__ == "__main__":
 
     dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
     dataset = torch.load(dataset_path)
-    _, val_loader = initialize_loaders(config, dataset)
+    train_loader, val_loader = initialize_loaders(config, dataset)
 
     batch_results = comprehensive_ablation_batch_optimized(
         model=model, 
@@ -701,7 +701,7 @@ if __name__ == "__main__":
         target_pos=41, 
         noise_scale=1.0, 
         replace_with_zeros=replace_with_zeros,
-        max_batches=100)
+        max_batches=10)
 
     breakpoint()
     # Save the heatmap figure
@@ -709,6 +709,10 @@ if __name__ == "__main__":
     os.makedirs(fig_save_path, exist_ok=True)
     batch_results['heatmap_figure'].savefig(
         os.path.join(fig_save_path, f"avg_embedding_ablation_heatmap_ablate_type_{ablate_type}.png"), bbox_inches="tight")
+
+    matrix_path = f"results/ablation_study"
+    os.makedirs(matrix_path, exist_ok=True)
+    np.save(os.path.join(matrix_path, f"avg_kl_divergence_matrix_ablate_type_{ablate_type}.npy"), batch_results['kl_matrix'])
 
     # # Save the KL divergence matrix
     # matrix_path = f"results/ablation_study"
