@@ -218,6 +218,7 @@ def embedding_ablation_study(model, base_input, target_layer, position_to_ablate
     return results
 
 
+@torch.no_grad()
 def embedding_ablation_study_layer(model, base_input, target_layer, tokenizer,
                                    target_pos=41, noise_scale=1.0, replace_with_zeros=False):
     """
