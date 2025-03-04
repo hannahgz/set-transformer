@@ -487,7 +487,8 @@ if __name__ == "__main__":
                 tokenizer=tokenizer,
                 target_pos=41,
                 noise_scale=1.0,
-                replace_with_zeros=replace_with_zeros)
+                replace_with_zeros=replace_with_zeros,
+                generate_fig=True)
 
             fig_save_path = f"COMPLETE_FIGS/ablation_study/layer_{target_layer}/ablate_type_{ablate_type}"
             os.makedirs(fig_save_path, exist_ok=True)
