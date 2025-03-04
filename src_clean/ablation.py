@@ -74,7 +74,7 @@ from model import GPTConfig44_Complete, GPT
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def embedding_ablation_study(model, base_input, target_layer, position_to_ablate, tokenizer, target_pos=41, noise_scale=1.0, replace_with_zeros=False, generate_fig = False):
+def embedding_ablation_study(model, base_input, target_layer, position_to_ablate, tokenizer, target_pos=41, noise_scale=1.0, replace_with_zeros=False, generate_fig=False):
     """
     Performs an ablation study by replacing embeddings at a specific layer and position
     with either noise or zeros, then measuring the impact on model predictions.
@@ -171,7 +171,7 @@ def embedding_ablation_study(model, base_input, target_layer, position_to_ablate
 
     if not generate_fig:
         return results
-    
+
     # Create visualizations
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
 
@@ -191,11 +191,25 @@ def embedding_ablation_study(model, base_input, target_layer, position_to_ablate
     ax1.set_xlabel('Token ID')
     ax1.set_ylabel('Probability')
 
-    # Plot modified probabilities for the same tokens
-    modified_values = modified_probs[token_indices].cpu().numpy()
-    ax2.bar(token_labels, modified_values)
+    # # Plot modified probabilities for the same tokens
+    # modified_values = modified_probs[token_indices].cpu().numpy()
+    # ax2.bar(token_labels, modified_values)
+    # ax2.set_title(
+    #     f'Modified Prediction Probabilities (Layer {target_layer}, Pos {position_to_ablate})')
+    # ax2.set_xlabel('Token ID')
+    # ax2.set_ylabel('Probability')
+
+    # Get top tokens for this modified distribution
+    modified_token_indices = torch.argsort(modified_probs, descending=True)[
+        :top_k].cpu().numpy()
+    modified_token_labels = [tokenizer.decode(
+        [idx]) for idx in modified_token_indices]
+    modified_values = modified_probs[modified_token_indices].cpu().numpy()
+
+    ax2.bar(modified_token_labels, modified_values)
     ax2.set_title(
         f'Modified Prediction Probabilities (Layer {target_layer}, Pos {position_to_ablate})')
+
     ax2.set_xlabel('Token ID')
     ax2.set_ylabel('Probability')
 
@@ -203,6 +217,143 @@ def embedding_ablation_study(model, base_input, target_layer, position_to_ablate
     results['figure'] = fig
 
     return results
+
+
+def embedding_ablation_study_layer(model, base_input, target_layer, tokenizer,
+                                   target_pos=41, noise_scale=1.0, replace_with_zeros=False):
+    """
+    Performs an ablation study for an entire layer, creating subplots for each position.
+
+    Args:
+        model: The GPT model
+        base_input: Input sequence tensor
+        target_layer: Which layer's embeddings to modify (0-indexed)
+        tokenizer: Tokenizer to decode token IDs
+        target_pos: Which position to examine in the output logits
+        noise_scale: Scale of Gaussian noise to add (if not replacing with zeros)
+        replace_with_zeros: If True, replace with zeros instead of noise
+
+    Returns:
+        Figure with subplots for each position in the sequence
+    """
+    sequence_length = base_input.size(1)
+    target_pos -= 1  # 0-indexed, predicts result at first position
+
+    # Step 1: Get the base model prediction
+    base_logits, _, _, _, _ = model(base_input, get_loss=True)
+    base_logits = base_logits[:, target_pos].squeeze(0)
+    base_probs = F.softmax(base_logits, dim=-1)
+
+    # Determine top_k tokens to display in the plots
+    top_k = 10
+    token_indices = torch.argsort(base_probs, descending=True)[
+        :top_k].cpu().numpy()
+
+    # Create a grid of subplots based on sequence length
+    # Calculate grid dimensions (aim for roughly square layout)
+    import math
+    grid_size = math.ceil(math.sqrt(sequence_length + 1)
+                          )  # +1 for the base prediction
+
+    fig = plt.figure(figsize=(5*grid_size, 5*grid_size))
+
+    # First subplot is for base prediction
+    ax_base = fig.add_subplot(grid_size, grid_size, 1)
+    token_labels = [tokenizer.decode([idx]) for idx in token_indices]
+    base_values = base_probs[token_indices].cpu().numpy()
+    ax_base.bar(token_labels, base_values)
+    ax_base.set_title('Base Prediction')
+    ax_base.set_xlabel('Token')
+    ax_base.set_ylabel('Probability')
+    ax_base.tick_params(axis='x', rotation=45)
+
+    # Now run ablation for each position in the sequence
+    for position_to_ablate in range(sequence_length):
+        # Get results for this position
+        with torch.no_grad():
+            # Get token and position embeddings
+            b, t = base_input.size()
+            pos = torch.arange(0, t, dtype=torch.long,
+                               device=base_input.device)
+            tok_emb = model.transformer.wte(base_input)
+            pos_emb = model.transformer.wpe(pos)
+            x = tok_emb + pos_emb
+
+            # Run through layers up to the target layer
+            for layer_idx, block in enumerate(model.transformer.h):
+                if layer_idx < target_layer:
+                    x, _, _ = block(x)
+                else:
+                    break
+
+            # Capture the embedding at this layer
+            original_embedding = x.clone()
+
+            # Create a modified embedding
+            modified_embedding = original_embedding.clone()
+
+            # Replace the target position with either noise or zeros
+            if replace_with_zeros:
+                # Replace with zeros
+                modified_embedding[0, position_to_ablate, :] = 0
+            else:
+                # Replace with Gaussian noise scaled to match embedding norm
+                emb_norm = torch.norm(
+                    original_embedding[0, position_to_ablate, :])
+                noise = torch.randn_like(
+                    original_embedding[0, position_to_ablate, :]) * noise_scale
+                # Scale noise to match the original embedding norm
+                noise = noise * (emb_norm / torch.norm(noise))
+                modified_embedding[0, position_to_ablate, :] = noise
+
+            # Continue the forward pass with modified embeddings
+            modified_x = modified_embedding
+
+            # Continue through remaining layers
+            for layer_idx, block in enumerate(model.transformer.h):
+                if layer_idx >= target_layer:
+                    modified_x, _, _ = block(modified_x)
+
+            # Final layer norm
+            modified_x = model.transformer.ln_f(modified_x)
+
+            # Get logits
+            modified_logits = model.lm_head(modified_x)
+            modified_logits = modified_logits[:, target_pos].squeeze(0)
+            modified_probs = F.softmax(modified_logits, dim=-1)
+            modified_prediction = torch.argmax(modified_probs).item()
+
+            # Calculate KL divergence
+            kl_div = F.kl_div(
+                base_probs.log(),
+                modified_probs,
+                reduction='batchmean'
+            ).item()
+
+            # Add subplot for this position
+            # +2 because base is at position 1
+            ax = fig.add_subplot(grid_size, grid_size, position_to_ablate + 2)
+
+            # Get top tokens for this modified distribution
+            modified_token_indices = torch.argsort(modified_probs, descending=True)[
+                :top_k].cpu().numpy()
+            modified_token_labels = [tokenizer.decode(
+                [idx]) for idx in modified_token_indices]
+            modified_values = modified_probs[modified_token_indices].cpu(
+            ).numpy()
+
+            ax.bar(modified_token_labels, modified_values)
+            ax.set_title(f'Position {position_to_ablate} (KL: {kl_div:.4f})')
+            ax.set_xlabel('Token')
+            ax.tick_params(axis='x', rotation=45)
+
+            # Only add y-label for leftmost plots
+            if (position_to_ablate + 2) % grid_size == 1:
+                ax.set_ylabel('Probability')
+
+    plt.tight_layout()
+
+    return fig
 
 
 def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positions_to_ablate, tokenizer, target_pos=41, noise_scale=1.0, replace_with_zeros=False):
@@ -239,7 +390,7 @@ def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positi
         results[layer] = layer_results
 
     # Create heatmap visualization
-    plt.figure(figsize=(20, 16))
+    plt.figure(figsize=(20, 10))
 
     sns.heatmap(kl_matrix, annot=True, fmt=".2f", cmap="viridis",
                 xticklabels=positions_to_ablate, yticklabels=layers_to_ablate)
@@ -283,13 +434,28 @@ if __name__ == "__main__":
     base_input = torch.tensor(
         encoded_seq, dtype=torch.long).unsqueeze(0).to(device)
 
-    target_layer = 0
+    # target_layer = 0
     position_to_ablate = 2
     replace_with_zeros = False
 
     ablate_type = "noise"
     if replace_with_zeros:
         ablate_type = "zeros"
+
+    for target_layer in range(4):
+        layer_fig = embedding_ablation_study_layer(
+            model=model,
+            base_input=base_input,
+            target_layer=target_layer,
+            tokenizer=tokenizer,
+            target_pos=41,
+            noise_scale=1.0,
+            replace_with_zeros=replace_with_zeros)
+        fig_save_path = f"COMPLETE_FIGS/ablation_study/layer_{target_layer}"
+        os.makedirs(fig_save_path, exist_ok=True)
+
+        layer_fig.savefig(
+            os.path.join(fig_save_path, f"embedding_ablation_layer_{target_layer}_ablate_type_{ablate_type}.png"), bbox_inches="tight")
 
     # results = embedding_ablation_study(
     #     model=model,
@@ -302,22 +468,22 @@ if __name__ == "__main__":
     #     replace_with_zeros=replace_with_zeros)
     # breakpoint()
 
-    comprehensive_results = comprehensive_embedding_ablation(
-        model=model,
-        base_input=base_input,
-        layers_to_ablate=[0, 1, 2, 3],
-        positions_to_ablate=range(40),
-        tokenizer=tokenizer,
-        target_pos=41,
-        noise_scale=1.0,
-        replace_with_zeros=replace_with_zeros)
+    # comprehensive_results = comprehensive_embedding_ablation(
+    #     model=model,
+    #     base_input=base_input,
+    #     layers_to_ablate=[0, 1, 2, 3],
+    #     positions_to_ablate=range(40),
+    #     tokenizer=tokenizer,
+    #     target_pos=41,
+    #     noise_scale=1.0,
+    #     replace_with_zeros=replace_with_zeros)
 
-    # Save the heatmap figure
-    fig_save_path = f"COMPLETE_FIGS/ablation_study"
-    os.makedirs(fig_save_path, exist_ok=True)
-    comprehensive_results['heatmap_figure'].savefig(
-        os.path.join(fig_save_path, f"embedding_ablation_heatmap_ablate_type_{ablate_type}.png"), bbox_inches="tight")
-    
+    # # Save the heatmap figure
+    # fig_save_path = f"COMPLETE_FIGS/ablation_study"
+    # os.makedirs(fig_save_path, exist_ok=True)
+    # comprehensive_results['heatmap_figure'].savefig(
+    #     os.path.join(fig_save_path, f"embedding_ablation_heatmap_ablate_type_{ablate_type}.png"), bbox_inches="tight")
+
     # # Save the KL divergence matrix
     # matrix_path = f"results/ablation_study"
     # os.makedirs(matrix_path, exist_ok=True)
