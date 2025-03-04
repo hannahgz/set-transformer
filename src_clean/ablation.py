@@ -92,10 +92,10 @@ def embedding_ablation_study(model, base_input, target_layer, position_to_ablate
         Dictionary with results including KL divergence and visualization
     """
     results = {}
-
+    target_pos -= 1 # 0-indexed, predicts result at first position
+    
     # Step 1: Get the base model prediction
-    base_logits, _, _, _, _ = model(base_input, get_loss=False)
-    breakpoint()
+    base_logits, _, _, _, _ = model(base_input, get_loss=True)
     base_logits = base_logits[:, target_pos].squeeze(0)
     base_probs = F.softmax(base_logits, dim=-1)
     base_prediction = torch.argmax(base_probs).item()
