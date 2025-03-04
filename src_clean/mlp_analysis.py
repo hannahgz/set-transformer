@@ -544,32 +544,153 @@ def plot_neuron_activation_histograms_overlap(model, data_loader, target_neurons
     
     return fig, neuron_activations
 
+def plot_neuron_activation_histograms_overlap_preloaded(target_neurons, capture_layer, set_filtering=None, num_bins=50, figsize=(60, 40)):
+    """
+    Compute and plot histograms of activations for specified neurons with overlapping histograms for different set filtering types.
+    
+    Parameters:
+        model: The GPT model
+        data_loader: DataLoader yielding batches of input sequences compatible with the model
+        target_neurons: List of neuron indices to analyze
+        config: Configuration object containing model settings
+        set_filtering: If None, will plot all three filtering types overlapping. Otherwise, specify a single value (0, 1, or 2)
+        num_bins: Number of bins for the histogram
+        figsize: Figure size as (width, height)
+        save_pkl: Whether to save the neuron activations to a pickle file
+        output_dir: Directory to save the pickle file in
+    
+    Returns:
+        fig: The matplotlib figure object containing the histograms
+        neuron_activations: Dictionary mapping neuron indices to their activation values for each set type
+    """
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import pickle
+    
+    # Define set filtering types and their colors
+    set_types = {
+        0: {"name": "No Set", "color": "blue", "alpha": 0.5},
+        1: {"name": "One Set", "color": "green", "alpha": 0.5},
+        2: {"name": "Two Set", "color": "red", "alpha": 0.5}
+    }
+    
+    # Determine which set types to process
+    if set_filtering is None:
+        set_types_to_process = [0, 1, 2]  # Process all three types
+    else:
+        set_types_to_process = [set_filtering]  # Process only the specified type
+    
+    # Initialize tracking structures for activations for each set type
+    neuron_activations = {
+        neuron: {set_type: [] for set_type in set_types_to_process} 
+        for neuron in target_neurons
+    }
+    
+    # Load neuron activations from pickle file
+    pkl_filename = f"neuron_activations_{capture_layer}.pkl"
+    with open(pkl_filename, 'rb') as f:
+        neuron_activations = pickle.load(f)
+
+    # Calculate rows and columns for subplot grid
+    n_neurons = len(target_neurons)
+    n_cols = min(4, n_neurons)  # At most 4 columns
+    n_rows = (n_neurons + n_cols - 1) // n_cols  # Ceiling division
+    
+    # Create figure and subplots
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize)
+    
+    # Flatten axes array for easy indexing if there are multiple subplots
+    if n_neurons > 1:
+        if n_rows > 1 and n_cols > 1:
+            axes = axes.flatten()
+        elif n_rows == 1 or n_cols == 1:
+            axes = np.array([axes]).flatten()  # Handle case of 1D array
+    else:
+        axes = [axes]  # Make it iterable when there's only one subplot
+    
+    print("Plotting histograms...")
+    # Plot histogram for each neuron
+    for i, neuron in enumerate(target_neurons):
+        # Store statistics for the combined data
+        all_activations = []
+        
+        # Plot histogram for each set type
+        for set_type in set_types_to_process:
+            activations = neuron_activations[neuron][set_type]
+            if not activations:  # Skip if no data for this set type
+                continue
+                
+            all_activations.extend(activations)
+            
+            # Calculate histogram statistics for this set type
+            mean_act = np.mean(activations)
+            median_act = np.median(activations)
+            
+            set_info = set_types[set_type]
+            
+            # Plot histogram with alpha transparency to show overlap
+            axes[i].hist(activations, bins=num_bins, alpha=set_info["alpha"], 
+                         color=set_info["color"], edgecolor='black', 
+                         label=f'{set_info["name"]} (n={len(activations)})')
+            
+            # Add vertical lines for mean values
+            axes[i].axvline(mean_act, color=set_info["color"], linestyle='dashed', linewidth=2, 
+                           label=f'{set_info["name"]} Mean: {mean_act:.3f}')
+        
+        # Calculate overall statistics
+        if all_activations:
+            overall_mean = np.mean(all_activations)
+            overall_std = np.std(all_activations)
+            min_act = np.min(all_activations)
+            max_act = np.max(all_activations)
+            
+            # Add text with overall activation statistics
+            text_info = (f'Overall:\nμ = {overall_mean:.3f}\nσ = {overall_std:.3f}\n'
+                         f'Min = {min_act:.3f}\nMax = {max_act:.3f}')
+            axes[i].text(0.95, 0.95, text_info, transform=axes[i].transAxes, 
+                         fontsize=10, va='top', ha='right', 
+                         bbox={'facecolor': 'white', 'alpha': 0.5, 'pad': 5})
+        
+        # Set titles and labels
+        axes[i].set_title(f'Neuron {neuron} Activations')
+        axes[i].set_xlabel('Activation Value')
+        axes[i].set_ylabel('Frequency')
+        axes[i].legend(loc='upper left', fontsize=8)
+    
+    # Remove any unused subplots
+    for i in range(n_neurons, len(axes)):
+        fig.delaxes(axes[i])
+    
+    plt.tight_layout()
+    print(f"Done! Plotted histograms for {len(target_neurons)} neurons with overlapping set types.")
+    
+    return fig, neuron_activations
+
 if __name__ == "__main__":
     config = GPTConfig44_Complete()
 
-    dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
-    dataset = torch.load(dataset_path)
-    _, val_loader = initialize_loaders(config, dataset)
+    # dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
+    # dataset = torch.load(dataset_path)
+    # _, val_loader = initialize_loaders(config, dataset)
 
     target_neurons = range(64)
 
-    # Create the model architecture
-    model = GPT(config).to(device)
-    checkpoint = torch.load(config.filename, weights_only = False)
-    # Load the weights
-    model.load_state_dict(checkpoint['model'])
-    model.eval()  # Set to evaluation mode
+    # # Create the model architecture
+    # model = GPT(config).to(device)
+    # checkpoint = torch.load(config.filename, weights_only = False)
+    # # Load the weights
+    # model.load_state_dict(checkpoint['model'])
+    # model.eval()  # Set to evaluation mode
 
 
     for capture_layer in range(4):
-        fig, neuron_acts = plot_neuron_activation_histograms_overlap(
-            model, 
-            val_loader, 
-            target_neurons,
-            config,
-            capture_layer = capture_layer,
-        )
-        plt.savefig(f'COMPLETE_FIGS/mlp/layer_{capture_layer}/neuron_activation_histograms.png', dpi=300, bbox_inches="tight")
+        for target_sets in [0, 1, 2]:
+            fig, neuron_acts = plot_neuron_activation_histograms_overlap_preloaded(
+                target_neurons,
+                capture_layer=capture_layer,
+                set_filtering=target_sets,
+            )
+        plt.savefig(f'COMPLETE_FIGS/mlp/layer_{capture_layer}/neuron_activation_histograms_set{target_sets}.png', dpi=300, bbox_inches="tight")
 
     # for set_filtering in [0, 1, 2]:
     #     fig, neuron_acts = plot_neuron_activation_histograms(
