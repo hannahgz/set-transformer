@@ -667,32 +667,129 @@ def plot_neuron_activation_histograms_overlap_preloaded(target_neurons, capture_
     
     return fig, neuron_activations
 
+
+def init_neuron_activations(model, data_loader, target_neurons, config, capture_layer, set_filtering=None, output_dir='./'):
+    """
+    Compute and plot histograms of activations for specified neurons with overlapping histograms for different set filtering types.
+    
+    Parameters:
+        model: The GPT model
+        data_loader: DataLoader yielding batches of input sequences compatible with the model
+        target_neurons: List of neuron indices to analyze
+        config: Configuration object containing model settings
+        set_filtering: If None, will plot all three filtering types overlapping. Otherwise, specify a single value (0, 1, or 2)
+        num_bins: Number of bins for the histogram
+        figsize: Figure size as (width, height)
+        save_pkl: Whether to save the neuron activations to a pickle file
+        output_dir: Directory to save the pickle file in
+    
+    Returns:
+        fig: The matplotlib figure object containing the histograms
+        neuron_activations: Dictionary mapping neuron indices to their activation values for each set type
+    """
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import torch
+    import pickle
+    import os
+    from datetime import datetime
+    
+    model.eval()
+    
+    # Determine which set types to process
+    if set_filtering is None:
+        set_types_to_process = [0, 1, 2]  # Process all three types
+    else:
+        set_types_to_process = [set_filtering]  # Process only the specified type
+    
+    # Initialize tracking structures for activations for each set type
+    neuron_activations = {
+        neuron: {set_type: [] for set_type in set_types_to_process} 
+        for neuron in target_neurons
+    }
+    
+    tokenizer = load_tokenizer(config.tokenizer_path)
+    no_set_token = tokenizer.token_to_id["*"]
+    two_set_token = tokenizer.token_to_id["/"]
+
+    # Process each batch in the data loader
+    print(f"Computing activations for {len(target_neurons)} neurons...")
+    for batch_idx, batch in enumerate(data_loader):
+        if batch_idx % 10 == 0:
+            print(f"Processing batch {batch_idx}/{len(data_loader)}")
+        
+        batch = batch.to(device)
+        batch_size = batch.shape[0]
+        
+        with torch.no_grad():
+            _, _, _, layer_activations, _ = model(batch, capture_layer=capture_layer)
+            
+            # For each sequence in the batch
+            for seq_idx in range(batch_size):
+                sequence = batch[seq_idx]
+                
+                # Determine which set type this sequence belongs to
+                current_set_type = None
+                if no_set_token in sequence:
+                    current_set_type = 0  # No Set
+                elif two_set_token in sequence:
+                    current_set_type = 2  # Two Set
+                else:
+                    current_set_type = 1  # One Set
+                
+                # Skip if we're not processing this set type
+                if current_set_type not in set_types_to_process:
+                    continue
+                
+                # Extract final position's activations for this sequence
+                final_pos_activations = layer_activations[seq_idx, -1, :]
+                
+                # Record activation for each target neuron
+                for neuron in target_neurons:
+                    activation = final_pos_activations[neuron].item()
+                    neuron_activations[neuron][current_set_type].append(activation)
+    
+    # Make sure the output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Create timestamp for the filename
+    pkl_filename = os.path.join(output_dir, f"neuron_activations_layer{capture_layer}.pkl")
+    
+    # Save the activations to a pickle file
+    with open(pkl_filename, 'wb') as f:
+        pickle.dump(neuron_activations, f)
+    
+    print(f"Saved neuron activations to {pkl_filename}")
+    breakpoint()
+
 if __name__ == "__main__":
     config = GPTConfig44_Complete()
 
-    # dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
-    # dataset = torch.load(dataset_path)
-    # _, val_loader = initialize_loaders(config, dataset)
+    dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
+    dataset = torch.load(dataset_path)
+    _, val_loader = initialize_loaders(config, dataset)
 
     target_neurons = range(64)
 
-    # # Create the model architecture
-    # model = GPT(config).to(device)
-    # checkpoint = torch.load(config.filename, weights_only = False)
-    # # Load the weights
-    # model.load_state_dict(checkpoint['model'])
-    # model.eval()  # Set to evaluation mode
-
+    # Create the model architecture
+    model = GPT(config).to(device)
+    checkpoint = torch.load(config.filename, weights_only = False)
+    # Load the weights
+    model.load_state_dict(checkpoint['model'])
+    model.eval()  # Set to evaluation mode
 
     for capture_layer in range(4):
-        for target_sets in [0, 1, 2]:
-            print(f"Layer {capture_layer}, Set {target_sets}")
-            fig, neuron_acts = plot_neuron_activation_histograms_overlap_preloaded(
-                target_neurons,
-                capture_layer=capture_layer,
-                set_filtering=target_sets,
-            )
-            plt.savefig(f'COMPLETE_FIGS/mlp/layer_{capture_layer}/neuron_activation_histograms_set{target_sets}.png', dpi=300, bbox_inches="tight")
+        init_neuron_activations(model, val_loader, target_neurons, config, capture_layer=capture_layer, set_filtering=None)
+
+    # for capture_layer in range(4):
+    #     for target_sets in [0, 1, 2]:
+    #         print(f"Layer {capture_layer}, Set {target_sets}")
+    #         fig, neuron_acts = plot_neuron_activation_histograms_overlap_preloaded(
+    #             target_neurons,
+    #             capture_layer=capture_layer,
+    #             set_filtering=target_sets,
+    #         )
+    #         plt.savefig(f'COMPLETE_FIGS/mlp/layer_{capture_layer}/neuron_activation_histograms_set{target_sets}.png', dpi=300, bbox_inches="tight")
 
     # for set_filtering in [0, 1, 2]:
     #     fig, neuron_acts = plot_neuron_activation_histograms(
