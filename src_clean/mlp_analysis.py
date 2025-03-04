@@ -168,7 +168,7 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import pickle
 
-def analyze_concept_neurons(model, data_loader, target_neurons, capture_layer):
+def analyze_concept_neurons(model, data_loader, target_neurons, capture_layer, set_filtering=None):
     """
     Perform dataset traversal to find inputs that maximally and minimally activate specific neurons in layer 3.
     
@@ -183,7 +183,16 @@ def analyze_concept_neurons(model, data_loader, target_neurons, capture_layer):
         bottom_k_inputs: Dictionary mapping neuron indices to their bottom 10 activating inputs
     """
     model.eval()
+
+    if set_filtering is None:
+        set_types_to_process = [0, 1, 2]  # Process all three types
+    else:
+        set_types_to_process = [set_filtering]  # Process only the specified type
     
+    tokenizer = load_tokenizer(config.tokenizer_path)
+    no_set_token = tokenizer.token_to_id["*"]
+    two_set_token = tokenizer.token_to_id["/"]
+
     # Initialize tracking structures
     neuron_activations = {neuron: [] for neuron in target_neurons}
     top_k_inputs = {neuron: [] for neuron in target_neurons}  # Store top 10 activating inputs for each neuron
@@ -202,6 +211,20 @@ def analyze_concept_neurons(model, data_loader, target_neurons, capture_layer):
             
             # For each sequence in the batch, extract final position's activations
             for seq_idx in range(batch_size):
+                sequence = batch[seq_idx]
+                # Determine which set type this sequence belongs to
+                current_set_type = None
+                if no_set_token in sequence:
+                    current_set_type = 0  # No Set
+                elif two_set_token in sequence:
+                    current_set_type = 2  # Two Set
+                else:
+                    current_set_type = 1  # One Set
+                
+                # Skip if we're not processing this set type
+                if current_set_type not in set_types_to_process:
+                    continue
+
                 # Extract final position's activations for this sequence
                 # Shape: [hidden_size]
                 final_pos_activations = layer_activations[seq_idx, -1, :]
@@ -761,7 +784,7 @@ def init_neuron_activations(model, data_loader, target_neurons, config, capture_
     print(f"Saved neuron activations to {pkl_filename}")
     breakpoint()
 
-def save_neuron_activations_to_txt(target_neurons, top_k_inputs, bottom_k_inputs, tokenizer, capture_layer, output_dir='./'):
+def save_neuron_activations_to_txt(target_neurons, top_k_inputs, bottom_k_inputs, tokenizer, capture_layer, set_filtering=None, output_dir='./'):
     """
     Save neuron activation analysis to a text file.
     
@@ -783,7 +806,10 @@ def save_neuron_activations_to_txt(target_neurons, top_k_inputs, bottom_k_inputs
     
     # Create filename with timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    txt_filename = os.path.join(output_dir, f"layer{capture_layer}_neuron_activations_analysis_{timestamp}.txt")
+
+    if set_filtering is None:
+        set_filtering = "all" 
+    txt_filename = os.path.join(output_dir, f"layer{capture_layer}_set{set_filtering}_neuron_activations_analysis_{timestamp}.txt")
     
     # Open a file to write the output
     with open(txt_filename, 'w') as f:
@@ -836,12 +862,15 @@ if __name__ == "__main__":
     _, val_loader = initialize_loaders(config, dataset)
 
     capture_layer = 0
+    set_filtering = 0
+
     target_neurons = [2, 4, 12, 19, 34, 36, 37, 43, 54, 60]
     top_k_inputs, bottom_k_inputs = analyze_concept_neurons(
         model, 
         val_loader, 
         target_neurons, 
-        capture_layer=capture_layer)
+        capture_layer=capture_layer,
+        set_filtering=set_filtering)
     
     tokenizer = load_tokenizer("all_tokenizer.pkl")
     
@@ -877,6 +906,7 @@ if __name__ == "__main__":
         bottom_k_inputs,
         tokenizer,
         capture_layer=capture_layer,
+        set_filtering=set_filtering,
         output_dir='./',
     )
 
