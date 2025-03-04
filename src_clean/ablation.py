@@ -202,8 +202,7 @@ def embedding_ablation_study(model, base_input, target_layer, position_to_ablate
     # Get top tokens for this modified distribution
     modified_token_indices = torch.argsort(modified_probs, descending=True)[
         :top_k].cpu().numpy()
-    modified_token_labels = [tokenizer.decode(
-        [idx]) for idx in modified_token_indices]
+    modified_token_labels = [tokenizer.decode(modified_token_indices)]
     modified_values = modified_probs[modified_token_indices].cpu().numpy()
 
     ax2.bar(modified_token_labels, modified_values)
@@ -259,7 +258,9 @@ def embedding_ablation_study_layer(model, base_input, target_layer, tokenizer,
 
     # First subplot is for base prediction
     ax_base = fig.add_subplot(grid_size, grid_size, 1)
-    token_labels = [tokenizer.decode([idx]) for idx in token_indices]
+    token_labels = tokenizer.decode(token_indices)
+
+    # Plot base probabilities
     base_values = base_probs[token_indices].cpu().numpy()
     ax_base.bar(token_labels, base_values)
     ax_base.set_title('Base Prediction')
@@ -337,8 +338,7 @@ def embedding_ablation_study_layer(model, base_input, target_layer, tokenizer,
             # Get top tokens for this modified distribution
             modified_token_indices = torch.argsort(modified_probs, descending=True)[
                 :top_k].cpu().numpy()
-            modified_token_labels = [tokenizer.decode(
-                [idx]) for idx in modified_token_indices]
+            modified_token_labels = [tokenizer.decode(modified_token_indices)]
             modified_values = modified_probs[modified_token_indices].cpu(
             ).numpy()
 
