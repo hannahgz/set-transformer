@@ -262,6 +262,8 @@ if __name__ == "__main__":
     model.load_state_dict(checkpoint['model'])
     model.eval()  # Set to evaluation mode
 
+    tokenizer = load_tokenizer(config.tokenizer_path)
+
     input_seq = [
         "B", "diamond", "C", "green", "B", "three", "B", "green", "D", "two",
         "E", "pink", "E", "two", "A", "blue", "A", "one", "D", "solid",
@@ -269,15 +271,19 @@ if __name__ == "__main__":
         "A", "diamond", "E", "diamond", "C", "solid", "C", "diamond", "E", "solid",
         ">", "*", ".", ".", ".", ".", ".", "."
     ]
+    # First encode the sequence - this returns a list
+    encoded_seq = tokenizer.encode(input_seq)
+
+    # Convert the list to a PyTorch tensor and add batch dimension
+    base_input = torch.tensor(encoded_seq, dtype=torch.long).unsqueeze(0).to(device)
 
     target_layer = 0
     position_to_ablate = 2
     replace_with_zeros = False
 
-    tokenizer = load_tokenizer(config.tokenizer_path)
     results = embedding_ablation_study(
         model=model,
-        base_input=tokenizer.encode(input_seq).unsqueeze(0).to(device),
+        base_input=base_input,
         target_layer=target_layer,
         position_to_ablate=position_to_ablate,
         tokenizer=tokenizer,
