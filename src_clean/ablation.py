@@ -169,53 +169,53 @@ def embedding_ablation_study(model, base_input, target_layer, position_to_ablate
             'modified_probs': modified_probs.cpu().numpy()
         }
 
-    if not generate_fig:
+        if not generate_fig:
+            return results
+
+        # Create visualizations
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+
+        # Plot probability distributions
+        top_k = 10  # Show top-k tokens
+        token_indices = torch.argsort(base_probs, descending=True)[
+            :top_k].cpu().numpy()
+
+        # Convert token IDs to string labels if possible (placeholder)
+        # token_labels = [str(idx) for idx in token_indices]
+        token_labels = tokenizer.decode(token_indices)
+
+        # Plot base probabilities
+        base_values = base_probs[token_indices].cpu().numpy()
+        ax1.bar(token_labels, base_values)
+        ax1.set_title('Base Prediction Probabilities')
+        ax1.set_xlabel('Token ID')
+        ax1.set_ylabel('Probability')
+
+        # # Plot modified probabilities for the same tokens
+        # modified_values = modified_probs[token_indices].cpu().numpy()
+        # ax2.bar(token_labels, modified_values)
+        # ax2.set_title(
+        #     f'Modified Prediction Probabilities (Layer {target_layer}, Pos {position_to_ablate})')
+        # ax2.set_xlabel('Token ID')
+        # ax2.set_ylabel('Probability')
+
+        # Get top tokens for this modified distribution
+        modified_token_indices = torch.argsort(modified_probs, descending=True)[
+            :top_k].cpu().numpy()
+        modified_token_labels = [tokenizer.decode(modified_token_indices)]
+        modified_values = modified_probs[modified_token_indices].cpu().numpy()
+
+        ax2.bar(modified_token_labels, modified_values)
+        ax2.set_title(
+            f'Modified Prediction Probabilities (Layer {target_layer}, Pos {position_to_ablate})')
+
+        ax2.set_xlabel('Token ID')
+        ax2.set_ylabel('Probability')
+
+        plt.tight_layout()
+        results['figure'] = fig
+
         return results
-
-    # Create visualizations
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
-
-    # Plot probability distributions
-    top_k = 10  # Show top-k tokens
-    token_indices = torch.argsort(base_probs, descending=True)[
-        :top_k].cpu().numpy()
-
-    # Convert token IDs to string labels if possible (placeholder)
-    # token_labels = [str(idx) for idx in token_indices]
-    token_labels = tokenizer.decode(token_indices)
-
-    # Plot base probabilities
-    base_values = base_probs[token_indices].cpu().numpy()
-    ax1.bar(token_labels, base_values)
-    ax1.set_title('Base Prediction Probabilities')
-    ax1.set_xlabel('Token ID')
-    ax1.set_ylabel('Probability')
-
-    # # Plot modified probabilities for the same tokens
-    # modified_values = modified_probs[token_indices].cpu().numpy()
-    # ax2.bar(token_labels, modified_values)
-    # ax2.set_title(
-    #     f'Modified Prediction Probabilities (Layer {target_layer}, Pos {position_to_ablate})')
-    # ax2.set_xlabel('Token ID')
-    # ax2.set_ylabel('Probability')
-
-    # Get top tokens for this modified distribution
-    modified_token_indices = torch.argsort(modified_probs, descending=True)[
-        :top_k].cpu().numpy()
-    modified_token_labels = [tokenizer.decode(modified_token_indices)]
-    modified_values = modified_probs[modified_token_indices].cpu().numpy()
-
-    ax2.bar(modified_token_labels, modified_values)
-    ax2.set_title(
-        f'Modified Prediction Probabilities (Layer {target_layer}, Pos {position_to_ablate})')
-
-    ax2.set_xlabel('Token ID')
-    ax2.set_ylabel('Probability')
-
-    plt.tight_layout()
-    results['figure'] = fig
-
-    return results
 
 
 # @torch.no_grad()
