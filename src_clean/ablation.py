@@ -277,7 +277,7 @@ if __name__ == "__main__":
     tokenizer = load_tokenizer(config.tokenizer_path)
     results = embedding_ablation_study(
         model=model,
-        base_input=tokenizer.encode(input_seq),
+        base_input=tokenizer.encode(input_seq).unsqueeze(0).to(device),
         target_layer=target_layer,
         position_to_ablate=position_to_ablate,
         tokenizer=tokenizer,
