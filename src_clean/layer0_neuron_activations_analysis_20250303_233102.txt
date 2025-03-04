@@ -1,0 +1,1840 @@
+Neuron 2:
+  Top activations:
+  Activation: 0.24516481161117554
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   two       blue      
+B         oval      striped   one       blue      
+C         oval      striped   three     blue      
+D         oval      striped   one       pink      
+E         diamond   striped   one       pink      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.24478943645954132
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   one       blue      
+B         squiggle  striped   one       blue      
+C         diamond   striped   three     blue      
+D         diamond   striped   one       pink      
+E         squiggle  striped   three     blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.24478673934936523
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   one       green     
+B         squiggle  striped   one       blue      
+C         diamond   striped   two       blue      
+D         oval      striped   two       green     
+E         oval      striped   three     green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.24451659619808197
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   one       blue      
+B         diamond   striped   two       blue      
+C         squiggle  striped   one       blue      
+D         oval      striped   two       green     
+E         diamond   striped   two       pink      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.24446697533130646
+  Card      Shape     Shading   Number    Color     
+A         oval      striped   one       green     
+B         diamond   striped   one       blue      
+C         diamond   striped   one       green     
+D         oval      striped   two       green     
+E         oval      striped   one       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.24422112107276917
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   three     green     
+B         diamond   striped   two       pink      
+C         squiggle  striped   one       green     
+D         diamond   striped   one       green     
+E         oval      striped   one       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.24416190385818481
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   one       green     
+B         oval      striped   one       blue      
+C         squiggle  striped   two       blue      
+D         squiggle  striped   one       pink      
+E         oval      striped   two       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.24413177371025085
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   one       pink      
+B         diamond   striped   one       green     
+C         oval      striped   two       green     
+D         squiggle  striped   two       blue      
+E         squiggle  striped   one       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.24407173693180084
+  Card      Shape     Shading   Number    Color     
+A         oval      striped   two       green     
+B         oval      striped   two       pink      
+C         squiggle  striped   one       blue      
+D         squiggle  striped   one       green     
+E         diamond   striped   two       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.24404561519622803
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   one       green     
+B         diamond   striped   two       blue      
+C         diamond   striped   one       blue      
+D         oval      striped   two       blue      
+E         oval      striped   two       green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Bottom activations:
+  Activation: -0.08772464096546173
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     one       blue      
+B         oval      solid     three     green     
+C         diamond   solid     two       pink      
+D         oval      solid     two       pink      
+E         squiggle  solid     two       pink      
+  Sets: ['B', 'A', 'D', '/', 'D', 'E', 'C', '.']
+
+  Activation: -0.08807183802127838
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     two       green     
+B         oval      solid     two       blue      
+C         diamond   solid     two       pink      
+D         oval      solid     three     green     
+E         squiggle  solid     one       blue      
+  Sets: ['D', 'E', 'C', '/', 'B', 'A', 'C', '.']
+
+  Activation: -0.0881192684173584
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     two       blue      
+B         squiggle  solid     two       green     
+C         oval      solid     one       green     
+D         oval      solid     three     blue      
+E         oval      solid     two       pink      
+  Sets: ['C', 'D', 'E', '/', 'E', 'B', 'A', '.']
+
+  Activation: -0.08851809799671173
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     one       blue      
+B         diamond   solid     two       green     
+C         squiggle  solid     three     green     
+D         oval      solid     one       green     
+E         diamond   solid     three     pink      
+  Sets: ['D', 'C', 'B', '/', 'B', 'A', 'E', '.']
+
+  Activation: -0.08873912692070007
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     one       green     
+B         oval      solid     two       pink      
+C         squiggle  solid     three     green     
+D         oval      solid     two       green     
+E         diamond   solid     one       blue      
+  Sets: ['D', 'C', 'A', '/', 'B', 'C', 'E', '.']
+
+  Activation: -0.08988362550735474
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       pink      
+B         squiggle  solid     two       green     
+C         diamond   solid     two       blue      
+D         diamond   solid     two       green     
+E         oval      solid     two       green     
+  Sets: ['E', 'B', 'D', '/', 'A', 'B', 'C', '.']
+
+  Activation: -0.0902923196554184
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     three     green     
+B         oval      solid     two       pink      
+C         diamond   solid     two       green     
+D         oval      solid     one       green     
+E         squiggle  solid     two       blue      
+  Sets: ['D', 'A', 'C', '/', 'B', 'E', 'C', '.']
+
+  Activation: -0.09144450724124908
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     three     green     
+B         squiggle  solid     three     blue      
+C         diamond   solid     three     blue      
+D         oval      solid     three     pink      
+E         diamond   solid     three     green     
+  Sets: ['D', 'A', 'C', '/', 'D', 'B', 'E', '.']
+
+  Activation: -0.09164562821388245
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       blue      
+B         oval      solid     three     pink      
+C         oval      solid     one       green     
+D         oval      solid     three     blue      
+E         oval      solid     three     green     
+  Sets: ['C', 'A', 'B', '/', 'E', 'D', 'B', '.']
+
+  Activation: -0.09236785769462585
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     two       pink      
+B         diamond   solid     two       green     
+C         diamond   solid     two       blue      
+D         diamond   solid     one       green     
+E         diamond   solid     three     pink      
+  Sets: ['D', 'C', 'E', '/', 'B', 'C', 'A', '.']
+
+--------------------------------------------------
+Neuron 4:
+  Top activations:
+  Activation: 0.15826484560966492
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     three     blue      
+B         oval      open      two       blue      
+C         oval      open      one       blue      
+D         squiggle  striped   three     blue      
+E         oval      open      three     blue      
+  Sets: ['C', 'B', 'E', '/', 'E', 'D', 'A', '.']
+
+  Activation: 0.15433825552463531
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   two       blue      
+B         oval      open      one       blue      
+C         diamond   solid     two       blue      
+D         oval      open      three     blue      
+E         oval      open      two       blue      
+  Sets: ['B', 'E', 'D', '/', 'E', 'A', 'C', '.']
+
+  Activation: 0.15116679668426514
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   two       blue      
+B         diamond   open      one       blue      
+C         squiggle  solid     three     blue      
+D         squiggle  open      one       blue      
+E         oval      striped   two       blue      
+  Sets: ['E', 'C', 'B', '/', 'D', 'A', 'C', '.']
+
+  Activation: 0.1511198729276657
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      three     blue      
+B         oval      solid     one       blue      
+C         oval      open      one       blue      
+D         oval      striped   one       blue      
+E         squiggle  open      two       blue      
+  Sets: ['B', 'D', 'C', '/', 'C', 'E', 'A', '.']
+
+  Activation: 0.14950111508369446
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      three     green     
+B         squiggle  striped   three     pink      
+C         oval      striped   three     blue      
+D         oval      open      three     blue      
+E         oval      solid     three     blue      
+  Sets: ['E', 'C', 'D', '/', 'E', 'B', 'A', '.']
+
+  Activation: 0.14934179186820984
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     three     blue      
+B         oval      striped   one       blue      
+C         squiggle  open      two       blue      
+D         diamond   solid     three     blue      
+E         oval      solid     three     blue      
+  Sets: ['B', 'C', 'D', '/', 'E', 'A', 'D', '.']
+
+  Activation: 0.1491868495941162
+  Card      Shape     Shading   Number    Color     
+A         oval      open      three     blue      
+B         oval      solid     one       blue      
+C         squiggle  open      one       blue      
+D         diamond   striped   one       blue      
+E         oval      striped   two       blue      
+  Sets: ['B', 'E', 'A', '/', 'B', 'C', 'D', '.']
+
+  Activation: 0.1491405963897705
+  Card      Shape     Shading   Number    Color     
+A         squiggle  open      two       blue      
+B         diamond   striped   two       blue      
+C         squiggle  solid     two       blue      
+D         oval      solid     two       blue      
+E         oval      open      two       blue      
+  Sets: ['D', 'A', 'B', '/', 'E', 'C', 'B', '.']
+
+  Activation: 0.14871126413345337
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     one       blue      
+B         diamond   open      three     blue      
+C         squiggle  open      one       blue      
+D         oval      open      two       blue      
+E         squiggle  striped   one       blue      
+  Sets: ['D', 'C', 'B', '/', 'A', 'E', 'C', '.']
+
+  Activation: 0.14846551418304443
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   one       blue      
+B         squiggle  solid     one       blue      
+C         squiggle  open      two       blue      
+D         squiggle  open      three     blue      
+E         squiggle  open      one       blue      
+  Sets: ['B', 'A', 'E', '/', 'E', 'C', 'D', '.']
+
+  Bottom activations:
+  Activation: 0.07602227479219437
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     three     blue      
+B         oval      solid     three     green     
+C         squiggle  solid     two       green     
+D         diamond   solid     two       green     
+E         diamond   solid     one       green     
+  Sets: ['B', 'C', 'E', '.', '_', '_', '_', '_']
+
+  Activation: 0.07600799202919006
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     two       blue      
+B         squiggle  solid     one       pink      
+C         squiggle  solid     three     green     
+D         squiggle  solid     one       green     
+E         diamond   solid     two       green     
+  Sets: ['C', 'A', 'B', '.', '_', '_', '_', '_']
+
+  Activation: 0.07587648183107376
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     one       green     
+B         oval      solid     one       green     
+C         diamond   solid     one       pink      
+D         squiggle  solid     two       pink      
+E         squiggle  solid     one       blue      
+  Sets: ['B', 'E', 'C', '.', '_', '_', '_', '_']
+
+  Activation: 0.07579358667135239
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     one       blue      
+B         squiggle  solid     three     blue      
+C         squiggle  solid     one       green     
+D         squiggle  solid     two       blue      
+E         squiggle  solid     three     green     
+  Sets: ['A', 'D', 'B', '.', '_', '_', '_', '_']
+
+  Activation: 0.07550223171710968
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     two       green     
+B         oval      solid     one       green     
+C         squiggle  solid     one       green     
+D         diamond   solid     two       blue      
+E         diamond   solid     one       green     
+  Sets: ['B', 'C', 'E', '.', '_', '_', '_', '_']
+
+  Activation: 0.07520513236522675
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     three     pink      
+B         squiggle  solid     two       green     
+C         diamond   solid     three     green     
+D         oval      solid     two       green     
+E         squiggle  solid     one       green     
+  Sets: ['D', 'E', 'C', '.', '_', '_', '_', '_']
+
+  Activation: 0.07490131258964539
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     two       green     
+B         squiggle  solid     one       green     
+C         diamond   solid     three     green     
+D         squiggle  solid     three     green     
+E         squiggle  solid     three     pink      
+  Sets: ['B', 'A', 'D', '.', '_', '_', '_', '_']
+
+  Activation: 0.07473497837781906
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     one       green     
+B         diamond   solid     three     blue      
+C         squiggle  solid     two       green     
+D         squiggle  solid     three     green     
+E         squiggle  solid     one       pink      
+  Sets: ['A', 'C', 'D', '.', '_', '_', '_', '_']
+
+  Activation: 0.07471484690904617
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     one       green     
+B         squiggle  solid     one       green     
+C         squiggle  solid     three     green     
+D         oval      solid     one       blue      
+E         squiggle  solid     one       pink      
+  Sets: ['D', 'E', 'A', '.', '_', '_', '_', '_']
+
+  Activation: 0.07415683567523956
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     one       blue      
+B         squiggle  solid     two       green     
+C         squiggle  solid     one       green     
+D         squiggle  solid     three     green     
+E         diamond   solid     one       pink      
+  Sets: ['C', 'B', 'D', '.', '_', '_', '_', '_']
+
+--------------------------------------------------
+Neuron 12:
+  Top activations:
+  Activation: 1.5588141679763794
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     two       pink      
+B         diamond   solid     two       green     
+C         diamond   solid     two       blue      
+D         diamond   solid     one       green     
+E         diamond   solid     three     pink      
+  Sets: ['D', 'C', 'E', '/', 'B', 'C', 'A', '.']
+
+  Activation: 1.5495247840881348
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       blue      
+B         oval      solid     three     pink      
+C         oval      solid     one       green     
+D         oval      solid     three     blue      
+E         oval      solid     three     green     
+  Sets: ['C', 'A', 'B', '/', 'E', 'D', 'B', '.']
+
+  Activation: 1.5486336946487427
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     one       blue      
+B         diamond   solid     two       green     
+C         squiggle  solid     three     green     
+D         oval      solid     one       green     
+E         diamond   solid     three     pink      
+  Sets: ['D', 'C', 'B', '/', 'B', 'A', 'E', '.']
+
+  Activation: 1.5444873571395874
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     one       green     
+B         oval      solid     two       pink      
+C         squiggle  solid     three     green     
+D         oval      solid     two       green     
+E         diamond   solid     one       blue      
+  Sets: ['D', 'C', 'A', '/', 'B', 'C', 'E', '.']
+
+  Activation: 1.5443528890609741
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     one       pink      
+B         squiggle  solid     one       green     
+C         oval      solid     two       blue      
+D         diamond   solid     three     pink      
+E         oval      solid     one       blue      
+  Sets: ['E', 'B', 'A', '/', 'C', 'B', 'D', '.']
+
+  Activation: 1.5442973375320435
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     one       green     
+B         oval      solid     one       blue      
+C         oval      solid     one       pink      
+D         squiggle  solid     three     green     
+E         diamond   solid     two       pink      
+  Sets: ['A', 'B', 'C', '/', 'B', 'D', 'E', '.']
+
+  Activation: 1.5436286926269531
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       pink      
+B         oval      solid     one       blue      
+C         diamond   solid     three     green     
+D         diamond   solid     two       pink      
+E         squiggle  solid     two       pink      
+  Sets: ['B', 'E', 'C', '/', 'A', 'E', 'D', '.']
+
+  Activation: 1.542024850845337
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     three     blue      
+B         diamond   solid     two       green     
+C         diamond   solid     one       blue      
+D         squiggle  solid     one       pink      
+E         oval      solid     one       green     
+  Sets: ['E', 'D', 'C', '/', 'A', 'D', 'B', '.']
+
+  Activation: 1.5409514904022217
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       pink      
+B         diamond   solid     two       pink      
+C         squiggle  solid     two       pink      
+D         oval      solid     one       green     
+E         diamond   solid     three     blue      
+  Sets: ['D', 'C', 'E', '/', 'A', 'C', 'B', '.']
+
+  Activation: 1.540726661682129
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     two       pink      
+B         oval      solid     three     green     
+C         oval      solid     two       green     
+D         diamond   solid     two       blue      
+E         diamond   solid     one       blue      
+  Sets: ['C', 'A', 'D', '/', 'B', 'A', 'E', '.']
+
+  Bottom activations:
+  Activation: 0.6224770545959473
+  Card      Shape     Shading   Number    Color     
+A         oval      striped   two       blue      
+B         diamond   striped   two       blue      
+C         oval      striped   three     blue      
+D         diamond   striped   one       pink      
+E         oval      striped   two       pink      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.6223790645599365
+  Card      Shape     Shading   Number    Color     
+A         oval      striped   three     blue      
+B         diamond   striped   two       green     
+C         squiggle  striped   two       blue      
+D         oval      striped   two       green     
+E         oval      striped   two       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.6223156452178955
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   two       blue      
+B         oval      striped   one       blue      
+C         oval      striped   three     blue      
+D         oval      striped   one       pink      
+E         diamond   striped   one       pink      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.6223032474517822
+  Card      Shape     Shading   Number    Color     
+A         oval      striped   two       green     
+B         oval      striped   two       pink      
+C         squiggle  striped   one       blue      
+D         squiggle  striped   one       green     
+E         diamond   striped   two       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.6222478747367859
+  Card      Shape     Shading   Number    Color     
+A         oval      striped   three     pink      
+B         oval      striped   two       green     
+C         oval      striped   one       pink      
+D         diamond   striped   one       blue      
+E         diamond   striped   two       green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.6218400001525879
+  Card      Shape     Shading   Number    Color     
+A         oval      striped   two       blue      
+B         diamond   striped   one       pink      
+C         oval      striped   two       green     
+D         squiggle  striped   one       blue      
+E         diamond   striped   three     green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.6215300559997559
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   one       green     
+B         squiggle  striped   one       blue      
+C         diamond   striped   two       blue      
+D         oval      striped   two       green     
+E         oval      striped   three     green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.6210321187973022
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   one       blue      
+B         diamond   striped   two       blue      
+C         squiggle  striped   one       blue      
+D         oval      striped   two       green     
+E         diamond   striped   two       pink      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.6207665801048279
+  Card      Shape     Shading   Number    Color     
+A         oval      striped   two       blue      
+B         squiggle  striped   two       green     
+C         diamond   striped   two       green     
+D         oval      striped   one       green     
+E         squiggle  striped   two       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.6204701662063599
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   one       green     
+B         diamond   striped   two       blue      
+C         diamond   striped   one       blue      
+D         oval      striped   two       blue      
+E         oval      striped   two       green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+--------------------------------------------------
+Neuron 19:
+  Top activations:
+  Activation: 0.5596234202384949
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      one       pink      
+B         squiggle  open      one       pink      
+C         oval      open      one       green     
+D         squiggle  open      one       blue      
+E         squiggle  open      one       green     
+  Sets: ['C', 'D', 'A', '/', 'E', 'D', 'B', '.']
+
+  Activation: 0.5514992475509644
+  Card      Shape     Shading   Number    Color     
+A         oval      open      three     pink      
+B         diamond   open      two       blue      
+C         squiggle  open      one       green     
+D         squiggle  open      one       pink      
+E         diamond   open      two       pink      
+  Sets: ['A', 'C', 'B', '/', 'A', 'D', 'E', '.']
+
+  Activation: 0.5506036281585693
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      one       pink      
+B         diamond   open      two       green     
+C         squiggle  open      three     pink      
+D         oval      open      one       blue      
+E         oval      open      two       pink      
+  Sets: ['D', 'C', 'B', '/', 'E', 'C', 'A', '.']
+
+  Activation: 0.5504358410835266
+  Card      Shape     Shading   Number    Color     
+A         squiggle  open      two       pink      
+B         oval      open      two       pink      
+C         diamond   open      one       blue      
+D         diamond   open      two       pink      
+E         squiggle  open      three     green     
+  Sets: ['B', 'E', 'C', '/', 'B', 'A', 'D', '.']
+
+  Activation: 0.5495032668113708
+  Card      Shape     Shading   Number    Color     
+A         squiggle  open      three     pink      
+B         oval      open      one       blue      
+C         oval      open      three     pink      
+D         oval      open      two       green     
+E         diamond   open      three     pink      
+  Sets: ['D', 'B', 'C', '/', 'C', 'A', 'E', '.']
+
+  Activation: 0.5493171215057373
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      three     blue      
+B         squiggle  open      one       green     
+C         oval      open      one       green     
+D         squiggle  open      two       pink      
+E         oval      open      two       pink      
+  Sets: ['C', 'D', 'A', '/', 'E', 'B', 'A', '.']
+
+  Activation: 0.5473198294639587
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      one       green     
+B         squiggle  open      two       pink      
+C         oval      open      three     blue      
+D         diamond   open      two       pink      
+E         squiggle  open      one       green     
+  Sets: ['C', 'E', 'D', '/', 'C', 'B', 'A', '.']
+
+  Activation: 0.5458536148071289
+  Card      Shape     Shading   Number    Color     
+A         oval      open      three     blue      
+B         squiggle  open      one       green     
+C         diamond   open      two       blue      
+D         squiggle  open      one       pink      
+E         squiggle  open      one       blue      
+  Sets: ['A', 'E', 'C', '/', 'B', 'E', 'D', '.']
+
+  Activation: 0.5453290939331055
+  Card      Shape     Shading   Number    Color     
+A         squiggle  open      one       pink      
+B         squiggle  striped   two       pink      
+C         squiggle  solid     three     pink      
+D         squiggle  open      three     pink      
+E         squiggle  open      two       pink      
+  Sets: ['A', 'B', 'C', '/', 'A', 'E', 'D', '.']
+
+  Activation: 0.544892430305481
+  Card      Shape     Shading   Number    Color     
+A         oval      striped   one       pink      
+B         diamond   open      one       pink      
+C         squiggle  open      one       pink      
+D         oval      open      one       pink      
+E         squiggle  solid     one       pink      
+  Sets: ['A', 'E', 'B', '/', 'D', 'C', 'B', '.']
+
+  Bottom activations:
+  Activation: 0.22230343520641327
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   two       pink      
+B         diamond   striped   three     blue      
+C         squiggle  striped   two       blue      
+D         diamond   striped   two       green     
+E         squiggle  striped   three     blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.2222934514284134
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   two       green     
+B         diamond   striped   two       green     
+C         squiggle  striped   one       blue      
+D         diamond   striped   three     blue      
+E         squiggle  striped   three     green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.2219359278678894
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   two       blue      
+B         diamond   striped   three     green     
+C         squiggle  striped   three     green     
+D         squiggle  striped   two       pink      
+E         squiggle  striped   three     blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.2218247801065445
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   two       blue      
+B         diamond   striped   three     green     
+C         squiggle  striped   two       green     
+D         squiggle  striped   one       blue      
+E         squiggle  striped   two       pink      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.22163549065589905
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   one       blue      
+B         oval      striped   one       blue      
+C         squiggle  striped   three     blue      
+D         squiggle  striped   three     green     
+E         squiggle  striped   two       green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.22136765718460083
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   one       blue      
+B         diamond   striped   two       blue      
+C         diamond   striped   three     pink      
+D         diamond   striped   three     blue      
+E         squiggle  striped   two       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.22095398604869843
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   three     blue      
+B         squiggle  striped   two       green     
+C         diamond   striped   three     blue      
+D         diamond   striped   two       green     
+E         squiggle  striped   one       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.22075334191322327
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   two       pink      
+B         squiggle  striped   two       pink      
+C         diamond   striped   three     blue      
+D         squiggle  striped   three     blue      
+E         squiggle  striped   two       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.22066067159175873
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   two       blue      
+B         oval      striped   two       green     
+C         squiggle  striped   three     blue      
+D         diamond   striped   two       blue      
+E         squiggle  striped   one       green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.22050504386425018
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   one       blue      
+B         squiggle  striped   one       pink      
+C         squiggle  striped   two       blue      
+D         diamond   striped   two       blue      
+E         diamond   striped   two       green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+--------------------------------------------------
+Neuron 34:
+  Top activations:
+  Activation: -0.1436944305896759
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      one       pink      
+B         diamond   open      two       pink      
+C         squiggle  open      two       green     
+D         oval      open      one       pink      
+E         diamond   open      one       green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: -0.14393992722034454
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      one       blue      
+B         squiggle  open      two       green     
+C         oval      open      two       green     
+D         oval      open      one       green     
+E         oval      open      two       pink      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: -0.14430664479732513
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      one       pink      
+B         squiggle  open      two       pink      
+C         diamond   open      two       pink      
+D         oval      open      two       pink      
+E         squiggle  open      two       blue      
+  Sets: ['D', 'B', 'C', '.', '_', '_', '_', '_']
+
+  Activation: -0.14440545439720154
+  Card      Shape     Shading   Number    Color     
+A         squiggle  open      two       blue      
+B         oval      open      one       blue      
+C         diamond   open      two       pink      
+D         oval      open      two       pink      
+E         diamond   open      one       pink      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: -0.14446865022182465
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      two       green     
+B         oval      open      one       green     
+C         diamond   open      one       blue      
+D         oval      open      two       pink      
+E         oval      open      one       pink      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: -0.14456132054328918
+  Card      Shape     Shading   Number    Color     
+A         squiggle  open      one       pink      
+B         oval      open      one       pink      
+C         oval      open      one       green     
+D         diamond   open      two       blue      
+E         oval      open      two       pink      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: -0.14457198977470398
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      two       pink      
+B         diamond   open      one       green     
+C         oval      open      one       green     
+D         oval      open      one       pink      
+E         diamond   open      two       green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: -0.14459645748138428
+  Card      Shape     Shading   Number    Color     
+A         oval      open      two       green     
+B         oval      open      one       blue      
+C         oval      open      one       green     
+D         diamond   open      one       pink      
+E         diamond   open      one       green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: -0.14476659893989563
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      two       blue      
+B         diamond   open      one       pink      
+C         squiggle  open      one       pink      
+D         oval      open      two       pink      
+E         oval      open      one       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: -0.14482583105564117
+  Card      Shape     Shading   Number    Color     
+A         squiggle  open      one       pink      
+B         oval      open      two       pink      
+C         oval      open      two       green     
+D         oval      open      one       green     
+E         diamond   open      two       green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Bottom activations:
+  Activation: -1.105639100074768
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      three     green     
+B         squiggle  striped   three     pink      
+C         oval      striped   three     blue      
+D         oval      open      three     blue      
+E         oval      solid     three     blue      
+  Sets: ['E', 'C', 'D', '/', 'E', 'B', 'A', '.']
+
+  Activation: -1.1062378883361816
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      three     blue      
+B         diamond   solid     three     pink      
+C         diamond   striped   three     green     
+D         diamond   striped   one       blue      
+E         diamond   striped   two       pink      
+  Sets: ['C', 'D', 'E', '/', 'C', 'A', 'B', '.']
+
+  Activation: -1.1062601804733276
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     three     pink      
+B         oval      solid     three     blue      
+C         diamond   open      three     blue      
+D         squiggle  solid     three     green     
+E         diamond   striped   three     green     
+  Sets: ['B', 'D', 'A', '/', 'E', 'C', 'A', '.']
+
+  Activation: -1.106290340423584
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     three     blue      
+B         oval      open      two       blue      
+C         oval      open      one       blue      
+D         squiggle  striped   three     blue      
+E         oval      open      three     blue      
+  Sets: ['C', 'B', 'E', '/', 'E', 'D', 'A', '.']
+
+  Activation: -1.1065285205841064
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     one       blue      
+B         squiggle  striped   one       blue      
+C         diamond   open      one       blue      
+D         oval      open      one       blue      
+E         diamond   solid     one       blue      
+  Sets: ['A', 'B', 'C', '/', 'D', 'B', 'E', '.']
+
+  Activation: -1.1070966720581055
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       blue      
+B         oval      solid     three     pink      
+C         oval      solid     one       green     
+D         oval      solid     three     blue      
+E         oval      solid     three     green     
+  Sets: ['C', 'A', 'B', '/', 'E', 'D', 'B', '.']
+
+  Activation: -1.1083245277404785
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     one       pink      
+B         diamond   solid     three     pink      
+C         diamond   open      two       blue      
+D         diamond   open      three     blue      
+E         diamond   striped   three     green     
+  Sets: ['E', 'C', 'A', '/', 'E', 'D', 'B', '.']
+
+  Activation: -1.1125938892364502
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       blue      
+B         oval      striped   three     green     
+C         oval      striped   one       blue      
+D         oval      solid     three     pink      
+E         oval      open      three     blue      
+  Sets: ['B', 'E', 'D', '/', 'C', 'A', 'E', '.']
+
+  Activation: -1.1127572059631348
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     three     pink      
+B         diamond   striped   three     blue      
+C         diamond   striped   two       pink      
+D         diamond   solid     one       blue      
+E         diamond   open      three     green     
+  Sets: ['E', 'D', 'C', '/', 'E', 'B', 'A', '.']
+
+  Activation: -1.1137938499450684
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     three     pink      
+B         diamond   open      three     blue      
+C         diamond   open      three     green     
+D         diamond   striped   three     blue      
+E         diamond   striped   three     green     
+  Sets: ['E', 'B', 'A', '/', 'C', 'D', 'A', '.']
+
+--------------------------------------------------
+Neuron 36:
+  Top activations:
+  Activation: -0.4188079833984375
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      one       pink      
+B         squiggle  open      one       pink      
+C         oval      open      one       green     
+D         squiggle  open      one       blue      
+E         squiggle  open      one       green     
+  Sets: ['C', 'D', 'A', '/', 'E', 'D', 'B', '.']
+
+  Activation: -0.43866968154907227
+  Card      Shape     Shading   Number    Color     
+A         oval      open      three     blue      
+B         squiggle  open      one       green     
+C         diamond   open      two       blue      
+D         squiggle  open      one       pink      
+E         squiggle  open      one       blue      
+  Sets: ['A', 'E', 'C', '/', 'B', 'E', 'D', '.']
+
+  Activation: -0.4429394602775574
+  Card      Shape     Shading   Number    Color     
+A         squiggle  open      two       blue      
+B         diamond   open      three     pink      
+C         squiggle  open      three     blue      
+D         squiggle  open      one       blue      
+E         oval      open      one       green     
+  Sets: ['E', 'A', 'B', '/', 'D', 'A', 'C', '.']
+
+  Activation: -0.44979703426361084
+  Card      Shape     Shading   Number    Color     
+A         oval      striped   one       blue      
+B         squiggle  striped   one       pink      
+C         oval      striped   one       pink      
+D         squiggle  striped   two       blue      
+E         oval      striped   two       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: -0.4504416286945343
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   two       green     
+B         oval      striped   two       blue      
+C         squiggle  striped   one       pink      
+D         squiggle  striped   one       blue      
+E         oval      striped   one       green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: -0.4504576325416565
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   one       green     
+B         oval      striped   one       blue      
+C         squiggle  striped   two       blue      
+D         squiggle  striped   one       pink      
+E         oval      striped   two       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: -0.4510250985622406
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   one       green     
+B         squiggle  striped   one       blue      
+C         squiggle  striped   two       blue      
+D         oval      striped   one       pink      
+E         oval      striped   three     blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: -0.45124757289886475
+  Card      Shape     Shading   Number    Color     
+A         oval      striped   two       green     
+B         oval      striped   two       pink      
+C         squiggle  striped   one       blue      
+D         squiggle  striped   one       green     
+E         diamond   striped   two       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: -0.4513401687145233
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   one       blue      
+B         oval      striped   two       blue      
+C         squiggle  striped   three     pink      
+D         oval      striped   one       green     
+E         oval      striped   two       green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: -0.4514864385128021
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      one       blue      
+B         squiggle  open      three     pink      
+C         oval      open      two       blue      
+D         squiggle  open      three     blue      
+E         squiggle  open      three     green     
+  Sets: ['C', 'D', 'A', '/', 'E', 'D', 'B', '.']
+
+  Bottom activations:
+  Activation: -0.6780306100845337
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     three     green     
+B         squiggle  solid     three     blue      
+C         diamond   solid     three     blue      
+D         oval      solid     three     pink      
+E         diamond   solid     three     green     
+  Sets: ['D', 'A', 'C', '/', 'D', 'B', 'E', '.']
+
+  Activation: -0.6781289577484131
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     one       pink      
+B         squiggle  solid     one       green     
+C         oval      solid     two       blue      
+D         diamond   solid     three     pink      
+E         oval      solid     one       blue      
+  Sets: ['E', 'B', 'A', '/', 'C', 'B', 'D', '.']
+
+  Activation: -0.6809133291244507
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     one       blue      
+B         diamond   solid     two       green     
+C         squiggle  solid     three     green     
+D         oval      solid     one       green     
+E         diamond   solid     three     pink      
+  Sets: ['D', 'C', 'B', '/', 'B', 'A', 'E', '.']
+
+  Activation: -0.6819670796394348
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     two       pink      
+B         oval      solid     three     green     
+C         oval      solid     two       green     
+D         diamond   solid     two       blue      
+E         diamond   solid     one       blue      
+  Sets: ['C', 'A', 'D', '/', 'B', 'A', 'E', '.']
+
+  Activation: -0.6837030649185181
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       pink      
+B         diamond   solid     two       pink      
+C         squiggle  solid     two       pink      
+D         oval      solid     one       green     
+E         diamond   solid     three     blue      
+  Sets: ['D', 'C', 'E', '/', 'A', 'C', 'B', '.']
+
+  Activation: -0.6839049458503723
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       pink      
+B         oval      solid     one       blue      
+C         diamond   solid     three     green     
+D         diamond   solid     two       pink      
+E         squiggle  solid     two       pink      
+  Sets: ['B', 'E', 'C', '/', 'A', 'E', 'D', '.']
+
+  Activation: -0.6862015128135681
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     two       pink      
+B         oval      solid     one       green     
+C         diamond   solid     one       blue      
+D         diamond   solid     two       blue      
+E         diamond   solid     three     blue      
+  Sets: ['B', 'A', 'E', '/', 'C', 'D', 'E', '.']
+
+  Activation: -0.6867867708206177
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     two       green     
+B         diamond   solid     two       blue      
+C         squiggle  solid     two       blue      
+D         diamond   solid     two       pink      
+E         oval      solid     two       green     
+  Sets: ['E', 'C', 'D', '/', 'A', 'B', 'D', '.']
+
+  Activation: -0.6989727020263672
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       blue      
+B         oval      solid     three     pink      
+C         oval      solid     one       green     
+D         oval      solid     three     blue      
+E         oval      solid     three     green     
+  Sets: ['C', 'A', 'B', '/', 'E', 'D', 'B', '.']
+
+  Activation: -0.711868405342102
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     two       pink      
+B         diamond   solid     two       green     
+C         diamond   solid     two       blue      
+D         diamond   solid     one       green     
+E         diamond   solid     three     pink      
+  Sets: ['D', 'C', 'E', '/', 'B', 'C', 'A', '.']
+
+--------------------------------------------------
+Neuron 37:
+  Top activations:
+  Activation: 0.8603075742721558
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      one       pink      
+B         diamond   striped   one       green     
+C         diamond   striped   one       pink      
+D         diamond   striped   one       blue      
+E         diamond   solid     one       green     
+  Sets: ['E', 'D', 'A', '/', 'B', 'D', 'C', '.']
+
+  Activation: 0.8565101623535156
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     one       pink      
+B         diamond   open      one       pink      
+C         oval      open      one       pink      
+D         diamond   striped   one       pink      
+E         squiggle  striped   one       pink      
+  Sets: ['C', 'E', 'A', '/', 'A', 'D', 'B', '.']
+
+  Activation: 0.856136679649353
+  Card      Shape     Shading   Number    Color     
+A         oval      striped   one       pink      
+B         oval      striped   one       green     
+C         oval      open      one       pink      
+D         oval      solid     one       pink      
+E         oval      open      one       blue      
+  Sets: ['B', 'E', 'D', '/', 'D', 'A', 'C', '.']
+
+  Activation: 0.8504250049591064
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   one       pink      
+B         oval      striped   one       pink      
+C         squiggle  striped   one       pink      
+D         diamond   open      one       blue      
+E         oval      solid     one       green     
+  Sets: ['E', 'C', 'D', '/', 'B', 'C', 'A', '.']
+
+  Activation: 0.8498039245605469
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     one       pink      
+B         diamond   open      three     pink      
+C         diamond   striped   two       pink      
+D         diamond   open      one       pink      
+E         diamond   solid     three     pink      
+  Sets: ['A', 'C', 'B', '/', 'D', 'C', 'E', '.']
+
+  Activation: 0.8476899862289429
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     one       pink      
+B         oval      striped   two       green     
+C         oval      striped   three     blue      
+D         oval      striped   one       pink      
+E         oval      open      one       pink      
+  Sets: ['B', 'C', 'D', '/', 'A', 'D', 'E', '.']
+
+  Activation: 0.8476109504699707
+  Card      Shape     Shading   Number    Color     
+A         squiggle  open      one       pink      
+B         diamond   open      one       blue      
+C         oval      open      one       green     
+D         diamond   solid     one       pink      
+E         oval      striped   one       pink      
+  Sets: ['C', 'A', 'B', '/', 'E', 'A', 'D', '.']
+
+  Activation: 0.847233772277832
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   two       green     
+B         diamond   solid     three     green     
+C         diamond   open      one       pink      
+D         diamond   open      one       green     
+E         diamond   open      one       blue      
+  Sets: ['D', 'A', 'B', '/', 'D', 'E', 'C', '.']
+
+  Activation: 0.8455104827880859
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      three     blue      
+B         diamond   striped   one       pink      
+C         diamond   solid     three     pink      
+D         diamond   open      one       green     
+E         diamond   open      two       pink      
+  Sets: ['D', 'A', 'E', '/', 'B', 'E', 'C', '.']
+
+  Activation: 0.8454223871231079
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      one       blue      
+B         diamond   open      one       pink      
+C         squiggle  striped   one       green     
+D         oval      solid     one       green     
+E         diamond   open      one       green     
+  Sets: ['D', 'C', 'E', '/', 'E', 'A', 'B', '.']
+
+  Bottom activations:
+  Activation: 0.03152841329574585
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     three     green     
+B         oval      solid     three     blue      
+C         oval      solid     three     green     
+D         oval      open      three     blue      
+E         oval      solid     two       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.03139542415738106
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     three     pink      
+B         squiggle  open      three     green     
+C         oval      solid     three     pink      
+D         oval      solid     two       green     
+E         oval      solid     three     green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.031297966837882996
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     three     pink      
+B         diamond   solid     three     green     
+C         diamond   open      three     green     
+D         squiggle  solid     three     green     
+E         oval      solid     three     blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.03125319629907608
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     three     green     
+B         squiggle  open      three     blue      
+C         diamond   solid     three     pink      
+D         squiggle  solid     three     pink      
+E         oval      solid     three     blue      
+  Sets: ['E', 'D', 'A', '.', '_', '_', '_', '_']
+
+  Activation: 0.031246745958924294
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     three     blue      
+B         squiggle  solid     three     green     
+C         oval      solid     three     green     
+D         oval      solid     one       pink      
+E         oval      solid     three     pink      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.031159227713942528
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     three     pink      
+B         oval      solid     three     green     
+C         squiggle  solid     three     blue      
+D         diamond   open      three     green     
+E         squiggle  solid     three     pink      
+  Sets: ['B', 'C', 'A', '.', '_', '_', '_', '_']
+
+  Activation: 0.03092181496322155
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     three     blue      
+B         oval      solid     two       pink      
+C         squiggle  solid     three     pink      
+D         oval      solid     three     blue      
+E         oval      solid     three     pink      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.030898354947566986
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     three     green     
+B         oval      solid     three     pink      
+C         oval      open      three     pink      
+D         squiggle  solid     three     pink      
+E         squiggle  solid     three     blue      
+  Sets: ['A', 'E', 'D', '.', '_', '_', '_', '_']
+
+  Activation: 0.030538517981767654
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     three     green     
+B         oval      solid     three     pink      
+C         oval      solid     three     blue      
+D         oval      open      three     blue      
+E         diamond   solid     three     pink      
+  Sets: ['A', 'C', 'B', '.', '_', '_', '_', '_']
+
+  Activation: 0.02989792451262474
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     three     pink      
+B         oval      solid     three     green     
+C         diamond   solid     three     green     
+D         oval      solid     three     blue      
+E         diamond   open      three     blue      
+  Sets: ['B', 'D', 'A', '.', '_', '_', '_', '_']
+
+--------------------------------------------------
+Neuron 43:
+  Top activations:
+  Activation: 0.05565191060304642
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     one       pink      
+B         squiggle  open      one       pink      
+C         squiggle  solid     three     pink      
+D         squiggle  solid     two       pink      
+E         squiggle  striped   two       pink      
+  Sets: ['A', 'D', 'C', '/', 'B', 'E', 'C', '.']
+
+  Activation: 0.054459430277347565
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     three     blue      
+B         squiggle  solid     two       pink      
+C         oval      solid     one       pink      
+D         diamond   solid     two       green     
+E         diamond   solid     three     pink      
+  Sets: ['C', 'A', 'D', '/', 'C', 'B', 'E', '.']
+
+  Activation: 0.053027909249067307
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       pink      
+B         oval      solid     one       blue      
+C         diamond   solid     three     green     
+D         diamond   solid     two       pink      
+E         squiggle  solid     two       pink      
+  Sets: ['B', 'E', 'C', '/', 'A', 'E', 'D', '.']
+
+  Activation: 0.052452534437179565
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     one       blue      
+B         oval      solid     three     green     
+C         diamond   solid     two       pink      
+D         oval      solid     two       pink      
+E         squiggle  solid     two       pink      
+  Sets: ['B', 'A', 'D', '/', 'D', 'E', 'C', '.']
+
+  Activation: 0.051775991916656494
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       pink      
+B         squiggle  solid     three     green     
+C         oval      solid     three     pink      
+D         diamond   solid     three     blue      
+E         squiggle  solid     one       green     
+  Sets: ['A', 'E', 'D', '/', 'C', 'B', 'D', '.']
+
+  Activation: 0.05132857337594032
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     three     green     
+B         oval      solid     two       pink      
+C         diamond   solid     two       green     
+D         oval      solid     one       green     
+E         squiggle  solid     two       blue      
+  Sets: ['D', 'A', 'C', '/', 'B', 'E', 'C', '.']
+
+  Activation: 0.05103033035993576
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     two       pink      
+B         diamond   solid     two       green     
+C         diamond   solid     two       blue      
+D         diamond   solid     one       green     
+E         diamond   solid     three     pink      
+  Sets: ['D', 'C', 'E', '/', 'B', 'C', 'A', '.']
+
+  Activation: 0.050990842282772064
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     two       pink      
+B         squiggle  solid     three     pink      
+C         squiggle  solid     one       pink      
+D         diamond   open      three     pink      
+E         oval      striped   one       pink      
+  Sets: ['E', 'A', 'D', '/', 'C', 'A', 'B', '.']
+
+  Activation: 0.05070267617702484
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       pink      
+B         squiggle  solid     two       green     
+C         diamond   solid     two       blue      
+D         diamond   solid     two       green     
+E         oval      solid     two       green     
+  Sets: ['E', 'B', 'D', '/', 'A', 'B', 'C', '.']
+
+  Activation: 0.05037657916545868
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       pink      
+B         diamond   solid     two       pink      
+C         squiggle  solid     two       pink      
+D         oval      solid     one       green     
+E         diamond   solid     three     blue      
+  Sets: ['D', 'C', 'E', '/', 'A', 'C', 'B', '.']
+
+  Bottom activations:
+  Activation: -0.15016287565231323
+  Card      Shape     Shading   Number    Color     
+A         squiggle  open      three     green     
+B         diamond   solid     two       pink      
+C         squiggle  open      one       blue      
+D         squiggle  open      one       pink      
+E         squiggle  open      one       green     
+  Sets: ['E', 'C', 'D', '.', '_', '_', '_', '_']
+
+  Activation: -0.15016914904117584
+  Card      Shape     Shading   Number    Color     
+A         squiggle  open      one       blue      
+B         squiggle  open      two       green     
+C         diamond   open      one       pink      
+D         oval      open      one       green     
+E         squiggle  open      three     green     
+  Sets: ['D', 'A', 'C', '.', '_', '_', '_', '_']
+
+  Activation: -0.1502358317375183
+  Card      Shape     Shading   Number    Color     
+A         squiggle  open      one       green     
+B         squiggle  open      two       pink      
+C         diamond   solid     one       pink      
+D         squiggle  open      one       blue      
+E         squiggle  open      three     green     
+  Sets: ['E', 'D', 'B', '.', '_', '_', '_', '_']
+
+  Activation: -0.15031538903713226
+  Card      Shape     Shading   Number    Color     
+A         squiggle  open      one       pink      
+B         squiggle  open      two       green     
+C         diamond   open      one       green     
+D         oval      open      three     green     
+E         squiggle  open      two       blue      
+  Sets: ['D', 'B', 'C', '.', '_', '_', '_', '_']
+
+  Activation: -0.1503187119960785
+  Card      Shape     Shading   Number    Color     
+A         squiggle  open      one       green     
+B         squiggle  open      one       pink      
+C         squiggle  open      three     green     
+D         squiggle  solid     one       pink      
+E         squiggle  open      two       green     
+  Sets: ['A', 'E', 'C', '.', '_', '_', '_', '_']
+
+  Activation: -0.15039916336536407
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      one       green     
+B         diamond   open      one       blue      
+C         squiggle  open      one       pink      
+D         diamond   open      one       pink      
+E         diamond   open      three     green     
+  Sets: ['A', 'B', 'D', '.', '_', '_', '_', '_']
+
+  Activation: -0.15081003308296204
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      one       green     
+B         squiggle  open      three     blue      
+C         squiggle  open      two       green     
+D         squiggle  open      one       pink      
+E         oval      open      two       green     
+  Sets: ['C', 'B', 'D', '.', '_', '_', '_', '_']
+
+  Activation: -0.1510237455368042
+  Card      Shape     Shading   Number    Color     
+A         oval      open      one       green     
+B         squiggle  open      two       blue      
+C         squiggle  open      one       green     
+D         diamond   open      one       green     
+E         squiggle  open      two       green     
+  Sets: ['A', 'C', 'D', '.', '_', '_', '_', '_']
+
+  Activation: -0.15108013153076172
+  Card      Shape     Shading   Number    Color     
+A         oval      open      one       green     
+B         squiggle  open      one       pink      
+C         squiggle  open      one       blue      
+D         squiggle  open      one       green     
+E         diamond   open      three     green     
+  Sets: ['D', 'C', 'B', '.', '_', '_', '_', '_']
+
+  Activation: -0.1511050909757614
+  Card      Shape     Shading   Number    Color     
+A         squiggle  open      three     green     
+B         diamond   open      one       blue      
+C         squiggle  open      two       green     
+D         diamond   open      one       pink      
+E         squiggle  open      one       green     
+  Sets: ['E', 'C', 'A', '.', '_', '_', '_', '_']
+
+--------------------------------------------------
+Neuron 54:
+  Top activations:
+  Activation: -0.05804895609617233
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     three     pink      
+B         oval      solid     two       green     
+C         squiggle  solid     three     green     
+D         oval      solid     three     green     
+E         oval      solid     one       green     
+  Sets: ['E', 'B', 'D', '.', '_', '_', '_', '_']
+
+  Activation: -0.05823523551225662
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       green     
+B         oval      solid     three     green     
+C         diamond   solid     two       pink      
+D         squiggle  solid     one       green     
+E         oval      solid     three     blue      
+  Sets: ['E', 'D', 'C', '.', '_', '_', '_', '_']
+
+  Activation: -0.058627836406230927
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     three     green     
+B         diamond   solid     two       green     
+C         squiggle  solid     one       green     
+D         diamond   solid     three     green     
+E         oval      solid     one       green     
+  Sets: ['A', 'C', 'B', '.', '_', '_', '_', '_']
+
+  Activation: -0.05864541605114937
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     one       green     
+B         oval      solid     three     green     
+C         oval      solid     three     pink      
+D         oval      solid     two       pink      
+E         oval      solid     one       pink      
+  Sets: ['E', 'D', 'C', '.', '_', '_', '_', '_']
+
+  Activation: -0.05896250903606415
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       green     
+B         oval      solid     one       pink      
+C         squiggle  solid     one       green     
+D         diamond   solid     two       green     
+E         squiggle  solid     two       green     
+  Sets: ['A', 'E', 'D', '.', '_', '_', '_', '_']
+
+  Activation: -0.05898930877447128
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     three     green     
+B         oval      solid     two       pink      
+C         diamond   solid     three     blue      
+D         oval      solid     one       green     
+E         oval      solid     three     pink      
+  Sets: ['E', 'A', 'C', '.', '_', '_', '_', '_']
+
+  Activation: -0.05902554467320442
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     three     green     
+B         squiggle  solid     two       pink      
+C         oval      solid     three     pink      
+D         oval      solid     three     green     
+E         oval      solid     three     blue      
+  Sets: ['D', 'E', 'C', '.', '_', '_', '_', '_']
+
+  Activation: -0.05906277149915695
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       green     
+B         diamond   solid     two       green     
+C         squiggle  solid     three     green     
+D         oval      solid     three     blue      
+E         diamond   solid     one       green     
+  Sets: ['A', 'C', 'E', '.', '_', '_', '_', '_']
+
+  Activation: -0.05912225693464279
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     two       green     
+B         squiggle  solid     one       green     
+C         oval      solid     three     blue      
+D         diamond   solid     two       green     
+E         oval      solid     three     green     
+  Sets: ['E', 'B', 'D', '.', '_', '_', '_', '_']
+
+  Activation: -0.059335798025131226
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     three     green     
+B         squiggle  solid     three     pink      
+C         oval      solid     two       blue      
+D         diamond   solid     two       green     
+E         oval      solid     one       pink      
+  Sets: ['A', 'C', 'E', '.', '_', '_', '_', '_']
+
+  Bottom activations:
+  Activation: -0.8658674955368042
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   two       green     
+B         diamond   striped   two       blue      
+C         oval      striped   three     pink      
+D         squiggle  striped   one       pink      
+E         diamond   striped   two       pink      
+  Sets: ['C', 'D', 'E', '/', 'A', 'B', 'E', '.']
+
+  Activation: -0.8660743832588196
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      two       green     
+B         diamond   solid     two       pink      
+C         diamond   striped   two       blue      
+D         diamond   open      one       blue      
+E         diamond   open      three     pink      
+  Sets: ['A', 'D', 'E', '/', 'A', 'C', 'B', '.']
+
+  Activation: -0.866478681564331
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   one       blue      
+B         diamond   striped   two       pink      
+C         diamond   striped   three     green     
+D         diamond   solid     two       pink      
+E         diamond   open      three     green     
+  Sets: ['C', 'A', 'B', '/', 'E', 'A', 'D', '.']
+
+  Activation: -0.8675767779350281
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     one       pink      
+B         diamond   open      three     blue      
+C         diamond   open      two       pink      
+D         diamond   striped   three     pink      
+E         diamond   striped   two       green     
+  Sets: ['E', 'B', 'A', '/', 'A', 'C', 'D', '.']
+
+  Activation: -0.8675867915153503
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   two       blue      
+B         squiggle  striped   one       blue      
+C         diamond   striped   two       pink      
+D         oval      striped   three     blue      
+E         diamond   striped   two       green     
+  Sets: ['D', 'B', 'A', '/', 'E', 'A', 'C', '.']
+
+  Activation: -0.8681275844573975
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   two       pink      
+B         diamond   striped   two       green     
+C         diamond   striped   two       blue      
+D         diamond   solid     two       green     
+E         diamond   open      two       green     
+  Sets: ['D', 'B', 'E', '/', 'B', 'C', 'A', '.']
+
+  Activation: -0.8687756657600403
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     two       green     
+B         diamond   open      three     pink      
+C         diamond   open      one       blue      
+D         diamond   open      two       green     
+E         diamond   striped   one       blue      
+  Sets: ['A', 'E', 'B', '/', 'D', 'C', 'B', '.']
+
+  Activation: -0.8705729246139526
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      one       green     
+B         diamond   open      one       blue      
+C         diamond   open      one       pink      
+D         diamond   open      three     green     
+E         diamond   open      two       blue      
+  Sets: ['A', 'B', 'C', '/', 'D', 'E', 'C', '.']
+
+  Activation: -0.8706769347190857
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      three     blue      
+B         diamond   solid     three     pink      
+C         diamond   striped   three     green     
+D         diamond   striped   one       blue      
+E         diamond   striped   two       pink      
+  Sets: ['C', 'D', 'E', '/', 'C', 'A', 'B', '.']
+
+  Activation: -0.8772038817405701
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      one       pink      
+B         diamond   striped   one       green     
+C         diamond   striped   one       pink      
+D         diamond   striped   one       blue      
+E         diamond   solid     one       green     
+  Sets: ['E', 'D', 'A', '/', 'B', 'D', 'C', '.']
+
+--------------------------------------------------
+Neuron 60:
+  Top activations:
+  Activation: 0.7313054203987122
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   three     blue      
+B         oval      striped   three     pink      
+C         squiggle  open      two       pink      
+D         diamond   striped   two       pink      
+E         diamond   striped   two       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.731162428855896
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   two       blue      
+B         squiggle  striped   three     blue      
+C         diamond   striped   one       blue      
+D         diamond   striped   three     blue      
+E         diamond   open      three     blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.7308670282363892
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      three     pink      
+B         diamond   striped   two       blue      
+C         diamond   striped   two       green     
+D         oval      striped   one       blue      
+E         diamond   striped   three     blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.7308599948883057
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   three     pink      
+B         squiggle  striped   two       blue      
+C         diamond   striped   two       pink      
+D         diamond   open      three     pink      
+E         oval      striped   two       blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.7307828068733215
+  Card      Shape     Shading   Number    Color     
+A         squiggle  striped   three     green     
+B         oval      striped   two       green     
+C         diamond   striped   two       blue      
+D         diamond   striped   three     blue      
+E         diamond   open      three     blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.7306642532348633
+  Card      Shape     Shading   Number    Color     
+A         oval      striped   two       pink      
+B         diamond   striped   two       pink      
+C         squiggle  striped   three     blue      
+D         diamond   striped   two       blue      
+E         oval      open      two       pink      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.7305911779403687
+  Card      Shape     Shading   Number    Color     
+A         oval      striped   two       blue      
+B         diamond   open      three     green     
+C         squiggle  striped   two       blue      
+D         diamond   striped   three     pink      
+E         squiggle  striped   two       pink      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.7305819392204285
+  Card      Shape     Shading   Number    Color     
+A         oval      striped   three     blue      
+B         squiggle  striped   two       blue      
+C         diamond   striped   three     pink      
+D         oval      striped   two       pink      
+E         diamond   open      three     green     
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.7305387854576111
+  Card      Shape     Shading   Number    Color     
+A         diamond   open      two       blue      
+B         squiggle  striped   three     blue      
+C         diamond   striped   two       green     
+D         squiggle  striped   two       blue      
+E         squiggle  striped   two       pink      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Activation: 0.7303632497787476
+  Card      Shape     Shading   Number    Color     
+A         diamond   striped   three     pink      
+B         oval      open      two       blue      
+C         diamond   striped   two       green     
+D         diamond   striped   two       blue      
+E         oval      striped   three     blue      
+  Sets: ['*', '.', '_', '_', '_', '_', '_', '_']
+
+  Bottom activations:
+  Activation: 0.3856569826602936
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     one       blue      
+B         diamond   solid     three     pink      
+C         squiggle  solid     three     green     
+D         oval      solid     three     blue      
+E         oval      solid     two       green     
+  Sets: ['E', 'A', 'B', '/', 'D', 'C', 'B', '.']
+
+  Activation: 0.38526397943496704
+  Card      Shape     Shading   Number    Color     
+A         oval      solid     one       blue      
+B         oval      solid     three     green     
+C         diamond   solid     two       pink      
+D         oval      solid     two       pink      
+E         squiggle  solid     two       pink      
+  Sets: ['B', 'A', 'D', '/', 'D', 'E', 'C', '.']
+
+  Activation: 0.3846498727798462
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     two       green     
+B         oval      solid     two       blue      
+C         diamond   solid     two       pink      
+D         oval      solid     three     green     
+E         squiggle  solid     one       blue      
+  Sets: ['D', 'E', 'C', '/', 'B', 'A', 'C', '.']
+
+  Activation: 0.3838421106338501
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     three     blue      
+B         squiggle  solid     two       pink      
+C         oval      solid     one       pink      
+D         diamond   solid     two       green     
+E         diamond   solid     three     pink      
+  Sets: ['C', 'A', 'D', '/', 'C', 'B', 'E', '.']
+
+  Activation: 0.38353776931762695
+  Card      Shape     Shading   Number    Color     
+A         diamond   solid     three     blue      
+B         oval      solid     three     blue      
+C         oval      solid     two       green     
+D         squiggle  solid     one       pink      
+E         squiggle  solid     three     blue      
+  Sets: ['C', 'D', 'A', '/', 'B', 'E', 'A', '.']
+
+  Activation: 0.38347363471984863
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     two       pink      
+B         diamond   solid     three     pink      
+C         diamond   solid     two       blue      
+D         oval      solid     two       green     
+E         squiggle  solid     one       blue      
+  Sets: ['D', 'E', 'B', '/', 'D', 'A', 'C', '.']
+
+  Activation: 0.3828810453414917
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     two       blue      
+B         oval      solid     two       pink      
+C         oval      solid     three     blue      
+D         diamond   solid     one       blue      
+E         squiggle  solid     three     green     
+  Sets: ['C', 'A', 'D', '/', 'B', 'E', 'D', '.']
+
+  Activation: 0.3816153407096863
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     two       pink      
+B         oval      solid     three     blue      
+C         oval      solid     three     pink      
+D         diamond   solid     one       green     
+E         squiggle  solid     two       blue      
+  Sets: ['B', 'A', 'D', '/', 'C', 'E', 'D', '.']
+
+  Activation: 0.37703999876976013
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     one       blue      
+B         squiggle  solid     two       green     
+C         diamond   solid     two       blue      
+D         oval      solid     one       green     
+E         squiggle  solid     three     pink      
+  Sets: ['D', 'E', 'C', '/', 'B', 'A', 'E', '.']
+
+  Activation: 0.3740842342376709
+  Card      Shape     Shading   Number    Color     
+A         squiggle  solid     two       blue      
+B         squiggle  solid     three     blue      
+C         squiggle  solid     one       blue      
+D         oval      solid     two       blue      
+E         diamond   solid     three     blue      
+  Sets: ['D', 'C', 'E', '/', 'C', 'A', 'B', '.']
+
+--------------------------------------------------
