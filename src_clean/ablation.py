@@ -694,7 +694,7 @@ if __name__ == "__main__":
 
     batch_results = comprehensive_ablation_batch_optimized(
         model=model, 
-        data_loader=val_loader, 
+        data_loader=train_loader, 
         layers_to_ablate=range(4), 
         positions_to_ablate=range(40), 
         tokenizer=tokenizer,
