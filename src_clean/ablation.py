@@ -226,6 +226,7 @@ def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positi
     for i, layer in enumerate(layers_to_ablate):
         layer_results = {}
         for j, position in enumerate(positions_to_ablate):
+            print(f"Layer {layer}, Position {position}")
             result = embedding_ablation_study(
                 model, base_input, layer, position,
                 target_pos, noise_scale, replace_with_zeros
