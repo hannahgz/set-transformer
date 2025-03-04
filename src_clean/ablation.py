@@ -494,6 +494,8 @@ if __name__ == "__main__":
     results["figure"].savefig(
         os.path.join(fig_save_path, f"embedding_ablation_position_{position_to_ablate}.png"), bbox_inches="tight")
 
+    breakpoint()
+    
     # for target_layer in range(4):
     #     for position_to_ablate in range(40):
     #         print(f"Layer {target_layer}, Position {position_to_ablate}")
