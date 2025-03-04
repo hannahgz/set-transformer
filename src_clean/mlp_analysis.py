@@ -587,7 +587,7 @@ def plot_neuron_activation_histograms_overlap_preloaded(target_neurons, capture_
     }
     
     # Load neuron activations from pickle file
-    pkl_filename = f"neuron_activations_{capture_layer}.pkl"
+    pkl_filename = f"neuron_activations_layer{capture_layer}.pkl"
     with open(pkl_filename, 'rb') as f:
         neuron_activations = pickle.load(f)
 
