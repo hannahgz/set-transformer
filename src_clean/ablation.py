@@ -73,6 +73,7 @@ from model import GPTConfig44_Complete, GPT
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 @torch.no_grad()
 def embedding_ablation_study(model, base_input, target_layer, position_to_ablate, tokenizer, target_pos=41, noise_scale=1.0, replace_with_zeros=False, generate_fig=False):
     """
@@ -207,7 +208,7 @@ def embedding_ablation_study(model, base_input, target_layer, position_to_ablate
 
         ax2.bar(modified_token_labels, modified_values)
         ax2.set_title(
-            f'Modified Prediction Probabilities (Layer {target_layer}, Pos {position_to_ablate})')
+            f'Modified Prediction Probabilities (Layer {target_layer}, Pos {position_to_ablate}, (KL: {kl_div:.3f}))')
 
         ax2.set_xlabel('Token ID')
         ax2.set_ylabel('Probability')
@@ -453,8 +454,8 @@ if __name__ == "__main__":
     base_input = torch.tensor(
         encoded_seq, dtype=torch.long).unsqueeze(0).to(device)
 
-    # target_layer = 0
-    # position_to_ablate = 2
+    target_layer = 1
+    position_to_ablate = 0
     replace_with_zeros = False
 
     ablate_type = "noise"
@@ -476,24 +477,41 @@ if __name__ == "__main__":
     #     layer_fig.savefig(
     #         os.path.join(fig_save_path, f"embedding_ablation_layer_{target_layer}_ablate_type_{ablate_type}.png"), bbox_inches="tight")
 
-    for target_layer in range(4):
-        for position_to_ablate in range(40):
-            print(f"Layer {target_layer}, Position {position_to_ablate}")
-            results = embedding_ablation_study(
-                model=model,
-                base_input=base_input,
-                target_layer=target_layer,
-                position_to_ablate=position_to_ablate,
-                tokenizer=tokenizer,
-                target_pos=41,
-                noise_scale=1.0,
-                replace_with_zeros=replace_with_zeros,
-                generate_fig=True)
+    print(f"Layer {target_layer}, Position {position_to_ablate}")
+    results = embedding_ablation_study(
+        model=model,
+        base_input=base_input,
+        target_layer=target_layer,
+        position_to_ablate=position_to_ablate,
+        tokenizer=tokenizer,
+        target_pos=41,
+        noise_scale=1.0,
+        replace_with_zeros=replace_with_zeros,
+        generate_fig=True)
 
-            fig_save_path = f"COMPLETE_FIGS/ablation_study/layer_{target_layer}/ablate_type_{ablate_type}"
-            os.makedirs(fig_save_path, exist_ok=True)
-            results["figure"].savefig(
-                os.path.join(fig_save_path, f"embedding_ablation_position_{position_to_ablate}.png"), bbox_inches="tight")
+    fig_save_path = f"COMPLETE_FIGS/ablation_study/layer_{target_layer}/ablate_type_{ablate_type}"
+    os.makedirs(fig_save_path, exist_ok=True)
+    results["figure"].savefig(
+        os.path.join(fig_save_path, f"embedding_ablation_position_{position_to_ablate}.png"), bbox_inches="tight")
+
+    # for target_layer in range(4):
+    #     for position_to_ablate in range(40):
+    #         print(f"Layer {target_layer}, Position {position_to_ablate}")
+    #         results = embedding_ablation_study(
+    #             model=model,
+    #             base_input=base_input,
+    #             target_layer=target_layer,
+    #             position_to_ablate=position_to_ablate,
+    #             tokenizer=tokenizer,
+    #             target_pos=41,
+    #             noise_scale=1.0,
+    #             replace_with_zeros=replace_with_zeros,
+    #             generate_fig=True)
+
+    #         fig_save_path = f"COMPLETE_FIGS/ablation_study/layer_{target_layer}/ablate_type_{ablate_type}"
+    #         os.makedirs(fig_save_path, exist_ok=True)
+    #         results["figure"].savefig(
+    #             os.path.join(fig_save_path, f"embedding_ablation_position_{position_to_ablate}.png"), bbox_inches="tight")
 
     # comprehensive_results = comprehensive_embedding_ablation(
     #     model=model,
