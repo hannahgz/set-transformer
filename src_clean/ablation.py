@@ -7,7 +7,9 @@ import random
 from torch.nn import functional as F
 from tokenizer import load_tokenizer
 from model import GPTConfig44_Complete, GPT
+from data_utils import initialize_loaders, pretty_print_input
 
+PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 # def token_ablation_study(model, base_input, token_replacement_positions, replacement, target_pos=41):
 #     """
 #     Perform ablation study by replacing target tokens at specific positions
@@ -428,6 +430,157 @@ def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positi
     return results
 
 
+@torch.no_grad()
+def comprehensive_ablation_batch_optimized(model, data_loader, layers_to_ablate, positions_to_ablate, tokenizer,
+                                           target_pos=41, noise_scale=1.0, replace_with_zeros=False,
+                                           max_batches=None):
+    """
+    Optimized version that processes entire batches at once for better efficiency.
+    When possible, this version computes base predictions for the whole batch in one pass.
+
+    Args:
+        model: The GPT model
+        data_loader: PyTorch DataLoader containing input sequences
+        layers_to_ablate: List of layers to ablate
+        positions_to_ablate: List of positions to ablate
+        tokenizer: Tokenizer for token decoding
+        target_pos: Which position to examine in the output logits
+        noise_scale: Scale of Gaussian noise to add
+        replace_with_zeros: If True, replace with zeros instead of noise
+        max_batches: Maximum number of batches to process (None = process all)
+        device: Device to run computations on ('cuda' or 'cpu')
+
+    Returns:
+        Dictionary with results and visualization
+    """
+    target_pos -= 1
+    results = {}
+
+    # Initialize KL matrix to accumulate results
+    kl_matrix = np.zeros((len(layers_to_ablate), len(positions_to_ablate)))
+
+    # Count total sequences and batches processed
+    total_sequences = 0
+    batch_count = 0
+
+    no_set_token = tokenizer.token_to_id["*"]
+
+    # Process each batch
+    for batch_idx, batch in enumerate(data_loader):
+        if max_batches is not None and batch_idx >= max_batches:
+            break
+
+        batch = batch.to(device)
+        batch_size = batch.shape[0]
+
+        # Get base predictions for the entire batch at once
+        with torch.no_grad():
+            base_logits, _, _, _, _ = model(batch, get_loss=True)
+            base_logits = base_logits[:, target_pos].squeeze(-1)
+            base_probs = F.softmax(base_logits, dim=-1)
+
+        # Process each sequence in the batch for each layer and position
+        for i, layer in enumerate(layers_to_ablate):
+            for j, position in enumerate(positions_to_ablate):
+                batch_kl_sum = 0.0
+                valid_count = 0
+
+                for seq_idx in range(batch_size):
+
+                    # Get single sequence
+                    input_seq = batch[seq_idx].unsqueeze(0)
+
+                    if no_set_token not in input_seq:
+                        continue
+
+                    # Get token and position embeddings for this sequence
+                    with torch.no_grad():
+                        b, t = input_seq.size()
+                        pos = torch.arange(
+                            0, t, dtype=torch.long, device=device)
+                        tok_emb = model.transformer.wte(input_seq)
+                        pos_emb = model.transformer.wpe(pos)
+                        x = tok_emb + pos_emb
+
+                        # Run through layers up to target layer
+                        for layer_idx, block in enumerate(model.transformer.h):
+                            if layer_idx < layer:
+                                x, _, _ = block(x)
+                            else:
+                                break
+
+                        # Modify embedding at target position
+                        modified_embedding = x.clone()
+
+                        if replace_with_zeros:
+                            modified_embedding[0, position, :] = 0
+                        else:
+                            emb_norm = torch.norm(x[0, position, :])
+                            noise = torch.randn_like(
+                                x[0, position, :]) * noise_scale
+                            noise = noise * (emb_norm / torch.norm(noise))
+                            modified_embedding[0, position, :] = noise
+
+                        # Continue forward pass with modified embeddings
+                        for layer_idx, block in enumerate(model.transformer.h):
+                            if layer_idx >= layer:
+                                modified_embedding, _, _ = block(
+                                    modified_embedding)
+
+                        # Final layer norm and get logits
+                        modified_embedding = model.transformer.ln_f(
+                            modified_embedding)
+                        modified_logits = model.lm_head(modified_embedding)
+                        # Adjust for 0-indexing
+                        modified_logits = modified_logits[:,
+                                                          target_pos].squeeze(0)
+                        modified_probs = F.softmax(modified_logits, dim=-1)
+
+                        # Calculate KL divergence for this sequence
+                        kl_div = F.kl_div(
+                            base_probs[seq_idx].log().unsqueeze(0),
+                            modified_probs,
+                            reduction='batchmean'
+                        ).item()
+
+                        batch_kl_sum += kl_div
+                        valid_count += 1
+
+                # Add average KL for this layer/position to the matrix
+                if valid_count > 0:
+                    kl_matrix[i, j] += batch_kl_sum
+
+            # Print progress
+            print(
+                f"Processed batch {batch_idx+1}/{len(data_loader)}, layer {layer} ({i+1}/{len(layers_to_ablate)})")
+
+        total_sequences += batch_size
+        batch_count += 1
+
+    # Calculate the final average
+    kl_matrix /= total_sequences
+
+    # Create heatmap visualization
+    plt.figure(figsize=(20, 10))
+
+    sns.heatmap(kl_matrix, annot=True, fmt=".3f", cmap="viridis",
+                xticklabels=positions_to_ablate, yticklabels=layers_to_ablate)
+
+    plt.xlabel('Sequence Position')
+    plt.ylabel('Layer')
+    plt.title(
+        f'Average Impact of Embedding Ablation (KL Divergence) across {total_sequences} samples')
+
+    plt.tight_layout()
+
+    results['heatmap_figure'] = plt.gcf()
+    results['kl_matrix'] = kl_matrix
+    results['total_sequences'] = total_sequences
+    results['batch_count'] = batch_count
+
+    return results
+
+
 if __name__ == "__main__":
     seed = 42
     torch.manual_seed(seed)
@@ -446,27 +599,27 @@ if __name__ == "__main__":
 
     tokenizer = load_tokenizer(config.tokenizer_path)
 
-    input_seq = [
-        "B", "diamond", "C", "green", "B", "three", "B", "green", "D", "two",
-        "E", "pink", "E", "two", "A", "blue", "A", "one", "D", "solid",
-        "C", "two", "A", "open", "D", "squiggle", "B", "solid", "D", "green",
-        "A", "diamond", "E", "diamond", "C", "solid", "C", "diamond", "E", "solid",
-        ">", "*", ".", ".", ".", ".", ".", "."
-    ]
+    # input_seq = [
+    #     "B", "diamond", "C", "green", "B", "three", "B", "green", "D", "two",
+    #     "E", "pink", "E", "two", "A", "blue", "A", "one", "D", "solid",
+    #     "C", "two", "A", "open", "D", "squiggle", "B", "solid", "D", "green",
+    #     "A", "diamond", "E", "diamond", "C", "solid", "C", "diamond", "E", "solid",
+    #     ">", "*", ".", ".", ".", ".", ".", "."
+    # ]
     # First encode the sequence - this returns a list
-    encoded_seq = tokenizer.encode(input_seq)
+    # encoded_seq = tokenizer.encode(input_seq)
 
-    # Convert the list to a PyTorch tensor and add batch dimension
-    base_input = torch.tensor(
-        encoded_seq, dtype=torch.long).unsqueeze(0).to(device)
+    # # Convert the list to a PyTorch tensor and add batch dimension
+    # base_input = torch.tensor(
+    #     encoded_seq, dtype=torch.long).unsqueeze(0).to(device)
 
-    target_layer = 1
-    position_to_ablate = 0
-    replace_with_zeros = False
+    # target_layer = 1
+    # position_to_ablate = 0
+    # replace_with_zeros = False
 
-    ablate_type = "noise"
-    if replace_with_zeros:
-        ablate_type = "zeros"
+    # ablate_type = "noise"
+    # if replace_with_zeros:
+    #     ablate_type = "zeros"
 
     # for target_layer in range(4):
     #     layer_fig, kl_fig = embedding_ablation_study_layer(
@@ -483,22 +636,22 @@ if __name__ == "__main__":
     #     layer_fig.savefig(
     #         os.path.join(fig_save_path, f"embedding_ablation_layer_{target_layer}_ablate_type_{ablate_type}.png"), bbox_inches="tight")
 
-    print(f"Layer {target_layer}, Position {position_to_ablate}")
-    results = embedding_ablation_study(
-        model=model,
-        base_input=base_input,
-        target_layer=target_layer,
-        position_to_ablate=position_to_ablate,
-        tokenizer=tokenizer,
-        target_pos=41,
-        noise_scale=1.0,
-        replace_with_zeros=replace_with_zeros,
-        generate_fig=True)
+    # print(f"Layer {target_layer}, Position {position_to_ablate}")
+    # results = embedding_ablation_study(
+    #     model=model,
+    #     base_input=base_input,
+    #     target_layer=target_layer,
+    #     position_to_ablate=position_to_ablate,
+    #     tokenizer=tokenizer,
+    #     target_pos=41,
+    #     noise_scale=1.0,
+    #     replace_with_zeros=replace_with_zeros,
+    #     generate_fig=True)
 
-    fig_save_path = f"COMPLETE_FIGS/ablation_study/layer_{target_layer}/ablate_type_{ablate_type}"
-    os.makedirs(fig_save_path, exist_ok=True)
-    results["figure"].savefig(
-        os.path.join(fig_save_path, f"embedding_ablation_position_{position_to_ablate}.png"), bbox_inches="tight")
+    # fig_save_path = f"COMPLETE_FIGS/ablation_study/layer_{target_layer}/ablate_type_{ablate_type}"
+    # os.makedirs(fig_save_path, exist_ok=True)
+    # results["figure"].savefig(
+    #     os.path.join(fig_save_path, f"embedding_ablation_position_{position_to_ablate}.png"), bbox_inches="tight")
 
     # for target_layer in range(4):
     #     for position_to_ablate in range(40):
@@ -519,21 +672,43 @@ if __name__ == "__main__":
     #         results["figure"].savefig(
     #             os.path.join(fig_save_path, f"embedding_ablation_position_{position_to_ablate}.png"), bbox_inches="tight")
 
-    comprehensive_results = comprehensive_embedding_ablation(
-        model=model,
-        base_input=base_input,
-        layers_to_ablate=[0, 1, 2, 3],
-        positions_to_ablate=range(40),
-        tokenizer=tokenizer,
-        target_pos=41,
-        noise_scale=1.0,
-        replace_with_zeros=replace_with_zeros)
+    # comprehensive_results = comprehensive_embedding_ablation(
+    #     model=model,
+    #     base_input=base_input,
+    #     layers_to_ablate=[0, 1, 2, 3],
+    #     positions_to_ablate=range(40),
+    #     tokenizer=tokenizer,
+    #     target_pos=41,
+    #     noise_scale=1.0,
+    #     replace_with_zeros=replace_with_zeros)
 
+    replace_with_zeros = False
+
+    ablate_type = "noise"
+    if replace_with_zeros:
+        ablate_type = "zeros"
+
+    dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
+    dataset = torch.load(dataset_path)
+    _, val_loader = initialize_loaders(config, dataset)
+
+    batch_results = comprehensive_ablation_batch_optimized(
+        model=model, 
+        data_loader=val_loader, 
+        layers_to_ablate=range(4), 
+        positions_to_ablate=range(40), 
+        tokenizer=tokenizer,
+        target_pos=41, 
+        noise_scale=1.0, 
+        replace_with_zeros=replace_with_zeros,
+        max_batches=100)
+
+    breakpoint()
     # Save the heatmap figure
     fig_save_path = f"COMPLETE_FIGS/ablation_study"
     os.makedirs(fig_save_path, exist_ok=True)
-    comprehensive_results['heatmap_figure'].savefig(
-        os.path.join(fig_save_path, f"embedding_ablation_heatmap_ablate_type_{ablate_type}.png"), bbox_inches="tight")
+    batch_results['heatmap_figure'].savefig(
+        os.path.join(fig_save_path, f"avg_embedding_ablation_heatmap_ablate_type_{ablate_type}.png"), bbox_inches="tight")
 
     # # Save the KL divergence matrix
     # matrix_path = f"results/ablation_study"
