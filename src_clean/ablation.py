@@ -73,7 +73,7 @@ from model import GPTConfig44_Complete, GPT
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
+@torch.no_grad()
 def embedding_ablation_study(model, base_input, target_layer, position_to_ablate, tokenizer, target_pos=41, noise_scale=1.0, replace_with_zeros=False, generate_fig=False):
     """
     Performs an ablation study by replacing embeddings at a specific layer and position
