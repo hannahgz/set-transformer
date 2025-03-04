@@ -236,7 +236,7 @@ def embedding_ablation_study_layer(model, base_input, target_layer, tokenizer,
     Returns:
         Figure with subplots for each position in the sequence
     """
-    sequence_length = base_input.size(1)
+    sequence_length = 40
     target_pos -= 1  # 0-indexed, predicts result at first position
 
     # Step 1: Get the base model prediction
