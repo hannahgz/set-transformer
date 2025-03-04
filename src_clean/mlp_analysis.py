@@ -617,6 +617,7 @@ def plot_neuron_activation_histograms_overlap_preloaded(target_neurons, capture_
         # Plot histogram for each set type
         for set_type in set_types_to_process:
             activations = neuron_activations[neuron][set_type]
+            breakpoint()
             if not activations:  # Skip if no data for this set type
                 continue
                 
