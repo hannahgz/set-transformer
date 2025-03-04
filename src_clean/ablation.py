@@ -93,7 +93,7 @@ def embedding_ablation_study(model, base_input, target_layer, position_to_ablate
     """
     results = {}
     target_pos -= 1 # 0-indexed, predicts result at first position
-    
+
     # Step 1: Get the base model prediction
     base_logits, _, _, _, _ = model(base_input, get_loss=True)
     base_logits = base_logits[:, target_pos].squeeze(0)
@@ -293,11 +293,11 @@ if __name__ == "__main__":
         replace_with_zeros=replace_with_zeros)
     breakpoint()
 
-    ablate_type = "noise"
-    if replace_with_zeros:
-        ablate_type = "zeros"
+    # ablate_type = "noise"
+    # if replace_with_zeros:
+    #     ablate_type = "zeros"
 
-    fig_save_path = f"COMPLETE_FIGS/ablation_study/layer_{target_layer}/ablate_type_{ablate_type}"
-    os.makedirs(fig_save_path, exist_ok=True)
-    results["figure"].savefig(
-        f"embedding_ablation_position_{position_to_ablate}.png", bbox_inches="tight")
+    # fig_save_path = f"COMPLETE_FIGS/ablation_study/layer_{target_layer}/ablate_type_{ablate_type}"
+    # os.makedirs(fig_save_path, exist_ok=True)
+    # results["figure"].savefig(
+    #     f"embedding_ablation_position_{position_to_ablate}.png", bbox_inches="tight")
