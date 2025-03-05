@@ -249,7 +249,7 @@ if __name__ == "__main__":
 
     layer = 0
 
-    for neuron in range[12, 14, 36, 43, 44, 60, 61]:
+    for neuron in [12, 14, 36, 43, 44, 60, 61]:
     # neuron = 4
         # Check if there's an input examples file
         examples_file = f"input_examples_layer{layer}.pkl"
