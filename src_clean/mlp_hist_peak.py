@@ -248,7 +248,7 @@ if __name__ == "__main__":
     # neuron = int(input("Enter the neuron index: "))
 
     layer = 0
-    neuron = 2
+    neuron = 4
     
     # Check if there's an input examples file
     examples_file = f"input_examples_layer{layer}.pkl"
