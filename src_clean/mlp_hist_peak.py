@@ -173,7 +173,7 @@ def save_peak_figure(peaks_info, filename=None, dpi=300, format='png'):
     if filename is None:
         neuron = peaks_info['neuron']
         layer = peaks_info['layer']
-        filename = f"COMPLETE_FIGS/layer_{layer}/neuron_{neuron}_peaks.{format}"
+        filename = f"COMPLETE_FIGS/mlp/layer_{layer}/neuron_{neuron}_peaks.{format}"
     
     # Save the figure
     fig = peaks_info['figure']
