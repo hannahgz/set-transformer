@@ -248,33 +248,34 @@ if __name__ == "__main__":
     # neuron = int(input("Enter the neuron index: "))
 
     layer = 0
-    neuron = 4
-    
-    # Check if there's an input examples file
-    examples_file = f"input_examples_layer{layer}.pkl"
-    if os.path.exists(examples_file):
-        use_examples = input(f"Found input examples file {examples_file}. Use it? (y/n): ").lower() == 'y'
-    else:
-        print(f"No input examples file found. Will only show activation values.")
-        use_examples = False
-    
-    # Get parameters for peak detection
-    min_peak_height = 0.04
-    min_peak_distance = 0.05
-    prominence = 0.01
-    num_bins = 50
-    
-    # Find peaks for the specified neuron
-    peaks_info = find_activation_peaks(
-        layer=layer,
-        neuron=neuron,
-        input_examples_file=examples_file if use_examples else None,
-        min_peak_height=min_peak_height,
-        min_peak_distance=min_peak_distance,
-        prominence=prominence
-    )
 
-    # Save the figure
-    saved_filename = save_peak_figure(
-        peaks_info,
-    )
+    for neuron in range[12, 14, 36, 43, 44, 60, 61]:
+    # neuron = 4
+        # Check if there's an input examples file
+        examples_file = f"input_examples_layer{layer}.pkl"
+        if os.path.exists(examples_file):
+            use_examples = input(f"Found input examples file {examples_file}. Use it? (y/n): ").lower() == 'y'
+        else:
+            print(f"No input examples file found. Will only show activation values.")
+            use_examples = False
+        
+        # Get parameters for peak detection
+        min_peak_height = 0.04
+        min_peak_distance = 0.05
+        prominence = 0.01
+        num_bins = 50
+        
+        # Find peaks for the specified neuron
+        peaks_info = find_activation_peaks(
+            layer=layer,
+            neuron=neuron,
+            input_examples_file=examples_file if use_examples else None,
+            min_peak_height=min_peak_height,
+            min_peak_distance=min_peak_distance,
+            prominence=prominence
+        )
+
+        # Save the figure
+        saved_filename = save_peak_figure(
+            peaks_info,
+        )
