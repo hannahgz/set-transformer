@@ -105,7 +105,7 @@ def find_activation_peaks(layer, neuron, input_examples_file=None, min_peak_heig
     peaks_info = {
         'neuron': neuron,
         'layer': layer,
-        'set_type': set_type_filter if set_type_filter else 'all',
+        'set_type': set_type_filter if set_type_filter is not None else 'all',
         'bin_centers': bin_centers[peaks],
         'heights': hist[peaks],
         'prominences': peak_properties['prominences'],
@@ -355,7 +355,7 @@ if __name__ == "__main__":
         )
 
         # Save peaks_info to a pickle file
-        peaks_info_filename = f"results/peaks_info_layer{layer}_neuron{neuron}.pkl"
+        peaks_info_filename = f"results/peaks_info_layer{layer}_neuron{neuron}_set_type_{set_type_filter}.pkl"
         with open(peaks_info_filename, 'wb') as f:
             pickle.dump(peaks_info, f)
         print(f"Peaks info saved to {peaks_info_filename}")
