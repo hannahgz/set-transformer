@@ -301,6 +301,36 @@ def create_input_sequence_dataset(data_loader, config):
     return input_examples
 
 
+def load_peaks_info(layer, neuron, config, set_type_filter=None):
+    """
+    Load peaks information from a pickle file.
+
+    Parameters:
+        layer: Layer number
+        neuron: Neuron index
+        set_type_filter: Set type to filter by (if None, all set types)
+
+    Returns:
+        peaks_info: Dictionary with peak information
+    """
+
+    tokenizer = load_tokenizer(config.tokenizer_path)
+    filename = f"results/peaks_info_layer{layer}_neuron{neuron}_set_type_{set_type_filter}.pkl"
+    if not os.path.exists(filename):
+        raise FileNotFoundError(f"Peaks info file {filename} not found")
+
+    with open(filename, 'rb') as f:
+        peaks_info = pickle.load(f)
+
+    # Print tokenized versions of all the saved examples
+    for peak_idx in peaks_info['examples_by_peak']:
+        print(f"\nPeak {peak_idx+1}:")
+        for example in peaks_info['examples_by_peak'][peak_idx]:
+            # Decode the tokenized example
+            decoded_example = tokenizer.decode(example)
+            print(f"  Activation: {example[0]:.4f} - {decoded_example}")
+    return peaks_info
+
 # Example usage:
 if __name__ == "__main__":
     seed = 42
@@ -330,37 +360,39 @@ if __name__ == "__main__":
     layer = 0
     set_type_filter = 0
 
-    # for neuron in [12, 14, 36, 43, 44, 60, 61]:
-    for neuron in [36, 43, 44, 60, 61]:
-        # neuron = 4
-        # Check if there's an input examples file
-        examples_file = "results/val_input_examples.pkl"
-        use_examples = True
+    # # for neuron in [12, 14, 36, 43, 44, 60, 61]:
+    # for neuron in [36, 43, 44, 60, 61]:
+    #     # neuron = 4
+    #     # Check if there's an input examples file
+    #     examples_file = "results/val_input_examples.pkl"
+    #     use_examples = True
 
-        # Get parameters for peak detection
-        min_peak_height = 0.04
-        min_peak_distance = 0.05
-        prominence = 0.01
-        num_bins = 50
+    #     # Get parameters for peak detection
+    #     min_peak_height = 0.04
+    #     min_peak_distance = 0.05
+    #     prominence = 0.01
+    #     num_bins = 50
 
-        # Find peaks for the specified neuron
-        peaks_info = find_activation_peaks(
-            layer=layer,
-            neuron=neuron,
-            input_examples_file=examples_file if use_examples else None,
-            min_peak_height=min_peak_height,
-            min_peak_distance=min_peak_distance,
-            prominence=prominence,
-            set_type_filter=set_type_filter,
-        )
+    #     # Find peaks for the specified neuron
+    #     peaks_info = find_activation_peaks(
+    #         layer=layer,
+    #         neuron=neuron,
+    #         input_examples_file=examples_file if use_examples else None,
+    #         min_peak_height=min_peak_height,
+    #         min_peak_distance=min_peak_distance,
+    #         prominence=prominence,
+    #         set_type_filter=set_type_filter,
+    #     )
 
-        # Save peaks_info to a pickle file
-        peaks_info_filename = f"results/peaks_info_layer{layer}_neuron{neuron}_set_type_{set_type_filter}.pkl"
-        with open(peaks_info_filename, 'wb') as f:
-            pickle.dump(peaks_info, f)
-        print(f"Peaks info saved to {peaks_info_filename}")
+    #     # Save peaks_info to a pickle file
+    #     peaks_info_filename = f"results/peaks_info_layer{layer}_neuron{neuron}_set_type_{set_type_filter}.pkl"
+    #     with open(peaks_info_filename, 'wb') as f:
+    #         pickle.dump(peaks_info, f)
+    #     print(f"Peaks info saved to {peaks_info_filename}")
 
-        # Save the figure
-        saved_filename = save_peak_figure(
-            peaks_info,
-        )
+    #     # Save the figure
+    #     saved_filename = save_peak_figure(
+    #         peaks_info,
+    #     )
+
+    load_peaks_info(layer, neuron=61, config=GPTConfig44_Complete(), set_type_filter=set_type_filter)
