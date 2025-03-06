@@ -8,7 +8,7 @@ import torch
 from tokenizer import load_tokenizer
 import random
 from model import GPTConfig44_Complete
-from data_utils import initialize_loaders
+from data_utils import initialize_loaders, pretty_print_input
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -324,11 +324,14 @@ def load_peaks_info(layer, neuron, config, set_type_filter=None):
 
     # Print tokenized versions of all the saved examples
     for peak_idx in peaks_info['examples_by_peak']:
-        print(f"\nPeak {peak_idx+1}:")
-        for example in peaks_info['examples_by_peak'][peak_idx]:
+        print(f"\nPeak {peak_idx+1}:")        
+        for example in peaks_info['examples_by_peak'][peak_idx][0:1]:
             # Decode the tokenized example
             decoded_example = tokenizer.decode(example[1])
-            print(f"  Activation: {example[0]:.4f} - {decoded_example}")
+
+            print(f"  Activation: {example[0]:.4f}")
+            print(f"  {decoded_example}")
+            print(f"  {pretty_print_input(decoded_example)}")
     return peaks_info
 
 # Example usage:
