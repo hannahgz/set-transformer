@@ -325,7 +325,7 @@ def load_peaks_info(layer, neuron, config, set_type_filter=None):
     # Print tokenized versions of all the saved examples
     for peak_idx in peaks_info['examples_by_peak']:
         print(f"\nPeak {peak_idx+1}:")        
-        for example in peaks_info['examples_by_peak'][peak_idx][0:1]:
+        for example in peaks_info['examples_by_peak'][peak_idx][0:3]:
             # Decode the tokenized example
             decoded_example = tokenizer.decode(example[1])
 
