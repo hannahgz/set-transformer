@@ -60,7 +60,7 @@ def find_activation_peaks(layer, neuron, input_examples_file=None, min_peak_heig
     all_activations = []
     activation_by_type = {}
 
-    if set_type_filter:
+    if set_type_filter is not None:
         # Verify that the requested set type exists
         if set_type_filter not in neuron_activations[neuron]:
             available_sets = list(neuron_activations[neuron].keys())
