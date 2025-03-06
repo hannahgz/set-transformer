@@ -453,8 +453,7 @@ if __name__ == "__main__":
 
     create_input_sequence_dataset(
         data_loader=val_loader, 
-        config=GPTConfig44_Complete, 
-        capture_layer=layer)
+        config=GPTConfig44_Complete(),)
 
     # layer = 0
 
