@@ -441,7 +441,7 @@ if __name__ == "__main__":
                 config=GPTConfig44_Complete, 
                 peaks_info=peaks_info, 
                 filename=os.path.join(peaks_dir, "peak_examples.txt"), 
-                top=2)
+                top=10)
 
 
 
