@@ -235,6 +235,7 @@ def save_peak_figure(peaks_info, filename=None, dpi=300, format='png'):
         neuron = peaks_info['neuron']
         layer = peaks_info['layer']
         set_type_filter = peaks_info['set_type']
+        # filename = f"COMPLETE_FIGS/mlp/layer_{layer}/neuron_{neuron}_set_type_{set_type_filter}_peaks.{format}"
         filename = f"COMPLETE_FIGS/mlp/layer_{layer}/neuron_{neuron}_set_type_{set_type_filter}_peaks.{format}"
 
     # Save the figure
@@ -334,6 +335,18 @@ def load_peaks_info(layer, neuron, config, set_type_filter=None):
             print(f"  {pretty_print_input(decoded_example)}")
     return peaks_info
 
+def save_top_peak_examples_as_txt(config, peaks_info, filename, top=2):
+    tokenizer = load_tokenizer(config.tokenizer_path)
+
+    with open(filename, 'w') as f:
+        for peak_idx in peaks_info['examples_by_peak']:
+            f.write(f"\nPeak {peak_idx+1}:\n")
+            for example in peaks_info['examples_by_peak'][peak_idx][0:top]:
+                decoded_example = tokenizer.decode(example[1])
+                f.write(f"  Activation: {example[0]:.4f}\n")
+                f.write(f"  {decoded_example}\n")
+                f.write(f"  {pretty_print_input(decoded_example)}\n")
+
 # Example usage:
 if __name__ == "__main__":
     seed = 42
@@ -363,39 +376,52 @@ if __name__ == "__main__":
     layer = 0
     set_type_filter = 0
 
-    # # for neuron in [12, 14, 36, 43, 44, 60, 61]:
-    # for neuron in [36, 43, 44, 60, 61]:
-    #     # neuron = 4
-    #     # Check if there's an input examples file
-    #     examples_file = "results/val_input_examples.pkl"
-    #     use_examples = True
+    # Get parameters for peak detection
+    min_peak_height = 0.04
+    min_peak_distance = 0.05
+    prominence = 0.01
+    num_bins = 50
+    
+    # for neuron in [12, 14, 36, 43, 44, 60, 61]:
+    for neuron in [36, 43, 44, 60, 61]:
+        # neuron = 4
+        # Check if there's an input examples file
+        examples_file = "results/val_input_examples.pkl"
+        use_examples = True
 
-    #     # Get parameters for peak detection
-    #     min_peak_height = 0.04
-    #     min_peak_distance = 0.05
-    #     prominence = 0.01
-    #     num_bins = 50
+        # Find peaks for the specified neuron
+        peaks_info = find_activation_peaks(
+            layer=layer,
+            neuron=neuron,
+            input_examples_file=examples_file if use_examples else None,
+            min_peak_height=min_peak_height,
+            min_peak_distance=min_peak_distance,
+            prominence=prominence,
+            set_type_filter=set_type_filter,
+        )
 
-    #     # Find peaks for the specified neuron
-    #     peaks_info = find_activation_peaks(
-    #         layer=layer,
-    #         neuron=neuron,
-    #         input_examples_file=examples_file if use_examples else None,
-    #         min_peak_height=min_peak_height,
-    #         min_peak_distance=min_peak_distance,
-    #         prominence=prominence,
-    #         set_type_filter=set_type_filter,
-    #     )
+        # Save peaks_info to a pickle file
+        # peaks_info_filename = f"results/mlp/peaks/peaks_info_layer{layer}_neuron{neuron}_set_type_{set_type_filter}.pkl"
+        peaks_path= f"results/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
+        os.makedirs(peaks_path, exist_ok=True)
 
-    #     # Save peaks_info to a pickle file
-    #     peaks_info_filename = f"results/peaks_info_layer{layer}_neuron{neuron}_set_type_{set_type_filter}.pkl"
-    #     with open(peaks_info_filename, 'wb') as f:
-    #         pickle.dump(peaks_info, f)
-    #     print(f"Peaks info saved to {peaks_info_filename}")
+        peaks_info = os.path.join(peaks_path, "info.pkl")
+        with open(peaks_info, 'wb') as f:
+            pickle.dump(peaks_info, f)
+        print(f"Peaks info saved to {peaks_info}")
 
-    #     # Save the figure
-    #     saved_filename = save_peak_figure(
-    #         peaks_info,
-    #     )
+        # Save the figure
+        save_peak_figure(
+            peaks_info,
+            filename=os.path.join(peaks_path, "histogram_peaks.png"),
+        )
 
-    load_peaks_info(layer, neuron=61, config=GPTConfig44_Complete(), set_type_filter=set_type_filter)
+        save_top_peak_examples_as_txt(
+            config=GPTConfig44_Complete, 
+            peaks_info=peaks_info, 
+            filename=os.path.join(peaks_path, "peak_examples.txt"), 
+            top=2)
+
+
+
+    # load_peaks_info(layer, neuron=61, config=GPTConfig44_Complete(), set_type_filter=set_type_filter)
