@@ -360,7 +360,12 @@ def save_top_peak_examples_as_txt(config, peaks_info, filename, top=2):
                 decoded_example = tokenizer.decode(example[1])
                 f.write(f"  Activation: {example[0]:.4f}\n")
                 f.write(f"  {decoded_example}\n")
-                f.write(f"  {pretty_print_input(decoded_example)}\n")
+                
+                # Handle the pretty print table with proper indentation
+                pretty_table = pretty_print_input(decoded_example)
+                # Add two spaces of indentation to each line in the table
+                indented_table = "\n".join("  " + line for line in pretty_table.split("\n"))
+                f.write(f"{indented_table}\n")
 
 # Example usage:
 if __name__ == "__main__":
