@@ -123,7 +123,7 @@ def find_activation_peaks(layer, neuron, input_examples_file=None, min_peak_heig
         plt.text(bin_centers[peak], hist[peak], f"Peak {i+1}",
                  fontsize=10, ha='center', va='bottom')
 
-    title_suffix = f" - {set_type_filter} Set" if set_type_filter else " - All Sets Combined"
+    title_suffix = f" - {set_type_filter} Set" if set_type_filter is not None else " - All Sets Combined"
     plt.title(
         f'Neuron {neuron} in Layer {layer}{title_suffix} - Activation Histogram with {len(peaks)} Peaks')
     plt.xlabel('Activation Value')
@@ -394,7 +394,7 @@ if __name__ == "__main__":
     #     config=GPTConfig44_Complete(),)
 
     layer = 0
-    set_type_filter = 0
+    # set_type_filter = 0
 
     # Get parameters for peak detection
     min_peak_height = 0.04
@@ -402,45 +402,46 @@ if __name__ == "__main__":
     prominence = 0.01
     num_bins = 50
     
-    # for neuron in [12, 14, 36, 43, 44, 60, 61]:
-    for neuron in [36, 43, 44, 60, 61]:
-        # neuron = 4
-        # Check if there's an input examples file
-        examples_file = "results/val_input_examples.pkl"
-        use_examples = True
+    for set_type_filter in [0, 1]:
+        # for neuron in [12, 14, 36, 43, 44, 60, 61]:
+        for neuron in [36, 43, 44, 60, 61]:
+            # neuron = 4
+            # Check if there's an input examples file
+            examples_file = "results/val_input_examples.pkl"
+            use_examples = True
 
-        # Find peaks for the specified neuron
-        peaks_info = find_activation_peaks(
-            layer=layer,
-            neuron=neuron,
-            input_examples_file=examples_file if use_examples else None,
-            min_peak_height=min_peak_height,
-            min_peak_distance=min_peak_distance,
-            prominence=prominence,
-            set_type_filter=set_type_filter,
-        )
+            # Find peaks for the specified neuron
+            peaks_info = find_activation_peaks(
+                layer=layer,
+                neuron=neuron,
+                input_examples_file=examples_file if use_examples else None,
+                min_peak_height=min_peak_height,
+                min_peak_distance=min_peak_distance,
+                prominence=prominence,
+                set_type_filter=set_type_filter,
+            )
 
-        # Save peaks_info to a pickle file
-        # peaks_info_filename = f"results/mlp/peaks/peaks_info_layer{layer}_neuron{neuron}_set_type_{set_type_filter}.pkl"
-        peaks_dir = f"results/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
-        os.makedirs(peaks_dir, exist_ok=True)
+            # Save peaks_info to a pickle file
+            # peaks_info_filename = f"results/mlp/peaks/peaks_info_layer{layer}_neuron{neuron}_set_type_{set_type_filter}.pkl"
+            peaks_dir = f"results/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
+            os.makedirs(peaks_dir, exist_ok=True)
 
-        peaks_info_path = os.path.join(peaks_dir, "info.pkl")
-        with open(peaks_info_path, 'wb') as f:
-            pickle.dump(peaks_info, f)
-        print(f"Peaks info saved to {peaks_info_path}")
+            peaks_info_path = os.path.join(peaks_dir, "info.pkl")
+            with open(peaks_info_path, 'wb') as f:
+                pickle.dump(peaks_info, f)
+            print(f"Peaks info saved to {peaks_info_path}")
 
-        # Save the figure
-        save_peak_figure(
-            peaks_info,
-            filename=os.path.join(peaks_dir, "histogram_peaks.png"),
-        )
+            # Save the figure
+            save_peak_figure(
+                peaks_info,
+                filename=os.path.join(peaks_dir, "histogram_peaks.png"),
+            )
 
-        save_top_peak_examples_as_txt(
-            config=GPTConfig44_Complete, 
-            peaks_info=peaks_info, 
-            filename=os.path.join(peaks_dir, "peak_examples.txt"), 
-            top=2)
+            save_top_peak_examples_as_txt(
+                config=GPTConfig44_Complete, 
+                peaks_info=peaks_info, 
+                filename=os.path.join(peaks_dir, "peak_examples.txt"), 
+                top=2)
 
 
 
