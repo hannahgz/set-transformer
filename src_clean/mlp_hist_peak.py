@@ -402,24 +402,24 @@ if __name__ == "__main__":
 
         # Save peaks_info to a pickle file
         # peaks_info_filename = f"results/mlp/peaks/peaks_info_layer{layer}_neuron{neuron}_set_type_{set_type_filter}.pkl"
-        peaks_path= f"results/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
-        os.makedirs(peaks_path, exist_ok=True)
+        peaks_dir = f"results/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
+        os.makedirs(peaks_dir, exist_ok=True)
 
-        peaks_info = os.path.join(peaks_path, "info.pkl")
-        with open(peaks_info, 'wb') as f:
+        peaks_info_path = os.path.join(peaks_dir, "info.pkl")
+        with open(peaks_info_path, 'wb') as f:
             pickle.dump(peaks_info, f)
-        print(f"Peaks info saved to {peaks_info}")
+        print(f"Peaks info saved to {peaks_info_path}")
 
         # Save the figure
         save_peak_figure(
             peaks_info,
-            filename=os.path.join(peaks_path, "histogram_peaks.png"),
+            filename=os.path.join(peaks_dir, "histogram_peaks.png"),
         )
 
         save_top_peak_examples_as_txt(
             config=GPTConfig44_Complete, 
             peaks_info=peaks_info, 
-            filename=os.path.join(peaks_path, "peak_examples.txt"), 
+            filename=os.path.join(peaks_dir, "peak_examples.txt"), 
             top=2)
 
 
