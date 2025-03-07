@@ -245,6 +245,73 @@ def split_data(X, y, test_size=0.2, val_size=0.2, random_state=42):
     return X_train, X_val, X_test, y_train, y_val, y_test
 
 
+# def pretty_print_input(input):
+#     grid = [["" for _ in range(4)] for _ in range(5)]
+#     card_indices = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4}
+    
+#     # Create a mapping from attribute values to their types
+#     attr_mapping = {}
+#     for shape in shapes:
+#         attr_mapping[shape] = "shape"
+#     for color in colors:
+#         attr_mapping[color] = "color"
+#     for number in numbers:
+#         attr_mapping[number] = "number"
+#     for shading in shadings:
+#         attr_mapping[shading] = "shading"
+    
+#     i = 0
+#     while i < 40:
+#         card = input[i]
+#         attr = input[i+1]
+
+#         attr_type = attr_mapping[attr]
+
+#         if attr_type == "shape":
+#             grid[card_indices[card]][0] = attr
+#         elif attr_type == "shading":
+#             grid[card_indices[card]][1] = attr
+#         elif attr_type == "number":
+#             grid[card_indices[card]][2] = attr
+#         elif attr_type == "color":
+#             grid[card_indices[card]][3] = attr
+
+#         i += 2
+        
+#     # print("Card\tShape\tShading\tNumber\tColor")
+#     # for card, attrs in zip(card_indices.keys(), grid):
+#     #     print(f"{card}\t" + "\t".join(attrs))
+
+#     # Define column widths
+#     col_widths = [10, 10, 10, 10, 10]
+
+#     # Create header
+#     headers = ["Card", "Shape", "Shading", "Number", "Color"]
+#     header_line = "".join(header.ljust(col_widths[i]) for i, header in enumerate(headers))
+
+#     # Create rows
+#     rows = []
+#     for card, attrs in zip(card_indices.keys(), grid):
+#         row = [card] + attrs
+#         row_line = "".join(attr.ljust(col_widths[i]) for i, attr in enumerate(row))
+#         rows.append(row_line)
+    
+#     return header_line + "\n" + "\n".join(rows)
+
+#     # # Define column widths
+#     # col_widths = [5, 10, 10, 10, 10]
+
+#     # # Print header
+#     # headers = ["Card", "Shape", "Shading", "Number", "Color"]
+#     # header_line = "".join(header.ljust(col_widths[i]) for i, header in enumerate(headers))
+#     # print(header_line)
+
+#     # # Print rows
+#     # for card, attrs in zip(card_indices.keys(), grid):
+#     #     row = [card] + attrs
+#     #     row_line = "".join(attr.ljust(col_widths[i]) for i, attr in enumerate(row))
+#     #     print(row_line)
+
 def pretty_print_input(input):
     grid = [["" for _ in range(4)] for _ in range(5)]
     card_indices = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4}
@@ -277,40 +344,23 @@ def pretty_print_input(input):
             grid[card_indices[card]][3] = attr
 
         i += 2
-        
-    # print("Card\tShape\tShading\tNumber\tColor")
-    # for card, attrs in zip(card_indices.keys(), grid):
-    #     print(f"{card}\t" + "\t".join(attrs))
-
+    
     # Define column widths
-    col_widths = [10, 10, 10, 10, 10]
+    col_widths = [5, 10, 10, 10, 10]  # Adjusted first column width for card
 
     # Create header
     headers = ["Card", "Shape", "Shading", "Number", "Color"]
-    header_line = "".join(header.ljust(col_widths[i]) for i, header in enumerate(headers))
+    header_line = "".join(headers[i].ljust(col_widths[i]) for i in range(len(headers)))
 
     # Create rows
     rows = []
     for card, attrs in zip(card_indices.keys(), grid):
-        row = [card] + attrs
-        row_line = "".join(attr.ljust(col_widths[i]) for i, attr in enumerate(row))
-        rows.append(row_line)
+        row = card.ljust(col_widths[0])  # Format card with correct width
+        for i, attr in enumerate(attrs):
+            row += attr.ljust(col_widths[i+1])  # Format each attribute with correct width
+        rows.append(row)
     
     return header_line + "\n" + "\n".join(rows)
-
-    # # Define column widths
-    # col_widths = [5, 10, 10, 10, 10]
-
-    # # Print header
-    # headers = ["Card", "Shape", "Shading", "Number", "Color"]
-    # header_line = "".join(header.ljust(col_widths[i]) for i, header in enumerate(headers))
-    # print(header_line)
-
-    # # Print rows
-    # for card, attrs in zip(card_indices.keys(), grid):
-    #     row = [card] + attrs
-    #     row_line = "".join(attr.ljust(col_widths[i]) for i, attr in enumerate(row))
-    #     print(row_line)
 
 
 def generate_base_combinations(n_cards = 5):

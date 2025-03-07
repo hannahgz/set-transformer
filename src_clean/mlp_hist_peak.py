@@ -335,11 +335,26 @@ def load_peaks_info(layer, neuron, config, set_type_filter=None):
             print(f"  {pretty_print_input(decoded_example)}")
     return peaks_info
 
+# def save_top_peak_examples_as_txt(config, peaks_info, filename, top=2):
+#     tokenizer = load_tokenizer(config.tokenizer_path)
+
+#     with open(filename, 'w') as f:
+#         for peak_idx in peaks_info['examples_by_peak']:
+#             f.write(f"\nPeak {peak_idx+1}:\n")
+#             for example in peaks_info['examples_by_peak'][peak_idx][0:top]:
+#                 decoded_example = tokenizer.decode(example[1])
+#                 f.write(f"  Activation: {example[0]:.4f}\n")
+#                 f.write(f"  {decoded_example}\n")
+#                 f.write(f"  {pretty_print_input(decoded_example)}\n")
+
 def save_top_peak_examples_as_txt(config, peaks_info, filename, top=2):
     tokenizer = load_tokenizer(config.tokenizer_path)
 
     with open(filename, 'w') as f:
-        for peak_idx in peaks_info['examples_by_peak']:
+        # Get the peak indices and sort them
+        peak_indices = sorted(peaks_info['examples_by_peak'].keys())
+        
+        for peak_idx in peak_indices:
             f.write(f"\nPeak {peak_idx+1}:\n")
             for example in peaks_info['examples_by_peak'][peak_idx][0:top]:
                 decoded_example = tokenizer.decode(example[1])
