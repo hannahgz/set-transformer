@@ -432,6 +432,7 @@ def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positi
 
     return results
 
+
 def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ablate):
     import matplotlib.pyplot as plt
     import seaborn as sns
@@ -447,11 +448,12 @@ def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ab
     )
 
     # Customize colorbar font size
-    heatmap.figure.axes[-1].tick_params(labelsize=14)  # Adjust colorbar tick labels
+    # Adjust colorbar tick labels
+    heatmap.figure.axes[-1].tick_params(labelsize=14)
 
     # Set font sizes for labels, ticks, and title
     plt.xlabel('Sequence Position', fontsize=18)
-    plt.ylabel('Layer', fontsize=18)
+    plt.ylabel('Layer', fontsize=18, rotation=0)
     plt.xticks(fontsize=14)
     plt.yticks(fontsize=14, rotation=0)
     plt.title('Impact of Embedding Ablation (KL Divergence)', fontsize=20)
@@ -726,13 +728,13 @@ if __name__ == "__main__":
     # train_loader, val_loader = initialize_loaders(config, dataset)
 
     # batch_results = comprehensive_ablation_batch_optimized(
-    #     model=model, 
-    #     data_loader=train_loader, 
-    #     layers_to_ablate=range(4), 
-    #     positions_to_ablate=range(40), 
+    #     model=model,
+    #     data_loader=train_loader,
+    #     layers_to_ablate=range(4),
+    #     positions_to_ablate=range(40),
     #     tokenizer=tokenizer,
-    #     target_pos=41, 
-    #     noise_scale=1.0, 
+    #     target_pos=41,
+    #     noise_scale=1.0,
     #     replace_with_zeros=replace_with_zeros,
     #     max_batches=10)
 
@@ -752,13 +754,15 @@ if __name__ == "__main__":
     os.makedirs(matrix_path, exist_ok=True)
 
     # Load the KL divergence matrix
-    loaded_kl_matrix = np.load(os.path.join(matrix_path, f"avg_kl_divergence_matrix_ablate_type_{ablate_type}.npy"))
+    loaded_kl_matrix = np.load(os.path.join(
+        matrix_path, f"avg_kl_divergence_matrix_ablate_type_{ablate_type}.npy"))
 
-    fig = generate_heatmap_from_kl_matrix(loaded_kl_matrix, range(40), range(1, 5))
+    fig = generate_heatmap_from_kl_matrix(
+        loaded_kl_matrix, range(40), range(1, 5))
     fig_save_path = f"COMPLETE_FIGS/paper/ablation_study"
     os.makedirs(fig_save_path, exist_ok=True)
-    fig.savefig(os.path.join(fig_save_path, f"avg_embedding_ablation_heatmap_ablate_type_{ablate_type}.png"), bbox_inches="tight")
-
+    fig.savefig(os.path.join(
+        fig_save_path, f"avg_embedding_ablation_heatmap_ablate_type_{ablate_type}.png"), bbox_inches="tight")
 
     # # Save the KL divergence matrix
     # matrix_path = f"results/ablation_study"
