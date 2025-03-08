@@ -104,7 +104,7 @@ def avg_combined_cosine_similarity_probe_embedding_heatmap():
         save_path, f"avg_combined_cosine_similarity_probe_embedding_heatmap.png"), bbox_inches="tight")
 
 
-def combined_probe_weight_cosine_sim(model_config, probe_config, normalize=False):
+def combined_probe_weight_cosine_sim(model_config, probe_config, center=False):
 
     from sklearn.metrics.pairwise import cosine_similarity
 
@@ -126,10 +126,10 @@ def combined_probe_weight_cosine_sim(model_config, probe_config, normalize=False
         if isinstance(probe_weights, torch.Tensor):
             probe_weights = probe_weights.numpy()
 
-        if normalize:
+        if center:
             centroid = np.mean(probe_weights, axis=0)
     
-            # Normalize weights by subtracting the centroid
+            # Center weights by subtracting the centroid
             probe_weights -= centroid
 
         # Calculate cosine similarity matrix
@@ -191,8 +191,8 @@ def combined_probe_weight_cosine_sim(model_config, probe_config, normalize=False
     cbar.outline.set_visible(False)
 
     # Add overarching title
-    if normalize:
-        fig.suptitle(f'Normalized Cosine Similarities Between Linear Probe Weight Vectors',
+    if center:
+        fig.suptitle(f'Centered Cosine Similarities Between Linear Probe Weight Vectors',
                  fontsize=title_font_size)
     else:
         fig.suptitle(f'Cosine Similarities Between Linear Probe Weight Vectors',
@@ -202,9 +202,9 @@ def combined_probe_weight_cosine_sim(model_config, probe_config, normalize=False
     save_path = f"COMPLETE_FIGS/paper/cosine_sim"
     os.makedirs(save_path, exist_ok=True)
 
-    if normalize:
+    if center:
         fig.savefig(os.path.join(
-            save_path, f"normalized_combined_probe_weight_cosine_sim.png"), bbox_inches="tight")
+            save_path, f"centered_combined_probe_weight_cosine_sim.png"), bbox_inches="tight")
     else:
         fig.savefig(os.path.join(
             save_path, f"combined_probe_weight_cosine_sim.png"), bbox_inches="tight")
@@ -220,13 +220,13 @@ if __name__ == "__main__":
 
     # embedding_ablation_kl_fig()
     # avg_combined_cosine_similarity_probe_embedding_heatmap()
-    combined_probe_weight_cosine_sim(
-        GPTConfig44_Complete(), 
-        LinearProbeBindingCardAttrConfig())
+    # combined_probe_weight_cosine_sim(
+    #     GPTConfig44_Complete(), 
+    #     LinearProbeBindingCardAttrConfig())
     combined_probe_weight_cosine_sim(
         GPTConfig44_Complete(),
         LinearProbeBindingCardAttrConfig(),
-        normalize=True)
+        center=True)
 
     # config = GPTConfig44_Complete()
     # checkpoint = torch.load(config.filename, weights_only=False)
