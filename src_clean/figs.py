@@ -81,7 +81,7 @@ def embedding_ablation_kl_fig():
 def avg_combined_cosine_similarity_probe_embedding_heatmap():
     cards = ['A', 'B', 'C', 'D', 'E']
     num_layers = 4
-    fig, axes = plt.subplots(2, 2, figsize=(12, 10), sharex=True, sharey=True, constrained_layout=True)
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10), constrained_layout=True)
 
     # Placeholder to collect data for shared color scale
     all_matrices = []
