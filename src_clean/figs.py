@@ -9,7 +9,7 @@ from classify import plot_similarity_heatmap
 import seaborn as sns
 import matplotlib.pyplot as plt
 from classify import load_linear_probe_from_config, load_continuous_to_original_from_config, LinearProbeBindingCardAttrConfig
-
+from data_utils import initialize_loaders, split_data
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
@@ -211,6 +211,30 @@ def combined_probe_weight_cosine_sim(model_config, probe_config, center=False):
 
     return fig
 
+def confirm_probe_dims(dataset_name, capture_layer):
+    config = GPTConfig44_Complete()
+    dataset = torch.load(config.dataset_path)
+    train_loader, val_loader = initialize_loaders(config, dataset)
+
+    input_embeddings_path = f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/input_embeddings.pt"
+    mapped_target_tokens_path = f"{PATH_PREFIX}/complete/classify/{dataset_name}/layer{capture_layer}/continuous_target_tokens.pt"
+
+    X = torch.load(input_embeddings_path)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    y = torch.load(mapped_target_tokens_path).to(device)
+
+    X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y)
+
+    breakpoint()
+
+    print(f"Size of input_embeddings: {X.size()}")
+    print(f"Size of mapped_target_tokens: {y.size()}")
+    print(f"Size of X_train: {X_train.size()}")
+    print(f"Size of X_val: {X_val.size()}")
+    print(f"Size of X_test: {X_test.size()}")
+    print(f"Size of y_train: {y_train.size()}")
+    print(f"Size of y_val: {y_val.size()}")
+    print(f"Size of y_test: {y_test.size()}")
 
 if __name__ == "__main__":
     seed = 42
@@ -223,10 +247,13 @@ if __name__ == "__main__":
     # combined_probe_weight_cosine_sim(
     #     GPTConfig44_Complete(), 
     #     LinearProbeBindingCardAttrConfig())
-    combined_probe_weight_cosine_sim(
-        GPTConfig44_Complete(),
-        LinearProbeBindingCardAttrConfig(),
-        center=True)
+    # combined_probe_weight_cosine_sim(
+    #     GPTConfig44_Complete(),
+    #     LinearProbeBindingCardAttrConfig(),
+    #     center=True)
+
+    confirm_probe_dims("card_from_attr", 0)
+    confirm_probe_dims("attr_from_card", 0)
 
     # config = GPTConfig44_Complete()
     # checkpoint = torch.load(config.filename, weights_only=False)
