@@ -432,36 +432,6 @@ def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positi
 
     return results
 
-
-# def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ablate):
-#     import matplotlib.pyplot as plt
-#     import seaborn as sns
-
-#     # Create heatmap visualization
-#     plt.figure(figsize=(24, 6))
-
-#     # Generate heatmap
-#     heatmap = sns.heatmap(
-#         kl_matrix, annot=True, fmt=".2f", cmap="viridis",
-#         xticklabels=positions_to_ablate, yticklabels=layers_to_ablate,
-#         cbar_kws={'label': 'KL Divergence'}  # No fontsize here
-#     )
-
-#     # Customize colorbar font size
-#     # Adjust colorbar tick labels
-#     heatmap.figure.axes[-1].tick_params(labelsize=14)
-
-#     # Set font sizes for labels, ticks, and title
-#     plt.xlabel('Sequence Position', fontsize=18)
-#     plt.ylabel('Layer', fontsize=18, rotation=0)
-#     plt.xticks(fontsize=14)
-#     plt.yticks(fontsize=14, rotation=0)
-#     plt.title('Impact of Embedding Ablation (KL Divergence)', fontsize=20)
-
-#     plt.tight_layout()
-
-#     return plt.gcf()
-
 def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ablate):
     import matplotlib.pyplot as plt
     import seaborn as sns
@@ -476,9 +446,10 @@ def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ab
     heatmap = sns.heatmap(
         kl_matrix, annot=True, fmt=".2f", cmap="viridis",
         xticklabels=positions_to_ablate, yticklabels=layers_to_ablate,
-        cbar_kws={'label': 'KL Divergence', 'pad': 0.02}  # Reduced padding between heatmap and colorbar
+        cbar_kws={'label': 'KL Divergence', 'pad': 0.02, 'fontsize': 18},  # Reduced padding between heatmap and colorbar
+        annot_kws={"fontsize": 14}
     )
-    
+
     # Customize colorbar font size
     heatmap.figure.axes[-1].tick_params(labelsize=14)
     
