@@ -433,16 +433,22 @@ def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positi
     return results
 
 def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ablate):
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+
     # Create heatmap visualization
-    plt.figure(figsize=(24, 8))
+    plt.figure(figsize=(24, 6))
 
     sns.heatmap(kl_matrix, annot=True, fmt=".2f", cmap="viridis",
-                xticklabels=positions_to_ablate, yticklabels=layers_to_ablate)
+                xticklabels=positions_to_ablate, yticklabels=layers_to_ablate,
+                cbar_kws={'label': 'KL Divergence', 'fontsize': 16})  # Make color bar font larger
 
-    plt.xlabel('Sequence Position')
-    plt.ylabel('Layer', rotation = 0)
-    plt.yticks(rotation=0)
-    plt.title('Impact of Embedding Ablation (KL Divergence)')
+    # Set font sizes for labels, ticks, and title
+    plt.xlabel('Sequence Position', fontsize=18)
+    plt.ylabel('Layer', fontsize=18)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14, rotation=0)
+    plt.title('Impact of Embedding Ablation (KL Divergence)', fontsize=20)
 
     plt.tight_layout()
 
