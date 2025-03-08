@@ -470,7 +470,7 @@ def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ab
     plt.figure(figsize=(24, 6))
     
     # Add padding to the left margin to make room for the y-label
-    plt.subplots_adjust(left=0.07)  # Increase left margin
+    plt.subplots_adjust(left=0.01)  # Increase left margin
     
     # Generate heatmap with tighter colorbar spacing
     heatmap = sns.heatmap(
@@ -488,8 +488,8 @@ def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ab
     # Position the y-label to the left of the plot
     plt.ylabel('Layer', fontsize=18, rotation=0, ha='right', va='center')
     
-    # Add padding between y-label and y-axis
-    plt.gca().yaxis.set_label_coords(-0.06, 0.5)
+    # # Add padding between y-label and y-axis
+    # plt.gca().yaxis.set_label_coords(-0.06, 0.5)
     
     plt.xticks(fontsize=14)
     plt.yticks(fontsize=14, rotation=0)
