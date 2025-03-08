@@ -18,6 +18,7 @@ annot_font_size = 14
 title_font_size = 16
 label_font_size = 14
 
+
 def embedding_ablation_kl_fig():
     ablate_type = "noise"
     matrix_path = f"results/ablation_study"
@@ -34,6 +35,7 @@ def embedding_ablation_kl_fig():
     fig.savefig(os.path.join(
         fig_save_path, f"avg_embedding_ablation_heatmap_ablate_type_{ablate_type}.png"), bbox_inches="tight")
 
+
 def avg_combined_cosine_similarity_probe_embedding_heatmap():
     cards = ['A', 'B', 'C', 'D', 'E']
     num_layers = 4
@@ -44,9 +46,10 @@ def avg_combined_cosine_similarity_probe_embedding_heatmap():
 
     # Load similarity matrices and determine global min/max for color scale
     for capture_layer in range(num_layers):
-        similarity_matrix = np.load(f"{PATH_PREFIX}/complete/classify/avg_cosine_similarity_matrix_layer{capture_layer}.npy")
+        similarity_matrix = np.load(
+            f"{PATH_PREFIX}/complete/classify/avg_cosine_similarity_matrix_layer{capture_layer}.npy")
         all_matrices.append(similarity_matrix)
-    
+
     global_min = np.min(all_matrices)
     global_max = np.max(all_matrices)
 
@@ -73,7 +76,8 @@ def avg_combined_cosine_similarity_probe_embedding_heatmap():
         ax.set_title(f'Layer {capture_layer + 1}', fontsize=title_font_size)
         ax.set_xlabel('Probe Cards', fontsize=label_font_size)
         ax.set_ylabel('Attribute Embedding Cards', fontsize=label_font_size)
-        ax.tick_params(axis='y', rotation=0, labelsize=label_font_size)  # Rotate y-tick labels to horizontal
+        # Rotate y-tick labels to horizontal
+        ax.tick_params(axis='y', rotation=0, labelsize=label_font_size)
         ax.tick_params(axis='x', labelsize=label_font_size)
 
     # Hide unused subplots
@@ -81,21 +85,26 @@ def avg_combined_cosine_similarity_probe_embedding_heatmap():
         ax.set_visible(False)
 
     # Add a single colorbar for the whole figure
-    cbar = fig.colorbar(axes_flat[0].collections[0], ax=axes, location='right', shrink=0.8, pad=0.02)
+    cbar = fig.colorbar(axes_flat[0].collections[0],
+                        ax=axes, location='right', shrink=0.8, pad=0.02)
     cbar.set_label('Cosine Similarity', fontsize=title_font_size)
-    cbar.ax.tick_params(labelsize=label_font_size)  # Set font size for colorbar tick labels
+    # Set font size for colorbar tick labels
+    cbar.ax.tick_params(labelsize=label_font_size)
     # Remove the color bar's black outline
     cbar.outline.set_visible(False)
-    
+
     # Add overarching title
-    fig.suptitle('Cosine Similarities Between Linear Probe Weights and Model Embeddings', fontsize=title_font_size)
-    
+    fig.suptitle('Cosine Similarities Between Linear Probe Weights and Model Embeddings',
+                 fontsize=title_font_size)
+
     # Save or show the combined figure
     save_path = f"COMPLETE_FIGS/paper/cosine_sim"
     os.makedirs(save_path, exist_ok=True)
-    fig.savefig(os.path.join(save_path, f"avg_combined_cosine_similarity_probe_embedding_heatmap.png"), bbox_inches="tight")
+    fig.savefig(os.path.join(
+        save_path, f"avg_combined_cosine_similarity_probe_embedding_heatmap.png"), bbox_inches="tight")
 
-def combined_probe_weight_cosine_sim(model_config, probe_config):
+
+def combined_probe_weight_cosine_sim(model_config, probe_config, normalize=False):
 
     from sklearn.metrics.pairwise import cosine_similarity
 
@@ -108,28 +117,36 @@ def combined_probe_weight_cosine_sim(model_config, probe_config):
         cards = []
         for i in range(probe_config.output_dim):
             cards.append(tokenizer.decode([continuous_to_original[i]])[0])
-        
+
         # Load probe and get weights
         probe = load_linear_probe_from_config(probe_config, capture_layer)
         probe_weights = probe.fc.weight.data.detach()  # Shape: [5, 64]
-        
+
         # Convert to numpy array if it's a torch tensor
         if isinstance(probe_weights, torch.Tensor):
             probe_weights = probe_weights.numpy()
-        
+
+        if normalize:
+            centroid = np.mean(probe_weights, axis=0)
+    
+            # Normalize weights by subtracting the centroid
+            probe_weights -= centroid
+
         # Calculate cosine similarity matrix
         cosine_sim_matrix = cosine_similarity(probe_weights)
-        
+
         # Get sorting indices for alphabetical order
         sorted_indices = sorted(range(len(cards)), key=lambda k: cards[k])
-        
+
         # Reorder the similarity matrix and cards
-        cosine_sim_matrix = cosine_sim_matrix[sorted_indices][:, sorted_indices]
+        cosine_sim_matrix = cosine_sim_matrix[sorted_indices][:,
+                                                              sorted_indices]
         all_matrices.append(cosine_sim_matrix)
 
     sorted_cards = sorted(cards)
 
-    num_layers = 4  # Adjust the number of layers to plot (can change based on your use case)
+    # Adjust the number of layers to plot (can change based on your use case)
+    num_layers = 4
     fig, axes = plt.subplots(2, 2, figsize=(12, 10), constrained_layout=True)
 
     global_min = -1  # Fixed min for cosine similarity
@@ -155,27 +172,42 @@ def combined_probe_weight_cosine_sim(model_config, probe_config):
             ax=ax,
             annot_kws={"fontsize": annot_font_size}
         )
-        ax.set_title(f'Layer {capture_layer_idx + 1}', fontsize=title_font_size)
-        ax.set_xlabel('Card for Neuron', fontsize=label_font_size)
-        ax.set_ylabel('Card for Neuron', fontsize=label_font_size)
-        ax.tick_params(axis='y', rotation=0, labelsize=label_font_size)  # Rotate y-tick labels to horizontal
+        ax.set_title(f'Layer {capture_layer_idx + 1}',
+                     fontsize=title_font_size)
+        ax.set_xlabel('Probe Cards', fontsize=label_font_size)
+        ax.set_ylabel('Probe Cards', fontsize=label_font_size)
+        # Rotate y-tick labels to horizontal
+        ax.tick_params(axis='y', rotation=0, labelsize=label_font_size)
         ax.tick_params(axis='x', labelsize=label_font_size)
 
     # Add a single colorbar for the whole figure
-    cbar = fig.colorbar(axes_flat[0].collections[0], ax=axes, location='right', shrink=0.8, pad=0.02)
+    cbar = fig.colorbar(axes_flat[0].collections[0],
+                        ax=axes, location='right', shrink=0.8, pad=0.02)
     cbar.set_label('Cosine Similarity', fontsize=title_font_size)
-    cbar.ax.tick_params(labelsize=label_font_size)  # Set font size for colorbar tick labels
-    
+    # Set font size for colorbar tick labels
+    cbar.ax.tick_params(labelsize=label_font_size)
+
     # Remove the color bar's black outline
     cbar.outline.set_visible(False)
-    
+
     # Add overarching title
-    fig.suptitle(f'Cosine Similarities Between Probe Weight Vectors', fontsize=title_font_size)
-    
+    if normalize:
+        fig.suptitle(f'Normalized Cosine Similarities Between Linear Probe Weight Vectors',
+                 fontsize=title_font_size)
+    else:
+        fig.suptitle(f'Cosine Similarities Between Linear Probe Weight Vectors',
+                    fontsize=title_font_size)
+
     # Save or show the combined figure
     save_path = f"COMPLETE_FIGS/paper/cosine_sim"
     os.makedirs(save_path, exist_ok=True)
-    fig.savefig(os.path.join(save_path, f"combined_probe_weight_cosine_sim_layer{capture_layer}.png"), bbox_inches="tight")
+
+    if normalize:
+        fig.savefig(os.path.join(
+            save_path, f"normalized_combined_probe_weight_cosine_sim.png"), bbox_inches="tight")
+    else:
+        fig.savefig(os.path.join(
+            save_path, f"combined_probe_weight_cosine_sim.png"), bbox_inches="tight")
 
     return fig
 
@@ -187,9 +219,15 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     # embedding_ablation_kl_fig()
-    avg_combined_cosine_similarity_probe_embedding_heatmap()
-    combined_probe_weight_cosine_sim(GPTConfig44_Complete(), LinearProbeBindingCardAttrConfig())
-    
+    # avg_combined_cosine_similarity_probe_embedding_heatmap()
+    combined_probe_weight_cosine_sim(
+        GPTConfig44_Complete(), 
+        LinearProbeBindingCardAttrConfig())
+    combined_probe_weight_cosine_sim(
+        GPTConfig44_Complete(),
+        LinearProbeBindingCardAttrConfig(),
+        normalize=True)
+
     # config = GPTConfig44_Complete()
     # checkpoint = torch.load(config.filename, weights_only=False)
 
