@@ -114,7 +114,7 @@ def avg_combined_cosine_similarity_probe_embedding_heatmap():
             ax=ax,
             annot_kws={"fontsize": 14}
         )
-        ax.set_title(f'Layer {capture_layer + 1}', fontsize=18)
+        ax.set_title(f'Layer {capture_layer + 1}', fontsize=16)
         ax.set_xlabel('Probe Cards', fontsize=14)
         ax.set_ylabel('Attribute Embedding Cards', fontsize=14)
         ax.tick_params(axis='y', rotation=0, labelsize=14)  # Rotate y-tick labels to horizontal
@@ -132,7 +132,7 @@ def avg_combined_cosine_similarity_probe_embedding_heatmap():
     cbar.outline.set_visible(False)
     
     # Add overarching title
-    fig.suptitle('Cosine Similarities Between Linear Probe Weights and Model Embeddings', fontsize=22)
+    fig.suptitle('Cosine Similarities Between Linear Probe Weights and Model Embeddings', fontsize=16)
     
     # Save or show the combined figure
     save_path = f"COMPLETE_FIGS/paper/cosine_sim"
