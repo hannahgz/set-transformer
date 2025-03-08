@@ -453,7 +453,7 @@ def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ab
     # Customize colorbar font size
     # heatmap.figure.axes[-1].tick_params(labelsize=14)
     # Customize colorbar
-    cbar = heatmap.figure.colorbar(heatmap.collections[0])  # Get the colorbar
+    cbar = heatmap.collections[0].colorbar
     cbar.set_label('KL Divergence', fontsize=18)  # Set colorbar label font size
     cbar.ax.tick_params(labelsize=14)  # Set font size for colorbar tick labels
     
