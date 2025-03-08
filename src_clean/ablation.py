@@ -433,33 +433,71 @@ def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positi
     return results
 
 
+# def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ablate):
+#     import matplotlib.pyplot as plt
+#     import seaborn as sns
+
+#     # Create heatmap visualization
+#     plt.figure(figsize=(24, 6))
+
+#     # Generate heatmap
+#     heatmap = sns.heatmap(
+#         kl_matrix, annot=True, fmt=".2f", cmap="viridis",
+#         xticklabels=positions_to_ablate, yticklabels=layers_to_ablate,
+#         cbar_kws={'label': 'KL Divergence'}  # No fontsize here
+#     )
+
+#     # Customize colorbar font size
+#     # Adjust colorbar tick labels
+#     heatmap.figure.axes[-1].tick_params(labelsize=14)
+
+#     # Set font sizes for labels, ticks, and title
+#     plt.xlabel('Sequence Position', fontsize=18)
+#     plt.ylabel('Layer', fontsize=18, rotation=0)
+#     plt.xticks(fontsize=14)
+#     plt.yticks(fontsize=14, rotation=0)
+#     plt.title('Impact of Embedding Ablation (KL Divergence)', fontsize=20)
+
+#     plt.tight_layout()
+
+#     return plt.gcf()
+
 def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ablate):
     import matplotlib.pyplot as plt
     import seaborn as sns
-
-    # Create heatmap visualization
+    
+    # Create figure with more padding on the left side
     plt.figure(figsize=(24, 6))
-
-    # Generate heatmap
+    
+    # Add padding to the left margin to make room for the y-label
+    plt.subplots_adjust(left=0.07)  # Increase left margin
+    
+    # Generate heatmap with tighter colorbar spacing
     heatmap = sns.heatmap(
         kl_matrix, annot=True, fmt=".2f", cmap="viridis",
         xticklabels=positions_to_ablate, yticklabels=layers_to_ablate,
-        cbar_kws={'label': 'KL Divergence'}  # No fontsize here
+        cbar_kws={'label': 'KL Divergence', 'pad': 0.02}  # Reduced padding between heatmap and colorbar
     )
-
+    
     # Customize colorbar font size
-    # Adjust colorbar tick labels
     heatmap.figure.axes[-1].tick_params(labelsize=14)
-
+    
     # Set font sizes for labels, ticks, and title
     plt.xlabel('Sequence Position', fontsize=18)
-    plt.ylabel('Layer', fontsize=18, rotation=0)
+    
+    # Position the y-label to the left of the plot
+    plt.ylabel('Layer', fontsize=18, rotation=0, ha='right', va='center')
+    
+    # Add padding between y-label and y-axis
+    plt.gca().yaxis.set_label_coords(-0.06, 0.5)
+    
     plt.xticks(fontsize=14)
     plt.yticks(fontsize=14, rotation=0)
     plt.title('Impact of Embedding Ablation (KL Divergence)', fontsize=20)
-
-    plt.tight_layout()
-
+    
+    # Use tight_layout with specific padding settings
+    plt.tight_layout(pad=1.1, w_pad=0.5, h_pad=0.5)
+    
     return plt.gcf()
 
 
