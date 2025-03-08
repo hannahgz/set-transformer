@@ -412,22 +412,41 @@ def comprehensive_embedding_ablation(model, base_input, layers_to_ablate, positi
             kl_matrix[i, j] = result['kl_div']
         results[layer] = layer_results
 
+    # # Create heatmap visualization
+    # plt.figure(figsize=(20, 10))
+
+    # sns.heatmap(kl_matrix, annot=True, fmt=".2f", cmap="viridis",
+    #             xticklabels=positions_to_ablate, yticklabels=layers_to_ablate)
+
+    # plt.xlabel('Sequence Position')
+    # plt.ylabel('Layer')
+    # plt.title('Impact of Embedding Ablation (KL Divergence)')
+
+    # plt.tight_layout()
+
+    heatmap_fig = generate_heatmap_from_kl_matrix(
+        kl_matrix, positions_to_ablate, layers_to_ablate)
+
+    results['heatmap_figure'] = heatmap_fig
+    results['kl_matrix'] = kl_matrix
+
+    return results
+
+def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ablate):
     # Create heatmap visualization
-    plt.figure(figsize=(20, 10))
+    plt.figure(figsize=(24, 8))
 
     sns.heatmap(kl_matrix, annot=True, fmt=".2f", cmap="viridis",
                 xticklabels=positions_to_ablate, yticklabels=layers_to_ablate)
 
     plt.xlabel('Sequence Position')
-    plt.ylabel('Layer')
+    plt.ylabel('Layer', rotation = 0)
+    plt.yticks(rotation=0)
     plt.title('Impact of Embedding Ablation (KL Divergence)')
 
     plt.tight_layout()
 
-    results['heatmap_figure'] = plt.gcf()
-    results['kl_matrix'] = kl_matrix
-
-    return results
+    return plt.gcf()
 
 
 @torch.no_grad()
@@ -682,37 +701,52 @@ if __name__ == "__main__":
     #     noise_scale=1.0,
     #     replace_with_zeros=replace_with_zeros)
 
-    replace_with_zeros = False
+    # # PIPELINE FOR GENERATING ABLATION HEATMAP
+
+    # replace_with_zeros = False
+
+    # ablate_type = "noise"
+    # if replace_with_zeros:
+    #     ablate_type = "zeros"
+
+    # dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
+    # dataset = torch.load(dataset_path)
+    # train_loader, val_loader = initialize_loaders(config, dataset)
+
+    # batch_results = comprehensive_ablation_batch_optimized(
+    #     model=model, 
+    #     data_loader=train_loader, 
+    #     layers_to_ablate=range(4), 
+    #     positions_to_ablate=range(40), 
+    #     tokenizer=tokenizer,
+    #     target_pos=41, 
+    #     noise_scale=1.0, 
+    #     replace_with_zeros=replace_with_zeros,
+    #     max_batches=10)
+
+    # breakpoint()
+    # # Save the heatmap figure
+    # fig_save_path = f"COMPLETE_FIGS/ablation_study"
+    # os.makedirs(fig_save_path, exist_ok=True)
+    # batch_results['heatmap_figure'].savefig(
+    #     os.path.join(fig_save_path, f"avg_embedding_ablation_heatmap_ablate_type_{ablate_type}.png"), bbox_inches="tight")
+
+    # matrix_path = f"results/ablation_study"
+    # os.makedirs(matrix_path, exist_ok=True)
+    # np.save(os.path.join(matrix_path, f"avg_kl_divergence_matrix_ablate_type_{ablate_type}.npy"), batch_results['kl_matrix'])
 
     ablate_type = "noise"
-    if replace_with_zeros:
-        ablate_type = "zeros"
-
-    dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
-    dataset = torch.load(dataset_path)
-    train_loader, val_loader = initialize_loaders(config, dataset)
-
-    batch_results = comprehensive_ablation_batch_optimized(
-        model=model, 
-        data_loader=train_loader, 
-        layers_to_ablate=range(4), 
-        positions_to_ablate=range(40), 
-        tokenizer=tokenizer,
-        target_pos=41, 
-        noise_scale=1.0, 
-        replace_with_zeros=replace_with_zeros,
-        max_batches=10)
-
-    breakpoint()
-    # Save the heatmap figure
-    fig_save_path = f"COMPLETE_FIGS/ablation_study"
-    os.makedirs(fig_save_path, exist_ok=True)
-    batch_results['heatmap_figure'].savefig(
-        os.path.join(fig_save_path, f"avg_embedding_ablation_heatmap_ablate_type_{ablate_type}.png"), bbox_inches="tight")
-
     matrix_path = f"results/ablation_study"
     os.makedirs(matrix_path, exist_ok=True)
-    np.save(os.path.join(matrix_path, f"avg_kl_divergence_matrix_ablate_type_{ablate_type}.npy"), batch_results['kl_matrix'])
+
+    # Load the KL divergence matrix
+    loaded_kl_matrix = np.load(os.path.join(matrix_path, f"avg_kl_divergence_matrix_ablate_type_{ablate_type}.npy"))
+
+    fig = generate_heatmap_from_kl_matrix(loaded_kl_matrix, range(40), range(1, 5))
+    fig_save_path = f"COMPLETE_FIGS/paper/ablation_study"
+    os.makedirs(fig_save_path, exist_ok=True)
+    fig.savefig(os.path.join(fig_save_path, f"avg_embedding_ablation_heatmap_ablate_type_{ablate_type}.png"), bbox_inches="tight")
+
 
     # # Save the KL divergence matrix
     # matrix_path = f"results/ablation_study"
