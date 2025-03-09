@@ -454,7 +454,7 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
     }
     
     for peak_idx in peaks_info['examples_by_peak']:
-        print(f"\nProcessing Peak {peak_idx+1}:")
+        print(f"\nProcessing Peak {peak_idx}:")
         peaks_attribute_dict[peak_idx] = initialize_attribute_count_dict()
 
         if top is None:
@@ -475,7 +475,7 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
             while i < 40:
                 card = example[i]
                 attr = example[i+1]
-                breakpoint()
+                # breakpoint()
                 peaks_attribute_dict[peak_idx][attr] += 1
                 
 
