@@ -452,13 +452,15 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
         "number": {"same": 0, "diff": 0, "total": 0},
         "shading": {"same": 0, "diff": 0, "total": 0}
     }
-    total_num_attributes = 0
+    
     for peak_idx in peaks_info['examples_by_peak']:
+        print(f"\nProcessing Peak {peak_idx+1}:")
         peaks_attribute_dict[peak_idx] = initialize_attribute_count_dict()
 
         if top is None:
             top = len(peaks_info['examples_by_peak'][peak_idx])
-        for _, example in peaks_info['examples_by_peak'][peak_idx][:top]:
+        for index, (_, example) in enumerate(peaks_info['examples_by_peak'][peak_idx][:top]):
+            print(f"  Example {index+1}/{top}:")
             i = 0
             attrs_dict_by_category = {
                 "shape": [],
@@ -475,7 +477,7 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
                 attr = example[i+1]
                 
                 peaks_attribute_dict[peak_idx][attr] += 1
-                total_num_attributes += 1
+                
 
                 if attr in shape_ids:
                     attrs_dict_by_category["shape"].append(attr)
@@ -486,24 +488,29 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
                 elif attr in shading_ids:
                     attrs_dict_by_category["shading"].append(attr)
             
-            for attribute_type in attrs_dict_by_category:
-                same_count, diff_count = count_combinations(attrs_dict_by_category[attribute_type])
-                peaks_same_diff_dict[attribute_type]["same"] += same_count
-                peaks_same_diff_dict[attribute_type]["diff"] += diff_count
-                peaks_same_diff_dict[attribute_type]["total"] += 10
+            for attribute_category in attrs_dict_by_category:
+                same_count, diff_count = count_combinations(attrs_dict_by_category[attribute_category])
+                peaks_same_diff_dict[attribute_category]["same"] += same_count
+                peaks_same_diff_dict[attribute_category]["diff"] += diff_count
+                peaks_same_diff_dict[attribute_category]["total"] += 10
+
+            if index % 100 == 0:
+                print(f" Same diff dict: {peaks_same_diff_dict}")
+                print(f" Attribute dict: {peaks_attribute_dict[peak_idx]}")
 
     for peak_idx in peaks_attribute_dict:
         print(f"\nPeak {peak_idx+1}:")
 
         print("Attribute Breakdown")
+        num_attributes = len(peaks_info['examples_by_peak'][peak_idx]) * 20
         for id in all_ids:
-            print(f"    Percentage of {tokenizer.decode([id])}: {peaks_attribute_dict[peak_idx][id]/total_num_attributes:.2%}")
+            print(f"    Percentage of {tokenizer.id_to_token[id]}: {peaks_attribute_dict[peak_idx][id]/num_attributes:.2%}")
 
         print(f"Total Same and Different")
-        for attribute_type in peaks_same_diff_dict:
-            same_pct = peaks_same_diff_dict[attribute_type]["same"]/peaks_same_diff_dict[attribute_type]["total"]
-            diff_pct = peaks_same_diff_dict[attribute_type]["diff"]/peaks_same_diff_dict[attribute_type]["total"]
-            print(f"    {attribute_type}: Same - {same_pct:.2%}, Different - {diff_pct:.2%}")
+        for attribute_category in peaks_same_diff_dict:
+            same_pct = peaks_same_diff_dict[attribute_category]["same"]/peaks_same_diff_dict[attribute_category]["total"]
+            diff_pct = peaks_same_diff_dict[attribute_category]["diff"]/peaks_same_diff_dict[attribute_category]["total"]
+            print(f"    {attribute_category}: Same - {same_pct:.2%}, Different - {diff_pct:.2%}")
 
 
 def save_peak_figure(peaks_info, filename=None, dpi=300, format='png'):
