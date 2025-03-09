@@ -10,6 +10,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from classify import load_linear_probe_from_config, load_continuous_to_original_from_config, LinearProbeBindingCardAttrConfig
 from data_utils import initialize_loaders, split_data
+import wandb
+import re
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
@@ -236,12 +238,178 @@ def confirm_probe_dims(dataset_name, capture_layer):
     print(f"Size of y_val: {y_val.size()}")
     print(f"Size of y_test: {y_test.size()}")
 
+
+def fetch_wandb_data(entity, project_name, run_names):
+    """
+    Fetch run data from W&B for specified runs.
+    
+    Args:
+        entity: W&B entity name
+        project_name: W&B project name
+        run_names: List of run names to fetch
+        
+    Returns:
+        Dictionary of run data with metrics
+    """
+    # Initialize wandb API
+    api = wandb.Api()
+    
+    # Dictionary to store run data
+    run_data = {}
+    
+    # Fetch data for each run
+    for run_name in run_names:
+        print(f"Fetching data for run: {run_name}")
+        runs = api.runs(f"{entity}/{project_name}", {"display_name": run_name})
+        if runs:
+            run = runs[0]
+            # For each run, fetch train and val loss
+            train_key = "train_loss"
+            val_key = "val_loss"
+            history = run.history(keys=[train_key, val_key])
+            # breakpoint()
+            
+            run_data[run_name] = {
+                "steps": history["_step"].to_numpy(),
+                "train_loss": history[train_key].to_numpy() if train_key in history.columns else None,
+                "val_loss": history[val_key].to_numpy() if val_key in history.columns else None
+            }
+            print(f"  Found data with {len(history)} steps")
+        else:
+            print(f"  No run found with name: {run_name}")
+    
+    # Check if we have data to visualize
+    if not run_data:
+        raise ValueError("No data found for any of the specified runs")
+        
+    breakpoint()
+    return run_data
+
+def create_loss_figure(run_data, model_type, layers):
+    """
+    Create a figure with loss plots for a specific model type across multiple layers.
+    
+    Args:
+        run_data: Dictionary containing the run data
+        model_type: 'attr_from_card' or 'card_from_attr'
+        layers: List of layer numbers
+        layer_names: List of layer names for plot titles
+        
+    Returns:
+        Matplotlib figure
+    """
+    # Define colors
+    train_color = '#1f77b4'  # blue for all training curves
+    val_color = '#ff7f0e'    # orange for all validation curves
+    
+    # Create figure
+    fig, axes = plt.subplots(1, len(layers), figsize=(5*len(layers), 5))
+    if model_type == "attr_from_card":
+        model_title = "Attribute From Card"
+    else:
+        model_title = "Card From Attribute"
+
+    fig.suptitle(f'{model_title} Loss', fontsize=title_font_size)
+    
+    # First pass: determine global min and max values across all layers
+    global_min = float('inf')
+    global_max = float('-inf')
+    
+    for layer in layers:
+        run_name = f"{model_type}_linear_layer{layer}"
+        if run_name in run_data and run_data[run_name]["train_loss"] is not None:
+            train_loss = run_data[run_name]["train_loss"]
+            val_loss = run_data[run_name]["val_loss"]
+            
+            global_min = min(global_min, np.min(train_loss), np.min(val_loss))
+            global_max = max(global_max, np.max(train_loss), np.max(val_loss))
+    
+    # Add padding to the global min/max
+    padding = (global_max - global_min) * 0.1
+    y_min = global_min - padding
+    y_max = global_max + padding
+    
+    # Second pass: create the plots with standardized y-axis
+    for i, layer in enumerate(layers):
+        ax = axes[i]
+        
+        # Get run for this layer
+        run_name = f"{model_type}_linear_layer{layer}"
+        
+        if run_name in run_data and run_data[run_name]["train_loss"] is not None:
+            # Plot losses
+            steps = run_data[run_name]["steps"]
+            train_loss = run_data[run_name]["train_loss"]
+            val_loss = run_data[run_name]["val_loss"]
+            
+            ax.plot(steps, train_loss, color=train_color, label='Training Loss')
+            ax.plot(steps, val_loss, color=val_color, label='Validation Loss')
+            
+            # Set standardized y-axis limits
+            ax.set_ylim(y_min, y_max)
+        else:
+            ax.text(0.5, 0.5, f"No data for {run_name}", 
+                    horizontalalignment='center', verticalalignment='center',
+                    transform=ax.transAxes)
+        
+        ax.set_title(f'Layer {i+1}')
+        ax.set_xlabel('Epochs', fontsize=label_font_size)
+        # ax.grid(True, linestyle='--', alpha=0.7)
+        
+        # Only add y-label to the first subplot
+        if i == 0:
+            ax.set_ylabel('Loss', rotation=0, fontsize = label_font_size)
+            
+        # Add legend to the last subplot
+        if i == len(layers) - 1:
+            ax.legend(loc='upper right')
+    
+    plt.tight_layout(rect=[0, 0, 1, 0.95])  # Make room for the title
+    return fig
+
+def run_probe_weight_loss_fig():
+    entity = "hazhou-harvard"
+    project_name = "complete-classify-card"
+    
+    # List of run names to include in the visualization
+    run_names = [
+        "attr_from_card_linear_layer3",
+        "attr_from_card_linear_layer2",
+        "attr_from_card_linear_layer1",
+        "attr_from_card_linear_layer0",
+        "card_from_attr_linear_layer3",
+        "card_from_attr_linear_layer1",
+        "card_from_attr_linear_layer0",
+        "card_from_attr_linear_layer2"
+    ]
+    
+    # Layer numbers and names
+    layers = [0, 1, 2, 3]
+    
+    # Fetch data from W&B
+    run_data = fetch_wandb_data(entity, project_name, run_names)
+    
+    fig_save_dir = "COMPLETE_FIGS/paper/probe_weight_loss"
+    os.makedirs(fig_save_dir, exist_ok=True)
+
+    # Create figure for attr_from_card
+    model_type = "attr_from_card"
+    attr_fig = create_loss_figure(run_data, model_type, layers)
+    attr_fig.savefig(os.path.join(fig_save_dir, f'{model_type}_losses.png'), dpi=300, bbox_inches='tight')
+    
+    model_type = "card_from_attr"
+    attr_fig = create_loss_figure(run_data, model_type, layers)
+    attr_fig.savefig(os.path.join(fig_save_dir, f'{model_type}_losses.png'), dpi=300, bbox_inches='tight')
+
+
 if __name__ == "__main__":
     seed = 42
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
 
+    run_probe_weight_loss_fig()
+    
     # embedding_ablation_kl_fig()
     # avg_combined_cosine_similarity_probe_embedding_heatmap()
     # combined_probe_weight_cosine_sim(
@@ -252,8 +420,8 @@ if __name__ == "__main__":
     #     LinearProbeBindingCardAttrConfig(),
     #     center=True)
 
-    confirm_probe_dims("card_from_attr", 0)
-    confirm_probe_dims("attr_from_card", 0)
+    # confirm_probe_dims("card_from_attr", 0)
+    # confirm_probe_dims("attr_from_card", 0)
 
     # config = GPTConfig44_Complete()
     # checkpoint = torch.load(config.filename, weights_only=False)
