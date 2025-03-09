@@ -863,6 +863,8 @@ if __name__ == "__main__":
     #     config=GPTConfig44_Complete(),)
 
     layer = 0
+    layer_0_target_neurons = [2, 4, 12, 19, 34, 36, 37, 43, 44, 54, 60, 61]
+    layer_1_target_neurons = [1, 2, 3, 4, 6, 9, 10, 12, 14, 15, 17, 18, 20, 21, 22, 23, 27, 29, 30, 32]
     # set_type_filter = 0
 
     # Get parameters for peak detection
@@ -872,7 +874,8 @@ if __name__ == "__main__":
     num_bins = 50
     
     for set_type_filter in [0, 1]:
-        for neuron in [2, 4, 12, 19, 34, 36, 37, 43, 44, 54, 60, 61]:
+        # for neuron in [2, 4, 12, 19, 34, 36, 37, 43, 44, 54, 60, 61]:
+        for neuron in layer_1_target_neurons:
             print(f"Set type filter: {set_type_filter}, Neuron: {neuron}")
             examples_file = "results/val_input_examples.pkl"
 
