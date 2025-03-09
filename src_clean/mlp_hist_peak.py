@@ -475,7 +475,7 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
             while i < 40:
                 card = example[i]
                 attr = example[i+1]
-                
+                breakpoint()
                 peaks_attribute_dict[peak_idx][attr] += 1
                 
 
@@ -488,7 +488,7 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
                 elif attr in shading_ids:
                     attrs_dict_by_category["shading"].append(attr)
                 
-                i += 1
+                i += 2
             
             for attribute_category in attrs_dict_by_category:
                 same_count, diff_count = count_combinations(attrs_dict_by_category[attribute_category])
