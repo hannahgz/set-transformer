@@ -369,7 +369,7 @@ def create_loss_figure(run_data, model_type, layers):
 
 def run_probe_weight_loss_fig():
     entity = "hazhou-harvard"
-    project_name = "complete-classify-card"
+    project_name = "full-complete-classify-card"
     
     # List of run names to include in the visualization
     run_names = [
@@ -409,7 +409,7 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     run_probe_weight_loss_fig()
-    
+
     # embedding_ablation_kl_fig()
     # avg_combined_cosine_similarity_probe_embedding_heatmap()
     # combined_probe_weight_cosine_sim(
