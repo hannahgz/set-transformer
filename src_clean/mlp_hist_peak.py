@@ -487,6 +487,8 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
                     attrs_dict_by_category["number"].append(attr)
                 elif attr in shading_ids:
                     attrs_dict_by_category["shading"].append(attr)
+                
+                i += 1
             
             for attribute_category in attrs_dict_by_category:
                 same_count, diff_count = count_combinations(attrs_dict_by_category[attribute_category])
@@ -494,9 +496,12 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
                 peaks_same_diff_dict[attribute_category]["diff"] += diff_count
                 peaks_same_diff_dict[attribute_category]["total"] += 10
 
-            if index % 100 == 0:
+            if index % 10 == 0:
                 print(f" Same diff dict: {peaks_same_diff_dict}")
                 print(f" Attribute dict: {peaks_attribute_dict[peak_idx]}")
+            
+            # print(f" Same diff dict: {peaks_same_diff_dict}")
+            # print(f" Attribute dict: {peaks_attribute_dict[peak_idx]}")
 
     for peak_idx in peaks_attribute_dict:
         print(f"\nPeak {peak_idx+1}:")
