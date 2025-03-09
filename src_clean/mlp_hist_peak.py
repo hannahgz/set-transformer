@@ -423,7 +423,16 @@ def initialize_attribute_count_dict():
 
     return attribute_count_dict
 
+def initialize_same_count_dict():
+    dict = {}
+
+    for id in all_ids:
+        dict[id] = 0
+    dict["total"] = 0
+    return dict
+
 from itertools import combinations
+from collections import Counter
 
 def count_combinations(numbers):
     """
@@ -444,6 +453,22 @@ def count_combinations(numbers):
 
     return same_count, diff_count
 
+def has_exactly_four_same(numbers):
+    # Count occurrences of each number
+    counts = Counter(numbers)
+    # Find the number that appears exactly 4 times
+    for number, count in counts.items():
+        if count == 4:
+            return True, number
+    return False, None
+
+def has_exactly_five_same(numbers):
+    counts = Counter(numbers)
+    for number, count in counts.items():
+        if count == 5:
+            return True, number
+    return False, None
+
 def initialize_same_diff_dict():
     same_diff_dict = {
         "shape": {"same": 0, "diff": 0, "total": 0},
@@ -456,12 +481,17 @@ def initialize_same_diff_dict():
 def summary_statistics_from_peak_info(peaks_info, top=None):
     peaks_attribute_dict = {}
     peaks_same_diff_dict = {}
+    four_same_dicts = {}
+    five_same_dicts = {}
     total_attributes = {}
     
     for peak_idx in peaks_info['examples_by_peak']:
         print(f"\nProcessing Peak {peak_idx}:")
         peaks_attribute_dict[peak_idx] = initialize_attribute_count_dict()
         peaks_same_diff_dict[peak_idx] = initialize_same_diff_dict()
+        four_same_dicts[peak_idx] = initialize_same_count_dict()
+        five_same_dicts[peak_idx] = initialize_same_count_dict()
+
         total_attributes[peak_idx] = 0
 
         if top is None:
@@ -503,6 +533,16 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
                 peaks_same_diff_dict[peak_idx][attribute_category]["diff"] += diff_count
                 peaks_same_diff_dict[peak_idx][attribute_category]["total"] += 10
 
+                is_five_same, five_same_value = has_exactly_five_same(attrs_dict_by_category[attribute_category])[0]:
+                if is_five_same:
+                    five_same_dicts[peak_idx][five_same_value] += 1
+                five_same_dicts[peak_idx]["total"] += 1
+
+                is_four_same, four_same_value = has_exactly_four_same(attrs_dict_by_category[attribute_category])[0]:
+                if is_four_same:
+                    four_same_dicts[peak_idx][four_same_value] += 1
+                four_same_dicts[peak_idx]["total"] += 1
+
             # if index % 10 == 0:
             #     print(f" Same diff dict: {peaks_same_diff_dict}")
             #     print(f" Attribute dict: {peaks_attribute_dict[peak_idx]}")
@@ -525,6 +565,15 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
             diff_pct = curr_same_diff_dict[attribute_category]["diff"]/curr_same_diff_dict[attribute_category]["total"]
             print(f"    {attribute_category}: Same - {same_pct:.2%}, Different - {diff_pct:.2%}")
 
+        print("Four Same")
+        curr_four_same_dict = four_same_dicts[peak_idx]
+        for id in all_ids:
+            print(f"    Percentage of {tokenizer.id_to_token[id]}: {curr_four_same_dict[id]/curr_four_same_dict['total']:.2%}")
+
+        print("Five Same")
+        curr_four_same_dict = four_same_dicts[peak_idx]
+        for id in all_ids:
+            print(f"    Percentage of {tokenizer.id_to_token[id]}: {curr_four_same_dict[id]/curr_four_same_dict['total']:.2%}")
 
 def save_peak_figure(peaks_info, filename=None, dpi=300, format='png'):
     """
