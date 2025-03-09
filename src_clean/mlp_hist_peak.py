@@ -885,14 +885,19 @@ if __name__ == "__main__":
 
     layer = 1
     layer_0_target_neurons = [2, 4, 12, 19, 34, 36, 37, 43, 44, 54, 60, 61]
-    # layer_1_target_neurons = [1, 2, 3, 4, 6, 9, 10, 12, 14, 15, 17, 18, 20, 21, 22, 23, 27, 29, 30, 32]
-    layer_1_target_neurons = [1]
+    layer_1_target_neurons = [1, 2, 3, 4, 6, 9, 10, 12, 14, 15, 17, 18, 20, 21, 22, 23, 27, 29, 30, 32]
+    # layer_1_target_neurons = [1]
     # set_type_filter = 0
 
     # Get parameters for peak detection
+    # min_peak_height = 0.04
+    # min_peak_distance = 0.05
+    # prominence = 0.01
+    # num_bins = 50
+
     min_peak_height = 0.04
-    min_peak_distance = 0.05
-    prominence = 0.01
+    min_peak_distance = 0.075
+    prominence = 0.05
     num_bins = 50
     
     for set_type_filter in [0, 1]:
