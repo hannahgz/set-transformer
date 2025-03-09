@@ -725,7 +725,7 @@ if __name__ == "__main__":
     prominence = 0.01
     num_bins = 50
     
-    for set_type_filter in [0, 1]:
+    for set_type_filter in [0]:
         for neuron in [36]:
             examples_file = "results/val_input_examples.pkl"
 
@@ -749,7 +749,7 @@ if __name__ == "__main__":
             # print(f"Peaks info saved to {peaks_info_path}")
             peaks_info = load_peaks_info(layer, neuron=neuron, set_type_filter=set_type_filter)
 
-            summary_statistics_from_peak_info(peaks_info, top=100)
+            summary_statistics_from_peak_info(peaks_info, top=10)
 
 
     # for set_type_filter in [0, 1]:
