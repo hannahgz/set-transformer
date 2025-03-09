@@ -571,9 +571,9 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
             print(f"    Percentage of {tokenizer.id_to_token[id]}: {curr_four_same_dict[id]/curr_four_same_dict['total']:.2%}")
 
         print("Five Same")
-        curr_four_same_dict = four_same_dicts[peak_idx]
+        curr_five_same_dict = five_same_dicts[peak_idx]
         for id in all_ids:
-            print(f"    Percentage of {tokenizer.id_to_token[id]}: {curr_four_same_dict[id]/curr_four_same_dict['total']:.2%}")
+            print(f"    Percentage of {tokenizer.id_to_token[id]}: {curr_five_same_dict[id]/curr_five_same_dict['total']:.2%}")
 
 def save_peak_figure(peaks_info, filename=None, dpi=300, format='png'):
     """
