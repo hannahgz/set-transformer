@@ -510,7 +510,7 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
             # print(f" Same diff dict: {peaks_same_diff_dict}")
             # print(f" Attribute dict: {peaks_attribute_dict[peak_idx]}")
 
-    for peak_idx in peaks_attribute_dict:
+    for peak_idx in sorted(peaks_attribute_dict.keys()):
         print(f"\nPeak {peak_idx+1}:")
 
         print("Attribute Breakdown")
@@ -521,8 +521,8 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
         print(f"Total Same and Different")
         curr_same_diff_dict = peaks_same_diff_dict[peak_idx]
         for attribute_category in curr_same_diff_dict:
-            same_pct = curr_same_diff_dict[attribute_category]["same"]/curr_same_diff_dict["total"]
-            diff_pct = curr_same_diff_dict[attribute_category]["diff"]/curr_same_diff_dict["total"]
+            same_pct = curr_same_diff_dict[attribute_category]["same"]/curr_same_diff_dict[attribute_category]["total"]
+            diff_pct = curr_same_diff_dict[attribute_category]["diff"]/curr_same_diff_dict[attribute_category]["total"]
             print(f"    {attribute_category}: Same - {same_pct:.2%}, Different - {diff_pct:.2%}")
 
 
