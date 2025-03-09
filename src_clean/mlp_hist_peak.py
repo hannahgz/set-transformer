@@ -14,204 +14,223 @@ PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-def find_activation_peaks(layer, neuron, input_examples_file=None, min_peak_height=0.05,
-                          min_peak_distance=0.1, prominence=0.02, num_bins=50,
-                          set_type_filter=None):
-    """
-    Identify peaks in the activation histogram for a specific neuron in a specific layer,
-    and provide examples of inputs that produce activations at each peak.
+# def find_activation_peaks(layer, neuron, input_examples_file=None, min_peak_height=0.05,
+#                           min_peak_distance=0.1, prominence=0.02, num_bins=50,
+#                           set_type_filter=None):
+#     """
+#     Identify peaks in the activation histogram for a specific neuron in a specific layer,
+#     and provide examples of inputs that produce activations at each peak.
 
-    Parameters:
-        layer: Layer number to analyze
-        neuron: Neuron index to analyze
-        input_examples_file: File containing input examples (if None, will not provide examples)
-        min_peak_height: Minimum height of peaks to identify (fraction of max height)
-        min_peak_distance: Minimum distance between peaks (fraction of activation range)
-        prominence: Minimum prominence of peaks (fraction of activation range)
-        num_bins: Number of bins for the histogram
-        set_type_filter: Specific set type to analyze (e.g., 'train', 'test', 'val'). 
-                         If None, all set types will be combined.
+#     Parameters:
+#         layer: Layer number to analyze
+#         neuron: Neuron index to analyze
+#         input_examples_file: File containing input examples (if None, will not provide examples)
+#         min_peak_height: Minimum height of peaks to identify (fraction of max height)
+#         min_peak_distance: Minimum distance between peaks (fraction of activation range)
+#         prominence: Minimum prominence of peaks (fraction of activation range)
+#         num_bins: Number of bins for the histogram
+#         set_type_filter: Specific set type to analyze (e.g., 'train', 'test', 'val'). 
+#                          If None, all set types will be combined.
 
-    Returns:
-        peaks_info: Information about the peaks, including indices, heights, and examples
-    """
-    # Load activation data from the pickle file
-    import os
-    import pickle
-    import numpy as np
-    from scipy.signal import find_peaks
-    import matplotlib.pyplot as plt
-    from collections import defaultdict
+#     Returns:
+#         peaks_info: Information about the peaks, including indices, heights, and examples
+#     """
+#     # Load activation data from the pickle file
+#     import os
+#     import pickle
+#     import numpy as np
+#     from scipy.signal import find_peaks
+#     import matplotlib.pyplot as plt
+#     from collections import defaultdict
 
-    pkl_filename = f"neuron_activations_layer{layer}.pkl"
-    if not os.path.exists(pkl_filename):
-        raise FileNotFoundError(
-            f"Activation data file {pkl_filename} not found")
+#     pkl_filename = f"neuron_activations_layer{layer}.pkl"
+#     if not os.path.exists(pkl_filename):
+#         raise FileNotFoundError(
+#             f"Activation data file {pkl_filename} not found")
 
-    print(f"Loading activation data from {pkl_filename}")
-    with open(pkl_filename, 'rb') as f:
-        neuron_activations = pickle.load(f)
+#     print(f"Loading activation data from {pkl_filename}")
+#     with open(pkl_filename, 'rb') as f:
+#         neuron_activations = pickle.load(f)
 
-    # Check if the neuron exists in the data
-    if neuron not in neuron_activations:
-        raise ValueError(f"Neuron {neuron} not found in layer {layer} data")
+#     # Check if the neuron exists in the data
+#     if neuron not in neuron_activations:
+#         raise ValueError(f"Neuron {neuron} not found in layer {layer} data")
 
-    # Combine activations from all set types or filter by specified set type
-    all_activations = []
-    activation_by_type = {}
+#     # Combine activations from all set types or filter by specified set type
+#     all_activations = []
+#     activation_by_type = {}
 
-    if set_type_filter is not None:
-        # Verify that the requested set type exists
-        if set_type_filter not in neuron_activations[neuron]:
-            available_sets = list(neuron_activations[neuron].keys())
-            raise ValueError(
-                f"Set type '{set_type_filter}' not found. Available set types: {available_sets}")
+#     if set_type_filter is not None:
+#         # Verify that the requested set type exists
+#         if set_type_filter not in neuron_activations[neuron]:
+#             available_sets = list(neuron_activations[neuron].keys())
+#             raise ValueError(
+#                 f"Set type '{set_type_filter}' not found. Available set types: {available_sets}")
 
-        # Only use the specified set type
-        activations = neuron_activations[neuron][set_type_filter]
-        all_activations.extend(activations)
-        activation_by_type[set_type_filter] = activations
-        print(
-            f"Analyzing {len(all_activations)} activations for neuron {neuron} in layer {layer} (set type: {set_type_filter})")
-    else:
-        # Use all available set types
-        for set_type in neuron_activations[neuron]:
-            activations = neuron_activations[neuron][set_type]
-            all_activations.extend(activations)
-            activation_by_type[set_type] = activations
-        print(
-            f"Analyzing {len(all_activations)} total activations for neuron {neuron} in layer {layer} (all set types combined)")
+#         # Only use the specified set type
+#         activations = neuron_activations[neuron][set_type_filter]
+#         all_activations.extend(activations)
+#         activation_by_type[set_type_filter] = activations
+#         print(
+#             f"Analyzing {len(all_activations)} activations for neuron {neuron} in layer {layer} (set type: {set_type_filter})")
+#     else:
+#         # Use all available set types
+#         for set_type in neuron_activations[neuron]:
+#             activations = neuron_activations[neuron][set_type]
+#             all_activations.extend(activations)
+#             activation_by_type[set_type] = activations
+#         print(
+#             f"Analyzing {len(all_activations)} total activations for neuron {neuron} in layer {layer} (all set types combined)")
 
-    # Calculate histogram
-    hist, bin_edges = np.histogram(all_activations, bins=num_bins)
-    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+#     # Calculate histogram
+#     hist, bin_edges = np.histogram(all_activations, bins=num_bins)
+#     bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
 
-    # Normalize histogram for visualization
-    hist_normalized = hist / hist.max()
+#     # Normalize histogram for visualization
+#     hist_normalized = hist / hist.max()
 
-    # Calculate range for peak distance and prominence parameters
-    activation_range = max(all_activations) - min(all_activations)
-    distance = int(min_peak_distance * num_bins)  # Convert to bin count
-    height = min_peak_height * hist.max()  # Minimum height threshold
-    prom = prominence * hist.max()  # Minimum prominence
+#     # Calculate range for peak distance and prominence parameters
+#     activation_range = max(all_activations) - min(all_activations)
+#     distance = int(min_peak_distance * num_bins)  # Convert to bin count
+#     height = min_peak_height * hist.max()  # Minimum height threshold
+#     prom = prominence * hist.max()  # Minimum prominence
 
-    # Find peaks in the histogram
-    peaks, peak_properties = find_peaks(
+#     # Find peaks in the histogram
+#     # peaks, peak_properties = find_peaks(
+#     #     hist, height=height, distance=distance, prominence=prom)
+    
+#     peaks = find_peaks_with_edges(hist, height, distance, prom)
+
+#     print(f"Found {len(peaks)} peaks in the histogram")
+
+#     # Create a dictionary to store peak information (without figure yet)
+#     peaks_info = {
+#         'neuron': neuron,
+#         'layer': layer,
+#         'set_type': set_type_filter if set_type_filter is not None else 'all',
+#         'bin_centers': bin_centers[peaks],
+#         'heights': hist[peaks],
+#         # 'prominences': peak_properties['prominences'],
+#         'examples_by_peak': defaultdict(list)
+#     }
+
+#     # Plot the histogram with identified peaks
+#     fig = plt.figure(figsize=(12, 6))
+#     plt.bar(bin_centers, hist, width=(bin_edges[1] - bin_edges[0]), alpha=0.7,
+#             color='skyblue', edgecolor='black')
+
+#     # Mark the peaks
+#     plt.plot(bin_centers[peaks], hist[peaks], "x", color='red', markersize=10)
+#     for i, peak in enumerate(peaks):
+#         plt.text(bin_centers[peak], hist[peak], f"Peak {i+1}",
+#                  fontsize=10, ha='center', va='bottom')
+
+#     title_suffix = f" - {set_type_filter} Set" if set_type_filter is not None else " - All Sets Combined"
+#     plt.title(
+#         f'Neuron {neuron} in Layer {layer}{title_suffix} - Activation Histogram with {len(peaks)} Peaks')
+#     plt.xlabel('Activation Value')
+#     plt.ylabel('Frequency')
+#     plt.grid(alpha=0.3)
+
+#     # Load input examples if a file is provided
+#     if input_examples_file and os.path.exists(input_examples_file):
+#         print(f"Loading input examples from {input_examples_file}")
+#         with open(input_examples_file, 'rb') as f:
+#             input_examples = pickle.load(f)
+
+#         # Get the bin for each activation value
+#         all_activations_with_examples = []
+
+#         # If filtering by set type, only use examples from that set type
+#         if set_type_filter:
+#             if set_type_filter in input_examples:
+#                 for i, act_value in enumerate(activation_by_type[set_type_filter]):
+#                     if i < len(input_examples[set_type_filter]):
+#                         all_activations_with_examples.append(
+#                             (act_value, input_examples[set_type_filter][i]))
+#             else:
+#                 print(
+#                     f"Warning: No input examples found for set type '{set_type_filter}'")
+#         # Otherwise use examples from all available set types
+#         else:
+#             for cur_set_type in activation_by_type:
+#                 if cur_set_type in input_examples:
+#                     for i, act_value in enumerate(activation_by_type[cur_set_type]):
+#                         if i < len(input_examples[cur_set_type]):
+#                             all_activations_with_examples.append(
+#                                 (act_value, input_examples[cur_set_type][i]))
+
+#         # Assign each activation to its nearest peak
+#         peak_values = bin_centers[peaks]
+#         for act_value, example in all_activations_with_examples:
+#             # Find the closest peak
+#             closest_peak_idx = np.abs(peak_values - act_value).argmin()
+#             # Store the example with its exact activation value
+#             peaks_info['examples_by_peak'][closest_peak_idx].append(
+#                 (act_value, example))
+
+#         # Sort examples by how close they are to the peak value
+#         for peak_idx in peaks_info['examples_by_peak']:
+#             peaks_info['examples_by_peak'][peak_idx].sort(
+#                 key=lambda x: abs(x[0] - peak_values[peak_idx]))
+#             # Keep only the top few examples closest to the peak
+#             peaks_info['examples_by_peak'][peak_idx] = peaks_info['examples_by_peak'][peak_idx][:5]
+
+#     else:
+#         print("No input examples file provided or file not found")
+
+#         # For each peak, find the activation values closest to it
+#         peak_values = bin_centers[peaks]
+#         for i, peak_val in enumerate(peak_values):
+#             # Find indices of activations closest to this peak
+#             closest_indices = np.argsort(
+#                 np.abs(np.array(all_activations) - peak_val))[:5]
+#             closest_activations = [all_activations[idx]
+#                                    for idx in closest_indices]
+#             peaks_info['examples_by_peak'][i] = [
+#                 (act, f"Activation: {act:.4f}") for act in closest_activations]
+
+#     # Print information about each peak
+#     for i, peak in enumerate(peaks):
+#         peak_value = bin_centers[peak]
+#         peak_height = hist[peak]
+#         prominence = peak_properties['prominences'][i]
+
+#         print(f"\nPeak {i+1}:")
+#         print(f"  Value: {peak_value:.4f}")
+#         print(f"  Height: {peak_height} ({peak_height/hist.max():.2%} of max)")
+#         print(
+#             f"  Prominence: {prominence} ({prominence/hist.max():.2%} of max)")
+
+#         if i in peaks_info['examples_by_peak']:
+#             print("  Example activations near this peak:")
+#             for j, (act_value, example) in enumerate(peaks_info['examples_by_peak'][i][:3]):
+#                 print(f"    Example {j+1}: {act_value:.4f} - {example[:50]}..." if len(str(example)) > 50
+#                       else f"    Example {j+1}: {act_value:.4f} - {example}")
+
+#     # Now add the completed figure to the dictionary
+#     peaks_info['figure'] = fig
+
+#     plt.show()
+#     return peaks_info
+
+
+# Modified peak detection approach
+def find_peaks_with_edges(hist, height, distance, prom):
+    # First find regular peaks
+    peaks, _ = find_peaks(
         hist, height=height, distance=distance, prominence=prom)
-
-    print(f"Found {len(peaks)} peaks in the histogram")
-
-    # Create a dictionary to store peak information (without figure yet)
-    peaks_info = {
-        'neuron': neuron,
-        'layer': layer,
-        'set_type': set_type_filter if set_type_filter is not None else 'all',
-        'bin_centers': bin_centers[peaks],
-        'heights': hist[peaks],
-        'prominences': peak_properties['prominences'],
-        'examples_by_peak': defaultdict(list)
-    }
-
-    # Plot the histogram with identified peaks
-    fig = plt.figure(figsize=(12, 6))
-    plt.bar(bin_centers, hist, width=(bin_edges[1] - bin_edges[0]), alpha=0.7,
-            color='skyblue', edgecolor='black')
-
-    # Mark the peaks
-    plt.plot(bin_centers[peaks], hist[peaks], "x", color='red', markersize=10)
-    for i, peak in enumerate(peaks):
-        plt.text(bin_centers[peak], hist[peak], f"Peak {i+1}",
-                 fontsize=10, ha='center', va='bottom')
-
-    title_suffix = f" - {set_type_filter} Set" if set_type_filter is not None else " - All Sets Combined"
-    plt.title(
-        f'Neuron {neuron} in Layer {layer}{title_suffix} - Activation Histogram with {len(peaks)} Peaks')
-    plt.xlabel('Activation Value')
-    plt.ylabel('Frequency')
-    plt.grid(alpha=0.3)
-
-    # Load input examples if a file is provided
-    if input_examples_file and os.path.exists(input_examples_file):
-        print(f"Loading input examples from {input_examples_file}")
-        with open(input_examples_file, 'rb') as f:
-            input_examples = pickle.load(f)
-
-        # Get the bin for each activation value
-        all_activations_with_examples = []
-
-        # If filtering by set type, only use examples from that set type
-        if set_type_filter:
-            if set_type_filter in input_examples:
-                for i, act_value in enumerate(activation_by_type[set_type_filter]):
-                    if i < len(input_examples[set_type_filter]):
-                        all_activations_with_examples.append(
-                            (act_value, input_examples[set_type_filter][i]))
-            else:
-                print(
-                    f"Warning: No input examples found for set type '{set_type_filter}'")
-        # Otherwise use examples from all available set types
-        else:
-            for cur_set_type in activation_by_type:
-                if cur_set_type in input_examples:
-                    for i, act_value in enumerate(activation_by_type[cur_set_type]):
-                        if i < len(input_examples[cur_set_type]):
-                            all_activations_with_examples.append(
-                                (act_value, input_examples[cur_set_type][i]))
-
-        # Assign each activation to its nearest peak
-        peak_values = bin_centers[peaks]
-        for act_value, example in all_activations_with_examples:
-            # Find the closest peak
-            closest_peak_idx = np.abs(peak_values - act_value).argmin()
-            # Store the example with its exact activation value
-            peaks_info['examples_by_peak'][closest_peak_idx].append(
-                (act_value, example))
-
-        # Sort examples by how close they are to the peak value
-        for peak_idx in peaks_info['examples_by_peak']:
-            peaks_info['examples_by_peak'][peak_idx].sort(
-                key=lambda x: abs(x[0] - peak_values[peak_idx]))
-            # Keep only the top few examples closest to the peak
-            peaks_info['examples_by_peak'][peak_idx] = peaks_info['examples_by_peak'][peak_idx][:5]
-
-    else:
-        print("No input examples file provided or file not found")
-
-        # For each peak, find the activation values closest to it
-        peak_values = bin_centers[peaks]
-        for i, peak_val in enumerate(peak_values):
-            # Find indices of activations closest to this peak
-            closest_indices = np.argsort(
-                np.abs(np.array(all_activations) - peak_val))[:5]
-            closest_activations = [all_activations[idx]
-                                   for idx in closest_indices]
-            peaks_info['examples_by_peak'][i] = [
-                (act, f"Activation: {act:.4f}") for act in closest_activations]
-
-    # Print information about each peak
-    for i, peak in enumerate(peaks):
-        peak_value = bin_centers[peak]
-        peak_height = hist[peak]
-        prominence = peak_properties['prominences'][i]
-
-        print(f"\nPeak {i+1}:")
-        print(f"  Value: {peak_value:.4f}")
-        print(f"  Height: {peak_height} ({peak_height/hist.max():.2%} of max)")
-        print(
-            f"  Prominence: {prominence} ({prominence/hist.max():.2%} of max)")
-
-        if i in peaks_info['examples_by_peak']:
-            print("  Example activations near this peak:")
-            for j, (act_value, example) in enumerate(peaks_info['examples_by_peak'][i][:3]):
-                print(f"    Example {j+1}: {act_value:.4f} - {example[:50]}..." if len(str(example)) > 50
-                      else f"    Example {j+1}: {act_value:.4f} - {example}")
-
-    # Now add the completed figure to the dictionary
-    peaks_info['figure'] = fig
-
-    plt.show()
-    return peaks_info
-
+    
+    # Check for edge peaks
+    # Left edge
+    if hist[0] > hist[1] and hist[0] > height:
+        peaks = np.append([0], peaks)
+        
+    # Right edge
+    if hist[-1] > hist[-2] and hist[-1] > height:
+        peaks = np.append(peaks, [len(hist)-1])
+        
+    return peaks
 
 def get_peak_info(layer, neuron, input_examples_file=None, min_peak_height=0.05,
                           min_peak_distance=0.1, prominence=0.02, num_bins=50,
@@ -295,7 +314,10 @@ def get_peak_info(layer, neuron, input_examples_file=None, min_peak_height=0.05,
     prom = prominence * hist.max()  # Minimum prominence
 
     # Find peaks in the histogram
-    peaks, peak_properties = find_peaks(
+    # peaks, peak_properties = find_peaks(
+    #     hist, height=height, distance=distance, prominence=prom)
+    
+    peaks = find_peaks_with_edges(
         hist, height=height, distance=distance, prominence=prom)
 
     print(f"Found {len(peaks)} peaks in the histogram")
@@ -307,7 +329,6 @@ def get_peak_info(layer, neuron, input_examples_file=None, min_peak_height=0.05,
         'set_type': set_type_filter if set_type_filter is not None else 'all',
         'bin_centers': bin_centers[peaks],
         'heights': hist[peaks],
-        'prominences': peak_properties['prominences'],
         'examples_by_peak': defaultdict(list)
     }
 
@@ -864,7 +885,8 @@ if __name__ == "__main__":
 
     layer = 1
     layer_0_target_neurons = [2, 4, 12, 19, 34, 36, 37, 43, 44, 54, 60, 61]
-    layer_1_target_neurons = [1, 2, 3, 4, 6, 9, 10, 12, 14, 15, 17, 18, 20, 21, 22, 23, 27, 29, 30, 32]
+    # layer_1_target_neurons = [1, 2, 3, 4, 6, 9, 10, 12, 14, 15, 17, 18, 20, 21, 22, 23, 27, 29, 30, 32]
+    layer_1_target_neurons = [1]
     # set_type_filter = 0
 
     # Get parameters for peak detection
