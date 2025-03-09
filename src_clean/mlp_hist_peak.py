@@ -499,13 +499,13 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
             
             for attribute_category in attrs_dict_by_category:
                 same_count, diff_count = count_combinations(attrs_dict_by_category[attribute_category])
-                peaks_same_diff_dict[attribute_category]["same"] += same_count
-                peaks_same_diff_dict[attribute_category]["diff"] += diff_count
-                peaks_same_diff_dict[attribute_category]["total"] += 10
+                peaks_same_diff_dict[peak_idx][attribute_category]["same"] += same_count
+                peaks_same_diff_dict[peak_idx][attribute_category]["diff"] += diff_count
+                peaks_same_diff_dict[peak_idx][attribute_category]["total"] += 10
 
-            if index % 10 == 0:
-                print(f" Same diff dict: {peaks_same_diff_dict}")
-                print(f" Attribute dict: {peaks_attribute_dict[peak_idx]}")
+            # if index % 10 == 0:
+            #     print(f" Same diff dict: {peaks_same_diff_dict}")
+            #     print(f" Attribute dict: {peaks_attribute_dict[peak_idx]}")
             
             # print(f" Same diff dict: {peaks_same_diff_dict}")
             # print(f" Attribute dict: {peaks_attribute_dict[peak_idx]}")
