@@ -458,7 +458,7 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
 
         if top is None:
             top = len(peaks_info['examples_by_peak'][peak_idx])
-        for example in peaks_info['examples_by_peak'][peak_idx][:top]:
+        for _, example in peaks_info['examples_by_peak'][peak_idx][:top]:
             i = 0
             attrs_dict_by_category = {
                 "shape": [],
@@ -473,7 +473,7 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
             while i < 40:
                 card = example[i]
                 attr = example[i+1]
-
+                
                 peaks_attribute_dict[peak_idx][attr] += 1
                 total_num_attributes += 1
 
@@ -595,38 +595,38 @@ def create_input_sequence_dataset(data_loader, config):
     return input_examples
 
 
-def load_peaks_info(layer, neuron, config, set_type_filter=None):
-    """
-    Load peaks information from a pickle file.
+# def load_peaks_info(layer, neuron, config, set_type_filter=None):
+#     """
+#     Load peaks information from a pickle file.
 
-    Parameters:
-        layer: Layer number
-        neuron: Neuron index
-        set_type_filter: Set type to filter by (if None, all set types)
+#     Parameters:
+#         layer: Layer number
+#         neuron: Neuron index
+#         set_type_filter: Set type to filter by (if None, all set types)
 
-    Returns:
-        peaks_info: Dictionary with peak information
-    """
+#     Returns:
+#         peaks_info: Dictionary with peak information
+#     """
 
-    tokenizer = load_tokenizer(config.tokenizer_path)
-    filename = f"results/peaks_info_layer{layer}_neuron{neuron}_set_type_{set_type_filter}.pkl"
-    if not os.path.exists(filename):
-        raise FileNotFoundError(f"Peaks info file {filename} not found")
+#     tokenizer = load_tokenizer(config.tokenizer_path)
+#     filename = f"results/peaks_info_layer{layer}_neuron{neuron}_set_type_{set_type_filter}.pkl"
+#     if not os.path.exists(filename):
+#         raise FileNotFoundError(f"Peaks info file {filename} not found")
 
-    with open(filename, 'rb') as f:
-        peaks_info = pickle.load(f)
+#     with open(filename, 'rb') as f:
+#         peaks_info = pickle.load(f)
 
-    # Print tokenized versions of all the saved examples
-    for peak_idx in peaks_info['examples_by_peak']:
-        print(f"\nPeak {peak_idx+1}:")        
-        for example in peaks_info['examples_by_peak'][peak_idx][0:3]:
-            # Decode the tokenized example
-            decoded_example = tokenizer.decode(example[1])
+#     # # Print tokenized versions of all the saved examples
+#     # for peak_idx in peaks_info['examples_by_peak']:
+#     #     print(f"\nPeak {peak_idx+1}:")        
+#     #     for example in peaks_info['examples_by_peak'][peak_idx][0:3]:
+#     #         # Decode the tokenized example
+#     #         decoded_example = tokenizer.decode(example[1])
 
-            print(f"  Activation: {example[0]:.4f}")
-            print(f"  {decoded_example}")
-            print(f"  {pretty_print_input(decoded_example)}")
-    return peaks_info
+#     #         print(f"  Activation: {example[0]:.4f}")
+#     #         print(f"  {decoded_example}")
+#     #         print(f"  {pretty_print_input(decoded_example)}")
+#     return peaks_info
 
 # def save_top_peak_examples_as_txt(config, peaks_info, filename, top=2):
 #     tokenizer = load_tokenizer(config.tokenizer_path)
@@ -659,6 +659,16 @@ def save_top_peak_examples_as_txt(config, peaks_info, filename, top=2):
                 # Add two spaces of indentation to each line in the table
                 indented_table = "\n".join("  " + line for line in pretty_table.split("\n"))
                 f.write(f"{indented_table}\n")
+
+def load_peaks_info(layer, neuron, set_type_filter):
+    peaks_dir = f"results/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
+    os.makedirs(peaks_dir, exist_ok=True)
+
+    peaks_info_path = os.path.join(peaks_dir, "all_info.pkl")
+    with open(peaks_info_path, 'rb') as f:
+        peaks_info = pickle.load(f)
+
+    return peaks_info
 
 # Example usage:
 if __name__ == "__main__":
@@ -699,24 +709,25 @@ if __name__ == "__main__":
         for neuron in [36]:
             examples_file = "results/val_input_examples.pkl"
 
-            peaks_info = get_peak_info(
-                layer=layer,
-                neuron=neuron,
-                input_examples_file=examples_file,
-                min_peak_height=min_peak_height,
-                min_peak_distance=min_peak_distance,
-                prominence=prominence,
-                num_bins=num_bins,
-                set_type_filter=set_type_filter,
-            )
+            # peaks_info = get_peak_info(
+            #     layer=layer,
+            #     neuron=neuron,
+            #     input_examples_file=examples_file,
+            #     min_peak_height=min_peak_height,
+            #     min_peak_distance=min_peak_distance,
+            #     prominence=prominence,
+            #     num_bins=num_bins,
+            #     set_type_filter=set_type_filter,
+            # )
 
-            peaks_dir = f"results/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
-            os.makedirs(peaks_dir, exist_ok=True)
+            # peaks_dir = f"results/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
+            # os.makedirs(peaks_dir, exist_ok=True)
 
-            peaks_info_path = os.path.join(peaks_dir, "all_info.pkl")
-            with open(peaks_info_path, 'wb') as f:
-                pickle.dump(peaks_info, f)
-            print(f"Peaks info saved to {peaks_info_path}")
+            # peaks_info_path = os.path.join(peaks_dir, "all_info.pkl")
+            # with open(peaks_info_path, 'wb') as f:
+            #     pickle.dump(peaks_info, f)
+            # print(f"Peaks info saved to {peaks_info_path}")
+            peaks_info = load_peaks_info(layer, neuron=neuron, set_type_filter=set_type_filter)
 
             summary_statistics_from_peak_info(peaks_info, top=100)
 
