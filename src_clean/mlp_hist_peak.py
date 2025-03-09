@@ -478,6 +478,7 @@ def initialize_same_diff_dict():
     }
 
     return same_diff_dict
+
 def summary_statistics_from_peak_info(peaks_info, top=None):
     peaks_attribute_dict = {}
     peaks_same_diff_dict = {}
@@ -574,6 +575,102 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
         curr_five_same_dict = five_same_dicts[peak_idx]
         for id in all_ids:
             print(f"    Percentage of {tokenizer.id_to_token[id]}: {curr_five_same_dict[id]/curr_five_same_dict['total']:.2%}")
+
+
+def save_summary_statistics_from_peak_info(peaks_info, top=None, output_file="summary_statistics.txt",):
+    peaks_attribute_dict = {}
+    peaks_same_diff_dict = {}
+    four_same_dicts = {}
+    five_same_dicts = {}
+    total_attributes = {}
+    
+    # Open the output file
+    with open(output_file, 'w') as f:
+        for peak_idx in peaks_info['examples_by_peak']:
+            peaks_attribute_dict[peak_idx] = initialize_attribute_count_dict()
+            peaks_same_diff_dict[peak_idx] = initialize_same_diff_dict()
+            four_same_dicts[peak_idx] = initialize_same_count_dict()
+            five_same_dicts[peak_idx] = initialize_same_count_dict()
+
+            total_attributes[peak_idx] = 0
+
+            if top is None:
+                top = len(peaks_info['examples_by_peak'][peak_idx])
+            for index, (_, example) in enumerate(peaks_info['examples_by_peak'][peak_idx][:top]):
+                i = 0
+                attrs_dict_by_category = {
+                    "shape": [],
+                    "color": [],
+                    "number": [],
+                    "shading": []
+                }
+                
+                while i < 40:
+                    card = example[i]
+                    attr = example[i+1]
+                    peaks_attribute_dict[peak_idx][attr] += 1
+                    
+                    if attr in shape_ids:
+                        attrs_dict_by_category["shape"].append(attr)
+                    elif attr in color_ids:
+                        attrs_dict_by_category["color"].append(attr)
+                    elif attr in number_ids:
+                        attrs_dict_by_category["number"].append(attr)
+                    elif attr in shading_ids:
+                        attrs_dict_by_category["shading"].append(attr)
+                    total_attributes[peak_idx] += 1
+                    i += 2
+                
+                for attribute_category in attrs_dict_by_category:
+                    same_count, diff_count = count_combinations(attrs_dict_by_category[attribute_category])
+                    peaks_same_diff_dict[peak_idx][attribute_category]["same"] += same_count
+                    peaks_same_diff_dict[peak_idx][attribute_category]["diff"] += diff_count
+                    peaks_same_diff_dict[peak_idx][attribute_category]["total"] += 10
+
+                    is_five_same, five_same_value = has_exactly_five_same(attrs_dict_by_category[attribute_category])
+                    if is_five_same:
+                        five_same_dicts[peak_idx][five_same_value] += 1
+                    five_same_dicts[peak_idx]["total"] += 1
+
+                    is_four_same, four_same_value = has_exactly_four_same(attrs_dict_by_category[attribute_category])
+                    if is_four_same:
+                        four_same_dicts[peak_idx][four_same_value] += 1
+                    four_same_dicts[peak_idx]["total"] += 1
+
+        # Write the summary statistics to the file
+        for peak_idx in sorted(peaks_attribute_dict.keys()):
+            f.write(f"\nPeak {peak_idx+1}:\n")
+
+            f.write("Attribute Breakdown\n")
+            
+            for id in all_ids:
+                f.write(f"    Percentage of {tokenizer.id_to_token[id]}: {peaks_attribute_dict[peak_idx][id]/total_attributes[peak_idx]:.2%}\n")
+
+            f.write(f"Total Same and Different\n")
+            curr_same_diff_dict = peaks_same_diff_dict[peak_idx]
+            for attribute_category in curr_same_diff_dict:
+                same_pct = curr_same_diff_dict[attribute_category]["same"]/curr_same_diff_dict[attribute_category]["total"]
+                diff_pct = curr_same_diff_dict[attribute_category]["diff"]/curr_same_diff_dict[attribute_category]["total"]
+                f.write(f"    {attribute_category}: Same - {same_pct:.2%}, Different - {diff_pct:.2%}\n")
+
+            f.write("Four Same\n")
+            curr_four_same_dict = four_same_dicts[peak_idx]
+            for id in all_ids:
+                f.write(f"    Percentage of {tokenizer.id_to_token[id]}: {curr_four_same_dict[id]/curr_four_same_dict['total']:.2%}\n")
+
+            f.write("Five Same\n")
+            curr_five_same_dict = five_same_dicts[peak_idx]
+            for id in all_ids:
+                f.write(f"    Percentage of {tokenizer.id_to_token[id]}: {curr_five_same_dict[id]/curr_five_same_dict['total']:.2%}\n")
+    
+    return {
+        "peaks_attribute_dict": peaks_attribute_dict,
+        "peaks_same_diff_dict": peaks_same_diff_dict,
+        "four_same_dicts": four_same_dicts,
+        "five_same_dicts": five_same_dicts,
+        "total_attributes": total_attributes
+    }
+
 
 def save_peak_figure(peaks_info, filename=None, dpi=300, format='png'):
     """
@@ -730,7 +827,7 @@ def save_top_peak_examples_as_txt(config, peaks_info, filename, top=2):
                 f.write(f"{indented_table}\n")
 
 def load_peaks_info(layer, neuron, set_type_filter):
-    peaks_dir = f"results/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
+    peaks_dir = f"data/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
     os.makedirs(peaks_dir, exist_ok=True)
 
     peaks_info_path = os.path.join(peaks_dir, "all_info.pkl")
@@ -774,31 +871,52 @@ if __name__ == "__main__":
     prominence = 0.01
     num_bins = 50
     
-    for set_type_filter in [0]:
-        for neuron in [36]:
+    for set_type_filter in [0, 1]:
+        for neuron in [2, 4, 12, 19, 34, 36, 37, 43, 44, 54, 60, 61]:
+            print(f"Set type filter: {set_type_filter}, Neuron: {neuron}")
             examples_file = "results/val_input_examples.pkl"
 
-            # peaks_info = get_peak_info(
-            #     layer=layer,
-            #     neuron=neuron,
-            #     input_examples_file=examples_file,
-            #     min_peak_height=min_peak_height,
-            #     min_peak_distance=min_peak_distance,
-            #     prominence=prominence,
-            #     num_bins=num_bins,
-            #     set_type_filter=set_type_filter,
-            # )
+            peaks_info = get_peak_info(
+                layer=layer,
+                neuron=neuron,
+                input_examples_file=examples_file,
+                min_peak_height=min_peak_height,
+                min_peak_distance=min_peak_distance,
+                prominence=prominence,
+                num_bins=num_bins,
+                set_type_filter=set_type_filter,
+            )
 
+            peaks_dir = f"data/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
             # peaks_dir = f"results/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
-            # os.makedirs(peaks_dir, exist_ok=True)
+            os.makedirs(peaks_dir, exist_ok=True)
 
-            # peaks_info_path = os.path.join(peaks_dir, "all_info.pkl")
-            # with open(peaks_info_path, 'wb') as f:
-            #     pickle.dump(peaks_info, f)
-            # print(f"Peaks info saved to {peaks_info_path}")
-            peaks_info = load_peaks_info(layer, neuron=neuron, set_type_filter=set_type_filter)
+            peaks_info_path = os.path.join(peaks_dir, "all_info.pkl")
+            with open(peaks_info_path, 'wb') as f:
+                pickle.dump(peaks_info, f)
+            print(f"Peaks info saved to {peaks_info_path}")
+            # peaks_info = load_peaks_info(layer, neuron=neuron, set_type_filter=set_type_filter)
 
-            summary_statistics_from_peak_info(peaks_info, top=50)
+            output_dir= f"results/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
+            os.makedirs(output_dir, exist_ok=True)
+
+            top = 10
+            save_summary_statistics_from_peak_info(
+                peaks_info, 
+                top=top, 
+                output_file=os.path.join(output_dir, f"top_{top}_summary_statistics.txt")
+            )
+
+            save_peak_figure(
+                peaks_info,
+                filename=os.path.join(output_dir, "histogram_peaks.png"),
+            )
+
+            save_top_peak_examples_as_txt(
+                config=GPTConfig44_Complete, 
+                peaks_info=peaks_info, 
+                filename=os.path.join(output_dir, "peak_examples.txt"), 
+                top=top)
 
 
     # for set_type_filter in [0, 1]:
