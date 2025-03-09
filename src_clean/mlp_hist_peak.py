@@ -533,12 +533,12 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
                 peaks_same_diff_dict[peak_idx][attribute_category]["diff"] += diff_count
                 peaks_same_diff_dict[peak_idx][attribute_category]["total"] += 10
 
-                is_five_same, five_same_value = has_exactly_five_same(attrs_dict_by_category[attribute_category])[0]:
+                is_five_same, five_same_value = has_exactly_five_same(attrs_dict_by_category[attribute_category])
                 if is_five_same:
                     five_same_dicts[peak_idx][five_same_value] += 1
                 five_same_dicts[peak_idx]["total"] += 1
 
-                is_four_same, four_same_value = has_exactly_four_same(attrs_dict_by_category[attribute_category])[0]:
+                is_four_same, four_same_value = has_exactly_four_same(attrs_dict_by_category[attribute_category])
                 if is_four_same:
                     four_same_dicts[peak_idx][four_same_value] += 1
                 four_same_dicts[peak_idx]["total"] += 1
