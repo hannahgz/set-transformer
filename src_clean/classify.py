@@ -134,13 +134,13 @@ def log_per_class_statistics(
                     f"  Accuracy: {accuracy_per_class:.4f} ({correct}/{total})\n")
 
 
-def train_model(model, train_data, val_data, criterion, optimizer, num_epochs=100, batch_size=32, patience=5, dataset_name=None, capture_layer=None, model_name=None):
+def train_model(model, train_data, val_data, criterion, optimizer, project, num_epochs=100, batch_size=32, patience=5, dataset_name=None, capture_layer=None, model_name=None):
     """Trains the model using validation accuracy for early stopping."""
     X_train, y_train = train_data
     X_val, y_val = val_data
 
     wandb.init(
-        project="complete-classify-card",
+        project=project,
         config={
             "epochs": num_epochs,
             "batch_size": batch_size,
@@ -212,6 +212,7 @@ def run_classify(
         input_dim,
         output_dim,
         capture_layer,
+        project="complete-classify-card",
         num_epochs=100,
         batch_size=32,
         lr=0.001,
@@ -255,8 +256,9 @@ def run_classify(
         (X_val, y_val),
         criterion,
         optimizer,
-        num_epochs,
-        batch_size,
+        project=project,
+        num_epochs=num_epochs,
+        batch_size=batch_size,
         dataset_name=dataset_name,
         capture_layer=capture_layer,
         model_name=model_type,
@@ -815,23 +817,44 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
 
-    n_components = 2
-    for layer in range(4):
-        fig, pca = plot_probe_weight_pca(
-            model_config=config, 
-            probe_config=LinearProbeBindingCardAttrConfig, 
-            capture_layer=layer, 
-            n_components=n_components)
-        fig.savefig(f"COMPLETE_FIGS/pca/probe_weight_vectors_layer{layer}_n_components_{n_components}.png", bbox_inches="tight")
+    pred_card_from_attr = True
+    for capture_layer in [2, 1, 3, 4]:
+        if pred_card_from_attr:
+            print(f"Predicting card from attribute, capture layer: {capture_layer}")
+            output_dim = 5
+        else:
+            print(f"Predicting attribute from card, capture layer: {capture_layer}")
+            output_dim = 12
 
-    n_components = 3
-    for layer in range(4):
-        fig, pca = plot_probe_weight_pca(
-            model_config=config, 
-            probe_config=LinearProbeBindingCardAttrConfig, 
-            capture_layer=layer, 
-            n_components=n_components)
-        fig.savefig(f"COMPLETE_FIGS/pca/probe_weight_vectors_layer{layer}_n_components_{n_components}.png", bbox_inches="tight")
+        run_classify(
+            input_dim=64,
+            output_dim=output_dim,
+            capture_layer=capture_layer,
+            project="full-complete-classify-card",
+            batch_size=32,
+            lr=0.001,
+            model_type="linear",
+            tokenizer_path=config.tokenizer_path,
+            pred_card_from_attr=pred_card_from_attr)
+
+
+    # n_components = 2
+    # for layer in range(4):
+    #     fig, pca = plot_probe_weight_pca(
+    #         model_config=config, 
+    #         probe_config=LinearProbeBindingCardAttrConfig, 
+    #         capture_layer=layer, 
+    #         n_components=n_components)
+    #     fig.savefig(f"COMPLETE_FIGS/pca/probe_weight_vectors_layer{layer}_n_components_{n_components}.png", bbox_inches="tight")
+
+    # n_components = 3
+    # for layer in range(4):
+    #     fig, pca = plot_probe_weight_pca(
+    #         model_config=config, 
+    #         probe_config=LinearProbeBindingCardAttrConfig, 
+    #         capture_layer=layer, 
+    #         n_components=n_components)
+    #     fig.savefig(f"COMPLETE_FIGS/pca/probe_weight_vectors_layer{layer}_n_components_{n_components}.png", bbox_inches="tight")
     # for capture_layer in range(4):
 
     #     # avg_similarity_matrix = linear_probe_vector_analysis_average(
