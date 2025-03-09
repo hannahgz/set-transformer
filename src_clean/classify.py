@@ -817,7 +817,7 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
 
-    pred_card_from_attr = True
+    pred_card_from_attr = False
     for capture_layer in [2, 1, 3, 4]:
         if pred_card_from_attr:
             print(f"Predicting card from attribute, capture layer: {capture_layer}")
