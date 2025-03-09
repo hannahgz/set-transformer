@@ -318,7 +318,7 @@ def get_peak_info(layer, neuron, input_examples_file=None, min_peak_height=0.05,
     #     hist, height=height, distance=distance, prominence=prom)
     
     peaks = find_peaks_with_edges(
-        hist, height=height, distance=distance, prominence=prom)
+        hist, height=height, distance=distance, prom=prom)
 
     print(f"Found {len(peaks)} peaks in the histogram")
 
