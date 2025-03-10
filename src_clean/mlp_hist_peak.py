@@ -883,7 +883,7 @@ if __name__ == "__main__":
     #     data_loader=val_loader,
     #     config=GPTConfig44_Complete(),)
 
-    layer = 1
+    layer = 0
     layer_0_target_neurons = [2, 4, 12, 19, 34, 36, 37, 43, 44, 54, 60, 61]
     layer_1_target_neurons = [1, 2, 3, 4, 6, 9, 10, 12, 14, 15, 17, 18, 20, 21, 22, 23, 27, 29, 30, 32]
     # layer_1_target_neurons = [1]
@@ -902,7 +902,8 @@ if __name__ == "__main__":
     
     for set_type_filter in [0, 1]:
         # for neuron in [2, 4, 12, 19, 34, 36, 37, 43, 44, 54, 60, 61]:
-        for neuron in layer_1_target_neurons:
+        # for neuron in layer_1_target_neurons:
+        for neuron in layer_0_target_neurons:
             print(f"Set type filter: {set_type_filter}, Neuron: {neuron}")
             examples_file = "results/val_input_examples.pkl"
 
