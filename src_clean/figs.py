@@ -740,10 +740,10 @@ def plot_consolidated_attribute_metrics(layers, tokenizer_path, loss_range = [0,
     os.makedirs(save_path, exist_ok=True)
     
     # Save figures
-    fig_train_loss.savefig(f'{save_path}/all_layers_train_loss.png', dpi=300, bbox_inches='tight')
-    fig_val_loss.savefig(f'{save_path}/all_layers_val_loss.png', dpi=300, bbox_inches='tight')
-    fig_train_acc.savefig(f'{save_path}/all_layers_train_acc.png', dpi=300, bbox_inches='tight')
-    fig_val_acc.savefig(f'{save_path}/all_layers_val_acc.png', dpi=300, bbox_inches='tight')
+    fig_train_loss.savefig(f'{save_path}/{project_name}_all_layers_train_loss.png', dpi=300, bbox_inches='tight')
+    fig_val_loss.savefig(f'{save_path}/{project_name}_all_layers_val_loss.png', dpi=300, bbox_inches='tight')
+    fig_train_acc.savefig(f'{save_path}/{project_name}_all_layers_train_acc.png', dpi=300, bbox_inches='tight')
+    fig_val_acc.savefig(f'{save_path}/{project_name}_all_layers_val_acc.png', dpi=300, bbox_inches='tight')
     
     plt.show()
 
@@ -756,6 +756,14 @@ if __name__ == "__main__":
     plot_consolidated_attribute_metrics(
         layers=[0, 1, 2, 3],
         tokenizer_path=GPTConfig44_Complete().tokenizer_path
+    )
+
+    plot_consolidated_attribute_metrics(
+        layers=[0, 1, 2, 3],
+        tokenizer_path=GPTConfig44_Complete().tokenizer_path,
+        project_name="attr_from_answer",
+        loss_range=[0, 0.63],
+        acc_range=[0.65, 1],
     )
 
     # project = "attr_from_answer"
