@@ -629,10 +629,10 @@ def plot_consolidated_attribute_metrics(layers, tokenizer_path, loss_range = [0,
     desired_order = shapes + colors + numbers + shadings
     
     # Create four figures with (1, 4) subplots
-    fig_train_loss, axes_train_loss = plt.subplots(1, 4, figsize=(24, 6))
-    fig_val_loss, axes_val_loss = plt.subplots(1, 4, figsize=(24, 6))
-    fig_train_acc, axes_train_acc = plt.subplots(1, 4, figsize=(24, 6))
-    fig_val_acc, axes_val_acc = plt.subplots(1, 4, figsize=(24, 6))
+    fig_train_loss, axes_train_loss = plt.subplots(1, 4, figsize=(24, 5))
+    fig_val_loss, axes_val_loss = plt.subplots(1, 4, figsize=(24, 5))
+    fig_train_acc, axes_train_acc = plt.subplots(1, 4, figsize=(24, 5))
+    fig_val_acc, axes_val_acc = plt.subplots(1, 4, figsize=(24, 5))
     
     # Set style
     sns.set_style("darkgrid")
@@ -681,7 +681,8 @@ def plot_consolidated_attribute_metrics(layers, tokenizer_path, loss_range = [0,
                                           label=label, color=color)
             axes_train_loss[layer_idx].set_title(f'Layer {target_layer + 1}', fontsize=title_font_size)
             axes_train_loss[layer_idx].set_xlabel('Epoch', fontsize=label_font_size)
-            axes_train_loss[layer_idx].set_ylabel('Loss', fontsize=label_font_size)
+            if layer_idx == 0:
+                axes_train_loss[layer_idx].set_ylabel('Loss', fontsize=label_font_size)
             axes_train_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
             axes_train_loss[layer_idx].tick_params(labelsize=annot_font_size)
             
@@ -690,7 +691,8 @@ def plot_consolidated_attribute_metrics(layers, tokenizer_path, loss_range = [0,
                                         label=label, color=color)
             axes_val_loss[layer_idx].set_title(f'Layer {target_layer + 1}', fontsize=title_font_size)
             axes_val_loss[layer_idx].set_xlabel('Epoch', fontsize=label_font_size)
-            axes_val_loss[layer_idx].set_ylabel('Loss', fontsize=label_font_size)
+            if layer_idx == 0:
+                axes_val_loss[layer_idx].set_ylabel('Loss', fontsize=label_font_size)
             axes_val_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
             axes_val_loss[layer_idx].tick_params(labelsize=annot_font_size)
             
@@ -699,7 +701,8 @@ def plot_consolidated_attribute_metrics(layers, tokenizer_path, loss_range = [0,
                                          label=label, color=color)
             axes_train_acc[layer_idx].set_title(f'Layer {target_layer + 1}', fontsize=title_font_size)
             axes_train_acc[layer_idx].set_xlabel('Epoch', fontsize=label_font_size)
-            axes_train_acc[layer_idx].set_ylabel('Accuracy', fontsize=label_font_size)
+            if layer_idx == 0:
+                axes_train_acc[layer_idx].set_ylabel('Accuracy', fontsize=label_font_size)
             axes_train_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
             axes_train_acc[layer_idx].tick_params(labelsize=annot_font_size)
             
@@ -708,7 +711,8 @@ def plot_consolidated_attribute_metrics(layers, tokenizer_path, loss_range = [0,
                                        label=label, color=color)
             axes_val_acc[layer_idx].set_title(f'Layer {target_layer + 1}', fontsize=title_font_size)
             axes_val_acc[layer_idx].set_xlabel('Epoch', fontsize=label_font_size)
-            axes_val_acc[layer_idx].set_ylabel('Accuracy', fontsize=label_font_size)
+            if layer_idx == 0:
+                axes_val_acc[layer_idx].set_ylabel('Accuracy', fontsize=label_font_size)
             axes_val_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
             axes_val_acc[layer_idx].tick_params(labelsize=annot_font_size)
         
@@ -753,6 +757,16 @@ if __name__ == "__main__":
         layers=[0, 1, 2, 3],
         tokenizer_path=GPTConfig44_Complete().tokenizer_path
     )
+
+    # project = "attr_from_answer"
+    # plot_all_layers_metrics(
+    #     layers=[0, 1, 2, 3],
+    #     tokenizer_path=config.tokenizer_path,
+    #     project_name=project,
+    #     loss_range=[0, 0.63],
+    #     acc_range=[0.65, 1]
+    #     )
+
     # run_probe_weight_loss_fig()
     # create_test_accuracy_visualization()
 
