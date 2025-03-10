@@ -529,6 +529,7 @@ def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_char
     num_layers = len(df['Layer'].unique())
     plt.xticks(range(num_layers), sorted(df['Layer'].unique()))
     ax.tick_params(axis='y', which='both', length=5, width=1)
+    plt.tick_params(axis='y', which='both', left=True, right=False)
     
     # Add value annotations on top of bars
     for i, p in enumerate(ax.patches):
@@ -542,16 +543,6 @@ def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_char
                 ha='center',
                 fontsize=annot_font_size
             )
-
-    # for i, p in enumerate(ax.patches):
-    #     height = p.get_height()
-    #     ax.text(
-    #         p.get_x() + p.get_width() / 2.,
-    #         height + 0.01,
-    #         f'{height:.3f}',
-    #         ha='center',
-    #         fontsize=annot_font_size
-    #     )
     
     # Adjust legend
     plt.legend(title='Model Type', fontsize=label_font_size, title_fontsize=label_font_size, loc = 'upper left')
