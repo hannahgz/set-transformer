@@ -12,6 +12,7 @@ from classify import load_linear_probe_from_config, load_continuous_to_original_
 from data_utils import initialize_loaders, split_data
 import wandb
 import re
+import pandas as pd
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
@@ -401,13 +402,208 @@ def run_probe_weight_loss_fig():
     attr_fig.savefig(os.path.join(fig_save_dir, f'{model_type}_losses.png'), dpi=300, bbox_inches='tight')
 
 
+def fetch_wandb_test_accuracy_data(entity, project_name, run_names):
+    """
+    Fetch final test accuracy data from W&B for specified runs.
+    
+    Args:
+        entity: W&B entity name
+        project_name: W&B project name
+        run_names: List of run names to fetch
+        
+    Returns:
+        Dictionary of model names mapped to their final test accuracy
+    """
+    # Initialize wandb API
+    api = wandb.Api()
+    
+    # Dictionary to store accuracy data
+    accuracy_data = {}
+    
+    # Fetch data for each run
+    for run_name in run_names:
+        print(f"Fetching data for run: {run_name}")
+        runs = api.runs(f"{entity}/{project_name}", {"display_name": run_name})
+        
+        if runs:
+            run = runs[0]
+            # For each run, fetch final test accuracy
+            summary = run.summary
+            
+            # The field name for test accuracy may vary, try different possibilities
+            test_accuracy = None
+            for field in ["final_test_accuracy", "test_accuracy", "accuracy/test"]:
+                if field in summary._json_dict:
+                    test_accuracy = summary._json_dict[field]
+                    break
+            
+            if test_accuracy is not None:
+                accuracy_data[run_name] = test_accuracy
+                print(f"  Found test accuracy: {test_accuracy}")
+            else:
+                print(f"  No test accuracy found for run: {run_name}")
+        else:
+            print(f"  No run found with name: {run_name}")
+    
+    return accuracy_data
+
+def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_chart.png"):
+    """
+    Creates a grouped bar chart showing final test accuracy for models,
+    split into two groups (attr_from_card and card_from_attr).
+    
+    Args:
+        data: Dictionary with keys as model names and values as their test accuracies
+             Example format: {
+                'attr_from_card_linear_layer0': 0.85,
+                'attr_from_card_linear_layer1': 0.87,
+                ...
+                'card_from_attr_linear_layer0': 0.92,
+                ...
+             }
+        output_path: Path to save the figure
+    
+    Returns:
+        The matplotlib figure object
+    """
+    # Extract model types and layers from the data keys
+    models = []
+    accuracies = []
+    types = []
+    layers = []
+    
+    for model_name, accuracy in data.items():
+        if 'attr_from_card' in model_name:
+            model_type = 'Attribute from Card'
+            # Extract layer number from the model name
+            layer = int(model_name.split('layer')[-1])
+        elif 'card_from_attr' in model_name:
+            model_type = 'Card from Attribute'
+            layer = int(model_name.split('layer')[-1])
+        else:
+            continue  # Skip if not matching our expected pattern
+        
+        models.append(model_name)
+        accuracies.append(accuracy)
+        types.append(model_type)
+        layers.append(layer)
+    
+    # Create DataFrame for easier plotting
+    df = pd.DataFrame({
+        'Model': models,
+        'Accuracy': accuracies,
+        'Type': types,
+        'Layer': layers
+    })
+    
+    # Sort by layer number to ensure sequential order
+    df = df.sort_values(by=['Type', 'Layer'])
+    
+    # Set up the figure
+    plt.figure(figsize=(12, 7))
+    
+    # Set seaborn style
+    sns.set_style("whitegrid")
+    
+    # Create grouped bar chart
+    ax = sns.barplot(
+        x='Layer', 
+        y='Accuracy', 
+        hue='Type', 
+        data=df,
+        palette=['#1f77b4', '#ff7f0e']  # Blue for attr_from_card, Orange for card_from_attr
+    )
+    
+    # Customize the plot
+    plt.title('Test Accuracy by Model Type and Layer', fontsize=title_font_size)
+    plt.xlabel('Layer', fontsize=label_font_size)
+    plt.ylabel('Accuracy', fontsize=label_font_size)
+    plt.xticks(fontsize=label_font_size)
+    plt.yticks(fontsize=label_font_size)
+    
+    # Set the y-axis to start at 0
+    plt.ylim(0, max(df['Accuracy']) * 1.1)  # Add 10% padding at the top
+    
+    # Adjust x-axis labels to show actual layer numbers (0, 1, 2, 3)
+    num_layers = len(df['Layer'].unique())
+    plt.xticks(range(num_layers), sorted(df['Layer'].unique()))
+    
+    # Add value annotations on top of bars
+    for i, p in enumerate(ax.patches):
+        height = p.get_height()
+        ax.text(
+            p.get_x() + p.get_width() / 2.,
+            height + 0.01,
+            f'{height:.3f}',
+            ha='center',
+            fontsize=annot_font_size
+        )
+    
+    # Adjust legend
+    plt.legend(title='Model Type', fontsize=label_font_size, title_fontsize=label_font_size)
+    
+    # Tight layout to ensure everything fits
+    plt.tight_layout()
+    
+    # Create directory if it doesn't exist
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    
+    # Save the figure
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    
+    return plt.gcf()
+
+# Main function to run the full pipeline
+def create_test_accuracy_visualization():
+    """
+    Main function to fetch data from wandb and create the test accuracy visualization.
+    Uses the same wandb project and entity as in run_probe_weight_loss_fig().
+    """
+    # Define wandb parameters (same as in run_probe_weight_loss_fig)
+    entity = "hazhou-harvard"
+    project_name = "full-complete-classify-card"
+    
+    # List of run names to include in the visualization
+    run_names = [
+        # "attr_from_card_linear_layer0",
+        "attr_from_card_linear_layer1",
+        "attr_from_card_linear_layer2",
+        "attr_from_card_linear_layer3",
+        # "card_from_attr_linear_layer0",
+        "card_from_attr_linear_layer1",
+        "card_from_attr_linear_layer2",
+        "card_from_attr_linear_layer3"
+    ]
+    
+    # Create output directory
+    fig_save_dir = "COMPLETE_FIGS/paper/probe_weight_loss"
+    os.makedirs(fig_save_dir, exist_ok=True)
+    output_path = os.path.join(fig_save_dir, "final_test_accuracy_chart.png")
+    
+    # Fetch data from wandb
+    print("Fetching test accuracy data from wandb...")
+    accuracy_data = fetch_wandb_test_accuracy_data(entity, project_name, run_names)
+    
+    # Check if we have data to visualize
+    if not accuracy_data:
+        print("No accuracy data found")
+    
+    # Create and save the chart
+    print(f"Creating test accuracy chart and saving to {output_path}")
+    fig = create_final_test_accuracy_chart(accuracy_data, output_path)
+    plt.show()
+    print("Done!")
+    return fig
+
+
 if __name__ == "__main__":
     seed = 42
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
 
-    run_probe_weight_loss_fig()
+    # run_probe_weight_loss_fig()
+    create_test_accuracy_visualization()
 
     # embedding_ablation_kl_fig()
     # avg_combined_cosine_similarity_probe_embedding_heatmap()
