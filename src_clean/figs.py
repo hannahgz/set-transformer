@@ -309,7 +309,7 @@ def create_loss_figure(run_data, model_type, layers):
     else:
         model_title = "Card-Attribute Binding Linear Probe: Card From Attribute Loss Curves"
 
-    fig.suptitle(f'{model_title} Loss', fontsize=title_font_size)
+    fig.suptitle(f'{model_title}', fontsize=title_font_size)
     
     # First pass: determine global min and max values across all layers
     global_min = float('inf')
@@ -358,7 +358,7 @@ def create_loss_figure(run_data, model_type, layers):
         
         # Only add y-label to the first subplot
         if i == 0:
-            ax.set_ylabel('Loss', rotation=0, fontsize = label_font_size)
+            ax.set_ylabel('Loss', rotation=0, fontsize = label_font_size, labelpad=20)
             
         # Add legend to the last subplot
         if i == len(layers) - 1:
