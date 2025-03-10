@@ -305,9 +305,9 @@ def create_loss_figure(run_data, model_type, layers):
     # Create figure
     fig, axes = plt.subplots(1, len(layers), figsize=(5*len(layers), 5))
     if model_type == "attr_from_card":
-        model_title = "Attribute From Card"
+        model_title = "Card-Attribute Binding Linear Probe: Attribute From Card Loss Curves"
     else:
-        model_title = "Card From Attribute"
+        model_title = "Card-Attribute Binding Linear Probe: Card From Attribute Loss Curves"
 
     fig.suptitle(f'{model_title} Loss', fontsize=title_font_size)
     
@@ -371,20 +371,36 @@ def run_probe_weight_loss_fig():
     entity = "hazhou-harvard"
     project_name = "full-complete-classify-card"
     
+    # # List of run names to include in the visualization
+    # run_names = [
+    #     "attr_from_card_linear_layer3",
+    #     "attr_from_card_linear_layer2",
+    #     "attr_from_card_linear_layer1",
+    #     "attr_from_card_linear_layer0",
+    #     "card_from_attr_linear_layer3",
+    #     "card_from_attr_linear_layer1",
+    #     "card_from_attr_linear_layer0",
+    #     "card_from_attr_linear_layer2"
+    # ]
+    
+    # # Layer numbers and names
+    # layers = [0, 1, 2, 3]
+
     # List of run names to include in the visualization
     run_names = [
         "attr_from_card_linear_layer3",
         "attr_from_card_linear_layer2",
         "attr_from_card_linear_layer1",
-        "attr_from_card_linear_layer0",
+        # "attr_from_card_linear_layer0",
         "card_from_attr_linear_layer3",
         "card_from_attr_linear_layer1",
-        "card_from_attr_linear_layer0",
+        # "card_from_attr_linear_layer0",
         "card_from_attr_linear_layer2"
     ]
     
     # Layer numbers and names
-    layers = [0, 1, 2, 3]
+    layers = [1, 2, 3]
+
     
     # Fetch data from W&B
     run_data = fetch_wandb_data(entity, project_name, run_names)
@@ -607,8 +623,8 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    # run_probe_weight_loss_fig()
-    create_test_accuracy_visualization()
+    run_probe_weight_loss_fig()
+    # create_test_accuracy_visualization()
 
     # embedding_ablation_kl_fig()
     # avg_combined_cosine_similarity_probe_embedding_heatmap()
