@@ -371,36 +371,20 @@ def run_probe_weight_loss_fig():
     entity = "hazhou-harvard"
     project_name = "full-complete-classify-card"
     
-    # # List of run names to include in the visualization
-    # run_names = [
-    #     "attr_from_card_linear_layer3",
-    #     "attr_from_card_linear_layer2",
-    #     "attr_from_card_linear_layer1",
-    #     "attr_from_card_linear_layer0",
-    #     "card_from_attr_linear_layer3",
-    #     "card_from_attr_linear_layer1",
-    #     "card_from_attr_linear_layer0",
-    #     "card_from_attr_linear_layer2"
-    # ]
-    
-    # # Layer numbers and names
-    # layers = [0, 1, 2, 3]
-
     # List of run names to include in the visualization
     run_names = [
         "attr_from_card_linear_layer3",
         "attr_from_card_linear_layer2",
         "attr_from_card_linear_layer1",
-        # "attr_from_card_linear_layer0",
+        "attr_from_card_linear_layer0",
         "card_from_attr_linear_layer3",
         "card_from_attr_linear_layer1",
-        # "card_from_attr_linear_layer0",
+        "card_from_attr_linear_layer0",
         "card_from_attr_linear_layer2"
     ]
     
     # Layer numbers and names
-    layers = [1, 2, 3]
-
+    layers = [0, 1, 2, 3]
     
     # Fetch data from W&B
     run_data = fetch_wandb_data(entity, project_name, run_names)
@@ -586,11 +570,11 @@ def create_test_accuracy_visualization():
     
     # List of run names to include in the visualization
     run_names = [
-        # "attr_from_card_linear_layer0",
+        "attr_from_card_linear_layer0",
         "attr_from_card_linear_layer1",
         "attr_from_card_linear_layer2",
         "attr_from_card_linear_layer3",
-        # "card_from_attr_linear_layer0",
+        "card_from_attr_linear_layer0",
         "card_from_attr_linear_layer1",
         "card_from_attr_linear_layer2",
         "card_from_attr_linear_layer3"
@@ -624,7 +608,7 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     run_probe_weight_loss_fig()
-    # create_test_accuracy_visualization()
+    create_test_accuracy_visualization()
 
     # embedding_ablation_kl_fig()
     # avg_combined_cosine_similarity_probe_embedding_heatmap()
