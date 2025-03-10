@@ -906,47 +906,47 @@ if __name__ == "__main__":
             print(f"Set type filter: {set_type_filter}, Neuron: {neuron}")
             examples_file = "results/val_input_examples.pkl"
 
-            peaks_info = get_peak_info(
-                layer=layer,
-                neuron=neuron,
-                input_examples_file=examples_file,
-                min_peak_height=min_peak_height,
-                min_peak_distance=min_peak_distance,
-                prominence=prominence,
-                num_bins=num_bins,
-                set_type_filter=set_type_filter,
-            )
+            # peaks_info = get_peak_info(
+            #     layer=layer,
+            #     neuron=neuron,
+            #     input_examples_file=examples_file,
+            #     min_peak_height=min_peak_height,
+            #     min_peak_distance=min_peak_distance,
+            #     prominence=prominence,
+            #     num_bins=num_bins,
+            #     set_type_filter=set_type_filter,
+            # )
 
-            peaks_dir = f"data/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
-            # peaks_dir = f"results/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
-            os.makedirs(peaks_dir, exist_ok=True)
+            # peaks_dir = f"data/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
+            # # peaks_dir = f"results/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
+            # os.makedirs(peaks_dir, exist_ok=True)
 
-            peaks_info_path = os.path.join(peaks_dir, "all_info.pkl")
-            with open(peaks_info_path, 'wb') as f:
-                pickle.dump(peaks_info, f)
-            print(f"Peaks info saved to {peaks_info_path}")
-            # peaks_info = load_peaks_info(layer, neuron=neuron, set_type_filter=set_type_filter)
+            # peaks_info_path = os.path.join(peaks_dir, "all_info.pkl")
+            # with open(peaks_info_path, 'wb') as f:
+            #     pickle.dump(peaks_info, f)
+            # print(f"Peaks info saved to {peaks_info_path}")
+            peaks_info = load_peaks_info(layer, neuron=neuron, set_type_filter=set_type_filter)
 
             output_dir= f"results/mlp/peaks/layer{layer}/neuron{neuron}/set_type_{set_type_filter}"
             os.makedirs(output_dir, exist_ok=True)
 
-            top = 10
+            top = 100
             save_summary_statistics_from_peak_info(
                 peaks_info, 
                 top=top, 
                 output_file=os.path.join(output_dir, f"top_{top}_summary_statistics.txt")
             )
 
-            save_peak_figure(
-                peaks_info,
-                filename=os.path.join(output_dir, "histogram_peaks.png"),
-            )
+            # save_peak_figure(
+            #     peaks_info,
+            #     filename=os.path.join(output_dir, "histogram_peaks.png"),
+            # )
 
-            save_top_peak_examples_as_txt(
-                config=GPTConfig44_Complete, 
-                peaks_info=peaks_info, 
-                filename=os.path.join(output_dir, "peak_examples.txt"), 
-                top=top)
+            # save_top_peak_examples_as_txt(
+            #     config=GPTConfig44_Complete, 
+            #     peaks_info=peaks_info, 
+            #     filename=os.path.join(output_dir, "peak_examples.txt"), 
+            #     top=top)
 
 
     # for set_type_filter in [0, 1]:

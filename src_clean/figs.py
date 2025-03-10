@@ -607,8 +607,8 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    run_probe_weight_loss_fig()
-    create_test_accuracy_visualization()
+    # run_probe_weight_loss_fig()
+    # create_test_accuracy_visualization()
 
     # embedding_ablation_kl_fig()
     # avg_combined_cosine_similarity_probe_embedding_heatmap()
