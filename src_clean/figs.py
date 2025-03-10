@@ -362,7 +362,7 @@ def create_loss_figure(run_data, model_type, layers):
             
         # Add legend to the last subplot
         if i == len(layers) - 1:
-            ax.legend(loc='upper right')
+            ax.legend(loc='upper left')
     
     plt.tight_layout(rect=[0.05, 0, 1, 0.99])  # Make room for the title
     return fig
@@ -503,7 +503,7 @@ def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_char
     plt.figure(figsize=(12, 7))
     
     # Set seaborn style
-    sns.set_style("whitegrid")
+    sns.set_style("white")
     
     # Create grouped bar chart
     ax = sns.barplot(
@@ -511,11 +511,11 @@ def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_char
         y='Accuracy', 
         hue='Type', 
         data=df,
-        palette=['#1f77b4', '#ff7f0e']  # Blue for attr_from_card, Orange for card_from_attr
+        # palette=['#1f77b4', '#ff7f0e']  # Blue for attr_from_card, Orange for card_from_attr
     )
     
     # Customize the plot
-    plt.title('Test Accuracy by Model Type and Layer', fontsize=title_font_size)
+    plt.title('Card-Attribute Binding Linear Probe: Test Accuracy', fontsize=title_font_size)
     plt.xlabel('Layer', fontsize=label_font_size)
     plt.ylabel('Accuracy', fontsize=label_font_size)
     plt.xticks(fontsize=label_font_size)
@@ -531,13 +531,25 @@ def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_char
     # Add value annotations on top of bars
     for i, p in enumerate(ax.patches):
         height = p.get_height()
-        ax.text(
-            p.get_x() + p.get_width() / 2.,
-            height + 0.01,
-            f'{height:.3f}',
-            ha='center',
-            fontsize=annot_font_size
-        )
+        # Only add text if the height is significant
+        if height > 0.001:  # Skip annotations for very small or zero values
+            ax.text(
+                p.get_x() + p.get_width() / 2.,
+                height + 0.01,
+                f'{height:.3f}',
+                ha='center',
+                fontsize=annot_font_size
+            )
+
+    # for i, p in enumerate(ax.patches):
+    #     height = p.get_height()
+    #     ax.text(
+    #         p.get_x() + p.get_width() / 2.,
+    #         height + 0.01,
+    #         f'{height:.3f}',
+    #         ha='center',
+    #         fontsize=annot_font_size
+    #     )
     
     # Adjust legend
     plt.legend(title='Model Type', fontsize=label_font_size, title_fontsize=label_font_size)
