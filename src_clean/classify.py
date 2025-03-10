@@ -818,7 +818,29 @@ if __name__ == "__main__":
     config = GPTConfig44_Complete()
 
     pred_card_from_attr = False
-    for capture_layer in [2, 1, 3, 4]:
+    # for capture_layer in [2, 1, 3, 4]:
+    for capture_layer in [0]:
+        if pred_card_from_attr:
+            print(f"Predicting card from attribute, capture layer: {capture_layer}")
+            output_dim = 5
+        else:
+            print(f"Predicting attribute from card, capture layer: {capture_layer}")
+            output_dim = 12
+
+        run_classify(
+            input_dim=64,
+            output_dim=output_dim,
+            capture_layer=capture_layer,
+            project="full-complete-classify-card",
+            batch_size=32,
+            lr=0.001,
+            model_type="linear",
+            tokenizer_path=config.tokenizer_path,
+            pred_card_from_attr=pred_card_from_attr)
+        
+    pred_card_from_attr = True
+    # for capture_layer in [2, 1, 3, 4]:
+    for capture_layer in [0]:
         if pred_card_from_attr:
             print(f"Predicting card from attribute, capture layer: {capture_layer}")
             output_dim = 5
