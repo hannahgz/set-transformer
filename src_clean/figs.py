@@ -500,7 +500,7 @@ def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_char
     df = df.sort_values(by=['Type', 'Layer'])
     
     # Set up the figure
-    plt.figure(figsize=(12, 7))
+    plt.figure(figsize=(12, 4))
     
     # Set seaborn style
     sns.set_style("white")
