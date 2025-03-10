@@ -362,7 +362,7 @@ def create_loss_figure(run_data, model_type, layers):
             
         # Add legend to the last subplot
         if i == len(layers) - 1:
-            ax.legend(loc='upper left')
+            ax.legend(loc='upper right')
     
     plt.tight_layout(rect=[0.05, 0, 1, 0.99])  # Make room for the title
     return fig
@@ -511,6 +511,7 @@ def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_char
         y='Accuracy', 
         hue='Type', 
         data=df,
+        palette=['#6A0572', '#36D1DC']
         # palette=['#1f77b4', '#ff7f0e']  # Blue for attr_from_card, Orange for card_from_attr
     )
     
@@ -527,6 +528,7 @@ def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_char
     # Adjust x-axis labels to show actual layer numbers (0, 1, 2, 3)
     num_layers = len(df['Layer'].unique())
     plt.xticks(range(num_layers), sorted(df['Layer'].unique()))
+    ax.tick_params(axis='y', which='both', length=5, width=1)
     
     # Add value annotations on top of bars
     for i, p in enumerate(ax.patches):
@@ -552,7 +554,7 @@ def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_char
     #     )
     
     # Adjust legend
-    plt.legend(title='Model Type', fontsize=label_font_size, title_fontsize=label_font_size)
+    plt.legend(title='Model Type', fontsize=label_font_size, title_fontsize=label_font_size, loc = 'upper left')
     
     # Tight layout to ensure everything fits
     plt.tight_layout()
