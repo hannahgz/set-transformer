@@ -282,7 +282,6 @@ def fetch_wandb_data(entity, project_name, run_names):
     if not run_data:
         raise ValueError("No data found for any of the specified runs")
         
-    breakpoint()
     return run_data
 
 def create_loss_figure(run_data, model_type, layers):
