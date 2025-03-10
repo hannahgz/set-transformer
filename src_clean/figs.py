@@ -753,11 +753,12 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    plot_consolidated_attribute_metrics(
-        layers=[0, 1, 2, 3],
-        tokenizer_path=GPTConfig44_Complete().tokenizer_path
-    )
-
+    # sns.set_style("white")
+    # plot_consolidated_attribute_metrics(
+    #     layers=[0, 1, 2, 3],
+    #     tokenizer_path=GPTConfig44_Complete().tokenizer_path
+    # )
+    sns.set_style("white")
     plot_consolidated_attribute_metrics(
         layers=[0, 1, 2, 3],
         tokenizer_path=GPTConfig44_Complete().tokenizer_path,
