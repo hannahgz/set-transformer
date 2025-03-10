@@ -364,7 +364,7 @@ def create_loss_figure(run_data, model_type, layers):
         if i == len(layers) - 1:
             ax.legend(loc='upper right')
     
-    plt.tight_layout(rect=[0, 0, 1, 0.95])  # Make room for the title
+    plt.tight_layout(rect=[0.03, 0, 1, 0.97])  # Make room for the title
     return fig
 
 def run_probe_weight_loss_fig():
