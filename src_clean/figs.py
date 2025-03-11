@@ -747,25 +747,39 @@ def plot_consolidated_attribute_metrics(layers, tokenizer_path, loss_range = [0,
     
     plt.show()
 
+def attr_from_last_attr_dataset_size(parent_folder="all_attr_from_last_attr_binding", capture_layer=0, attribute_id=1):
+    dataset_path = f"{PATH_PREFIX}/{parent_folder}/layer{capture_layer}/binary_dataset_{attribute_id}.pt"
+    data = torch.load(dataset_path)
+
+    print(f"Dataset size for attribute {attribute_id}: {len(data)}")
+
+    val_split = 0.2
+    # Calculate split sizes
+    val_size = int(len(data) * val_split)
+    train_size = len(data) - val_size
+
+    print(f"Train size: {train_size}, Val size: {val_size}")
+
 if __name__ == "__main__":
     seed = 42
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
 
+    attr_from_last_attr_dataset_size()
     # sns.set_style("white")
     # plot_consolidated_attribute_metrics(
     #     layers=[0, 1, 2, 3],
     #     tokenizer_path=GPTConfig44_Complete().tokenizer_path
     # )
-    sns.set_style("white")
-    plot_consolidated_attribute_metrics(
-        layers=[0, 1, 2, 3],
-        tokenizer_path=GPTConfig44_Complete().tokenizer_path,
-        project_name="attr_from_answer",
-        loss_range=[0, 0.63],
-        acc_range=[0.65, 1],
-    )
+    # sns.set_style("white")
+    # plot_consolidated_attribute_metrics(
+    #     layers=[0, 1, 2, 3],
+    #     tokenizer_path=GPTConfig44_Complete().tokenizer_path,
+    #     project_name="attr_from_answer",
+    #     loss_range=[0, 0.63],
+    #     acc_range=[0.65, 1],
+    # )
 
     # project = "attr_from_answer"
     # plot_all_layers_metrics(
