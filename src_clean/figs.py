@@ -817,7 +817,7 @@ def create_loss_figure_orig_set_model(run_data, layers):
 
     # Create figure
     fig, axes = plt.subplots(1, len(layers), figsize=(5*len(layers), 3))
-    model_title = "Set Prediction Model"
+    model_title = "Set Prediction Model Loss Curves"
     
     fig.suptitle(f'{model_title}', fontsize=title_font_size)
 
