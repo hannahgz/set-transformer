@@ -816,7 +816,7 @@ def create_loss_figure_orig_set_model(run_data, layers):
     val_color = '#ff7f0e'    # orange for all validation curves
 
     # Create figure
-    fig, axes = plt.subplots(1, len(layers), figsize=(5*len(layers), 3))
+    fig, axes = plt.subplots(1, len(layers), figsize=(5*len(layers), 4))
     model_title = "Set Prediction Model Loss Curves"
     
     fig.suptitle(f'{model_title}', fontsize=title_font_size)
