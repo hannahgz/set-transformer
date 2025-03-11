@@ -876,8 +876,54 @@ def create_loss_figure_orig_set_model(run_data, layers):
     return fig
 
 
+def fetch_wandb_data_set_model(entity, project_name, run_names):
+    """
+    Fetch run data from W&B for specified runs.
+
+    Args:
+        entity: W&B entity name
+        project_name: W&B project name
+        run_names: List of run names to fetch
+
+    Returns:
+        Dictionary of run data with metrics
+    """
+    # Initialize wandb API
+    api = wandb.Api()
+
+    # Dictionary to store run data
+    run_data = {}
+
+    # Fetch data for each run
+    for run_name in run_names:
+        print(f"Fetching data for run: {run_name}")
+        runs = api.runs(f"{entity}/{project_name}", {"display_name": run_name})
+        if runs:
+            run = runs[0]
+            # For each run, fetch train and val loss
+            train_key = "train_loss"
+            val_key = "val_loss"
+            history = run.history(keys=[train_key, val_key])
+            breakpoint()
+
+            run_data[run_name] = {
+                "steps": history["_step"].to_numpy(),
+                "train_loss": history[train_key].to_numpy() if train_key in history.columns else None,
+                "val_loss": history[val_key].to_numpy() if val_key in history.columns else None
+            }
+            print(f"  Found data with {len(history)} steps")
+        else:
+            print(f"  No run found with name: {run_name}")
+
+    # Check if we have data to visualize
+    if not run_data:
+        raise ValueError("No data found for any of the specified runs")
+
+    return run_data
+
+
 def plot_orig_set_model_loss():
-    run_data = fetch_wandb_data(
+    run_data = fetch_wandb_data_set_model(
         entity="hazhou-harvard",
         project_name="equal-set-prediction-balanced",
         run_names=[
