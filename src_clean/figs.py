@@ -131,7 +131,7 @@ def combined_probe_weight_cosine_sim(model_config, probe_config, center=False):
 
         if center:
             centroid = np.mean(probe_weights, axis=0)
-    
+
             # Center weights by subtracting the centroid
             probe_weights -= centroid
 
@@ -196,10 +196,10 @@ def combined_probe_weight_cosine_sim(model_config, probe_config, center=False):
     # Add overarching title
     if center:
         fig.suptitle(f'Centered Cosine Similarities Between Linear Probe Weight Vectors',
-                 fontsize=title_font_size)
+                     fontsize=title_font_size)
     else:
         fig.suptitle(f'Cosine Similarities Between Linear Probe Weight Vectors',
-                    fontsize=title_font_size)
+                     fontsize=title_font_size)
 
     # Save or show the combined figure
     save_path = f"COMPLETE_FIGS/paper/cosine_sim"
@@ -213,6 +213,7 @@ def combined_probe_weight_cosine_sim(model_config, probe_config, center=False):
             save_path, f"combined_probe_weight_cosine_sim.png"), bbox_inches="tight")
 
     return fig
+
 
 def confirm_probe_dims(dataset_name, capture_layer):
     config = GPTConfig44_Complete()
@@ -243,21 +244,21 @@ def confirm_probe_dims(dataset_name, capture_layer):
 def fetch_wandb_data(entity, project_name, run_names):
     """
     Fetch run data from W&B for specified runs.
-    
+
     Args:
         entity: W&B entity name
         project_name: W&B project name
         run_names: List of run names to fetch
-        
+
     Returns:
         Dictionary of run data with metrics
     """
     # Initialize wandb API
     api = wandb.Api()
-    
+
     # Dictionary to store run data
     run_data = {}
-    
+
     # Fetch data for each run
     for run_name in run_names:
         print(f"Fetching data for run: {run_name}")
@@ -269,7 +270,7 @@ def fetch_wandb_data(entity, project_name, run_names):
             val_key = "val_loss"
             history = run.history(keys=[train_key, val_key])
             # breakpoint()
-            
+
             run_data[run_name] = {
                 "steps": history["_step"].to_numpy(),
                 "train_loss": history[train_key].to_numpy() if train_key in history.columns else None,
@@ -278,30 +279,31 @@ def fetch_wandb_data(entity, project_name, run_names):
             print(f"  Found data with {len(history)} steps")
         else:
             print(f"  No run found with name: {run_name}")
-    
+
     # Check if we have data to visualize
     if not run_data:
         raise ValueError("No data found for any of the specified runs")
-        
+
     return run_data
+
 
 def create_loss_figure(run_data, model_type, layers):
     """
     Create a figure with loss plots for a specific model type across multiple layers.
-    
+
     Args:
         run_data: Dictionary containing the run data
         model_type: 'attr_from_card' or 'card_from_attr'
         layers: List of layer numbers
         layer_names: List of layer names for plot titles
-        
+
     Returns:
         Matplotlib figure
     """
     # Define colors
     train_color = '#1f77b4'  # blue for all training curves
     val_color = '#ff7f0e'    # orange for all validation curves
-    
+
     # Create figure
     fig, axes = plt.subplots(1, len(layers), figsize=(5*len(layers), 5))
     if model_type == "attr_from_card":
@@ -310,67 +312,70 @@ def create_loss_figure(run_data, model_type, layers):
         model_title = "Card-Attribute Binding Linear Probe: Card From Attribute Loss Curves"
 
     fig.suptitle(f'{model_title}', fontsize=title_font_size)
-    
+
     # First pass: determine global min and max values across all layers
     global_min = float('inf')
     global_max = float('-inf')
-    
+
     for layer in layers:
         run_name = f"{model_type}_linear_layer{layer}"
         if run_name in run_data and run_data[run_name]["train_loss"] is not None:
             train_loss = run_data[run_name]["train_loss"]
             val_loss = run_data[run_name]["val_loss"]
-            
+
             global_min = min(global_min, np.min(train_loss), np.min(val_loss))
             global_max = max(global_max, np.max(train_loss), np.max(val_loss))
-    
+
     # Add padding to the global min/max
     padding = (global_max - global_min) * 0.1
     y_min = global_min - padding
     y_max = global_max + padding
-    
+
     # Second pass: create the plots with standardized y-axis
     for i, layer in enumerate(layers):
         ax = axes[i]
-        
+
         # Get run for this layer
         run_name = f"{model_type}_linear_layer{layer}"
-        
+
         if run_name in run_data and run_data[run_name]["train_loss"] is not None:
             # Plot losses
             steps = run_data[run_name]["steps"]
             train_loss = run_data[run_name]["train_loss"]
             val_loss = run_data[run_name]["val_loss"]
-            
-            ax.plot(steps, train_loss, color=train_color, label='Training Loss')
+
+            ax.plot(steps, train_loss, color=train_color,
+                    label='Training Loss')
             ax.plot(steps, val_loss, color=val_color, label='Validation Loss')
-            
+
             # Set standardized y-axis limits
             ax.set_ylim(y_min, y_max)
         else:
-            ax.text(0.5, 0.5, f"No data for {run_name}", 
+            ax.text(0.5, 0.5, f"No data for {run_name}",
                     horizontalalignment='center', verticalalignment='center',
                     transform=ax.transAxes)
-        
+
         ax.set_title(f'Layer {i+1}')
         ax.set_xlabel('Epochs', fontsize=label_font_size)
         # ax.grid(True, linestyle='--', alpha=0.7)
-        
+
         # Only add y-label to the first subplot
         if i == 0:
-            ax.set_ylabel('Loss', rotation=0, fontsize = label_font_size, labelpad=20)
-            
+            ax.set_ylabel('Loss', rotation=0,
+                          fontsize=label_font_size, labelpad=20)
+
         # Add legend to the last subplot
         if i == len(layers) - 1:
             ax.legend(loc='upper right')
-    
+
     plt.tight_layout(rect=[0.05, 0, 1, 0.99])  # Make room for the title
     return fig
+
 
 def run_probe_weight_loss_fig():
     entity = "hazhou-harvard"
     project_name = "full-complete-classify-card"
-    
+
     # List of run names to include in the visualization
     run_names = [
         "attr_from_card_linear_layer3",
@@ -382,61 +387,63 @@ def run_probe_weight_loss_fig():
         "card_from_attr_linear_layer0",
         "card_from_attr_linear_layer2"
     ]
-    
+
     # Layer numbers and names
     layers = [0, 1, 2, 3]
-    
+
     # Fetch data from W&B
     run_data = fetch_wandb_data(entity, project_name, run_names)
-    
+
     fig_save_dir = "COMPLETE_FIGS/paper/probe_weight_loss"
     os.makedirs(fig_save_dir, exist_ok=True)
 
     # Create figure for attr_from_card
     model_type = "attr_from_card"
     attr_fig = create_loss_figure(run_data, model_type, layers)
-    attr_fig.savefig(os.path.join(fig_save_dir, f'{model_type}_losses.png'), dpi=300, bbox_inches='tight')
-    
+    attr_fig.savefig(os.path.join(
+        fig_save_dir, f'{model_type}_losses.png'), dpi=300, bbox_inches='tight')
+
     model_type = "card_from_attr"
     attr_fig = create_loss_figure(run_data, model_type, layers)
-    attr_fig.savefig(os.path.join(fig_save_dir, f'{model_type}_losses.png'), dpi=300, bbox_inches='tight')
+    attr_fig.savefig(os.path.join(
+        fig_save_dir, f'{model_type}_losses.png'), dpi=300, bbox_inches='tight')
 
 
 def fetch_wandb_test_accuracy_data(entity, project_name, run_names):
     """
     Fetch final test accuracy data from W&B for specified runs.
-    
+
     Args:
         entity: W&B entity name
         project_name: W&B project name
         run_names: List of run names to fetch
-        
+
     Returns:
         Dictionary of model names mapped to their final test accuracy
     """
     # Initialize wandb API
     api = wandb.Api()
-    
+
     # Dictionary to store accuracy data
     accuracy_data = {}
-    
+
     # Fetch data for each run
     for run_name in run_names:
         print(f"Fetching data for run: {run_name}")
         runs = api.runs(f"{entity}/{project_name}", {"display_name": run_name})
-        
+
         if runs:
             run = runs[0]
             # For each run, fetch final test accuracy
             summary = run.summary
-            
+
             # The field name for test accuracy may vary, try different possibilities
             test_accuracy = None
             for field in ["final_test_accuracy", "test_accuracy", "accuracy/test"]:
                 if field in summary._json_dict:
                     test_accuracy = summary._json_dict[field]
                     break
-            
+
             if test_accuracy is not None:
                 accuracy_data[run_name] = test_accuracy
                 print(f"  Found test accuracy: {test_accuracy}")
@@ -444,14 +451,15 @@ def fetch_wandb_test_accuracy_data(entity, project_name, run_names):
                 print(f"  No test accuracy found for run: {run_name}")
         else:
             print(f"  No run found with name: {run_name}")
-    
+
     return accuracy_data
+
 
 def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_chart.png"):
     """
     Creates a grouped bar chart showing final test accuracy for models,
     split into two groups (attr_from_card and card_from_attr).
-    
+
     Args:
         data: Dictionary with keys as model names and values as their test accuracies
              Example format: {
@@ -462,7 +470,7 @@ def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_char
                 ...
              }
         output_path: Path to save the figure
-    
+
     Returns:
         The matplotlib figure object
     """
@@ -471,7 +479,7 @@ def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_char
     accuracies = []
     types = []
     layers = []
-    
+
     for model_name, accuracy in data.items():
         if 'attr_from_card' in model_name:
             model_type = 'Attribute from Card'
@@ -482,12 +490,12 @@ def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_char
             layer = int(model_name.split('layer')[-1])
         else:
             continue  # Skip if not matching our expected pattern
-        
+
         models.append(model_name)
         accuracies.append(accuracy)
         types.append(model_type)
         layers.append(layer)
-    
+
     # Create DataFrame for easier plotting
     df = pd.DataFrame({
         'Model': models,
@@ -495,42 +503,43 @@ def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_char
         'Type': types,
         'Layer': layers
     })
-    
+
     # Sort by layer number to ensure sequential order
     df = df.sort_values(by=['Type', 'Layer'])
-    
+
     # Set up the figure
     plt.figure(figsize=(12, 4))
-    
+
     # Set seaborn style
     sns.set_style("white")
-    
+
     # Create grouped bar chart
     ax = sns.barplot(
-        x='Layer', 
-        y='Accuracy', 
-        hue='Type', 
+        x='Layer',
+        y='Accuracy',
+        hue='Type',
         data=df,
         palette=['#6A0572', '#36D1DC']
         # palette=['#1f77b4', '#ff7f0e']  # Blue for attr_from_card, Orange for card_from_attr
     )
-    
+
     # Customize the plot
-    plt.title('Card-Attribute Binding Linear Probe: Test Accuracy', fontsize=title_font_size)
+    plt.title('Card-Attribute Binding Linear Probe: Test Accuracy',
+              fontsize=title_font_size)
     plt.xlabel('Layer', fontsize=label_font_size)
     plt.ylabel('Accuracy', fontsize=label_font_size)
     plt.xticks(fontsize=label_font_size)
     plt.yticks(fontsize=label_font_size)
-    
+
     # Set the y-axis to start at 0
     plt.ylim(0, max(df['Accuracy']) * 1.1)  # Add 10% padding at the top
-    
+
     # Adjust x-axis labels to show actual layer numbers (0, 1, 2, 3)
     num_layers = len(df['Layer'].unique())
     plt.xticks(range(num_layers), sorted(df['Layer'].unique()))
     ax.tick_params(axis='y', which='both', length=5, width=1)
     plt.tick_params(axis='y', which='both', left=True, right=False)
-    
+
     # Add value annotations on top of bars
     for i, p in enumerate(ax.patches):
         height = p.get_height()
@@ -543,22 +552,25 @@ def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_char
                 ha='center',
                 fontsize=annot_font_size
             )
-    
+
     # Adjust legend
-    plt.legend(title='Model Type', fontsize=label_font_size, title_fontsize=label_font_size, loc = 'upper left')
-    
+    plt.legend(title='Model Type', fontsize=label_font_size,
+               title_fontsize=label_font_size, loc='upper left')
+
     # Tight layout to ensure everything fits
     plt.tight_layout()
-    
+
     # Create directory if it doesn't exist
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    
+
     # Save the figure
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    
+
     return plt.gcf()
 
 # Main function to run the full pipeline
+
+
 def create_test_accuracy_visualization():
     """
     Main function to fetch data from wandb and create the test accuracy visualization.
@@ -567,7 +579,7 @@ def create_test_accuracy_visualization():
     # Define wandb parameters (same as in run_probe_weight_loss_fig)
     entity = "hazhou-harvard"
     project_name = "full-complete-classify-card"
-    
+
     # List of run names to include in the visualization
     run_names = [
         "attr_from_card_linear_layer0",
@@ -579,20 +591,21 @@ def create_test_accuracy_visualization():
         "card_from_attr_linear_layer2",
         "card_from_attr_linear_layer3"
     ]
-    
+
     # Create output directory
     fig_save_dir = "COMPLETE_FIGS/paper/probe_weight_loss"
     os.makedirs(fig_save_dir, exist_ok=True)
     output_path = os.path.join(fig_save_dir, "final_test_accuracy_chart.png")
-    
+
     # Fetch data from wandb
     print("Fetching test accuracy data from wandb...")
-    accuracy_data = fetch_wandb_test_accuracy_data(entity, project_name, run_names)
-    
+    accuracy_data = fetch_wandb_test_accuracy_data(
+        entity, project_name, run_names)
+
     # Check if we have data to visualize
     if not accuracy_data:
         print("No accuracy data found")
-    
+
     # Create and save the chart
     print(f"Creating test accuracy chart and saving to {output_path}")
     fig = create_final_test_accuracy_chart(accuracy_data, output_path)
@@ -601,14 +614,14 @@ def create_test_accuracy_visualization():
     return fig
 
 
-def plot_consolidated_attribute_metrics(layers, tokenizer_path, loss_range = [0, 0.5], acc_range = [0.7, 1], project_name="binary-probe-training-all-attr", entity="hazhou-harvard"):
+def plot_consolidated_attribute_metrics(layers, tokenizer_path, loss_range=[0, 0.5], acc_range=[0.7, 1], project_name="binary-probe-training-all-attr", entity="hazhou-harvard"):
     """
     Create four figures:
     1. Training losses across all layers
     2. Validation losses across all layers
     3. Training accuracies across all layers
     4. Validation accuracies across all layers
-    
+
     Args:
         layers (list): List of layer numbers to plot
         tokenizer_path (str): Path to the tokenizer
@@ -617,34 +630,34 @@ def plot_consolidated_attribute_metrics(layers, tokenizer_path, loss_range = [0,
     """
     # Initialize wandb
     api = wandb.Api()
-    
+
     # Get all runs from your project
     runs = api.runs(f"{entity}/{project_name}")
-    
+
     # Define the desired attribute order
     shapes = ["oval", "squiggle", "diamond"]
     colors = ["green", "blue", "pink"]
     numbers = ["one", "two", "three"]
     shadings = ["solid", "striped", "open"]
     desired_order = shapes + colors + numbers + shadings
-    
+
     # Create four figures with (1, 4) subplots
     fig_train_loss, axes_train_loss = plt.subplots(1, 4, figsize=(24, 5))
     fig_val_loss, axes_val_loss = plt.subplots(1, 4, figsize=(24, 5))
     fig_train_acc, axes_train_acc = plt.subplots(1, 4, figsize=(24, 5))
     fig_val_acc, axes_val_acc = plt.subplots(1, 4, figsize=(24, 5))
-    
+
     # Set style
     sns.set_style("darkgrid")
-    
+
     tokenizer = load_tokenizer(tokenizer_path)
-    
+
     # Process each layer
     for layer_idx, target_layer in enumerate(layers):
         # Filter and sort runs for current layer
         layer_runs = []
         run_order_mapping = {}
-        
+
         for run in runs:
             match = re.search(r'layer(\d+)$', run.name)
             if match and int(match.group(1)) == target_layer:
@@ -658,94 +671,115 @@ def plot_consolidated_attribute_metrics(layers, tokenizer_path, loss_range = [0,
                         layer_runs.append(run)
                     except ValueError:
                         continue
-        
+
         # Sort runs based on desired order
         layer_runs.sort(key=lambda x: run_order_mapping[x])
-        
+
         # Color map for different attributes
         num_runs = len(layer_runs)
         colors = plt.cm.rainbow(np.linspace(0, 1, num_runs))
-        
+
         # Plot for each run
         for run, color in zip(layer_runs, colors):
             # Extract attribute ID and get label
             attr_match = re.search(r'attr_(\d+)_', run.name)
             attr_id = attr_match.group(1) if attr_match else 'unknown'
             label = tokenizer.id_to_token[int(attr_id)]
-            
+
             # Convert run history to pandas DataFrame
             history = pd.DataFrame(run.history())
-            
+
             # Plot training loss
-            axes_train_loss[layer_idx].plot(history['epoch'], history['train_loss'], 
-                                          label=label, color=color)
-            axes_train_loss[layer_idx].set_title(f'Layer {target_layer + 1}', fontsize=title_font_size)
-            axes_train_loss[layer_idx].set_xlabel('Epoch', fontsize=label_font_size)
+            axes_train_loss[layer_idx].plot(history['epoch'], history['train_loss'],
+                                            label=label, color=color)
+            axes_train_loss[layer_idx].set_title(
+                f'Layer {target_layer + 1}', fontsize=title_font_size)
+            axes_train_loss[layer_idx].set_xlabel(
+                'Epoch', fontsize=label_font_size)
             if layer_idx == 0:
-                axes_train_loss[layer_idx].set_ylabel('Loss', fontsize=label_font_size)
+                axes_train_loss[layer_idx].set_ylabel(
+                    'Loss', fontsize=label_font_size)
             axes_train_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
             axes_train_loss[layer_idx].tick_params(labelsize=annot_font_size)
-            
+
             # Plot validation loss
-            axes_val_loss[layer_idx].plot(history['epoch'], history['val_loss'], 
-                                        label=label, color=color)
-            axes_val_loss[layer_idx].set_title(f'Layer {target_layer + 1}', fontsize=title_font_size)
-            axes_val_loss[layer_idx].set_xlabel('Epoch', fontsize=label_font_size)
+            axes_val_loss[layer_idx].plot(history['epoch'], history['val_loss'],
+                                          label=label, color=color)
+            axes_val_loss[layer_idx].set_title(
+                f'Layer {target_layer + 1}', fontsize=title_font_size)
+            axes_val_loss[layer_idx].set_xlabel(
+                'Epoch', fontsize=label_font_size)
             if layer_idx == 0:
-                axes_val_loss[layer_idx].set_ylabel('Loss', fontsize=label_font_size)
+                axes_val_loss[layer_idx].set_ylabel(
+                    'Loss', fontsize=label_font_size)
             axes_val_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
             axes_val_loss[layer_idx].tick_params(labelsize=annot_font_size)
-            
+
             # Plot training accuracy
-            axes_train_acc[layer_idx].plot(history['epoch'], history['train_accuracy'], 
-                                         label=label, color=color)
-            axes_train_acc[layer_idx].set_title(f'Layer {target_layer + 1}', fontsize=title_font_size)
-            axes_train_acc[layer_idx].set_xlabel('Epoch', fontsize=label_font_size)
+            axes_train_acc[layer_idx].plot(history['epoch'], history['train_accuracy'],
+                                           label=label, color=color)
+            axes_train_acc[layer_idx].set_title(
+                f'Layer {target_layer + 1}', fontsize=title_font_size)
+            axes_train_acc[layer_idx].set_xlabel(
+                'Epoch', fontsize=label_font_size)
             if layer_idx == 0:
-                axes_train_acc[layer_idx].set_ylabel('Accuracy', fontsize=label_font_size)
+                axes_train_acc[layer_idx].set_ylabel(
+                    'Accuracy', fontsize=label_font_size)
             axes_train_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
             axes_train_acc[layer_idx].tick_params(labelsize=annot_font_size)
-            
+
             # Plot validation accuracy
-            axes_val_acc[layer_idx].plot(history['epoch'], history['val_accuracy'], 
-                                       label=label, color=color)
-            axes_val_acc[layer_idx].set_title(f'Layer {target_layer + 1}', fontsize=title_font_size)
-            axes_val_acc[layer_idx].set_xlabel('Epoch', fontsize=label_font_size)
+            axes_val_acc[layer_idx].plot(history['epoch'], history['val_accuracy'],
+                                         label=label, color=color)
+            axes_val_acc[layer_idx].set_title(
+                f'Layer {target_layer + 1}', fontsize=title_font_size)
+            axes_val_acc[layer_idx].set_xlabel(
+                'Epoch', fontsize=label_font_size)
             if layer_idx == 0:
-                axes_val_acc[layer_idx].set_ylabel('Accuracy', fontsize=label_font_size)
+                axes_val_acc[layer_idx].set_ylabel(
+                    'Accuracy', fontsize=label_font_size)
             axes_val_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
             axes_val_acc[layer_idx].tick_params(labelsize=annot_font_size)
-        
+
         # Only add legend to the last subplot
         if layer_idx == len(layers) - 1:
-            axes_train_loss[layer_idx].legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=annot_font_size)
-            axes_val_loss[layer_idx].legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=annot_font_size)
-            axes_train_acc[layer_idx].legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=annot_font_size)
-            axes_val_acc[layer_idx].legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=annot_font_size)
-    
+            axes_train_loss[layer_idx].legend(bbox_to_anchor=(
+                1.05, 1), loc='upper left', fontsize=annot_font_size)
+            axes_val_loss[layer_idx].legend(bbox_to_anchor=(
+                1.05, 1), loc='upper left', fontsize=annot_font_size)
+            axes_train_acc[layer_idx].legend(bbox_to_anchor=(
+                1.05, 1), loc='upper left', fontsize=annot_font_size)
+            axes_val_acc[layer_idx].legend(bbox_to_anchor=(
+                1.05, 1), loc='upper left', fontsize=annot_font_size)
+
     # Set main titles
     fig_train_loss.suptitle('Training Losses', fontsize=title_font_size)
     fig_val_loss.suptitle('Validation Losses', fontsize=title_font_size)
     fig_train_acc.suptitle('Training Accuracies', fontsize=title_font_size)
     fig_val_acc.suptitle('Validation Accuracies', fontsize=title_font_size)
-    
+
     # Adjust layouts
     fig_train_loss.tight_layout()
     fig_val_loss.tight_layout()
     fig_train_acc.tight_layout()
     fig_val_acc.tight_layout()
-    
+
     # Create save directory
     save_path = f"COMPLETE_FIGS/paper/{project_name}"
     os.makedirs(save_path, exist_ok=True)
-    
+
     # Save figures
-    fig_train_loss.savefig(f'{save_path}/{project_name}_all_layers_train_loss.png', dpi=300, bbox_inches='tight')
-    fig_val_loss.savefig(f'{save_path}/{project_name}_all_layers_val_loss.png', dpi=300, bbox_inches='tight')
-    fig_train_acc.savefig(f'{save_path}/{project_name}_all_layers_train_acc.png', dpi=300, bbox_inches='tight')
-    fig_val_acc.savefig(f'{save_path}/{project_name}_all_layers_val_acc.png', dpi=300, bbox_inches='tight')
-    
+    fig_train_loss.savefig(
+        f'{save_path}/{project_name}_all_layers_train_loss.png', dpi=300, bbox_inches='tight')
+    fig_val_loss.savefig(
+        f'{save_path}/{project_name}_all_layers_val_loss.png', dpi=300, bbox_inches='tight')
+    fig_train_acc.savefig(
+        f'{save_path}/{project_name}_all_layers_train_acc.png', dpi=300, bbox_inches='tight')
+    fig_val_acc.savefig(
+        f'{save_path}/{project_name}_all_layers_val_acc.png', dpi=300, bbox_inches='tight')
+
     plt.show()
+
 
 def attr_from_last_attr_dataset_size(parent_folder="all_attr_from_last_attr_binding", capture_layer=0, attribute_id=1):
     dataset_path = f"{PATH_PREFIX}/{parent_folder}/layer{capture_layer}/binary_dataset_{attribute_id}.pt"
@@ -753,7 +787,8 @@ def attr_from_last_attr_dataset_size(parent_folder="all_attr_from_last_attr_bind
 
     input_embeddings = data['input_embeddings']
     breakpoint()
-    print(f"Dataset size for attribute {attribute_id}: {len(input_embeddings)}")
+    print(
+        f"Dataset size for attribute {attribute_id}: {len(input_embeddings)}")
 
     val_split = 0.2
     # Calculate split sizes
@@ -762,13 +797,115 @@ def attr_from_last_attr_dataset_size(parent_folder="all_attr_from_last_attr_bind
 
     print(f"Train size: {train_size}, Val size: {val_size}")
 
+
+def create_loss_figure_orig_set_model(run_data, layers):
+    """
+    Create a figure with loss plots for a specific model type across multiple layers.
+
+    Args:
+        run_data: Dictionary containing the run data
+        model_type: 'attr_from_card' or 'card_from_attr'
+        layers: List of layer numbers
+        layer_names: List of layer names for plot titles
+
+    Returns:
+        Matplotlib figure
+    """
+    # Define colors
+    train_color = '#1f77b4'  # blue for all training curves
+    val_color = '#ff7f0e'    # orange for all validation curves
+
+    # Create figure
+    fig, axes = plt.subplots(1, len(layers), figsize=(5*len(layers), 5))
+    model_title = "Set Prediction Model"
+    
+    fig.suptitle(f'{model_title}', fontsize=title_font_size)
+
+    # First pass: determine global min and max values across all layers
+    global_min = float('inf')
+    global_max = float('-inf')
+
+    for run_name in run_data:
+        if run_name in run_data and run_data[run_name]["train_loss"] is not None:
+            train_loss = run_data[run_name]["train_loss"]
+            val_loss = run_data[run_name]["val_loss"]
+
+            global_min = min(global_min, np.min(train_loss), np.min(val_loss))
+            global_max = max(global_max, np.max(train_loss), np.max(val_loss))
+
+    # Add padding to the global min/max
+    padding = (global_max - global_min) * 0.1
+    y_min = global_min - padding
+    y_max = global_max + padding
+
+    # Second pass: create the plots with standardized y-axis
+    for i, run_name in enumerate(run_data):
+        ax = axes[i]
+
+        if run_data[run_name]["train_loss"] is not None:
+            # Plot losses
+            steps = run_data[run_name]["steps"]
+            train_loss = run_data[run_name]["train_loss"]
+            val_loss = run_data[run_name]["val_loss"]
+
+            ax.plot(steps, train_loss, color=train_color,
+                    label='Training Loss')
+            ax.plot(steps, val_loss, color=val_color, label='Validation Loss')
+
+            # Set standardized y-axis limits
+            ax.set_ylim(y_min, y_max)
+        else:
+            ax.text(0.5, 0.5, f"No data for {run_name}",
+                    horizontalalignment='center', verticalalignment='center',
+                    transform=ax.transAxes)
+
+        ax.set_title(f'{layers[i]} Layers')
+        ax.set_xlabel('Steps', fontsize=label_font_size)
+        # ax.grid(True, linestyle='--', alpha=0.7)
+
+        # Only add y-label to the first subplot
+        if i == 0:
+            ax.set_ylabel('Loss', rotation=0,
+                          fontsize=label_font_size, labelpad=20)
+
+        # Add legend to the last subplot
+        if i == len(layers) - 1:
+            ax.legend(loc='upper right')
+
+    plt.tight_layout(rect=[0.05, 0, 1, 0.99])  # Make room for the title
+    return fig
+
+
+def plot_orig_set_model_loss():
+    run_data = fetch_wandb_data(
+        entity="hazhou-harvard",
+        project_name="equal-set-prediction-balanced",
+        run_names=[
+            "triples_card_randomization_tuple_randomization_layers_2_heads_4.pt",
+            "triples_card_randomization_tuple_randomization_layers_3_heads_4.pt",
+            "triples_card_randomization_tuple_randomization_layers_4_heads_4.pt"]
+    )
+
+    fig_save_dir = "COMPLETE_FIGS/paper/set_model"
+    os.makedirs(fig_save_dir, exist_ok=True)
+
+    fig = create_loss_figure_orig_set_model(
+        run_data,
+        layers = [2, 3, 4])
+    
+    fig.savefig(os.path.join(
+        fig_save_dir, f'set_model_losses.png'), dpi=300, bbox_inches='tight')
+
+
 if __name__ == "__main__":
     seed = 42
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
 
-    attr_from_last_attr_dataset_size()
+    plot_orig_set_model_loss()
+
+    # attr_from_last_attr_dataset_size()
     # sns.set_style("white")
     # plot_consolidated_attribute_metrics(
     #     layers=[0, 1, 2, 3],
@@ -798,7 +935,7 @@ if __name__ == "__main__":
     # embedding_ablation_kl_fig()
     # avg_combined_cosine_similarity_probe_embedding_heatmap()
     # combined_probe_weight_cosine_sim(
-    #     GPTConfig44_Complete(), 
+    #     GPTConfig44_Complete(),
     #     LinearProbeBindingCardAttrConfig())
     # combined_probe_weight_cosine_sim(
     #     GPTConfig44_Complete(),
