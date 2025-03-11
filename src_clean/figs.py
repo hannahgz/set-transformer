@@ -751,12 +751,14 @@ def attr_from_last_attr_dataset_size(parent_folder="all_attr_from_last_attr_bind
     dataset_path = f"{PATH_PREFIX}/{parent_folder}/layer{capture_layer}/binary_dataset_{attribute_id}.pt"
     data = torch.load(dataset_path)
 
-    print(f"Dataset size for attribute {attribute_id}: {len(data)}")
+    input_embeddings = data['input_embeddings']
+    breakpoint()
+    print(f"Dataset size for attribute {attribute_id}: {len(input_embeddings)}")
 
     val_split = 0.2
     # Calculate split sizes
-    val_size = int(len(data) * val_split)
-    train_size = len(data) - val_size
+    val_size = int(len(input_embeddings) * val_split)
+    train_size = len(input_embeddings) - val_size
 
     print(f"Train size: {train_size}, Val size: {val_size}")
 
