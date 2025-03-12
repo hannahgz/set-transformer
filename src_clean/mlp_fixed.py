@@ -446,7 +446,6 @@ def plot_overlap_histograms(neuron_activations, target_neurons, num_bins=50, fig
     if n_neurons == 1:
         axes = axes.reshape(1, -1)
     
-    print("Plotting histograms...")
     # Plot histogram for each neuron and position
     for i, neuron in enumerate(target_neurons):
         for pos_idx in range(8):
