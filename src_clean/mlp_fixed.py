@@ -511,7 +511,7 @@ if __name__ == "__main__":
         os.makedirs(output_dir, exist_ok=True)
     
         fig = plot_overlap_histograms(
-            nueron_activations = neuron_activations,
+            neuron_activations = neuron_activations,
             target_neurons = range(i * 8, (i+1) * 8),
             num_bins = 50,
         )
