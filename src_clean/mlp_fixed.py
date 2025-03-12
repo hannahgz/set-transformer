@@ -150,16 +150,35 @@ def plot_neuron_activations(neuron_activations, neuron_idx, pos_idx, num_bins=50
     peaks, _ = find_peaks(hist, height=0.1*hist.max(), distance=num_bins/10)
     bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
 
+    # Plot the histogram with identified peaks
+    fig = plt.figure(figsize=(12, 6))
+    plt.bar(bin_centers, hist, width=(bin_edges[1] - bin_edges[0]), alpha=0.7,
+            color='skyblue', edgecolor='black')
+
     # Mark the peaks
     plt.plot(bin_centers[peaks], hist[peaks], "x", color='red', markersize=10)
+    for i, peak in enumerate(peaks):
+        plt.text(bin_centers[peak], hist[peak], f"Peak {i+1}",
+                 fontsize=10, ha='center', va='bottom')
 
-    plt.title(f'Neuron {neuron_idx} Activation Distribution')
+    # title_suffix = f" - {set_type_filter} Set" if set_type_filter is not None else " - All Sets Combined"
+    plt.title(
+        f'Neuron {neuron_idx} - Activation Histogram with {len(peaks)} Peaks')
     plt.xlabel('Activation Value')
     plt.ylabel('Frequency')
     plt.grid(alpha=0.3)
-    plt.show()
 
-    return plt.gcf()
+    # # Mark the peaks
+    # plt.plot(bin_centers[peaks], hist[peaks], "x", color='red', markersize=10)
+
+    # plt.title(f'Neuron {neuron_idx} Activation Distribution')
+    # plt.xlabel('Activation Value')
+    # plt.ylabel('Frequency')
+    # plt.grid(alpha=0.3)
+    # plt.show()
+
+    # return plt.gcf()
+    return fig
     # return plt.gcf(), bin_centers[peaks], hist[peaks]
 
 if __name__ == "__main__":
