@@ -132,8 +132,6 @@ def analyze_mlp_neurons(model, data_loader, layer_idx=0, neuron_indices=None, mo
             # For each position, extend the corresponding list
             for pos_idx in range(num_positions):
                 neuron_activations[neuron_idx][pos_idx].extend(neuron_acts[:, pos_idx].tolist())
-    
-    breakpoint()
     return neuron_activations
 
 
@@ -188,11 +186,10 @@ if __name__ == "__main__":
         data_loader=val_loader, 
         layer_idx=0, 
         neuron_indices=None, 
-        mode='hidden',)
-    
-    breakpoint()
-    
-    output_dir = f"data/mlp/layer{curr_layer}"
+        mode='hidden',
+        position_slice=slice(-8,None))
+
+    output_dir = f"{PATH_PREFIX}/data/mlp/layer{curr_layer}"
     # Make sure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
     
