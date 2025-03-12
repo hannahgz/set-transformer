@@ -272,17 +272,18 @@ if __name__ == "__main__":
     with open(pkl_filename, 'rb') as f:
         neuron_activations = pickle.load(f)
 
-    for neuron_idx in range(256):
+    # for neuron_idx in range(256):
+    for neuron_idx in [21, 71, 88, 97, 111, 118, 130, 148, 161, 164, 191, 214]:
         for pos_idx in range(8):
             at_threshold, num_peaks = check_peak_threshold(neuron_activations, neuron_idx, pos_idx)
             if at_threshold:
                 print(f"Neuron {neuron_idx}, position {pos_idx}, num_peaks {num_peaks}")
             # if check_peak_threshold(neuron_activations, neuron_idx, pos_idx):
             #     print(f"Neuron {neuron_idx}, position {pos_idx} has enough peaks")
-            #     fig = plot_neuron_activations(neuron_activations, neuron_idx, pos_idx)
-            #     peaks_dir = f"results/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron_idx}"
-            #     os.makedirs(peaks_dir, exist_ok=True)
-            #     fig.savefig(f"{peaks_dir}/pos{pos_idx}_hist.png")
+            fig = plot_neuron_activations(neuron_activations, neuron_idx, pos_idx)
+            peaks_dir = f"results/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron_idx}"
+            os.makedirs(peaks_dir, exist_ok=True)
+            fig.savefig(f"{peaks_dir}/pos{pos_idx}_hist.png")
     # # Plot the histogram of activations for a specific neuron
     # neuron_idx = 0
     # # pos_idx = 0
