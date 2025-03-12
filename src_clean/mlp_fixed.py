@@ -5,6 +5,8 @@ import torch
 import os
 import pickle
 import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import find_peaks
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
@@ -152,15 +154,26 @@ def find_peaks_with_edges(hist, height, distance, prom):
     return peaks
 
 def check_peak_threshold(neuron_activations, neuron_idx, pos_idx, num_bins = 50, peak_threshold=2):
-    import matplotlib.pyplot as plt
-    from scipy.signal import find_peaks
     activations = neuron_activations[neuron_idx][pos_idx]
 
     # plt.figure(figsize=(10, 6))
     hist, bin_edges = np.histogram(activations, bins=num_bins)
 
+    min_peak_height = 0.04
+    min_peak_distance = 0.075
+    prominence = 0.05
+    num_bins = 50
+
+    distance = int(min_peak_distance * num_bins)  # Convert to bin count
+    height = min_peak_height * hist.max()  # Minimum height threshold
+    prominence = prominence * hist.max()  # Minimum prominence
+
     # Find peaks in the histogram
-    peaks = find_peaks_with_edges(hist, height=0.1*hist.max(), distance=num_bins/10)
+    peaks = find_peaks_with_edges(
+        hist, 
+        height=height, 
+        distance=distance,
+        prominence=prominence)
 
     if len(peaks) >= peak_threshold:
         return True, len(peaks)
