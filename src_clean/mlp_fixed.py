@@ -214,7 +214,7 @@ if __name__ == "__main__":
     # pos_idx = 0
     for pos_idx in range(8):
         print(f"Plotting histogram for neuron {neuron_idx}, position {pos_idx}")
-        fig, _, _ = plot_neuron_activations(neuron_activations, neuron_idx, pos_idx)
+        fig = plot_neuron_activations(neuron_activations, neuron_idx, pos_idx)
         peaks_dir = f"results/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron_idx}"
         os.makedirs(peaks_dir, exist_ok=True)
         fig.savefig(f"{peaks_dir}/pos{pos_idx}_hist.png")
