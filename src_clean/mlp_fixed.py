@@ -437,7 +437,7 @@ def plot_overlap_histograms(neuron_activations, target_neurons, num_bins=50, fig
     
     # Set default figsize based on number of neurons if not provided
     if figsize is None:
-        figsize = (80, 10 * n_neurons)
+        figsize = (80, 5 * n_neurons)
     
     # Create figure and subplots
     fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize)
