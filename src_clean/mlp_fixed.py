@@ -492,8 +492,11 @@ if __name__ == "__main__":
                     set_type_filter=set_type_filter,
                 )
 
-                set_type_filter = "all"
-                peaks_dir = f"{PATH_PREFIX}/data/mlp_fixed/layer{curr_layer}/neuron{neuron}/pos{pos_idx}/set_type_{set_type_filter}"
+                if set_type_filter is None:
+                    set_type_filter_name = "all"
+                else:
+                    set_type_filter_name = set_type_filter
+                peaks_dir = f"{PATH_PREFIX}/data/mlp_fixed/layer{curr_layer}/neuron{neuron}/pos{pos_idx}/set_type_{set_type_filter_name}"
 
                 os.makedirs(peaks_dir, exist_ok=True)
 
@@ -504,7 +507,7 @@ if __name__ == "__main__":
 
                 # peaks_info = load_peaks_info(layer, neuron=neuron, set_type_filter=set_type_filter)
 
-                output_dir = f"results/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron}/pos{pos_idx}/set_type_{set_type_filter}"
+                output_dir = f"results/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron}/pos{pos_idx}/set_type_{set_type_filter_name}"
                 os.makedirs(output_dir, exist_ok=True)
 
                 top = 10
