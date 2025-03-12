@@ -190,8 +190,22 @@ def plot_neuron_activations(neuron_activations, neuron_idx, pos_idx, num_bins=50
     plt.figure(figsize=(10, 6))
     hist, bin_edges = np.histogram(activations, bins=num_bins)
 
+    min_peak_height = 0.04
+    min_peak_distance = 0.03
+    prominence = 0.03
+    num_bins = 50
+
+    distance = int(min_peak_distance * num_bins)  # Convert to bin count
+    height = min_peak_height * hist.max()  # Minimum height threshold
+    prominence = prominence * hist.max()  # Minimum prominence
+
     # Find peaks in the histogram
-    peaks, _ = find_peaks(hist, height=0.1*hist.max(), distance=num_bins/10)
+    peaks = find_peaks_with_edges(
+        hist, 
+        height=height, 
+        distance=distance,
+        prominence=prominence)
+
     bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
 
     # Plot the histogram with identified peaks
