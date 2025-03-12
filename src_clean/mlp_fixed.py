@@ -506,6 +506,7 @@ if __name__ == "__main__":
         neuron_activations = pickle.load(f)
 
     for i in range(32):
+        print(f"Plotting histograms for neurons {i*8} to {(i+1)*8}")
         output_dir = f"results/mlp_fixed/peaks/layer{curr_layer}"
         os.makedirs(output_dir, exist_ok=True)
     
