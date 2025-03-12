@@ -137,10 +137,10 @@ def analyze_mlp_neurons(model, data_loader, layer_idx=0, neuron_indices=None, mo
                 neuron_activations[neuron_idx][pos_idx].extend(neuron_acts[:, pos_idx].tolist())
     return neuron_activations
 
-def find_peaks_with_edges(hist, height, distance, prom):
+def find_peaks_with_edges(hist, height, distance, prominence):
     # First find regular peaks
     peaks, _ = find_peaks(
-        hist, height=height, distance=distance, prominence=prom)
+        hist, height=height, distance=distance, prominence=prominence)
     
     # Check for edge peaks
     # Left edge
