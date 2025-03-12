@@ -437,7 +437,7 @@ def plot_overlap_histograms(neuron_activations, target_neurons, num_bins=50, fig
     
     # Set default figsize based on number of neurons if not provided
     if figsize is None:
-        figsize = (80, 5 * n_neurons)
+        figsize = (70, 4 * n_neurons)
     
     # Create figure and subplots
     fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize)
@@ -474,19 +474,19 @@ def plot_overlap_histograms(neuron_activations, target_neurons, num_bins=50, fig
                            label=f'{set_info["name"]} Mean: {mean_act:.3f}')
             
             # Set titles and labels
-            if i == 0:  # Add position labels only on top row
-                ax.set_title(f'Position {pos_idx}')
+            # if i == 0:  # Add position labels only on top row
+            ax.set_title(f'Position {pos_idx}')
             if pos_idx == 0:  # Add neuron labels only on leftmost column
                 ax.set_ylabel(f'Neuron {neuron}')
             
             # Only add legend to the rightmost column
-            if pos_idx == n_cols - 1:
-                ax.legend(loc='upper left', bbox_to_anchor=(1.05, 1), fontsize=8)
+            # if pos_idx == n_cols - 1:
+            ax.legend(loc='best', fontsize=8)
             
             # Remove x-axis labels except for bottom row
-            if i != n_rows - 1:
-                ax.set_xticklabels([])
-            else:
+            # if i != n_rows - 1:
+            #     ax.set_xticklabels([])
+            if i == n_rows - 1:
                 ax.set_xlabel('Activation Value')
     
     plt.tight_layout()
