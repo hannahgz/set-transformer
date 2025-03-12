@@ -135,12 +135,12 @@ def analyze_mlp_neurons(model, data_loader, layer_idx=0, neuron_indices=None, mo
     return neuron_activations
 
 
-def plot_neuron_activations(neuron_activations, neuron_idx, num_bins=50):
+def plot_neuron_activations(neuron_activations, neuron_idx, pos_idx, num_bins=50):
     """Plot histogram of activations for a specific neuron"""
     import matplotlib.pyplot as plt
     from scipy.signal import find_peaks
 
-    activations = neuron_activations[neuron_idx]
+    activations = neuron_activations[neuron_idx][pos_idx]
 
     plt.figure(figsize=(10, 6))
     hist, bin_edges = plt.hist(activations, bins=num_bins, alpha=0.7)
@@ -158,48 +158,66 @@ def plot_neuron_activations(neuron_activations, neuron_idx, num_bins=50):
     plt.grid(alpha=0.3)
     plt.show()
 
-    return bin_centers[peaks], hist[peaks]
-
+    return plt.gcf()
+    # return plt.gcf(), bin_centers[peaks], hist[peaks]
 
 if __name__ == "__main__":
-    config = GPTConfig44_Complete()
-    # Load the checkpoint
-    checkpoint = torch.load(config.filename, weights_only=False)
+    # config = GPTConfig44_Complete()
+    # # Load the checkpoint
+    # checkpoint = torch.load(config.filename, weights_only=False)
 
-    # Create the model architecture
-    model = GPT(config).to(device)
+    # # Create the model architecture
+    # model = GPT(config).to(device)
 
-    # Load the weights
-    model.load_state_dict(checkpoint['model'])
-    model.eval()  # Set to evaluation mode
+    # # Load the weights
+    # model.load_state_dict(checkpoint['model'])
+    # model.eval()  # Set to evaluation mode
 
-    # dataset = torch.load(config.dataset_path)
+    # # dataset = torch.load(config.dataset_path)
+    # # _, val_loader = initialize_loaders(config, dataset)
+
+    # dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
+    # dataset = torch.load(dataset_path)
     # _, val_loader = initialize_loaders(config, dataset)
 
-    dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
-    dataset = torch.load(dataset_path)
-    _, val_loader = initialize_loaders(config, dataset)
+    # curr_layer = 0
+    # neuron_activations = analyze_mlp_neurons(
+    #     model=model, 
+    #     data_loader=val_loader, 
+    #     layer_idx=0, 
+    #     neuron_indices=None, 
+    #     mode='hidden',
+    #     position_slice=slice(-8,None))
+
+    # output_dir = f"{PATH_PREFIX}/data/mlp/layer{curr_layer}"
+    # # Make sure the output directory exists
+    # os.makedirs(output_dir, exist_ok=True)
+    
+    # # Create timestamp for the filename
+    # pkl_filename = os.path.join(output_dir, f"neuron_activations_layer{curr_layer}.pkl")
+    
+    # # Save the activations to a pickle file
+    # with open(pkl_filename, 'wb') as f:
+    #     pickle.dump(neuron_activations, f)
+    
+    # print(f"Saved neuron activations to {pkl_filename}")
 
     curr_layer = 0
-    neuron_activations = analyze_mlp_neurons(
-        model=model, 
-        data_loader=val_loader, 
-        layer_idx=0, 
-        neuron_indices=None, 
-        mode='hidden',
-        position_slice=slice(-8,None))
-
     output_dir = f"{PATH_PREFIX}/data/mlp/layer{curr_layer}"
-    # Make sure the output directory exists
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Create timestamp for the filename
     pkl_filename = os.path.join(output_dir, f"neuron_activations_layer{curr_layer}.pkl")
-    
-    # Save the activations to a pickle file
-    with open(pkl_filename, 'wb') as f:
-        pickle.dump(neuron_activations, f)
-    
-    print(f"Saved neuron activations to {pkl_filename}")
+    with open(pkl_filename, 'rb') as f:
+        neuron_activations = pickle.load(f)
+
+    # Plot the histogram of activations for a specific neuron
+    neuron_idx = 0
+    # pos_idx = 0
+    for pos_idx in range(8):
+        print(f"Plotting histogram for neuron {neuron_idx}, position {pos_idx}")
+        fig = plot_neuron_activations(neuron_activations, neuron_idx, pos_idx)
+        peaks_dir = f"results/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron_idx}"
+        os.makedirs(peaks_dir, exist_ok=True)
+        fig.savefig(f"{peaks_dir}/pos{pos_idx}_hist.png")
+
+
     
 
