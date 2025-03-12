@@ -505,13 +505,13 @@ if __name__ == "__main__":
     with open(pkl_filename, 'rb') as f:
         neuron_activations = pickle.load(f)
 
-    for i in range(4):
+    for i in range(32):
         output_dir = f"results/mlp_fixed/peaks/layer{curr_layer}"
         os.makedirs(output_dir, exist_ok=True)
     
         fig = plot_overlap_histograms(
             nueron_activations = neuron_activations,
-            target_neurons = range(i * 64, (i+1) * 64),
+            target_neurons = range(i * 8, (i+1) * 8),
             num_bins = 50,
         )
 
