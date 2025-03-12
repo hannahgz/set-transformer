@@ -314,8 +314,9 @@ def get_peak_info(neuron_activations, layer, position, neuron, input_examples_fi
             f"Analyzing {len(all_activations)} activations for neuron {neuron} in layer {layer} (set type: {set_type_filter})")
     else:
         # Use all available set types
-        for set_type in neuron_activations[neuron][position]:
-            breakpoint()
+        # for set_type in neuron_activations[neuron][position]:
+        for set_type in range(3):
+            # breakpoint()
             activations = neuron_activations[neuron][position][set_type]
             all_activations.extend(activations)
             activation_by_type[set_type] = activations
@@ -492,7 +493,7 @@ if __name__ == "__main__":
                 )
 
                 set_type_filter = "all"
-                peaks_dir = f"data/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron}/set_type_{set_type_filter}"
+                peaks_dir = f"{PATH_PREFIX}/data/mlp_fixed/layer{curr_layer}/neuron{neuron}/pos{pos_idx}/set_type_{set_type_filter}"
 
                 os.makedirs(peaks_dir, exist_ok=True)
 
