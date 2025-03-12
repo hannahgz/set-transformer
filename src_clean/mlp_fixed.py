@@ -77,6 +77,7 @@ tokenizer = load_tokenizer(GPTConfig44_Complete().tokenizer_path)
 no_set_token = tokenizer.token_to_id["*"]
 two_set_token = tokenizer.token_to_id["/"]
 
+
 def analyze_mlp_neurons(model, data_loader, layer_idx=0, neuron_indices=None, mode='hidden', position_slice=None):
     """
     Analyze specific neurons in the MLP's hidden or output layer, preserving position information.
@@ -136,8 +137,9 @@ def analyze_mlp_neurons(model, data_loader, layer_idx=0, neuron_indices=None, mo
             # Now initialize the proper structure with 3 set types
             for idx in neuron_indices:
                 # Initialize as [num_positions][3 set types][activations]
-                neuron_activations[idx] = [[[] for _ in range(3)] for _ in range(num_positions)]
-        
+                neuron_activations[idx] = [
+                    [[] for _ in range(3)] for _ in range(num_positions)]
+
         # Determine set type for each sequence in the batch
         batch_set_types = []
         with torch.no_grad():
@@ -166,7 +168,7 @@ def analyze_mlp_neurons(model, data_loader, layer_idx=0, neuron_indices=None, mo
                     # Convert to standard Python float to avoid np.float32 representation
                     neuron_activations[neuron_idx][pos_idx][set_type].append(
                         float(neuron_acts[batch_item_idx, pos_idx]))
-    
+
     return neuron_activations
 
 
@@ -264,9 +266,10 @@ def plot_neuron_activations(neuron_activations, neuron_idx, pos_idx, num_bins=50
     return fig
     # return plt.gcf(), bin_centers[peaks], hist[peaks]
 
+
 def get_peak_info(neuron_activations, layer, position, neuron, input_examples_file=None, min_peak_height=0.05,
-                          min_peak_distance=0.1, prominence=0.02, num_bins=50,
-                          set_type_filter=None):
+                  min_peak_distance=0.1, prominence=0.02, num_bins=50,
+                  set_type_filter=None):
     """
     Identify peaks in the activation histogram for a specific neuron in a specific layer,
     and provide examples of inputs that produce activations at each peak.
@@ -312,6 +315,7 @@ def get_peak_info(neuron_activations, layer, position, neuron, input_examples_fi
     else:
         # Use all available set types
         for set_type in neuron_activations[neuron][position]:
+            breakpoint()
             activations = neuron_activations[neuron][position][set_type]
             all_activations.extend(activations)
             activation_by_type[set_type] = activations
@@ -334,7 +338,7 @@ def get_peak_info(neuron_activations, layer, position, neuron, input_examples_fi
     # Find peaks in the histogram
     # peaks, peak_properties = find_peaks(
     #     hist, height=height, distance=distance, prominence=prom)
-    
+
     peaks = find_peaks_with_edges(
         hist, height=height, distance=distance, prominence=prominence)
 
@@ -446,14 +450,15 @@ if __name__ == "__main__":
     #     neuron_indices=None,
     #     mode='hidden',
     #     position_slice=slice(-8,None))
-    
+
     # breakpoint()
 
     output_dir = f"{PATH_PREFIX}/data/mlp_fixed/layer{curr_layer}"
     # # Make sure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
 
-    pkl_filename = os.path.join(output_dir, f"neuron_activations_layer{curr_layer}.pkl")
+    pkl_filename = os.path.join(
+        output_dir, f"neuron_activations_layer{curr_layer}.pkl")
 
     # # Save the activations to a pickle file
     # with open(pkl_filename, 'wb') as f:
@@ -469,7 +474,8 @@ if __name__ == "__main__":
         # for neuron in layer_1_target_neurons:
         for neuron in layer_0_target_neurons:
             for pos_idx in range(8):
-                print(f"Set type filter: {set_type_filter}, Neuron: {neuron}, Pos: {pos_idx}")
+                print(
+                    f"Set type filter: {set_type_filter}, Neuron: {neuron}, Pos: {pos_idx}")
                 examples_file = "results/val_input_examples.pkl"
 
                 peaks_info = get_peak_info(
@@ -497,14 +503,15 @@ if __name__ == "__main__":
 
                 # peaks_info = load_peaks_info(layer, neuron=neuron, set_type_filter=set_type_filter)
 
-                output_dir= f"results/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron}/pos{pos_idx}/set_type_{set_type_filter}"
+                output_dir = f"results/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron}/pos{pos_idx}/set_type_{set_type_filter}"
                 os.makedirs(output_dir, exist_ok=True)
 
                 top = 10
                 save_summary_statistics_from_peak_info(
-                    peaks_info, 
-                    top=top, 
-                    output_file=os.path.join(output_dir, f"top_{top}_summary_statistics.txt")
+                    peaks_info,
+                    top=top,
+                    output_file=os.path.join(
+                        output_dir, f"top_{top}_summary_statistics.txt")
                 )
 
                 save_peak_figure(
@@ -513,9 +520,9 @@ if __name__ == "__main__":
                 )
 
                 save_top_peak_examples_as_txt(
-                    config=GPTConfig44_Complete, 
-                    peaks_info=peaks_info, 
-                    filename=os.path.join(output_dir, "peak_examples.txt"), 
+                    config=GPTConfig44_Complete,
+                    peaks_info=peaks_info,
+                    filename=os.path.join(output_dir, "peak_examples.txt"),
                     top=top)
 
     # print(f"Saved neuron activations to {pkl_filename}")
