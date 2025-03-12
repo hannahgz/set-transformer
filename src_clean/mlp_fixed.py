@@ -160,8 +160,8 @@ def check_peak_threshold(neuron_activations, neuron_idx, pos_idx, num_bins = 50,
     hist, bin_edges = np.histogram(activations, bins=num_bins)
 
     min_peak_height = 0.04
-    min_peak_distance = 0.075
-    prominence = 0.05
+    min_peak_distance = 0.03
+    prominence = 0.03
     num_bins = 50
 
     distance = int(min_peak_distance * num_bins)  # Convert to bin count
