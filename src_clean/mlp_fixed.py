@@ -4,6 +4,7 @@ from tokenizer import load_tokenizer
 import torch
 import os
 import pickle
+import numpy as np
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
@@ -143,7 +144,7 @@ def plot_neuron_activations(neuron_activations, neuron_idx, pos_idx, num_bins=50
     activations = neuron_activations[neuron_idx][pos_idx]
 
     plt.figure(figsize=(10, 6))
-    hist, bin_edges = plt.hist(activations, bins=num_bins, alpha=0.7)
+    hist, bin_edges = np.histogram(activations, bins=num_bins)
 
     # Find peaks in the histogram
     peaks, _ = find_peaks(hist, height=0.1*hist.max(), distance=num_bins/10)
@@ -213,7 +214,7 @@ if __name__ == "__main__":
     # pos_idx = 0
     for pos_idx in range(8):
         print(f"Plotting histogram for neuron {neuron_idx}, position {pos_idx}")
-        fig = plot_neuron_activations(neuron_activations, neuron_idx, pos_idx)
+        fig, _, _ = plot_neuron_activations(neuron_activations, neuron_idx, pos_idx)
         peaks_dir = f"results/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron_idx}"
         os.makedirs(peaks_dir, exist_ok=True)
         fig.savefig(f"{peaks_dir}/pos{pos_idx}_hist.png")
