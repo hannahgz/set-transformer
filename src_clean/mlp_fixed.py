@@ -135,6 +135,37 @@ def analyze_mlp_neurons(model, data_loader, layer_idx=0, neuron_indices=None, mo
                 neuron_activations[neuron_idx][pos_idx].extend(neuron_acts[:, pos_idx].tolist())
     return neuron_activations
 
+def find_peaks_with_edges(hist, height, distance, prom):
+    # First find regular peaks
+    peaks, _ = find_peaks(
+        hist, height=height, distance=distance, prominence=prom)
+    
+    # Check for edge peaks
+    # Left edge
+    if hist[0] > hist[1] and hist[0] > height:
+        peaks = np.append([0], peaks)
+        
+    # Right edge
+    if hist[-1] > hist[-2] and hist[-1] > height:
+        peaks = np.append(peaks, [len(hist)-1])
+        
+    return peaks
+
+def check_peak_threshold(neuron_activations, neuron_idx, pos_idx, num_bins = 50, peak_threshold=2):
+    import matplotlib.pyplot as plt
+    from scipy.signal import find_peaks
+    activations = neuron_activations[neuron_idx][pos_idx]
+
+    # plt.figure(figsize=(10, 6))
+    hist, bin_edges = np.histogram(activations, bins=num_bins)
+
+    # Find peaks in the histogram
+    peaks = find_peaks_with_edges(hist, height=0.1*hist.max(), distance=num_bins/10)
+
+    if len(peaks) >= peak_threshold:
+        return True, len(peaks)
+    
+    return False, len(peaks)
 
 def plot_neuron_activations(neuron_activations, neuron_idx, pos_idx, num_bins=50):
     """Plot histogram of activations for a specific neuron"""
@@ -228,15 +259,26 @@ if __name__ == "__main__":
     with open(pkl_filename, 'rb') as f:
         neuron_activations = pickle.load(f)
 
-    # Plot the histogram of activations for a specific neuron
-    neuron_idx = 0
-    # pos_idx = 0
-    for pos_idx in range(8):
-        print(f"Plotting histogram for neuron {neuron_idx}, position {pos_idx}")
-        fig = plot_neuron_activations(neuron_activations, neuron_idx, pos_idx)
-        peaks_dir = f"results/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron_idx}"
-        os.makedirs(peaks_dir, exist_ok=True)
-        fig.savefig(f"{peaks_dir}/pos{pos_idx}_hist.png")
+    for neuron_idx in range(256):
+        for pos_idx in range(8):
+            at_threshold, num_peaks = check_peak_threshold(neuron_activations, neuron_idx, pos_idx)
+            if at_threshold:
+                print(f"Neuron {neuron_idx}, position {pos_idx}, num_peaks {num_peaks}")
+            # if check_peak_threshold(neuron_activations, neuron_idx, pos_idx):
+            #     print(f"Neuron {neuron_idx}, position {pos_idx} has enough peaks")
+            #     fig = plot_neuron_activations(neuron_activations, neuron_idx, pos_idx)
+            #     peaks_dir = f"results/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron_idx}"
+            #     os.makedirs(peaks_dir, exist_ok=True)
+            #     fig.savefig(f"{peaks_dir}/pos{pos_idx}_hist.png")
+    # # Plot the histogram of activations for a specific neuron
+    # neuron_idx = 0
+    # # pos_idx = 0
+    # for pos_idx in range(8):
+    #     print(f"Plotting histogram for neuron {neuron_idx}, position {pos_idx}")
+    #     fig = plot_neuron_activations(neuron_activations, neuron_idx, pos_idx)
+    #     peaks_dir = f"results/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron_idx}"
+    #     os.makedirs(peaks_dir, exist_ok=True)
+    #     fig.savefig(f"{peaks_dir}/pos{pos_idx}_hist.png")
 
 
     
