@@ -141,8 +141,8 @@ if __name__ == "__main__":
         with open(pkl_filename, 'wb') as f:
             pickle.dump(neuron_activations, f)
 
-        print("Plotting histograms for interesting output neurons")
-        output_dir = f"results/mlp_fixed/peaks/output/layer{curr_layer}"
+        print("Plotting histograms for interesting hidden neurons")
+        output_dir = f"results/mlp_fixed/peaks/hidden/layer{curr_layer}"
         os.makedirs(output_dir, exist_ok=True)
 
         fig = plot_overlap_histograms(
