@@ -19,7 +19,9 @@ def analyze_mlp_weights(mlp_weights):
     for layer_name, layer_weights in mlp_weights.items():
         for weight_name, weights in layer_weights.items():
             col_norms = np.linalg.norm(weights, axis=0)
-            breakpoint()
+            row_norms = np.linalg.norm(weights, axis=1)
+            if layer_name == "layer_3":
+                breakpoint()
 
 if __name__ == "__main__":
 
