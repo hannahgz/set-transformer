@@ -487,7 +487,138 @@ def plot_overlap_histograms(neuron_activations, target_neurons, num_bins=50, fig
     
     return fig
 
+from itertools import combinations
+from collections import Counter
+
+tokenizer = load_tokenizer(f"{PATH_PREFIX}/all_tokenizer.pkl")
+
+shapes = ["oval", "squiggle", "diamond"]
+colors = ["green", "blue", "pink"]
+numbers = ["one", "two", "three"]
+shadings = ["solid", "striped", "open"]
+
+shape_ids = tokenizer.encode(shapes)
+color_ids = tokenizer.encode(colors)
+number_ids = tokenizer.encode(numbers)
+shading_ids = tokenizer.encode(shadings)
+
+card_ids = tokenizer.encode(["A", "B", "C", "D", "E"])
+
+def get_per_card_attributes(input):
+    grid = [[0 for _ in range(4)] for _ in range(5)]
+    card_indices = {card_ids[0]: 0, card_ids[1]: 1, card_ids[2]: 2, card_ids[3]: 3, card_ids[4]: 4}
+    
+    i = 0
+    while i < 40:
+        card = input[i]
+        attr = input[i+1]
+
+        if attr in shape_ids:
+            grid[card_indices[card]][0] = attr
+        elif attr in number_ids:
+            grid[card_indices[card]][1] = attr
+        elif attr in shading_ids:
+            grid[card_indices[card]][2] = attr
+        elif attr in color_ids:
+            grid[card_indices[card]][3] = attr
+
+        i += 2
+    return grid
+
+def overall_count(grid):
+    # same_count = []
+    # diff_count = []
+    same_count = 0
+    diff_count = 0
+
+    for comb in combinations(range(5), 3):
+        card_one = grid[comb[0]]
+        card_two = grid[comb[1]]
+        card_three = grid[comb[2]]
+
+        cards = [card_one, card_two, card_three]
+
+        for attribute_type in range(4):
+            same = True
+            diff = True
+            for card in cards:
+                if card[attribute_type] != card_one[attribute_type]:
+                    same = False
+                if card[attribute_type] == card_one[attribute_type]:
+                    diff = False
+            if same:
+                same_count += 1
+            if diff:
+                diff_count += 1
+
+    return same_count, diff_count
+
+def test_overall_summary_stat(peaks_info, top=None, output_file="overall_summary_statistics.txt",):
+    # Open the output file
+    same_count_total = 0
+    diff_count_total = 0
+    total = 0
+    with open(output_file, 'w') as f:
+        for peak_idx in peaks_info['examples_by_peak']:
+            for index, (_, example) in enumerate(peaks_info['examples_by_peak'][peak_idx][:top]):
+                grid = get_per_card_attributes(example)
+                same_count, diff_count = overall_count(grid)
+                same_count_total += same_count
+                diff_count_total += diff_count
+        
+        total = same_count_total + diff_count_total
+        # Write the summary statistics to the file
+        for peak_idx in sorted(peaks_info['examples_by_peak']):
+            f.write(f"\nPeak {peak_idx+1}:\n")
+            
+            f.write(f"Same Count: {same_count_total}\n")
+            f.write(f"Diff Count: {diff_count_total}\n")
+            f.write(f"Total: {total}\n")
+
 if __name__ == "__main__":
+    input_examples_file = "results/val_input_examples.pkl"
+    print(f"Loading input examples from {input_examples_file}")
+    with open(input_examples_file, 'rb') as f:
+        input_examples = pickle.load(f)
+
+    # layer_0_target_neurons = [148, 164, 191]
+    # layer_0_target_neurons = [10, 11, 12, 14, 16, 24]
+    # layer_0_target_neurons = [84, 88, 97, 115, 128, 196, 209, 220]
+    # target_neurons = [84, 88, 97, 115, 128, 196, 209, 220]
+    target_neurons = [220]
+    # # for set_type_filter in [0, 1]:
+
+    # for curr_layer in range(4):
+    for curr_layer in [0]:
+        for set_type_filter in [0, 1, 2]:
+            # for neuron in [2, 4, 12, 19, 34, 36, 37, 43, 44, 54, 60, 61]:
+            # for neuron in layer_1_target_neurons:
+            for neuron in target_neurons:
+                for pos_idx in range(8):
+                    print(
+                        f"Layer {curr_layer}, Set type filter: {set_type_filter}, Neuron: {neuron}, Pos: {pos_idx}")
+
+                    if set_type_filter is None:
+                        set_type_filter_name = "all"
+                    else:
+                        set_type_filter_name = set_type_filter
+                    peaks_dir = f"{PATH_PREFIX}/data/mlp_fixed/layer{curr_layer}/neuron{neuron}/pos{pos_idx}/set_type_{set_type_filter_name}"
+
+                    peaks_info_path = os.path.join(peaks_dir, f"{set_type_filter_name}_info.pkl")
+
+                    with open(peaks_info_path, 'rb') as f:
+                        peaks_info = pickle.load(f)
+
+                    output_dir = f"results/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron}/pos{pos_idx}/set_type_{set_type_filter_name}"
+                    os.makedirs(output_dir, exist_ok=True)
+
+                    top = 100
+                    test_overall_summary_stat(
+                        peaks_info,
+                        top=top,
+                        output_file=os.path.join(output_dir, "overall_summary_statistics.txt")
+                    )
+
     # curr_layer = 0
     # output_dir = f"{PATH_PREFIX}/data/mlp_fixed/layer{curr_layer}"
     # os.makedirs(output_dir, exist_ok=True)
@@ -563,88 +694,88 @@ if __name__ == "__main__":
 
     
 
-    input_examples_file = "results/val_input_examples.pkl"
-    print(f"Loading input examples from {input_examples_file}")
-    with open(input_examples_file, 'rb') as f:
-        input_examples = pickle.load(f)
+    # input_examples_file = "results/val_input_examples.pkl"
+    # print(f"Loading input examples from {input_examples_file}")
+    # with open(input_examples_file, 'rb') as f:
+    #     input_examples = pickle.load(f)
 
-    # layer_0_target_neurons = [148, 164, 191]
-    # layer_0_target_neurons = [10, 11, 12, 14, 16, 24]
-    # layer_0_target_neurons = [84, 88, 97, 115, 128, 196, 209, 220]
-    target_neurons = [84, 88, 97, 115, 128, 196, 209, 220]
-    # # for set_type_filter in [0, 1]:
+    # # layer_0_target_neurons = [148, 164, 191]
+    # # layer_0_target_neurons = [10, 11, 12, 14, 16, 24]
+    # # layer_0_target_neurons = [84, 88, 97, 115, 128, 196, 209, 220]
+    # target_neurons = [84, 88, 97, 115, 128, 196, 209, 220]
+    # # # for set_type_filter in [0, 1]:
 
-    for curr_layer in range(4):
-        output_dir = f"{PATH_PREFIX}/data/mlp_fixed/layer{curr_layer}"
-        # # Make sure the output directory exists
-        os.makedirs(output_dir, exist_ok=True)
+    # for curr_layer in range(4):
+    #     output_dir = f"{PATH_PREFIX}/data/mlp_fixed/layer{curr_layer}"
+    #     # # Make sure the output directory exists
+    #     os.makedirs(output_dir, exist_ok=True)
 
-        pkl_filename = os.path.join(
-            output_dir, f"neuron_activations_layer{curr_layer}.pkl")
-        with open(pkl_filename, 'rb') as f:
-            neuron_activations = pickle.load(f)
+    #     pkl_filename = os.path.join(
+    #         output_dir, f"neuron_activations_layer{curr_layer}.pkl")
+    #     with open(pkl_filename, 'rb') as f:
+    #         neuron_activations = pickle.load(f)
 
-        for set_type_filter in [0, 1, 2]:
-            # for neuron in [2, 4, 12, 19, 34, 36, 37, 43, 44, 54, 60, 61]:
-            # for neuron in layer_1_target_neurons:
-            for neuron in target_neurons:
-                for pos_idx in range(8):
-                    print(
-                        f"Layer {curr_layer}, Set type filter: {set_type_filter}, Neuron: {neuron}, Pos: {pos_idx}")
+    #     for set_type_filter in [0, 1, 2]:
+    #         # for neuron in [2, 4, 12, 19, 34, 36, 37, 43, 44, 54, 60, 61]:
+    #         # for neuron in layer_1_target_neurons:
+    #         for neuron in target_neurons:
+    #             for pos_idx in range(8):
+    #                 print(
+    #                     f"Layer {curr_layer}, Set type filter: {set_type_filter}, Neuron: {neuron}, Pos: {pos_idx}")
 
-                    if set_type_filter is None:
-                        set_type_filter_name = "all"
-                    else:
-                        set_type_filter_name = set_type_filter
-                    peaks_dir = f"{PATH_PREFIX}/data/mlp_fixed/layer{curr_layer}/neuron{neuron}/pos{pos_idx}/set_type_{set_type_filter_name}"
+    #                 if set_type_filter is None:
+    #                     set_type_filter_name = "all"
+    #                 else:
+    #                     set_type_filter_name = set_type_filter
+    #                 peaks_dir = f"{PATH_PREFIX}/data/mlp_fixed/layer{curr_layer}/neuron{neuron}/pos{pos_idx}/set_type_{set_type_filter_name}"
 
-                    peaks_info_path = os.path.join(peaks_dir, f"{set_type_filter_name}_info.pkl")
+    #                 peaks_info_path = os.path.join(peaks_dir, f"{set_type_filter_name}_info.pkl")
 
-                    if not os.path.exists(peaks_dir):
+    #                 if not os.path.exists(peaks_dir):
 
-                        peaks_info = get_peak_info(
-                            neuron_activations=neuron_activations,
-                            layer=curr_layer,
-                            position=pos_idx,
-                            neuron=neuron,
-                            input_examples=input_examples,
-                            min_peak_height=min_peak_height,
-                            min_peak_distance=min_peak_distance,
-                            prominence=prominence,
-                            num_bins=num_bins,
-                            set_type_filter=set_type_filter,
-                        )
+    #                     peaks_info = get_peak_info(
+    #                         neuron_activations=neuron_activations,
+    #                         layer=curr_layer,
+    #                         position=pos_idx,
+    #                         neuron=neuron,
+    #                         input_examples=input_examples,
+    #                         min_peak_height=min_peak_height,
+    #                         min_peak_distance=min_peak_distance,
+    #                         prominence=prominence,
+    #                         num_bins=num_bins,
+    #                         set_type_filter=set_type_filter,
+    #                     )
 
-                        os.makedirs(peaks_dir, exist_ok=True)
-                        with open(peaks_info_path, 'wb') as f:
-                            pickle.dump(peaks_info, f)
-                        print(f"Peaks info saved to {peaks_info_path}")
-                    else:
-                        # peaks_info = load_peaks_info(layer, neuron=neuron, set_type_filter=set_type_filter)
-                        with open(peaks_info_path, 'rb') as f:
-                            peaks_info = pickle.load(f)
+    #                     os.makedirs(peaks_dir, exist_ok=True)
+    #                     with open(peaks_info_path, 'wb') as f:
+    #                         pickle.dump(peaks_info, f)
+    #                     print(f"Peaks info saved to {peaks_info_path}")
+    #                 else:
+    #                     # peaks_info = load_peaks_info(layer, neuron=neuron, set_type_filter=set_type_filter)
+    #                     with open(peaks_info_path, 'rb') as f:
+    #                         peaks_info = pickle.load(f)
 
-                    output_dir = f"results/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron}/pos{pos_idx}/set_type_{set_type_filter_name}"
-                    os.makedirs(output_dir, exist_ok=True)
+    #                 output_dir = f"results/mlp_fixed/peaks/layer{curr_layer}/neuron{neuron}/pos{pos_idx}/set_type_{set_type_filter_name}"
+    #                 os.makedirs(output_dir, exist_ok=True)
 
-                    top = 100
-                    save_summary_statistics_from_peak_info(
-                        peaks_info,
-                        top=top,
-                        output_file=os.path.join(
-                            output_dir, f"top_{top}_summary_statistics.txt")
-                    )
+    #                 top = 100
+    #                 save_summary_statistics_from_peak_info(
+    #                     peaks_info,
+    #                     top=top,
+    #                     output_file=os.path.join(
+    #                         output_dir, f"top_{top}_summary_statistics.txt")
+    #                 )
 
-                    save_peak_figure(
-                        peaks_info,
-                        filename=os.path.join(output_dir, "histogram_peaks.png"),
-                    )
+    #                 save_peak_figure(
+    #                     peaks_info,
+    #                     filename=os.path.join(output_dir, "histogram_peaks.png"),
+    #                 )
 
-                    save_top_peak_examples_as_txt(
-                        config=GPTConfig44_Complete,
-                        peaks_info=peaks_info,
-                        filename=os.path.join(output_dir, "peak_examples.txt"),
-                        top=top)
+    #                 save_top_peak_examples_as_txt(
+    #                     config=GPTConfig44_Complete,
+    #                     peaks_info=peaks_info,
+    #                     filename=os.path.join(output_dir, "peak_examples.txt"),
+    #                     top=top)
 
     # print(f"Saved neuron activations to {pkl_filename}")
 
