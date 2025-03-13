@@ -300,12 +300,6 @@ def get_peak_info(neuron_activations, layer, position, neuron, input_examples=No
     activation_by_type = {}
 
     if set_type_filter is not None:
-        # Verify that the requested set type exists
-        if set_type_filter not in neuron_activations[neuron][position]:
-            available_sets = list(neuron_activations[neuron][position].keys())
-            raise ValueError(
-                f"Set type '{set_type_filter}' not found. Available set types: {available_sets}")
-
         # Only use the specified set type
         activations = neuron_activations[neuron][position][set_type_filter]
         all_activations.extend(activations)
@@ -590,7 +584,7 @@ if __name__ == "__main__":
         with open(pkl_filename, 'rb') as f:
             neuron_activations = pickle.load(f)
 
-        for set_type_filter in [None, 0, 1, 2]:
+        for set_type_filter in [0, 1, 2]:
             # for neuron in [2, 4, 12, 19, 34, 36, 37, 43, 44, 54, 60, 61]:
             # for neuron in layer_1_target_neurons:
             for neuron in target_neurons:
