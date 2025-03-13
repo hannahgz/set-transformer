@@ -494,68 +494,78 @@ def plot_overlap_histograms(neuron_activations, target_neurons, num_bins=50, fig
     return fig
 
 if __name__ == "__main__":
-    curr_layer = 0
-    output_dir = f"{PATH_PREFIX}/data/mlp_fixed/layer{curr_layer}"
-    os.makedirs(output_dir, exist_ok=True)
-
-    pkl_filename = os.path.join(
-        output_dir, f"neuron_activations_layer{curr_layer}.pkl")
-
-    with open(pkl_filename, 'rb') as f:
-        neuron_activations = pickle.load(f)
-
-    for i in range(32):
-        print(f"Plotting histograms for neurons {i*8} to {(i+1)*8}")
-        output_dir = f"results/mlp_fixed/peaks/layer{curr_layer}"
-        os.makedirs(output_dir, exist_ok=True)
-    
-        fig = plot_overlap_histograms(
-            neuron_activations = neuron_activations,
-            target_neurons = range(i * 8, (i+1) * 8),
-            num_bins = 50,
-        )
-
-        plt.savefig(f"{output_dir}/consolidated_overlap_heatmap_{i}.png")
-
-
-    # config = GPTConfig44_Complete()
-    # # Load the checkpoint
-    # checkpoint = torch.load(config.filename, weights_only=False)
-
-    # # Create the model architecture
-    # model = GPT(config).to(device)
-
-    # # Load the weights
-    # model.load_state_dict(checkpoint['model'])
-    # model.eval()  # Set to evaluation mode
-
-    # dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
-    # dataset = torch.load(dataset_path)
-    # _, val_loader = initialize_loaders(config, dataset)
-
-    # curr_layer = 0
-    # neuron_activations = analyze_mlp_neurons(
-    #     model=model,
-    #     data_loader=val_loader,
-    #     layer_idx=0,
-    #     neuron_indices=None,
-    #     mode='hidden',
-    #     position_slice=slice(-8,None))
-
-    # breakpoint()
-
-
     # curr_layer = 0
     # output_dir = f"{PATH_PREFIX}/data/mlp_fixed/layer{curr_layer}"
-    # # # Make sure the output directory exists
     # os.makedirs(output_dir, exist_ok=True)
 
     # pkl_filename = os.path.join(
     #     output_dir, f"neuron_activations_layer{curr_layer}.pkl")
 
-    # # # Save the activations to a pickle file
-    # # with open(pkl_filename, 'wb') as f:
-    # #     pickle.dump(neuron_activations, f)
+    # with open(pkl_filename, 'rb') as f:
+    #     neuron_activations = pickle.load(f)
+
+    # for i in range(32):
+    #     print(f"Plotting histograms for neurons {i*8} to {(i+1)*8}")
+    #     output_dir = f"results/mlp_fixed/peaks/layer{curr_layer}"
+    #     os.makedirs(output_dir, exist_ok=True)
+    
+    #     fig = plot_overlap_histograms(
+    #         neuron_activations = neuron_activations,
+    #         target_neurons = range(i * 8, (i+1) * 8),
+    #         num_bins = 50,
+    #     )
+
+    #     plt.savefig(f"{output_dir}/consolidated_overlap_heatmap_{i}.png")
+
+
+    config = GPTConfig44_Complete()
+    # Load the checkpoint
+    checkpoint = torch.load(config.filename, weights_only=False)
+
+    # Create the model architecture
+    model = GPT(config).to(device)
+
+    # Load the weights
+    model.load_state_dict(checkpoint['model'])
+    model.eval()  # Set to evaluation mode
+
+    dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
+    dataset = torch.load(dataset_path)
+    _, val_loader = initialize_loaders(config, dataset)
+
+    for curr_layer in [1, 2, 3]:
+        print(f"Analyzing layer {curr_layer}")
+        neuron_activations = analyze_mlp_neurons(
+            model=model,
+            data_loader=val_loader,
+            layer_idx=0,
+            neuron_indices=None,
+            mode='hidden',
+            position_slice=slice(-8,None))
+
+        output_dir = f"{PATH_PREFIX}/data/mlp_fixed/layer{curr_layer}"
+        # # Make sure the output directory exists
+        os.makedirs(output_dir, exist_ok=True)
+
+        pkl_filename = os.path.join(
+            output_dir, f"neuron_activations_layer{curr_layer}.pkl")
+
+        # Save the activations to a pickle file
+        with open(pkl_filename, 'wb') as f:
+            pickle.dump(neuron_activations, f)
+
+        for i in range(32):
+            print(f"Plotting histograms for neurons {i*8} to {(i+1)*8}")
+            output_dir = f"results/mlp_fixed/peaks/layer{curr_layer}"
+            os.makedirs(output_dir, exist_ok=True)
+        
+            fig = plot_overlap_histograms(
+                neuron_activations = neuron_activations,
+                target_neurons = range(i * 8, (i+1) * 8),
+                num_bins = 50,
+            )
+
+            plt.savefig(f"{output_dir}/consolidated_overlap_heatmap_{i}.png")
 
     # with open(pkl_filename, 'rb') as f:
     #     neuron_activations = pickle.load(f)
