@@ -555,20 +555,22 @@ def overall_count(grid):
 
 def test_overall_summary_stat(peaks_info, top=None, output_file="overall_summary_statistics.txt",):
     # Open the output file
-    same_count_total = 0
-    diff_count_total = 0
-    total = 0
+    
     with open(output_file, 'w') as f:
         for peak_idx in peaks_info['examples_by_peak']:
+            same_count_total = 0
+            diff_count_total = 0
+            total = 0
+
             for index, (_, example) in enumerate(peaks_info['examples_by_peak'][peak_idx][:top]):
                 grid = get_per_card_attributes(example)
                 same_count, diff_count = overall_count(grid)
                 same_count_total += same_count
                 diff_count_total += diff_count
         
-        total = same_count_total + diff_count_total
-        # Write the summary statistics to the file
-        for peak_idx in sorted(peaks_info['examples_by_peak']):
+            total = same_count_total + diff_count_total
+            # Write the summary statistics to the file
+        
             f.write(f"\nPeak {peak_idx+1}:\n")
             
             f.write(f"Same Count: {same_count_total}\n")
