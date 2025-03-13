@@ -541,7 +541,7 @@ def overall_count(grid):
         for attribute_type in range(4):
             same = True
             diff = True
-            for card in cards:
+            for card in cards[1:]:
                 if card[attribute_type] != card_one[attribute_type]:
                     same = False
                 if card[attribute_type] == card_one[attribute_type]:
@@ -557,7 +557,7 @@ def test_overall_summary_stat(peaks_info, top=None, output_file="overall_summary
     # Open the output file
     
     with open(output_file, 'w') as f:
-        for peak_idx in peaks_info['examples_by_peak']:
+        for peak_idx in sorted(peaks_info['examples_by_peak']):
             same_count_total = 0
             diff_count_total = 0
             total = 0
