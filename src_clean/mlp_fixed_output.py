@@ -117,7 +117,8 @@ if __name__ == "__main__":
     dataset = torch.load(dataset_path)
     _, val_loader = initialize_loaders(config, dataset)
 
-    output_indices = [5, 13, 20, 36, 60]
+    neuron_type = "hidden"
+    # output_indices = [5, 13, 20, 36, 60]
     hidden_indices = sorted([185, 25, 93, 36, 166, 89])
 
     for curr_layer in [3]:
@@ -130,7 +131,7 @@ if __name__ == "__main__":
             mode='hidden',)
         # position_slice=slice(-8,None))
 
-        output_dir = f"{PATH_PREFIX}/data/mlp_fixed/output/layer{curr_layer}"
+        output_dir = f"{PATH_PREFIX}/data/mlp_fixed/{neuron_type}/layer{curr_layer}"
         # # Make sure the output directory exists
         os.makedirs(output_dir, exist_ok=True)
 
@@ -141,16 +142,16 @@ if __name__ == "__main__":
         with open(pkl_filename, 'wb') as f:
             pickle.dump(neuron_activations, f)
 
-        print("Plotting histograms for interesting hidden neurons")
-        output_dir = f"results/mlp_fixed/peaks/hidden/layer{curr_layer}"
-        os.makedirs(output_dir, exist_ok=True)
+        # print("Plotting histograms for interesting hidden neurons")
+        # output_dir = f"results/mlp_fixed/peaks/{neuron_type}/layer{curr_layer}"
+        # os.makedirs(output_dir, exist_ok=True)
 
-        fig = plot_overlap_histograms(
-            neuron_activations=neuron_activations,
-            target_neurons=hidden_indices,
-            num_pos=49,
-            num_bins=50,
-        )
+        # fig = plot_overlap_histograms(
+        #     neuron_activations=neuron_activations,
+        #     target_neurons=hidden_indices,
+        #     num_pos=49,
+        #     num_bins=50,
+        # )
 
-        plt.savefig(
-            f"{output_dir}/hidden_consolidated_overlap_heatmap_interesting_from_heatmap.png")
+        # plt.savefig(
+        #     f"{output_dir}/{neuron_type}_consolidated_overlap_heatmap_interesting_from_heatmap.png")
