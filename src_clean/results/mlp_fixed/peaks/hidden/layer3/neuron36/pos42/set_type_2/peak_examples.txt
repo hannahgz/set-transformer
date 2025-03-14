@@ -1,0 +1,802 @@
+
+Peak 1:
+  Activation: -0.0010
+  ['E', 'one', 'E', 'open', 'A', 'solid', 'B', 'pink', 'E', 'squiggle', 'D', 'three', 'A', 'green', 'B', 'oval', 'C', 'diamond', 'B', 'three', 'E', 'green', 'B', 'striped', 'C', 'solid', 'C', 'blue', 'D', 'squiggle', 'D', 'blue', 'C', 'two', 'D', 'open', 'A', 'diamond', 'A', 'three', '>', 'B', 'E', 'C', '/', 'B', 'D', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     three     green     
+  B    oval      striped   three     pink      
+  C    diamond   solid     two       blue      
+  D    squiggle  open      three     blue      
+  E    squiggle  open      one       green     
+  Activation: -0.0010
+  ['E', 'two', 'C', 'one', 'D', 'pink', 'A', 'three', 'A', 'open', 'D', 'diamond', 'D', 'striped', 'E', 'diamond', 'E', 'solid', 'B', 'one', 'B', 'green', 'C', 'oval', 'A', 'blue', 'B', 'striped', 'C', 'blue', 'A', 'squiggle', 'C', 'striped', 'D', 'one', 'B', 'squiggle', 'E', 'blue', '>', 'C', 'B', 'D', '/', 'C', 'A', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  open      three     blue      
+  B    squiggle  striped   one       green     
+  C    oval      striped   one       blue      
+  D    diamond   striped   one       pink      
+  E    diamond   solid     two       blue      
+  Activation: -0.0010
+  ['B', 'open', 'B', 'blue', 'E', 'open', 'C', 'open', 'B', 'oval', 'E', 'three', 'D', 'squiggle', 'E', 'diamond', 'D', 'solid', 'B', 'one', 'C', 'pink', 'C', 'two', 'A', 'green', 'A', 'striped', 'C', 'squiggle', 'A', 'two', 'A', 'squiggle', 'D', 'blue', 'E', 'green', 'D', 'two', '>', 'B', 'C', 'E', '/', 'A', 'D', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  striped   two       green     
+  B    oval      open      one       blue      
+  C    squiggle  open      two       pink      
+  D    squiggle  solid     two       blue      
+  E    diamond   open      three     green     
+  Activation: -0.0009
+  ['D', 'three', 'E', 'oval', 'B', 'green', 'E', 'three', 'A', 'open', 'C', 'solid', 'B', 'open', 'C', 'three', 'D', 'pink', 'D', 'striped', 'C', 'squiggle', 'A', 'diamond', 'E', 'pink', 'A', 'green', 'B', 'three', 'B', 'oval', 'A', 'three', 'D', 'diamond', 'E', 'striped', 'C', 'blue', '>', 'B', 'C', 'D', '/', 'E', 'C', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   open      three     green     
+  B    oval      open      three     green     
+  C    squiggle  solid     three     blue      
+  D    diamond   striped   three     pink      
+  E    oval      striped   three     pink      
+  Activation: -0.0010
+  ['E', 'blue', 'B', 'squiggle', 'E', 'oval', 'E', 'three', 'D', 'open', 'A', 'solid', 'A', 'pink', 'A', 'diamond', 'B', 'one', 'C', 'pink', 'D', 'three', 'D', 'squiggle', 'C', 'open', 'B', 'striped', 'E', 'open', 'A', 'two', 'D', 'green', 'C', 'three', 'C', 'diamond', 'B', 'green', '>', 'E', 'B', 'A', '/', 'E', 'D', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     two       pink      
+  B    squiggle  striped   one       green     
+  C    diamond   open      three     pink      
+  D    squiggle  open      three     green     
+  E    oval      open      three     blue      
+  Activation: -0.0010
+  ['A', 'green', 'C', 'oval', 'E', 'green', 'D', 'striped', 'B', 'green', 'C', 'open', 'B', 'oval', 'A', 'oval', 'E', 'striped', 'D', 'three', 'E', 'diamond', 'B', 'striped', 'C', 'two', 'A', 'solid', 'D', 'squiggle', 'D', 'green', 'E', 'three', 'A', 'one', 'C', 'green', 'B', 'three', '>', 'A', 'C', 'B', '/', 'B', 'D', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     one       green     
+  B    oval      striped   three     green     
+  C    oval      open      two       green     
+  D    squiggle  striped   three     green     
+  E    diamond   striped   three     green     
+  Activation: -0.0010
+  ['C', 'green', 'C', 'one', 'E', 'open', 'A', 'diamond', 'E', 'pink', 'C', 'striped', 'C', 'squiggle', 'B', 'solid', 'A', 'solid', 'D', 'blue', 'A', 'three', 'D', 'striped', 'D', 'one', 'B', 'squiggle', 'E', 'two', 'B', 'green', 'B', 'three', 'D', 'diamond', 'A', 'blue', 'E', 'oval', '>', 'E', 'C', 'A', '/', 'E', 'B', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     three     blue      
+  B    squiggle  solid     three     green     
+  C    squiggle  striped   one       green     
+  D    diamond   striped   one       blue      
+  E    oval      open      two       pink      
+  Activation: -0.0009
+  ['B', 'three', 'B', 'open', 'C', 'squiggle', 'C', 'two', 'A', 'diamond', 'C', 'green', 'D', 'pink', 'E', 'one', 'E', 'solid', 'D', 'solid', 'B', 'oval', 'A', 'green', 'D', 'diamond', 'C', 'striped', 'D', 'three', 'E', 'blue', 'A', 'solid', 'E', 'diamond', 'A', 'two', 'B', 'pink', '>', 'B', 'C', 'E', '/', 'A', 'E', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     two       green     
+  B    oval      open      three     pink      
+  C    squiggle  striped   two       green     
+  D    diamond   solid     three     pink      
+  E    diamond   solid     one       blue      
+  Activation: -0.0011
+  ['B', 'diamond', 'E', 'green', 'D', 'squiggle', 'E', 'two', 'D', 'green', 'A', 'three', 'B', 'solid', 'E', 'striped', 'E', 'oval', 'C', 'oval', 'A', 'pink', 'C', 'blue', 'D', 'two', 'A', 'solid', 'B', 'one', 'B', 'blue', 'C', 'one', 'A', 'oval', 'C', 'open', 'D', 'solid', '>', 'E', 'C', 'A', '/', 'A', 'D', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     three     pink      
+  B    diamond   solid     one       blue      
+  C    oval      open      one       blue      
+  D    squiggle  solid     two       green     
+  E    oval      striped   two       green     
+  Activation: -0.0009
+  ['B', 'one', 'D', 'diamond', 'E', 'pink', 'A', 'blue', 'E', 'three', 'E', 'diamond', 'C', 'three', 'C', 'diamond', 'E', 'solid', 'B', 'diamond', 'B', 'blue', 'A', 'striped', 'A', 'three', 'A', 'diamond', 'D', 'two', 'B', 'solid', 'D', 'solid', 'D', 'green', 'C', 'open', 'C', 'green', '>', 'D', 'B', 'E', '/', 'C', 'A', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   striped   three     blue      
+  B    diamond   solid     one       blue      
+  C    diamond   open      three     green     
+  D    diamond   solid     two       green     
+  E    diamond   solid     three     pink      
+  Activation: -0.0009
+  ['B', 'squiggle', 'A', 'striped', 'C', 'green', 'B', 'solid', 'C', 'diamond', 'D', 'two', 'E', 'solid', 'D', 'open', 'C', 'one', 'C', 'solid', 'E', 'blue', 'D', 'diamond', 'E', 'oval', 'A', 'three', 'E', 'one', 'A', 'pink', 'A', 'squiggle', 'B', 'pink', 'B', 'one', 'D', 'green', '>', 'E', 'B', 'C', '/', 'E', 'A', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  striped   three     pink      
+  B    squiggle  solid     one       pink      
+  C    diamond   solid     one       green     
+  D    diamond   open      two       green     
+  E    oval      solid     one       blue      
+  Activation: -0.0011
+  ['B', 'striped', 'E', 'diamond', 'E', 'two', 'C', 'squiggle', 'B', 'one', 'C', 'two', 'A', 'two', 'B', 'diamond', 'D', 'three', 'A', 'striped', 'A', 'oval', 'D', 'striped', 'C', 'green', 'C', 'solid', 'D', 'pink', 'E', 'blue', 'A', 'pink', 'B', 'pink', 'D', 'squiggle', 'E', 'open', '>', 'A', 'C', 'E', '/', 'A', 'D', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      striped   two       pink      
+  B    diamond   striped   one       pink      
+  C    squiggle  solid     two       green     
+  D    squiggle  striped   three     pink      
+  E    diamond   open      two       blue      
+  Activation: -0.0008
+  ['B', 'two', 'C', 'three', 'C', 'striped', 'C', 'green', 'D', 'squiggle', 'D', 'one', 'E', 'squiggle', 'C', 'diamond', 'E', 'striped', 'A', 'diamond', 'B', 'oval', 'D', 'solid', 'A', 'three', 'D', 'green', 'E', 'one', 'A', 'solid', 'B', 'open', 'B', 'green', 'E', 'green', 'A', 'green', '>', 'B', 'D', 'C', '/', 'B', 'E', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     three     green     
+  B    oval      open      two       green     
+  C    diamond   striped   three     green     
+  D    squiggle  solid     one       green     
+  E    squiggle  striped   one       green     
+  Activation: -0.0012
+  ['E', 'solid', 'D', 'blue', 'E', 'two', 'A', 'solid', 'C', 'open', 'C', 'pink', 'B', 'squiggle', 'C', 'diamond', 'A', 'one', 'B', 'two', 'E', 'squiggle', 'B', 'striped', 'D', 'oval', 'C', 'three', 'D', 'one', 'D', 'striped', 'B', 'blue', 'A', 'green', 'E', 'green', 'A', 'oval', '>', 'A', 'B', 'C', '/', 'D', 'E', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     one       green     
+  B    squiggle  striped   two       blue      
+  C    diamond   open      three     pink      
+  D    oval      striped   one       blue      
+  E    squiggle  solid     two       green     
+  Activation: -0.0012
+  ['B', 'one', 'E', 'squiggle', 'C', 'squiggle', 'D', 'one', 'E', 'green', 'D', 'striped', 'C', 'pink', 'E', 'open', 'C', 'two', 'D', 'squiggle', 'C', 'striped', 'A', 'solid', 'A', 'squiggle', 'B', 'pink', 'B', 'squiggle', 'A', 'pink', 'A', 'three', 'B', 'open', 'D', 'blue', 'E', 'two', '>', 'E', 'D', 'A', '/', 'B', 'C', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  solid     three     pink      
+  B    squiggle  open      one       pink      
+  C    squiggle  striped   two       pink      
+  D    squiggle  striped   one       blue      
+  E    squiggle  open      two       green     
+  Activation: -0.0012
+  ['A', 'squiggle', 'B', 'one', 'C', 'diamond', 'C', 'striped', 'E', 'pink', 'D', 'green', 'A', 'one', 'E', 'solid', 'A', 'blue', 'D', 'oval', 'A', 'striped', 'C', 'one', 'D', 'open', 'E', 'two', 'B', 'oval', 'E', 'diamond', 'C', 'green', 'B', 'pink', 'B', 'striped', 'D', 'three', '>', 'D', 'A', 'E', '/', 'B', 'A', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  striped   one       blue      
+  B    oval      striped   one       pink      
+  C    diamond   striped   one       green     
+  D    oval      open      three     green     
+  E    diamond   solid     two       pink      
+  Activation: -0.0012
+  ['E', 'three', 'E', 'squiggle', 'B', 'two', 'D', 'green', 'C', 'diamond', 'E', 'open', 'B', 'open', 'B', 'oval', 'E', 'blue', 'D', 'diamond', 'A', 'one', 'D', 'one', 'A', 'green', 'B', 'pink', 'A', 'squiggle', 'C', 'blue', 'C', 'three', 'C', 'striped', 'D', 'open', 'A', 'solid', '>', 'B', 'A', 'C', '/', 'B', 'E', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  solid     one       green     
+  B    oval      open      two       pink      
+  C    diamond   striped   three     blue      
+  D    diamond   open      one       green     
+  E    squiggle  open      three     blue      
+  Activation: -0.0007
+  ['B', 'one', 'A', 'solid', 'C', 'solid', 'D', 'two', 'E', 'two', 'B', 'oval', 'A', 'green', 'C', 'two', 'C', 'blue', 'D', 'open', 'E', 'squiggle', 'D', 'oval', 'B', 'striped', 'E', 'striped', 'A', 'three', 'C', 'diamond', 'A', 'oval', 'D', 'green', 'B', 'green', 'E', 'pink', '>', 'B', 'D', 'A', '/', 'D', 'E', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     three     green     
+  B    oval      striped   one       green     
+  C    diamond   solid     two       blue      
+  D    oval      open      two       green     
+  E    squiggle  striped   two       pink      
+  Activation: -0.0013
+  ['B', 'pink', 'C', 'diamond', 'A', 'two', 'A', 'blue', 'B', 'squiggle', 'D', 'green', 'B', 'one', 'A', 'open', 'D', 'oval', 'E', 'pink', 'E', 'solid', 'E', 'oval', 'C', 'three', 'B', 'solid', 'D', 'striped', 'D', 'two', 'C', 'striped', 'E', 'two', 'C', 'green', 'A', 'oval', '>', 'D', 'A', 'E', '/', 'A', 'B', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      open      two       blue      
+  B    squiggle  solid     one       pink      
+  C    diamond   striped   three     green     
+  D    oval      striped   two       green     
+  E    oval      solid     two       pink      
+  Activation: -0.0013
+  ['A', 'green', 'A', 'three', 'E', 'solid', 'E', 'two', 'E', 'pink', 'C', 'solid', 'B', 'blue', 'D', 'squiggle', 'A', 'solid', 'E', 'diamond', 'B', 'solid', 'C', 'three', 'C', 'oval', 'A', 'diamond', 'B', 'diamond', 'B', 'one', 'D', 'green', 'D', 'solid', 'C', 'pink', 'D', 'two', '>', 'C', 'D', 'B', '/', 'A', 'B', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     three     green     
+  B    diamond   solid     one       blue      
+  C    oval      solid     three     pink      
+  D    squiggle  solid     two       green     
+  E    diamond   solid     two       pink      
+  Activation: -0.0013
+  ['A', 'green', 'D', 'striped', 'B', 'striped', 'D', 'one', 'C', 'oval', 'A', 'solid', 'E', 'open', 'A', 'diamond', 'D', 'squiggle', 'A', 'three', 'E', 'oval', 'B', 'two', 'C', 'three', 'C', 'striped', 'E', 'pink', 'B', 'diamond', 'E', 'two', 'C', 'green', 'B', 'pink', 'D', 'blue', '>', 'C', 'D', 'B', '/', 'E', 'D', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     three     green     
+  B    diamond   striped   two       pink      
+  C    oval      striped   three     green     
+  D    squiggle  striped   one       blue      
+  E    oval      open      two       pink      
+  Activation: -0.0007
+  ['B', 'solid', 'C', 'squiggle', 'B', 'one', 'D', 'solid', 'E', 'diamond', 'B', 'green', 'B', 'squiggle', 'C', 'pink', 'C', 'striped', 'A', 'three', 'C', 'three', 'D', 'pink', 'D', 'two', 'A', 'oval', 'E', 'open', 'D', 'diamond', 'A', 'solid', 'A', 'blue', 'E', 'three', 'E', 'green', '>', 'A', 'B', 'D', '/', 'A', 'C', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     three     blue      
+  B    squiggle  solid     one       green     
+  C    squiggle  striped   three     pink      
+  D    diamond   solid     two       pink      
+  E    diamond   open      three     green     
+  Activation: -0.0007
+  ['E', 'squiggle', 'D', 'solid', 'B', 'squiggle', 'C', 'squiggle', 'D', 'oval', 'A', 'one', 'E', 'one', 'A', 'diamond', 'A', 'blue', 'B', 'blue', 'B', 'striped', 'C', 'green', 'C', 'three', 'C', 'open', 'D', 'green', 'E', 'pink', 'E', 'solid', 'B', 'two', 'D', 'one', 'A', 'solid', '>', 'D', 'E', 'A', '/', 'C', 'B', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     one       blue      
+  B    squiggle  striped   two       blue      
+  C    squiggle  open      three     green     
+  D    oval      solid     one       green     
+  E    squiggle  solid     one       pink      
+  Activation: -0.0013
+  ['A', 'squiggle', 'E', 'one', 'E', 'diamond', 'E', 'open', 'B', 'blue', 'A', 'pink', 'D', 'solid', 'B', 'diamond', 'B', 'striped', 'D', 'three', 'A', 'two', 'C', 'diamond', 'E', 'pink', 'A', 'solid', 'C', 'one', 'C', 'solid', 'C', 'green', 'B', 'one', 'D', 'oval', 'D', 'blue', '>', 'D', 'A', 'C', '/', 'C', 'B', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  solid     two       pink      
+  B    diamond   striped   one       blue      
+  C    diamond   solid     one       green     
+  D    oval      solid     three     blue      
+  E    diamond   open      one       pink      
+  Activation: -0.0006
+  ['B', 'two', 'B', 'green', 'A', 'one', 'D', 'two', 'E', 'two', 'C', 'pink', 'D', 'green', 'C', 'striped', 'B', 'oval', 'E', 'green', 'E', 'open', 'D', 'solid', 'E', 'squiggle', 'C', 'three', 'B', 'striped', 'D', 'diamond', 'C', 'diamond', 'A', 'squiggle', 'A', 'striped', 'A', 'blue', '>', 'B', 'E', 'D', '/', 'B', 'A', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  striped   one       blue      
+  B    oval      striped   two       green     
+  C    diamond   striped   three     pink      
+  D    diamond   solid     two       green     
+  E    squiggle  open      two       green     
+  Activation: -0.0006
+  ['C', 'oval', 'B', 'green', 'C', 'solid', 'A', 'diamond', 'E', 'striped', 'B', 'two', 'C', 'green', 'A', 'three', 'A', 'green', 'D', 'one', 'D', 'open', 'B', 'solid', 'E', 'one', 'E', 'squiggle', 'D', 'diamond', 'E', 'pink', 'B', 'squiggle', 'C', 'one', 'D', 'blue', 'A', 'solid', '>', 'C', 'B', 'A', '/', 'C', 'E', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     three     green     
+  B    squiggle  solid     two       green     
+  C    oval      solid     one       green     
+  D    diamond   open      one       blue      
+  E    squiggle  striped   one       pink      
+  Activation: -0.0006
+  ['E', 'diamond', 'A', 'open', 'B', 'diamond', 'D', 'striped', 'A', 'green', 'B', 'pink', 'C', 'open', 'A', 'one', 'C', 'pink', 'E', 'striped', 'B', 'solid', 'C', 'squiggle', 'E', 'one', 'E', 'blue', 'C', 'two', 'D', 'pink', 'B', 'one', 'D', 'oval', 'D', 'three', 'A', 'diamond', '>', 'D', 'C', 'B', '/', 'A', 'E', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   open      one       green     
+  B    diamond   solid     one       pink      
+  C    squiggle  open      two       pink      
+  D    oval      striped   three     pink      
+  E    diamond   striped   one       blue      
+  Activation: -0.0014
+  ['B', 'two', 'E', 'green', 'C', 'striped', 'B', 'blue', 'D', 'three', 'D', 'pink', 'E', 'three', 'C', 'oval', 'C', 'one', 'D', 'striped', 'A', 'three', 'A', 'oval', 'B', 'open', 'C', 'pink', 'A', 'blue', 'E', 'diamond', 'E', 'solid', 'A', 'open', 'B', 'squiggle', 'D', 'squiggle', '>', 'A', 'D', 'E', '/', 'C', 'B', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      open      three     blue      
+  B    squiggle  open      two       blue      
+  C    oval      striped   one       pink      
+  D    squiggle  striped   three     pink      
+  E    diamond   solid     three     green     
+  Activation: -0.0014
+  ['A', 'squiggle', 'D', 'blue', 'E', 'three', 'B', 'striped', 'A', 'three', 'B', 'oval', 'C', 'green', 'C', 'three', 'D', 'open', 'C', 'striped', 'E', 'diamond', 'A', 'green', 'E', 'striped', 'B', 'three', 'E', 'pink', 'C', 'squiggle', 'D', 'three', 'A', 'solid', 'B', 'blue', 'D', 'oval', '>', 'B', 'C', 'E', '/', 'D', 'A', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  solid     three     green     
+  B    oval      striped   three     blue      
+  C    squiggle  striped   three     green     
+  D    oval      open      three     blue      
+  E    diamond   striped   three     pink      
+  Activation: -0.0006
+  ['A', 'striped', 'B', 'two', 'E', 'one', 'D', 'one', 'C', 'striped', 'D', 'blue', 'D', 'striped', 'A', 'one', 'E', 'squiggle', 'A', 'pink', 'C', 'diamond', 'C', 'green', 'D', 'oval', 'B', 'blue', 'E', 'green', 'B', 'diamond', 'C', 'three', 'A', 'diamond', 'E', 'striped', 'B', 'striped', '>', 'D', 'E', 'A', '/', 'C', 'B', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   striped   one       pink      
+  B    diamond   striped   two       blue      
+  C    diamond   striped   three     green     
+  D    oval      striped   one       blue      
+  E    squiggle  striped   one       green     
+  Activation: -0.0006
+  ['C', 'pink', 'D', 'two', 'B', 'one', 'A', 'three', 'C', 'one', 'B', 'oval', 'A', 'solid', 'D', 'pink', 'A', 'squiggle', 'A', 'green', 'C', 'open', 'D', 'solid', 'E', 'squiggle', 'E', 'striped', 'E', 'two', 'E', 'blue', 'C', 'squiggle', 'D', 'diamond', 'B', 'blue', 'B', 'solid', '>', 'B', 'A', 'D', '/', 'A', 'E', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  solid     three     green     
+  B    oval      solid     one       blue      
+  C    squiggle  open      one       pink      
+  D    diamond   solid     two       pink      
+  E    squiggle  striped   two       blue      
+  Activation: -0.0005
+  ['D', 'squiggle', 'D', 'blue', 'E', 'solid', 'A', 'oval', 'C', 'diamond', 'A', 'striped', 'C', 'blue', 'C', 'one', 'B', 'two', 'B', 'solid', 'E', 'green', 'A', 'one', 'E', 'three', 'A', 'blue', 'E', 'oval', 'C', 'open', 'B', 'pink', 'B', 'diamond', 'D', 'one', 'D', 'solid', '>', 'E', 'D', 'B', '/', 'A', 'D', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      striped   one       blue      
+  B    diamond   solid     two       pink      
+  C    diamond   open      one       blue      
+  D    squiggle  solid     one       blue      
+  E    oval      solid     three     green     
+  Activation: -0.0014
+  ['A', 'one', 'E', 'blue', 'D', 'solid', 'E', 'three', 'D', 'pink', 'A', 'striped', 'D', 'oval', 'E', 'open', 'B', 'three', 'C', 'blue', 'C', 'solid', 'A', 'squiggle', 'C', 'squiggle', 'B', 'diamond', 'A', 'blue', 'C', 'two', 'D', 'two', 'B', 'open', 'E', 'squiggle', 'B', 'green', '>', 'D', 'A', 'B', '/', 'A', 'C', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  striped   one       blue      
+  B    diamond   open      three     green     
+  C    squiggle  solid     two       blue      
+  D    oval      solid     two       pink      
+  E    squiggle  open      three     blue      
+  Activation: -0.0005
+  ['A', 'open', 'C', 'three', 'B', 'diamond', 'A', 'three', 'A', 'blue', 'B', 'two', 'E', 'three', 'B', 'striped', 'E', 'oval', 'C', 'striped', 'E', 'blue', 'D', 'one', 'D', 'blue', 'D', 'solid', 'E', 'solid', 'A', 'squiggle', 'B', 'blue', 'C', 'diamond', 'D', 'oval', 'C', 'blue', '>', 'D', 'A', 'B', '/', 'E', 'A', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  open      three     blue      
+  B    diamond   striped   two       blue      
+  C    diamond   striped   three     blue      
+  D    oval      solid     one       blue      
+  E    oval      solid     three     blue      
+  Activation: -0.0005
+  ['A', 'three', 'E', 'green', 'C', 'two', 'B', 'squiggle', 'D', 'open', 'B', 'two', 'A', 'solid', 'A', 'pink', 'B', 'striped', 'C', 'squiggle', 'A', 'squiggle', 'D', 'squiggle', 'B', 'green', 'C', 'open', 'D', 'blue', 'D', 'one', 'C', 'blue', 'E', 'striped', 'E', 'squiggle', 'E', 'one', '>', 'E', 'C', 'A', '/', 'B', 'D', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  solid     three     pink      
+  B    squiggle  striped   two       green     
+  C    squiggle  open      two       blue      
+  D    squiggle  open      one       blue      
+  E    squiggle  striped   one       green     
+  Activation: -0.0014
+  ['C', 'striped', 'A', 'blue', 'D', 'pink', 'C', 'pink', 'A', 'striped', 'B', 'squiggle', 'E', 'pink', 'B', 'two', 'A', 'two', 'E', 'one', 'D', 'oval', 'D', 'striped', 'B', 'striped', 'C', 'two', 'D', 'three', 'B', 'green', 'A', 'squiggle', 'E', 'striped', 'E', 'diamond', 'C', 'squiggle', '>', 'D', 'C', 'E', '/', 'B', 'A', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  striped   two       blue      
+  B    squiggle  striped   two       green     
+  C    squiggle  striped   two       pink      
+  D    oval      striped   three     pink      
+  E    diamond   striped   one       pink      
+  Activation: -0.0005
+  ['A', 'diamond', 'E', 'pink', 'A', 'green', 'C', 'oval', 'D', 'three', 'C', 'two', 'C', 'green', 'B', 'three', 'E', 'oval', 'A', 'one', 'D', 'open', 'E', 'three', 'B', 'green', 'A', 'striped', 'B', 'open', 'E', 'open', 'D', 'blue', 'C', 'solid', 'D', 'diamond', 'B', 'squiggle', '>', 'C', 'B', 'A', '/', 'E', 'B', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   striped   one       green     
+  B    squiggle  open      three     green     
+  C    oval      solid     two       green     
+  D    diamond   open      three     blue      
+  E    oval      open      three     pink      
+  Activation: -0.0005
+  ['C', 'diamond', 'A', 'green', 'B', 'solid', 'D', 'pink', 'B', 'three', 'C', 'two', 'C', 'pink', 'D', 'open', 'A', 'open', 'B', 'blue', 'E', 'green', 'C', 'striped', 'D', 'three', 'B', 'oval', 'A', 'squiggle', 'A', 'one', 'D', 'squiggle', 'E', 'diamond', 'E', 'striped', 'E', 'three', '>', 'B', 'A', 'C', '/', 'B', 'D', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  open      one       green     
+  B    oval      solid     three     blue      
+  C    diamond   striped   two       pink      
+  D    squiggle  open      three     pink      
+  E    diamond   striped   three     green     
+  Activation: -0.0005
+  ['C', 'blue', 'A', 'solid', 'E', 'blue', 'E', 'oval', 'C', 'three', 'E', 'two', 'D', 'solid', 'A', 'diamond', 'C', 'solid', 'B', 'green', 'E', 'solid', 'D', 'two', 'D', 'green', 'B', 'squiggle', 'A', 'one', 'D', 'oval', 'C', 'squiggle', 'A', 'pink', 'B', 'three', 'B', 'solid', '>', 'D', 'C', 'A', '/', 'E', 'B', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     one       pink      
+  B    squiggle  solid     three     green     
+  C    squiggle  solid     three     blue      
+  D    oval      solid     two       green     
+  E    oval      solid     two       blue      
+  Activation: -0.0005
+  ['A', 'solid', 'C', 'blue', 'D', 'open', 'D', 'one', 'B', 'one', 'C', 'solid', 'B', 'striped', 'E', 'squiggle', 'B', 'squiggle', 'E', 'pink', 'D', 'oval', 'A', 'one', 'B', 'blue', 'E', 'three', 'A', 'pink', 'C', 'diamond', 'C', 'two', 'E', 'striped', 'D', 'green', 'A', 'diamond', '>', 'D', 'B', 'A', '/', 'D', 'E', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     one       pink      
+  B    squiggle  striped   one       blue      
+  C    diamond   solid     two       blue      
+  D    oval      open      one       green     
+  E    squiggle  striped   three     pink      
+  Activation: -0.0015
+  ['A', 'striped', 'B', 'green', 'C', 'open', 'A', 'green', 'E', 'oval', 'E', 'pink', 'A', 'oval', 'D', 'open', 'D', 'diamond', 'D', 'two', 'E', 'striped', 'C', 'three', 'D', 'green', 'C', 'blue', 'B', 'solid', 'B', 'squiggle', 'C', 'diamond', 'B', 'one', 'E', 'two', 'A', 'three', '>', 'A', 'B', 'D', '/', 'E', 'B', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      striped   three     green     
+  B    squiggle  solid     one       green     
+  C    diamond   open      three     blue      
+  D    diamond   open      two       green     
+  E    oval      striped   two       pink      
+  Activation: -0.0005
+  ['D', 'squiggle', 'C', 'two', 'C', 'striped', 'D', 'striped', 'A', 'three', 'B', 'green', 'C', 'squiggle', 'C', 'blue', 'A', 'green', 'E', 'diamond', 'E', 'open', 'B', 'one', 'A', 'oval', 'B', 'squiggle', 'D', 'pink', 'A', 'solid', 'B', 'striped', 'D', 'three', 'E', 'pink', 'E', 'one', '>', 'A', 'C', 'E', '/', 'B', 'C', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     three     green     
+  B    squiggle  striped   one       green     
+  C    squiggle  striped   two       blue      
+  D    squiggle  striped   three     pink      
+  E    diamond   open      one       pink      
+  Activation: -0.0005
+  ['B', 'striped', 'E', 'green', 'E', 'three', 'D', 'solid', 'C', 'pink', 'A', 'blue', 'C', 'three', 'D', 'pink', 'D', 'oval', 'A', 'diamond', 'B', 'oval', 'A', 'open', 'B', 'three', 'C', 'striped', 'E', 'squiggle', 'A', 'one', 'D', 'two', 'B', 'blue', 'C', 'diamond', 'E', 'striped', '>', 'B', 'E', 'C', '/', 'D', 'E', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   open      one       blue      
+  B    oval      striped   three     blue      
+  C    diamond   striped   three     pink      
+  D    oval      solid     two       pink      
+  E    squiggle  striped   three     green     
+  Activation: -0.0005
+  ['D', 'striped', 'A', 'open', 'D', 'green', 'E', 'solid', 'E', 'green', 'B', 'green', 'B', 'open', 'C', 'green', 'D', 'one', 'C', 'squiggle', 'C', 'striped', 'B', 'squiggle', 'B', 'one', 'C', 'one', 'A', 'diamond', 'E', 'oval', 'A', 'one', 'D', 'diamond', 'E', 'one', 'A', 'green', '>', 'E', 'C', 'A', '/', 'E', 'B', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   open      one       green     
+  B    squiggle  open      one       green     
+  C    squiggle  striped   one       green     
+  D    diamond   striped   one       green     
+  E    oval      solid     one       green     
+  Activation: -0.0005
+  ['C', 'open', 'D', 'pink', 'A', 'pink', 'E', 'blue', 'D', 'solid', 'B', 'solid', 'D', 'one', 'C', 'diamond', 'E', 'squiggle', 'E', 'three', 'A', 'oval', 'B', 'green', 'A', 'one', 'C', 'pink', 'E', 'solid', 'D', 'squiggle', 'A', 'striped', 'B', 'two', 'B', 'squiggle', 'C', 'one', '>', 'A', 'D', 'C', '/', 'B', 'E', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      striped   one       pink      
+  B    squiggle  solid     two       green     
+  C    diamond   open      one       pink      
+  D    squiggle  solid     one       pink      
+  E    squiggle  solid     three     blue      
+  Activation: -0.0005
+  ['B', 'pink', 'A', 'green', 'D', 'green', 'E', 'oval', 'E', 'blue', 'C', 'one', 'E', 'one', 'B', 'two', 'B', 'solid', 'C', 'green', 'D', 'diamond', 'C', 'striped', 'D', 'three', 'A', 'solid', 'A', 'diamond', 'E', 'striped', 'D', 'open', 'A', 'two', 'C', 'diamond', 'B', 'squiggle', '>', 'E', 'B', 'D', '/', 'C', 'A', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     two       green     
+  B    squiggle  solid     two       pink      
+  C    diamond   striped   one       green     
+  D    diamond   open      three     green     
+  E    oval      striped   one       blue      
+  Activation: -0.0005
+  ['C', 'blue', 'C', 'solid', 'E', 'squiggle', 'B', 'oval', 'B', 'striped', 'C', 'diamond', 'E', 'open', 'B', 'two', 'B', 'blue', 'E', 'two', 'D', 'three', 'D', 'blue', 'A', 'one', 'D', 'solid', 'A', 'blue', 'E', 'blue', 'D', 'oval', 'A', 'oval', 'C', 'two', 'A', 'open', '>', 'A', 'B', 'D', '/', 'B', 'E', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      open      one       blue      
+  B    oval      striped   two       blue      
+  C    diamond   solid     two       blue      
+  D    oval      solid     three     blue      
+  E    squiggle  open      two       blue      
+  Activation: -0.0005
+  ['B', 'pink', 'A', 'blue', 'B', 'three', 'A', 'open', 'A', 'three', 'C', 'oval', 'E', 'green', 'B', 'striped', 'D', 'open', 'E', 'three', 'D', 'two', 'C', 'one', 'E', 'solid', 'C', 'blue', 'E', 'squiggle', 'C', 'open', 'D', 'oval', 'A', 'oval', 'B', 'diamond', 'D', 'blue', '>', 'C', 'D', 'A', '/', 'A', 'E', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      open      three     blue      
+  B    diamond   striped   three     pink      
+  C    oval      open      one       blue      
+  D    oval      open      two       blue      
+  E    squiggle  solid     three     green     
+  Activation: -0.0005
+  ['B', 'open', 'A', 'three', 'B', 'diamond', 'E', 'two', 'D', 'diamond', 'C', 'solid', 'C', 'two', 'D', 'green', 'C', 'squiggle', 'E', 'pink', 'C', 'green', 'B', 'blue', 'A', 'oval', 'E', 'squiggle', 'B', 'one', 'D', 'one', 'D', 'solid', 'E', 'striped', 'A', 'green', 'A', 'solid', '>', 'A', 'C', 'D', '/', 'A', 'E', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     three     green     
+  B    diamond   open      one       blue      
+  C    squiggle  solid     two       green     
+  D    diamond   solid     one       green     
+  E    squiggle  striped   two       pink      
+  Activation: -0.0004
+  ['C', 'striped', 'D', 'oval', 'B', 'two', 'D', 'three', 'C', 'squiggle', 'E', 'green', 'B', 'squiggle', 'E', 'diamond', 'B', 'solid', 'B', 'green', 'D', 'solid', 'A', 'three', 'A', 'squiggle', 'E', 'open', 'A', 'pink', 'D', 'pink', 'C', 'one', 'C', 'blue', 'E', 'two', 'A', 'open', '>', 'D', 'C', 'E', '/', 'B', 'C', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  open      three     pink      
+  B    squiggle  solid     two       green     
+  C    squiggle  striped   one       blue      
+  D    oval      solid     three     pink      
+  E    diamond   open      two       green     
+  Activation: -0.0004
+  ['C', 'blue', 'B', 'solid', 'D', 'green', 'B', 'two', 'E', 'striped', 'D', 'one', 'C', 'oval', 'E', 'three', 'E', 'oval', 'A', 'three', 'D', 'striped', 'A', 'squiggle', 'E', 'green', 'A', 'blue', 'D', 'diamond', 'C', 'open', 'C', 'one', 'B', 'pink', 'A', 'open', 'B', 'oval', '>', 'E', 'C', 'B', '/', 'B', 'A', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  open      three     blue      
+  B    oval      solid     two       pink      
+  C    oval      open      one       blue      
+  D    diamond   striped   one       green     
+  E    oval      striped   three     green     
+  Activation: -0.0004
+  ['B', 'one', 'D', 'pink', 'E', 'open', 'C', 'striped', 'E', 'two', 'C', 'three', 'B', 'squiggle', 'A', 'squiggle', 'A', 'two', 'B', 'solid', 'C', 'oval', 'C', 'green', 'A', 'green', 'D', 'open', 'E', 'pink', 'B', 'blue', 'A', 'striped', 'E', 'diamond', 'D', 'three', 'D', 'squiggle', '>', 'C', 'B', 'E', '/', 'A', 'B', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  striped   two       green     
+  B    squiggle  solid     one       blue      
+  C    oval      striped   three     green     
+  D    squiggle  open      three     pink      
+  E    diamond   open      two       pink      
+  Activation: -0.0004
+  ['D', 'striped', 'B', 'one', 'A', 'pink', 'D', 'green', 'E', 'blue', 'C', 'squiggle', 'E', 'oval', 'A', 'two', 'C', 'open', 'C', 'pink', 'B', 'blue', 'E', 'open', 'D', 'diamond', 'E', 'one', 'B', 'solid', 'A', 'solid', 'D', 'three', 'B', 'oval', 'A', 'squiggle', 'C', 'two', '>', 'B', 'C', 'D', '/', 'E', 'A', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  solid     two       pink      
+  B    oval      solid     one       blue      
+  C    squiggle  open      two       pink      
+  D    diamond   striped   three     green     
+  E    oval      open      one       blue      
+  Activation: -0.0004
+  ['B', 'two', 'A', 'pink', 'C', 'one', 'A', 'squiggle', 'C', 'oval', 'E', 'open', 'C', 'striped', 'E', 'three', 'B', 'solid', 'D', 'oval', 'A', 'three', 'B', 'squiggle', 'D', 'blue', 'E', 'green', 'A', 'solid', 'D', 'three', 'B', 'blue', 'D', 'striped', 'C', 'pink', 'E', 'diamond', '>', 'D', 'A', 'E', '/', 'C', 'B', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  solid     three     pink      
+  B    squiggle  solid     two       blue      
+  C    oval      striped   one       pink      
+  D    oval      striped   three     blue      
+  E    diamond   open      three     green     
+  Activation: -0.0004
+  ['A', 'three', 'B', 'open', 'E', 'squiggle', 'A', 'oval', 'B', 'one', 'C', 'three', 'E', 'open', 'B', 'pink', 'E', 'three', 'E', 'green', 'D', 'green', 'D', 'squiggle', 'B', 'oval', 'A', 'solid', 'D', 'solid', 'C', 'diamond', 'A', 'pink', 'C', 'striped', 'C', 'blue', 'D', 'two', '>', 'B', 'D', 'C', '/', 'A', 'E', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     three     pink      
+  B    oval      open      one       pink      
+  C    diamond   striped   three     blue      
+  D    squiggle  solid     two       green     
+  E    squiggle  open      three     green     
+  Activation: -0.0004
+  ['D', 'three', 'D', 'oval', 'B', 'two', 'A', 'striped', 'A', 'squiggle', 'D', 'blue', 'B', 'blue', 'A', 'blue', 'E', 'green', 'C', 'pink', 'B', 'diamond', 'C', 'two', 'A', 'one', 'E', 'one', 'E', 'striped', 'B', 'open', 'C', 'open', 'E', 'oval', 'C', 'oval', 'D', 'solid', '>', 'E', 'D', 'C', '/', 'D', 'A', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  striped   one       blue      
+  B    diamond   open      two       blue      
+  C    oval      open      two       pink      
+  D    oval      solid     three     blue      
+  E    oval      striped   one       green     
+  Activation: -0.0004
+  ['E', 'striped', 'B', 'diamond', 'D', 'blue', 'D', 'oval', 'C', 'three', 'B', 'two', 'E', 'diamond', 'D', 'striped', 'B', 'solid', 'A', 'three', 'C', 'pink', 'C', 'open', 'A', 'squiggle', 'A', 'blue', 'A', 'striped', 'E', 'blue', 'D', 'one', 'B', 'green', 'C', 'squiggle', 'E', 'two', '>', 'D', 'A', 'E', '/', 'D', 'C', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  striped   three     blue      
+  B    diamond   solid     two       green     
+  C    squiggle  open      three     pink      
+  D    oval      striped   one       blue      
+  E    diamond   striped   two       blue      
+  Activation: -0.0004
+  ['C', 'pink', 'E', 'pink', 'B', 'diamond', 'A', 'squiggle', 'E', 'three', 'A', 'one', 'B', 'open', 'D', 'pink', 'D', 'three', 'D', 'striped', 'E', 'open', 'A', 'solid', 'C', 'solid', 'A', 'green', 'C', 'squiggle', 'B', 'two', 'E', 'diamond', 'D', 'oval', 'B', 'blue', 'C', 'three', '>', 'D', 'A', 'B', '/', 'D', 'C', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  solid     one       green     
+  B    diamond   open      two       blue      
+  C    squiggle  solid     three     pink      
+  D    oval      striped   three     pink      
+  E    diamond   open      three     pink      
+  Activation: -0.0004
+  ['D', 'three', 'E', 'green', 'A', 'two', 'A', 'blue', 'A', 'open', 'E', 'striped', 'B', 'one', 'D', 'oval', 'C', 'solid', 'B', 'pink', 'A', 'diamond', 'E', 'one', 'C', 'green', 'C', 'two', 'B', 'squiggle', 'D', 'green', 'B', 'open', 'C', 'oval', 'E', 'oval', 'D', 'open', '>', 'E', 'C', 'D', '/', 'D', 'B', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   open      two       blue      
+  B    squiggle  open      one       pink      
+  C    oval      solid     two       green     
+  D    oval      open      three     green     
+  E    oval      striped   one       green     
+  Activation: -0.0016
+  ['A', 'green', 'B', 'blue', 'A', 'two', 'A', 'diamond', 'D', 'solid', 'D', 'one', 'D', 'squiggle', 'E', 'one', 'C', 'green', 'E', 'oval', 'A', 'open', 'B', 'striped', 'B', 'squiggle', 'E', 'solid', 'C', 'open', 'C', 'squiggle', 'D', 'pink', 'E', 'pink', 'B', 'three', 'C', 'two', '>', 'E', 'B', 'A', '/', 'C', 'B', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   open      two       green     
+  B    squiggle  striped   three     blue      
+  C    squiggle  open      two       green     
+  D    squiggle  solid     one       pink      
+  E    oval      solid     one       pink      
+  Activation: -0.0004
+  ['A', 'squiggle', 'C', 'green', 'C', 'striped', 'B', 'blue', 'A', 'striped', 'C', 'oval', 'D', 'one', 'E', 'three', 'E', 'green', 'A', 'two', 'D', 'striped', 'D', 'squiggle', 'E', 'striped', 'C', 'one', 'B', 'one', 'E', 'oval', 'B', 'striped', 'D', 'pink', 'A', 'pink', 'B', 'diamond', '>', 'C', 'D', 'B', '/', 'E', 'A', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  striped   two       pink      
+  B    diamond   striped   one       blue      
+  C    oval      striped   one       green     
+  D    squiggle  striped   one       pink      
+  E    oval      striped   three     green     
+  Activation: -0.0003
+  ['E', 'one', 'B', 'two', 'E', 'open', 'B', 'solid', 'C', 'one', 'E', 'oval', 'D', 'green', 'A', 'striped', 'C', 'oval', 'B', 'pink', 'A', 'squiggle', 'C', 'open', 'A', 'pink', 'E', 'blue', 'A', 'three', 'D', 'striped', 'D', 'squiggle', 'C', 'pink', 'D', 'three', 'B', 'diamond', '>', 'E', 'D', 'B', '/', 'C', 'A', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  striped   three     pink      
+  B    diamond   solid     two       pink      
+  C    oval      open      one       pink      
+  D    squiggle  striped   three     green     
+  E    oval      open      one       blue      
+  Activation: -0.0003
+  ['C', 'squiggle', 'C', 'blue', 'A', 'two', 'D', 'open', 'C', 'one', 'C', 'striped', 'A', 'solid', 'E', 'squiggle', 'B', 'striped', 'E', 'one', 'B', 'diamond', 'A', 'diamond', 'E', 'pink', 'D', 'pink', 'E', 'solid', 'D', 'three', 'D', 'oval', 'B', 'pink', 'A', 'green', 'B', 'two', '>', 'D', 'C', 'A', '/', 'D', 'E', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     two       green     
+  B    diamond   striped   two       pink      
+  C    squiggle  striped   one       blue      
+  D    oval      open      three     pink      
+  E    squiggle  solid     one       pink      
+  Activation: -0.0003
+  ['A', 'pink', 'A', 'three', 'E', 'squiggle', 'D', 'diamond', 'C', 'three', 'E', 'blue', 'D', 'one', 'A', 'oval', 'B', 'blue', 'C', 'diamond', 'D', 'pink', 'C', 'solid', 'B', 'striped', 'A', 'solid', 'D', 'open', 'B', 'diamond', 'C', 'green', 'E', 'three', 'B', 'two', 'E', 'solid', '>', 'A', 'E', 'C', '/', 'C', 'B', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     three     pink      
+  B    diamond   striped   two       blue      
+  C    diamond   solid     three     green     
+  D    diamond   open      one       pink      
+  E    squiggle  solid     three     blue      
+  Activation: -0.0003
+  ['E', 'pink', 'A', 'diamond', 'A', 'solid', 'B', 'oval', 'A', 'two', 'E', 'diamond', 'B', 'three', 'E', 'striped', 'D', 'blue', 'C', 'pink', 'B', 'blue', 'C', 'squiggle', 'D', 'diamond', 'C', 'one', 'D', 'open', 'A', 'green', 'D', 'one', 'C', 'striped', 'E', 'three', 'B', 'open', '>', 'B', 'C', 'A', '/', 'A', 'D', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     two       green     
+  B    oval      open      three     blue      
+  C    squiggle  striped   one       pink      
+  D    diamond   open      one       blue      
+  E    diamond   striped   three     pink      
+  Activation: -0.0003
+  ['E', 'squiggle', 'D', 'three', 'B', 'open', 'B', 'blue', 'E', 'one', 'E', 'open', 'D', 'pink', 'C', 'squiggle', 'A', 'blue', 'D', 'striped', 'C', 'three', 'C', 'solid', 'A', 'solid', 'E', 'green', 'B', 'oval', 'A', 'two', 'D', 'diamond', 'A', 'oval', 'C', 'green', 'B', 'three', '>', 'A', 'E', 'D', '/', 'B', 'C', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     two       blue      
+  B    oval      open      three     blue      
+  C    squiggle  solid     three     green     
+  D    diamond   striped   three     pink      
+  E    squiggle  open      one       green     
+  Activation: -0.0003
+  ['E', 'three', 'D', 'green', 'D', 'oval', 'E', 'striped', 'D', 'open', 'C', 'one', 'B', 'green', 'C', 'diamond', 'E', 'pink', 'A', 'squiggle', 'A', 'striped', 'B', 'solid', 'B', 'diamond', 'A', 'two', 'C', 'solid', 'D', 'two', 'B', 'two', 'A', 'green', 'C', 'blue', 'E', 'squiggle', '>', 'D', 'A', 'B', '/', 'D', 'E', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  striped   two       green     
+  B    diamond   solid     two       green     
+  C    diamond   solid     one       blue      
+  D    oval      open      two       green     
+  E    squiggle  striped   three     pink      
+  Activation: -0.0003
+  ['C', 'striped', 'E', 'oval', 'C', 'green', 'B', 'two', 'A', 'diamond', 'E', 'pink', 'B', 'solid', 'A', 'striped', 'D', 'open', 'A', 'green', 'D', 'three', 'D', 'pink', 'C', 'diamond', 'E', 'open', 'D', 'oval', 'A', 'one', 'C', 'two', 'E', 'two', 'B', 'blue', 'B', 'squiggle', '>', 'E', 'B', 'C', '/', 'D', 'B', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   striped   one       green     
+  B    squiggle  solid     two       blue      
+  C    diamond   striped   two       green     
+  D    oval      open      three     pink      
+  E    oval      open      two       pink      
+  Activation: -0.0017
+  ['A', 'green', 'A', 'three', 'C', 'open', 'B', 'one', 'E', 'oval', 'B', 'open', 'B', 'squiggle', 'E', 'three', 'B', 'green', 'E', 'open', 'D', 'solid', 'D', 'oval', 'C', 'diamond', 'C', 'blue', 'A', 'striped', 'D', 'blue', 'C', 'two', 'E', 'pink', 'A', 'oval', 'D', 'three', '>', 'A', 'D', 'E', '/', 'E', 'B', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      striped   three     green     
+  B    squiggle  open      one       green     
+  C    diamond   open      two       blue      
+  D    oval      solid     three     blue      
+  E    oval      open      three     pink      
+  Activation: -0.0003
+  ['E', 'three', 'C', 'one', 'E', 'pink', 'E', 'open', 'C', 'oval', 'C', 'striped', 'A', 'squiggle', 'D', 'blue', 'B', 'one', 'A', 'green', 'B', 'solid', 'D', 'one', 'E', 'diamond', 'B', 'pink', 'A', 'two', 'B', 'oval', 'D', 'open', 'D', 'oval', 'C', 'green', 'A', 'open', '>', 'C', 'D', 'B', '/', 'D', 'A', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  open      two       green     
+  B    oval      solid     one       pink      
+  C    oval      striped   one       green     
+  D    oval      open      one       blue      
+  E    diamond   open      three     pink      
+  Activation: -0.0003
+  ['B', 'green', 'A', 'diamond', 'C', 'three', 'E', 'solid', 'B', 'open', 'C', 'squiggle', 'B', 'one', 'D', 'three', 'E', 'oval', 'D', 'blue', 'C', 'solid', 'D', 'open', 'E', 'green', 'E', 'two', 'A', 'striped', 'A', 'three', 'D', 'oval', 'A', 'green', 'C', 'pink', 'B', 'squiggle', '>', 'E', 'B', 'A', '/', 'D', 'C', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   striped   three     green     
+  B    squiggle  open      one       green     
+  C    squiggle  solid     three     pink      
+  D    oval      open      three     blue      
+  E    oval      solid     two       green     
+  Activation: -0.0003
+  ['E', 'solid', 'B', 'striped', 'B', 'diamond', 'B', 'two', 'A', 'two', 'D', 'three', 'C', 'squiggle', 'B', 'blue', 'D', 'squiggle', 'E', 'two', 'E', 'oval', 'C', 'open', 'A', 'squiggle', 'A', 'open', 'C', 'blue', 'D', 'open', 'C', 'one', 'D', 'blue', 'A', 'blue', 'E', 'blue', '>', 'E', 'A', 'B', '/', 'C', 'A', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  open      two       blue      
+  B    diamond   striped   two       blue      
+  C    squiggle  open      one       blue      
+  D    squiggle  open      three     blue      
+  E    oval      solid     two       blue      
+  Activation: -0.0003
+  ['A', 'pink', 'A', 'squiggle', 'C', 'blue', 'D', 'pink', 'D', 'diamond', 'B', 'striped', 'A', 'three', 'C', 'three', 'D', 'two', 'C', 'striped', 'B', 'oval', 'E', 'solid', 'A', 'solid', 'B', 'one', 'E', 'green', 'D', 'open', 'B', 'pink', 'C', 'oval', 'E', 'squiggle', 'E', 'one', '>', 'C', 'E', 'D', '/', 'B', 'A', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  solid     three     pink      
+  B    oval      striped   one       pink      
+  C    oval      striped   three     blue      
+  D    diamond   open      two       pink      
+  E    squiggle  solid     one       green     
+  Activation: -0.0002
+  ['D', 'oval', 'E', 'pink', 'C', 'solid', 'A', 'pink', 'A', 'oval', 'B', 'two', 'D', 'solid', 'C', 'three', 'E', 'one', 'A', 'one', 'E', 'oval', 'B', 'green', 'C', 'oval', 'A', 'striped', 'D', 'pink', 'E', 'open', 'B', 'oval', 'B', 'solid', 'C', 'blue', 'D', 'one', '>', 'B', 'C', 'D', '/', 'D', 'A', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      striped   one       pink      
+  B    oval      solid     two       green     
+  C    oval      solid     three     blue      
+  D    oval      solid     one       pink      
+  E    oval      open      one       pink      
+  Activation: -0.0002
+  ['D', 'oval', 'B', 'pink', 'A', 'solid', 'D', 'one', 'B', 'diamond', 'E', 'striped', 'D', 'blue', 'A', 'green', 'C', 'open', 'C', 'green', 'E', 'two', 'C', 'diamond', 'D', 'open', 'B', 'striped', 'C', 'three', 'E', 'green', 'A', 'squiggle', 'E', 'oval', 'A', 'one', 'B', 'one', '>', 'E', 'A', 'C', '/', 'D', 'A', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  solid     one       green     
+  B    diamond   striped   one       pink      
+  C    diamond   open      three     green     
+  D    oval      open      one       blue      
+  E    oval      striped   two       green     
+  Activation: -0.0002
+  ['B', 'two', 'E', 'diamond', 'A', 'three', 'A', 'squiggle', 'D', 'solid', 'A', 'open', 'C', 'striped', 'D', 'three', 'A', 'green', 'C', 'diamond', 'E', 'striped', 'E', 'one', 'D', 'green', 'E', 'green', 'B', 'squiggle', 'B', 'open', 'B', 'green', 'C', 'green', 'C', 'three', 'D', 'oval', '>', 'D', 'B', 'E', '/', 'D', 'A', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  open      three     green     
+  B    squiggle  open      two       green     
+  C    diamond   striped   three     green     
+  D    oval      solid     three     green     
+  E    diamond   striped   one       green     
+  Activation: -0.0002
+  ['C', 'open', 'D', 'oval', 'E', 'pink', 'C', 'three', 'B', 'one', 'D', 'pink', 'D', 'open', 'C', 'diamond', 'A', 'pink', 'B', 'squiggle', 'B', 'pink', 'D', 'three', 'A', 'two', 'E', 'open', 'B', 'open', 'A', 'diamond', 'E', 'oval', 'C', 'pink', 'E', 'two', 'A', 'open', '>', 'E', 'B', 'C', '/', 'D', 'B', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   open      two       pink      
+  B    squiggle  open      one       pink      
+  C    diamond   open      three     pink      
+  D    oval      open      three     pink      
+  E    oval      open      two       pink      
+  Activation: -0.0002
+  ['A', 'green', 'E', 'striped', 'A', 'diamond', 'C', 'squiggle', 'E', 'two', 'C', 'pink', 'E', 'blue', 'A', 'striped', 'D', 'blue', 'D', 'diamond', 'B', 'green', 'C', 'striped', 'D', 'striped', 'B', 'striped', 'B', 'oval', 'C', 'three', 'D', 'one', 'A', 'one', 'E', 'oval', 'B', 'two', '>', 'B', 'C', 'D', '/', 'E', 'C', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   striped   one       green     
+  B    oval      striped   two       green     
+  C    squiggle  striped   three     pink      
+  D    diamond   striped   one       blue      
+  E    oval      striped   two       blue      
+  Activation: -0.0002
+  ['D', 'two', 'B', 'diamond', 'C', 'three', 'E', 'pink', 'A', 'one', 'C', 'diamond', 'A', 'green', 'B', 'striped', 'B', 'blue', 'D', 'open', 'C', 'open', 'D', 'pink', 'E', 'diamond', 'C', 'blue', 'D', 'diamond', 'A', 'open', 'B', 'one', 'E', 'solid', 'A', 'diamond', 'E', 'one', '>', 'A', 'B', 'E', '/', 'A', 'C', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   open      one       green     
+  B    diamond   striped   one       blue      
+  C    diamond   open      three     blue      
+  D    diamond   open      two       pink      
+  E    diamond   solid     one       pink      
+  Activation: -0.0017
+  ['D', 'pink', 'B', 'open', 'C', 'one', 'D', 'striped', 'B', 'green', 'E', 'diamond', 'B', 'oval', 'D', 'diamond', 'A', 'blue', 'D', 'three', 'C', 'open', 'C', 'pink', 'A', 'squiggle', 'E', 'striped', 'A', 'solid', 'E', 'three', 'C', 'oval', 'E', 'green', 'A', 'two', 'B', 'one', '>', 'B', 'A', 'D', '/', 'C', 'A', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  solid     two       blue      
+  B    oval      open      one       green     
+  C    oval      open      one       pink      
+  D    diamond   striped   three     pink      
+  E    diamond   striped   three     green     
+  Activation: -0.0002
+  ['E', 'open', 'C', 'diamond', 'D', 'open', 'D', 'three', 'D', 'diamond', 'C', 'three', 'D', 'pink', 'B', 'green', 'E', 'oval', 'E', 'three', 'A', 'solid', 'C', 'green', 'B', 'squiggle', 'C', 'striped', 'A', 'three', 'E', 'green', 'A', 'blue', 'B', 'solid', 'A', 'diamond', 'B', 'three', '>', 'E', 'B', 'C', '/', 'C', 'A', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     three     blue      
+  B    squiggle  solid     three     green     
+  C    diamond   striped   three     green     
+  D    diamond   open      three     pink      
+  E    oval      open      three     green     
+  Activation: -0.0002
+  ['A', 'solid', 'D', 'two', 'B', 'solid', 'E', 'one', 'A', 'one', 'D', 'oval', 'B', 'oval', 'D', 'pink', 'C', 'pink', 'C', 'one', 'C', 'open', 'E', 'striped', 'D', 'solid', 'E', 'green', 'E', 'oval', 'B', 'three', 'A', 'oval', 'A', 'blue', 'B', 'green', 'C', 'oval', '>', 'E', 'A', 'C', '/', 'B', 'A', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     one       blue      
+  B    oval      solid     three     green     
+  C    oval      open      one       pink      
+  D    oval      solid     two       pink      
+  E    oval      striped   one       green     
+  Activation: -0.0002
+  ['D', 'squiggle', 'E', 'striped', 'E', 'green', 'A', 'three', 'C', 'two', 'A', 'oval', 'E', 'diamond', 'B', 'green', 'C', 'green', 'C', 'solid', 'D', 'open', 'B', 'diamond', 'B', 'three', 'D', 'three', 'C', 'oval', 'D', 'green', 'E', 'one', 'B', 'striped', 'A', 'green', 'A', 'solid', '>', 'C', 'D', 'E', '/', 'A', 'D', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     three     green     
+  B    diamond   striped   three     green     
+  C    oval      solid     two       green     
+  D    squiggle  open      three     green     
+  E    diamond   striped   one       green     
+  Activation: -0.0002
+  ['B', 'pink', 'E', 'squiggle', 'E', 'two', 'B', 'solid', 'D', 'pink', 'C', 'two', 'A', 'oval', 'C', 'oval', 'D', 'two', 'B', 'diamond', 'A', 'pink', 'E', 'solid', 'C', 'green', 'C', 'solid', 'D', 'squiggle', 'A', 'solid', 'A', 'two', 'D', 'solid', 'B', 'two', 'E', 'blue', '>', 'C', 'E', 'B', '/', 'A', 'D', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     two       pink      
+  B    diamond   solid     two       pink      
+  C    oval      solid     two       green     
+  D    squiggle  solid     two       pink      
+  E    squiggle  solid     two       blue      
+  Activation: -0.0002
+  ['B', 'pink', 'C', 'striped', 'A', 'green', 'C', 'oval', 'D', 'two', 'D', 'pink', 'A', 'squiggle', 'E', 'blue', 'B', 'one', 'E', 'diamond', 'A', 'striped', 'E', 'striped', 'B', 'oval', 'D', 'squiggle', 'E', 'two', 'D', 'striped', 'C', 'two', 'A', 'three', 'C', 'green', 'B', 'striped', '>', 'C', 'D', 'E', '/', 'B', 'A', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  striped   three     green     
+  B    oval      striped   one       pink      
+  C    oval      striped   two       green     
+  D    squiggle  striped   two       pink      
+  E    diamond   striped   two       blue      
+  Activation: -0.0002
+  ['C', 'oval', 'E', 'solid', 'D', 'two', 'B', 'open', 'C', 'one', 'B', 'squiggle', 'A', 'one', 'E', 'three', 'D', 'diamond', 'D', 'solid', 'B', 'green', 'C', 'green', 'E', 'green', 'A', 'striped', 'B', 'two', 'A', 'squiggle', 'D', 'green', 'C', 'solid', 'E', 'squiggle', 'A', 'green', '>', 'C', 'E', 'D', '/', 'A', 'B', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  striped   one       green     
+  B    squiggle  open      two       green     
+  C    oval      solid     one       green     
+  D    diamond   solid     two       green     
+  E    squiggle  solid     three     green     
+  Activation: -0.0002
+  ['D', 'solid', 'B', 'oval', 'C', 'striped', 'C', 'oval', 'D', 'oval', 'C', 'two', 'E', 'striped', 'A', 'oval', 'E', 'oval', 'B', 'pink', 'A', 'green', 'D', 'one', 'E', 'blue', 'D', 'pink', 'A', 'open', 'B', 'striped', 'E', 'two', 'B', 'two', 'A', 'three', 'C', 'green', '>', 'C', 'E', 'B', '/', 'A', 'E', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      open      three     green     
+  B    oval      striped   two       pink      
+  C    oval      striped   two       green     
+  D    oval      solid     one       pink      
+  E    oval      striped   two       blue      
+  Activation: -0.0002
+  ['D', 'pink', 'A', 'two', 'C', 'open', 'E', 'pink', 'A', 'striped', 'E', 'three', 'D', 'one', 'D', 'striped', 'B', 'solid', 'E', 'squiggle', 'E', 'striped', 'B', 'three', 'A', 'pink', 'C', 'one', 'C', 'oval', 'A', 'squiggle', 'B', 'pink', 'C', 'pink', 'D', 'squiggle', 'B', 'diamond', '>', 'C', 'A', 'B', '/', 'D', 'A', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  striped   two       pink      
+  B    diamond   solid     three     pink      
+  C    oval      open      one       pink      
+  D    squiggle  striped   one       pink      
+  E    squiggle  striped   three     pink      
+  Activation: -0.0002
+  ['C', 'diamond', 'E', 'blue', 'E', 'striped', 'A', 'blue', 'B', 'pink', 'C', 'one', 'D', 'one', 'B', 'squiggle', 'D', 'oval', 'A', 'one', 'B', 'open', 'E', 'oval', 'D', 'blue', 'A', 'solid', 'D', 'open', 'B', 'one', 'E', 'one', 'C', 'striped', 'C', 'green', 'A', 'oval', '>', 'A', 'E', 'D', '/', 'A', 'B', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     one       blue      
+  B    squiggle  open      one       pink      
+  C    diamond   striped   one       green     
+  D    oval      open      one       blue      
+  E    oval      striped   one       blue      
+  Activation: -0.0002
+  ['C', 'one', 'D', 'striped', 'B', 'striped', 'B', 'oval', 'E', 'green', 'D', 'two', 'A', 'diamond', 'A', 'two', 'A', 'striped', 'E', 'two', 'C', 'striped', 'A', 'green', 'C', 'oval', 'C', 'green', 'B', 'three', 'B', 'green', 'E', 'striped', 'D', 'green', 'E', 'oval', 'D', 'squiggle', '>', 'C', 'E', 'B', '/', 'E', 'D', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   striped   two       green     
+  B    oval      striped   three     green     
+  C    oval      striped   one       green     
+  D    squiggle  striped   two       green     
+  E    oval      striped   two       green     
+  Activation: -0.0002
+  ['B', 'three', 'E', 'two', 'A', 'striped', 'A', 'one', 'B', 'squiggle', 'C', 'three', 'D', 'two', 'E', 'open', 'C', 'solid', 'A', 'pink', 'E', 'squiggle', 'D', 'oval', 'B', 'green', 'D', 'blue', 'C', 'blue', 'A', 'diamond', 'D', 'solid', 'B', 'open', 'E', 'green', 'C', 'oval', '>', 'D', 'B', 'A', '/', 'C', 'E', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   striped   one       pink      
+  B    squiggle  open      three     green     
+  C    oval      solid     three     blue      
+  D    oval      solid     two       blue      
+  E    squiggle  open      two       green     
+  Activation: -0.0002
+  ['D', 'one', 'B', 'blue', 'C', 'open', 'E', 'striped', 'D', 'striped', 'A', 'green', 'C', 'three', 'C', 'green', 'A', 'two', 'E', 'oval', 'B', 'diamond', 'C', 'squiggle', 'E', 'three', 'B', 'three', 'D', 'diamond', 'A', 'solid', 'D', 'green', 'B', 'solid', 'A', 'oval', 'E', 'pink', '>', 'A', 'C', 'D', '/', 'E', 'C', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     two       green     
+  B    diamond   solid     three     blue      
+  C    squiggle  open      three     green     
+  D    diamond   striped   one       green     
+  E    oval      striped   three     pink      
+  Activation: -0.0002
+  ['E', 'striped', 'D', 'squiggle', 'C', 'one', 'E', 'green', 'B', 'two', 'A', 'one', 'D', 'green', 'B', 'green', 'A', 'green', 'B', 'squiggle', 'E', 'oval', 'A', 'solid', 'C', 'green', 'E', 'one', 'D', 'three', 'A', 'squiggle', 'D', 'striped', 'C', 'diamond', 'C', 'open', 'B', 'open', '>', 'E', 'A', 'C', '/', 'A', 'B', 'D', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  solid     one       green     
+  B    squiggle  open      two       green     
+  C    diamond   open      one       green     
+  D    squiggle  striped   three     green     
+  E    oval      striped   one       green     
+  Activation: -0.0002
+  ['C', 'green', 'B', 'pink', 'E', 'one', 'D', 'diamond', 'D', 'one', 'C', 'solid', 'D', 'open', 'A', 'striped', 'C', 'one', 'E', 'striped', 'B', 'two', 'E', 'oval', 'B', 'open', 'A', 'oval', 'E', 'blue', 'A', 'three', 'D', 'pink', 'B', 'diamond', 'C', 'squiggle', 'A', 'blue', '>', 'E', 'C', 'D', '/', 'A', 'C', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      striped   three     blue      
+  B    diamond   open      two       pink      
+  C    squiggle  solid     one       green     
+  D    diamond   open      one       pink      
+  E    oval      striped   one       blue      
+  Activation: -0.0001
+  ['E', 'three', 'D', 'oval', 'B', 'striped', 'C', 'open', 'C', 'two', 'A', 'oval', 'E', 'solid', 'D', 'three', 'A', 'striped', 'B', 'diamond', 'A', 'blue', 'C', 'pink', 'B', 'blue', 'E', 'squiggle', 'A', 'one', 'D', 'green', 'C', 'oval', 'B', 'one', 'D', 'solid', 'E', 'green', '>', 'D', 'A', 'C', '/', 'C', 'E', 'B', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      striped   one       blue      
+  B    diamond   striped   one       blue      
+  C    oval      open      two       pink      
+  D    oval      solid     three     green     
+  E    squiggle  solid     three     green     
+  Activation: -0.0001
+  ['C', 'diamond', 'B', 'one', 'B', 'squiggle', 'A', 'two', 'A', 'pink', 'C', 'striped', 'B', 'solid', 'D', 'striped', 'A', 'open', 'D', 'three', 'E', 'two', 'E', 'striped', 'C', 'one', 'E', 'blue', 'E', 'squiggle', 'C', 'pink', 'D', 'green', 'B', 'blue', 'D', 'oval', 'A', 'diamond', '>', 'D', 'B', 'A', '/', 'D', 'E', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   open      two       pink      
+  B    squiggle  solid     one       blue      
+  C    diamond   striped   one       pink      
+  D    oval      striped   three     green     
+  E    squiggle  striped   two       blue      
+  Activation: -0.0001
+  ['D', 'solid', 'B', 'diamond', 'B', 'pink', 'A', 'striped', 'B', 'striped', 'D', 'pink', 'C', 'blue', 'C', 'three', 'A', 'three', 'D', 'squiggle', 'E', 'blue', 'D', 'three', 'C', 'open', 'C', 'diamond', 'E', 'squiggle', 'B', 'three', 'A', 'green', 'A', 'oval', 'E', 'three', 'E', 'striped', '>', 'A', 'E', 'B', '/', 'A', 'D', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      striped   three     green     
+  B    diamond   striped   three     pink      
+  C    diamond   open      three     blue      
+  D    squiggle  solid     three     pink      
+  E    squiggle  striped   three     blue      
+  Activation: -0.0001
+  ['D', 'solid', 'A', 'solid', 'D', 'oval', 'B', 'green', 'E', 'open', 'A', 'green', 'E', 'oval', 'A', 'two', 'C', 'solid', 'C', 'squiggle', 'B', 'one', 'C', 'green', 'A', 'diamond', 'C', 'three', 'B', 'oval', 'B', 'striped', 'D', 'one', 'E', 'one', 'D', 'green', 'E', 'green', '>', 'D', 'B', 'E', '/', 'D', 'C', 'A', '.']
+  Card Shape     Shading   Number    Color     
+  A    diamond   solid     two       green     
+  B    oval      striped   one       green     
+  C    squiggle  solid     three     green     
+  D    oval      solid     one       green     
+  E    oval      open      one       green     
+  Activation: -0.0001
+  ['B', 'pink', 'A', 'oval', 'A', 'one', 'E', 'two', 'E', 'pink', 'C', 'one', 'B', 'oval', 'C', 'squiggle', 'C', 'blue', 'D', 'green', 'B', 'two', 'A', 'blue', 'D', 'oval', 'E', 'diamond', 'A', 'solid', 'D', 'striped', 'B', 'open', 'E', 'striped', 'C', 'striped', 'D', 'three', '>', 'D', 'A', 'B', '/', 'D', 'C', 'E', '.']
+  Card Shape     Shading   Number    Color     
+  A    oval      solid     one       blue      
+  B    oval      open      two       pink      
+  C    squiggle  striped   one       blue      
+  D    oval      striped   three     green     
+  E    diamond   striped   two       pink      
+  Activation: -0.0001
+  ['A', 'open', 'E', 'pink', 'C', 'pink', 'D', 'diamond', 'D', 'striped', 'C', 'solid', 'E', 'one', 'A', 'squiggle', 'D', 'blue', 'E', 'oval', 'D', 'one', 'A', 'one', 'B', 'squiggle', 'C', 'squiggle', 'B', 'blue', 'C', 'two', 'E', 'solid', 'B', 'striped', 'B', 'three', 'A', 'green', '>', 'E', 'A', 'D', '/', 'A', 'B', 'C', '.']
+  Card Shape     Shading   Number    Color     
+  A    squiggle  open      one       green     
+  B    squiggle  striped   three     blue      
+  C    squiggle  solid     two       pink      
+  D    diamond   striped   one       blue      
+  E    oval      solid     one       pink      
