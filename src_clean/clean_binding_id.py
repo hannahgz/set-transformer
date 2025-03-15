@@ -85,7 +85,7 @@ def construct_binding_id_dataset(config, capture_layer):
                 X.append(torch.cat((element1, element2)))
                 y.append(1 if token1 == token2 else 0)
 
-                breakpoint()
+                # breakpoint()
                 # Save intermediate results when threshold is reached
                 if len(y) >= save_threshold:
                     X_tensor = torch.stack(X)
