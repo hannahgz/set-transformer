@@ -434,6 +434,8 @@ color_ids = tokenizer.encode(colors)
 number_ids = tokenizer.encode(numbers)
 shading_ids = tokenizer.encode(shadings)
 
+card_ids = tokenizer.encode(["A", "B", "C", "D", "E"])
+
 all_ids = shape_ids + color_ids + number_ids + shading_ids
 
 def initialize_attribute_count_dict():
@@ -506,6 +508,7 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
     four_same_dicts = {}
     five_same_dicts = {}
     total_attributes = {}
+    overall_set_sim_dict = {}
     
     for peak_idx in peaks_info['examples_by_peak']:
         print(f"\nProcessing Peak {peak_idx}:")
@@ -513,6 +516,7 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
         peaks_same_diff_dict[peak_idx] = initialize_same_diff_dict()
         four_same_dicts[peak_idx] = initialize_same_count_dict()
         five_same_dicts[peak_idx] = initialize_same_count_dict()
+        overall_set_sim_dict[peak_idx] = [(0, 0, 0) for _ in range(top)]
 
         total_attributes[peak_idx] = 0
 
@@ -531,6 +535,7 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
             # color_attrs = []
             # number_attrs = []
             # shading_attrs = []
+            
             while i < 40:
                 card = example[i]
                 attr = example[i+1]
@@ -597,6 +602,8 @@ def summary_statistics_from_peak_info(peaks_info, top=None):
         for id in all_ids:
             print(f"    Percentage of {tokenizer.id_to_token[id]}: {curr_five_same_dict[id]/curr_five_same_dict['total']:.2%}")
 
+
+# [(same, diff), (same, diff), (same, diff), (same, diff)]
 
 def save_summary_statistics_from_peak_info(peaks_info, top=None, output_file="summary_statistics.txt",):
     peaks_attribute_dict = {}
