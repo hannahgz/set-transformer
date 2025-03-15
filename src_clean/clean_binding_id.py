@@ -98,10 +98,9 @@ def construct_binding_id_dataset(config, capture_layer):
 
                     print("Saving y tensor")
                     torch.save(y_tensor, os.path.join(base_dir, f"y.pt"))
-                    
-                    # # Clear lists and increment counter
-                    # X = []
-                    # y = []
+
+                    print("Returning")
+                    return
 
 def train_binding_classifier(dataset_name, capture_layer, model_name, input_dim=128, num_epochs=100, batch_size=32, lr=0.001, patience=10):
     """Train a binary classifier for binding identification using randomly selected chunks."""
