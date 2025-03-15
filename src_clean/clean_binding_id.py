@@ -88,6 +88,7 @@ def construct_binding_id_dataset(config, capture_layer):
                 # breakpoint()
                 # Save intermediate results when threshold is reached
                 if len(y) >= save_threshold:
+                    print("Saving intermediate results")
                     X_tensor = torch.stack(X)
                     y_tensor = torch.tensor(y)
                     
