@@ -51,7 +51,7 @@ def construct_binding_id_dataset(config, capture_layer):
 
     X = []
     y = []
-    save_threshold = 25000000  # Save after accumulating 50M samples
+    save_threshold = 5000000
 
     base_dir = f"{PATH_PREFIX}/src_clean/binding_id/44_complete/layer{capture_layer}"
     os.makedirs(base_dir, exist_ok=True)
