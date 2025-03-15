@@ -93,7 +93,10 @@ def construct_binding_id_dataset(config, capture_layer):
                     y_tensor = torch.tensor(y)
                     
                     # Save current chunk
+                    print("Saving X tensor")
                     torch.save(X_tensor, os.path.join(base_dir, f"X.pt"))
+
+                    print("Saving y tensor")
                     torch.save(y_tensor, os.path.join(base_dir, f"y.pt"))
                     
                     # # Clear lists and increment counter
