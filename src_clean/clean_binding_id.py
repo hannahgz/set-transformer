@@ -434,21 +434,21 @@ if __name__ == "__main__":
     #     project="acc-binding-id",
     # )
 
-    capture_layer = 1
-    initialize_binding_dataset(capture_layer)
-    print("Finished initializing dataset")
-    train_binary_probe(
-        capture_layer=capture_layer,
-        project="acc-binding-id",
-    )
-
-    # capture_layer = 2
+    # capture_layer = 1
     # initialize_binding_dataset(capture_layer)
     # print("Finished initializing dataset")
     # train_binary_probe(
     #     capture_layer=capture_layer,
     #     project="acc-binding-id",
     # )
+
+    capture_layer = 2
+    initialize_binding_dataset(capture_layer)
+    print("Finished initializing dataset")
+    train_binary_probe(
+        capture_layer=capture_layer,
+        project="acc-binding-id",
+    )
 
     # capture_layer = 3
     # initialize_binding_dataset(capture_layer)
