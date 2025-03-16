@@ -151,12 +151,14 @@ def initialize_binding_dataset(capture_layer, val_size=0.05, test_size=0.05, bat
     test_size = len(full_dataset) - train_size - val_size  # Remainder for test
     # print(f"Train size: {train_size}, Val size: {val_size}, Test size: {test_size}")
 
+    print("Random splitting")
     train_dataset, val_dataset, test_dataset = random_split(
         full_dataset,
         [train_size, val_size, test_size],
         generator=torch.Generator().manual_seed(42) 
     )
 
+    print("Separating training data into class 0 and 1")
     # Separate training data into class 0 and class 1
     X_train, y_train = zip(*train_dataset)  # Unpack into X_train and y_train
     X_train = torch.stack(X_train)
@@ -165,6 +167,7 @@ def initialize_binding_dataset(capture_layer, val_size=0.05, test_size=0.05, bat
     class_0_data_train = X_train[(y_train == 0).nonzero(as_tuple=True)[0]]
     class_1_data_train = X_train[(y_train == 1).nonzero(as_tuple=True)[0]]
 
+    print("Separating validation data into class 0 and 1")
     # Separate validation data into class 0 and class 1
     X_val, y_val = zip(*val_dataset)  # Unpack into X_val and y_val
     X_val = torch.stack(X_val)
@@ -173,6 +176,7 @@ def initialize_binding_dataset(capture_layer, val_size=0.05, test_size=0.05, bat
     class_0_data_val = X_val[(y_val == 0).nonzero(as_tuple=True)[0]]
     class_1_data_val = X_val[(y_val == 1).nonzero(as_tuple=True)[0]]
 
+    print("Separating test data into class 0 and 1")
     # Separate test data into class 0 and class 1
     X_test, y_test = zip(*test_dataset)  # Unpack into X_test and y_test
     X_test = torch.stack(X_test)
@@ -181,26 +185,38 @@ def initialize_binding_dataset(capture_layer, val_size=0.05, test_size=0.05, bat
     class_0_data_test = X_test[(y_test == 0).nonzero(as_tuple=True)[0]]
     class_1_data_test = X_test[(y_test == 1).nonzero(as_tuple=True)[0]]
 
-
-    # Create the balanced training dataset
-    balanced_train_dataset = BalancedBindingDataset(class_0_data_train, class_1_data_train)
-    balanced_val_dataset = BalancedBindingDataset(class_0_data_val, class_1_data_val)
-    balanced_test_dataset = BalancedBindingDataset(class_0_data_test, class_1_data_test)
-
-    # Create DataLoaders
-    train_loader = DataLoader(balanced_train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(balanced_val_dataset, batch_size=batch_size, shuffle=False)
-    test_loader = DataLoader(balanced_test_dataset, batch_size=batch_size, shuffle=False)
-
-    breakpoint()
-
+    print("Saving indiv classes")
     torch.save({
-        "train_loader": train_loader,
-        "val_loader": val_loader,
-        "test_loader": test_loader
-    }, os.path.join(base_dir, "balanced_dataloader.pt"))
+        "class_0_data_train": class_0_data_train,
+        "class_1_data_train": class_1_data_train,
+        "class_0_data_val": class_0_data_val,
+        "class_1_data_val": class_1_data_val,
+        "class_0_data_test": class_0_data_test,
+        "class_1_data_test": class_1_data_test
+    }, os.path.join(base_dir, "balanced_data.pt"))
     
-    return train_loader, val_loader, test_loader
+    # print("Creating balanced datasets")
+    # # Create the balanced training dataset
+    # balanced_train_dataset = BalancedBindingDataset(class_0_data_train, class_1_data_train)
+    # balanced_val_dataset = BalancedBindingDataset(class_0_data_val, class_1_data_val)
+    # balanced_test_dataset = BalancedBindingDataset(class_0_data_test, class_1_data_test)
+
+    # print("Creating dataloaders")
+    # # Create DataLoaders
+    # train_loader = DataLoader(balanced_train_dataset, batch_size=batch_size, shuffle=True)
+    # val_loader = DataLoader(balanced_val_dataset, batch_size=batch_size, shuffle=False)
+    # test_loader = DataLoader(balanced_test_dataset, batch_size=batch_size, shuffle=False)
+
+    # breakpoint()
+
+    # print("Saving dataloaders")
+    # torch.save({
+    #     "train_loader": train_loader,
+    #     "val_loader": val_loader,
+    #     "test_loader": test_loader
+    # }, os.path.join(base_dir, "balanced_dataloader.pt"))
+    
+    # return train_loader, val_loader, test_loader
 
 class BinaryProbe(nn.Module):
     def __init__(self, embedding_dim=64):
@@ -223,25 +239,34 @@ class BinaryProbe(nn.Module):
         # Binary cross entropy loss
         return nn.functional.binary_cross_entropy(outputs, targets)
 
-def load_binary_dataloader(capture_layer):
+def load_binary_dataloader(capture_layer, batch_size):
     base_dir = f"{PATH_PREFIX}/src_clean/binding_id/44_complete/layer{capture_layer}"
-    saved_data = torch.load(dataset_save_path)
-    return saved_data['train_loader'], saved_data['val_loader']
+
+    saved_data = torch.load(os.path.join(base_dir, "balanced_data.pt"))
+    balanced_train_dataset = BalancedBindingDataset(saved_data["class_0_data_train"], saved_data["class_1_data_train"])
+    balanced_val_dataset = BalancedBindingDataset(saved_data["class_0_data_val"], saved_data["class_1_data_val"])
+    balanced_test_dataset = BalancedBindingDataset(saved_data["class_0_data_test"], saved_data["class_1_data_test"])
+
+    train_loader = DataLoader(balanced_train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(balanced_val_dataset, batch_size=batch_size, shuffle=False)
+    test_loader = DataLoader(balanced_test_dataset, batch_size=batch_size, shuffle=False)
+
+    return train_loader, val_loader, test_loader
 
 def train_binary_probe(
     capture_layer,
-    attribute_id,
     project,
     embedding_dim=64,
     batch_size=32,
     learning_rate=1e-3,
     num_epochs=100,
     patience=10,
-    val_split=0.2,
     device='cuda' if torch.cuda.is_available() else 'cpu'
 ): 
     # Load the binary dataset
-    train_loader, val_loader = load_binary_dataloader(attribute_id, capture_layer, project)
+    print("Loading binary dataset")
+    train_loader, val_loader, test_loader = load_binary_dataloader(capture_layer, batch_size=batch_size)
+    print("Binary dataset loaded")
 
     # Initialize model, optimizer, and move to device
     model = BinaryProbe(embedding_dim=embedding_dim).to(device)
@@ -255,10 +280,8 @@ def train_binary_probe(
             "batch_size": batch_size,
             "embedding_dim": embedding_dim,
             "capture_layer": capture_layer,
-            "attribute_id": attribute_id,
-            "val_split": val_split
         },
-        name=f"attr_{attribute_id}_layer{capture_layer}"
+        name=f"layer{capture_layer}"
     )
     
     # Early stopping variables
@@ -345,8 +368,9 @@ def train_binary_probe(
     # Save the best model
     model.load_state_dict(best_model_state)
 
+    base_dir = f"{PATH_PREFIX}/src_clean/binding_id/44_complete/layer{capture_layer}"
     torch.save(model.state_dict(), 
-               f"{PATH_PREFIX}/{project}/layer{capture_layer}/attr_{attribute_id}/binary_probe_model.pt")
+               os.path.join(base_dir, "binary_probe.pt"))
     wandb.finish()
     return model
 
@@ -391,38 +415,43 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
 
-    for capture_layer in range(4):
-        # construct_binding_id_dataset(
-        #     config, 
-        #     capture_layer)
-        initialize_binding_dataset(capture_layer)
-        
+    # for capture_layer in range(4):
+    #     # construct_binding_id_dataset(
+    #     #     config, 
+    #     #     capture_layer)
+    #     # initialize_binding_dataset(capture_layer)
+    #     train_binary_probe(
+    #         capture_layer=capture_layer,
+    #         project="acc-binding-id",
+    #         num_epochs=1,
+    #     )
 
-    # train_binding_classifier_single_chunk(
-    #     dataset_name=dataset_name, 
-    #     capture_layer=capture_layer, 
-    #     chunk_id=0,
-    #     model_name=model_name, 
-    #     val_size=0.05,
-    #     test_size=0.05,
-    #     input_dim=128, 
-    #     num_epochs=100, 
-    #     batch_size=32, 
-    #     lr=0.001, 
-    #     patience=10
+    capture_layer = 0
+    initialize_binding_dataset(capture_layer)
+    print("Finished initializing dataset")
+    train_binary_probe(
+        capture_layer=capture_layer,
+        project="acc-binding-id",
+        num_epochs=1
+    )
+
+    # capture_layer = 1
+    # initialize_binding_dataset(capture_layer)
+    # train_binary_probe(
+    #     capture_layer=capture_layer,
+    #     project="acc-binding-id",
     # )
 
-        
-    # construct_binding_id_dataset(
-    #     config=config, 
-    #     capture_layer=0)
-    
-    # config = GPTConfig44_Com
-    # plete()
-    # project = "Attribute From Last Attribute"
-    # run_layer_probe_similarity_analysis(
-    #     project=project,
-    #     layers=range(4),
-    #     attributes=[6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11],
-    #     tokenizer_path=config.tokenizer_path
+    # capture_layer = 2
+    # initialize_binding_dataset(capture_layer)
+    # train_binary_probe(
+    #     capture_layer=capture_layer,
+    #     project="acc-binding-id",
+    # )
+
+    # capture_layer = 3
+    # initialize_binding_dataset(capture_layer)
+    # train_binary_probe(
+    #     capture_layer=capture_layer,
+    #     project="acc-binding-id",
     # )
