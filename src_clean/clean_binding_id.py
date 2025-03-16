@@ -102,95 +102,6 @@ def construct_binding_id_dataset(config, capture_layer):
                     print("Returning")
                     return
 
-def train_binding_classifier(dataset_name, capture_layer, model_name, input_dim=128, num_epochs=100, batch_size=32, lr=0.001, patience=10):
-    """Train a binary classifier for binding identification using randomly selected chunks."""
-    wandb.init(
-        project="binding-id-classifier", 
-        config={"epochs": num_epochs, "batch_size": batch_size, "lr": lr, "patience": patience},
-        name=model_name
-    )
-    
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    base_dir = f"{PATH_PREFIX}/binding_id/{dataset_name}/layer{capture_layer}"
-    
-    # Setup data splits
-    num_chunks = torch.load(os.path.join(base_dir, "metadata.pt"))['num_chunks']
-    split_info = select_chunks(num_chunks)
-    torch.save(split_info, os.path.join(base_dir, f"{model_name}_split_info.pt"))
-    
-    # Load validation and test sets
-    X_val, y_val = load_and_combine_chunks(base_dir, split_info['val_chunks'], device)
-    X_test, y_test = load_and_combine_chunks(base_dir, split_info['test_chunks'], device)
-    
-    # Initialize model and training components
-    model = nn.Sequential(nn.Linear(input_dim, 1), nn.Sigmoid()).to(device)
-    criterion = nn.BCELoss()
-    optimizer = optim.Adam(model.parameters(), lr=lr)
-    
-    best_val_loss = float('inf')
-    counter = 0
-    
-    for epoch in range(num_epochs):
-        # Training phase
-        model.train()
-        train_chunks = random.sample(split_info['train_chunks'], len(split_info['train_chunks']))
-        total_train_loss = 0
-        total_samples = 0
-        
-        for index, chunk_idx in enumerate(train_chunks):
-            print(f"Training chunk {index}/{len(train_chunks)} with id {chunk_idx}")
-            chunk = {
-                'X_path': os.path.join(base_dir, f"X_chunk_{chunk_idx}.pt"),
-                'y_path': os.path.join(base_dir, f"y_chunk_{chunk_idx}.pt")
-            }
-            loss, samples = process_chunk(model, chunk, device, criterion, optimizer, batch_size)
-            total_train_loss += loss
-            total_samples += samples
-        
-        avg_train_loss = total_train_loss / total_samples
-        
-        # Validation phase
-        model.eval()
-        with torch.no_grad():
-            val_outputs = model(X_val).squeeze()
-            val_loss = criterion(val_outputs, y_val.float())
-            val_acc = ((val_outputs > 0.5).float() == y_val.float()).float().mean()
-        
-        # Logging
-        print(f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {avg_train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}")
-        wandb.log({
-            'epoch': epoch,
-            'train_loss': avg_train_loss,
-            'val_loss': val_loss.item(),
-            'val_acc': val_acc.item()
-        })
-        
-        # Early stopping
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            counter = 0
-            torch.save({
-                'model_state_dict': model.state_dict(),
-                'split_info': split_info,
-                'epoch': epoch,
-                'val_loss': val_loss,
-                'val_acc': val_acc
-            }, f'{PATH_PREFIX}/binding_id/{model_name}_best.pt')
-        else:
-            counter += 1
-            if counter >= patience:
-                print(f"Early stopping triggered after {epoch + 1} epochs")
-                break
-    
-    # Final evaluation
-    test_acc = get_binding_classifier_accuracy(X_test, y_test, f'{PATH_PREFIX}/binding_id/{model_name}_best.pt', input_dim)
-    wandb.log({'test_accuracy': test_acc})
-    wandb.finish()
-    
-    return model
-
-
-
 from torch.utils.data import Dataset, DataLoader
 
 class BalancedBindingDataset(Dataset):
@@ -226,19 +137,24 @@ class BalancedBindingDataset(Dataset):
         return data, torch.tensor(label, dtype=torch.float32)
 
 
-def initialize_binding_dataset(X, y, val_size, test_size, batch_size):
+def initialize_binding_dataset(capture_layer, val_size=0.05, test_size=0.05, batch_size=32):
     # Combine X and y into a single dataset
+    base_dir = f"{PATH_PREFIX}/src_clean/binding_id/44_complete/layer{capture_layer}"
+    X = torch.load(os.path.join(base_dir, "X.pt"))
+    y = torch.load(os.path.join(base_dir, "y.pt"))
+
     full_dataset = TensorDataset(X, y)
 
     # Split the combined dataset into training, validation, and test sets
     train_size = int((1-val_size-test_size) * len(full_dataset)) 
     val_size = int(val_size * len(full_dataset))  # 15% for validation
     test_size = len(full_dataset) - train_size - val_size  # Remainder for test
+    # print(f"Train size: {train_size}, Val size: {val_size}, Test size: {test_size}")
 
     train_dataset, val_dataset, test_dataset = random_split(
         full_dataset,
         [train_size, val_size, test_size],
-        generator=torch.Generator().manual_seed(42)  # Ensures reproducibility
+        generator=torch.Generator().manual_seed(42) 
     )
 
     # Separate training data into class 0 and class 1
@@ -276,220 +192,196 @@ def initialize_binding_dataset(X, y, val_size, test_size, batch_size):
     val_loader = DataLoader(balanced_val_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(balanced_test_dataset, batch_size=batch_size, shuffle=False)
 
+    breakpoint()
+
+    torch.save({
+        "train_loader": train_loader,
+        "val_loader": val_loader,
+        "test_loader": test_loader
+    }, os.path.join(base_dir, "balanced_dataloader.pt"))
+    
     return train_loader, val_loader, test_loader
 
+class BinaryProbe(nn.Module):
+    def __init__(self, embedding_dim=64):
+        super().__init__()
+        self.linear = nn.Linear(embedding_dim, 1)
+        self.sigmoid = nn.Sigmoid()
+    
+    def forward(self, x):
+        # x shape: (batch_size, embedding_dim)
+        logits = self.linear(x)
+        probs = self.sigmoid(logits)
+        return probs
+    
+    def predict(self, x, threshold=0.5):
+        # Returns binary predictions (0 or 1)
+        probs = self.forward(x)
+        return (probs >= threshold).float()
+    
+    def compute_loss(self, outputs, targets):
+        # Binary cross entropy loss
+        return nn.functional.binary_cross_entropy(outputs, targets)
 
-def train_binding_classifier_single_chunk(
-    dataset_name, 
-    capture_layer, 
-    chunk_id,
-    model_name, 
-    val_size=0.05,
-    test_size=0.05,
-    input_dim=128, 
-    num_epochs=100, 
-    batch_size=32, 
-    lr=0.001, 
-    patience=10
-):
-    """Train a binary classifier using a single chunk split into train/val/test sets."""
+def load_binary_dataloader(capture_layer):
+    base_dir = f"{PATH_PREFIX}/src_clean/binding_id/44_complete/layer{capture_layer}"
+    saved_data = torch.load(dataset_save_path)
+    return saved_data['train_loader'], saved_data['val_loader']
+
+def train_binary_probe(
+    capture_layer,
+    attribute_id,
+    project,
+    embedding_dim=64,
+    batch_size=32,
+    learning_rate=1e-3,
+    num_epochs=100,
+    patience=10,
+    val_split=0.2,
+    device='cuda' if torch.cuda.is_available() else 'cpu'
+): 
+    # Load the binary dataset
+    train_loader, val_loader = load_binary_dataloader(attribute_id, capture_layer, project)
+
+    # Initialize model, optimizer, and move to device
+    model = BinaryProbe(embedding_dim=embedding_dim).to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    
+    # Initialize wandb
     wandb.init(
-        project="binding-id-classifier", 
+        project=project,
         config={
-            "epochs": num_epochs,
+            "learning_rate": learning_rate,
             "batch_size": batch_size,
-            "lr": lr,
-            "patience": patience,
-            "chunk_id": chunk_id,
-            "val_size": val_size,
-            "test_size": test_size
+            "embedding_dim": embedding_dim,
+            "capture_layer": capture_layer,
+            "attribute_id": attribute_id,
+            "val_split": val_split
         },
-        name=f"{model_name}_chunk{chunk_id}"
+        name=f"attr_{attribute_id}_layer{capture_layer}"
     )
     
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    base_dir = f"{PATH_PREFIX}/binding_id/{dataset_name}/layer{capture_layer}"
-    
-    # Load the single chunk
-    X = torch.load(os.path.join(base_dir, f"X_chunk_{chunk_id}.pt")).to(device)
-    y = torch.load(os.path.join(base_dir, f"y_chunk_{chunk_id}.pt")).to(device)
-    
-    # X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y, val_size, test_size)  
-    
-    # print(f"Split sizes - Train: {len(X_train)}, Val: {len(X_val)}, Test: {len(X_test)}")
-    
-    # print("Class distribution:")
-    # print(f"Train - Class 0: {(y_train == 0).sum()/len(y_train):.3f}, Class 1: {(y_train == 1).sum()/len(y_train):.3f}")
-    # print(f"Val   - Class 0: {(y_val == 0).sum()/len(y_val):.3f}, Class 1: {(y_val == 1).sum()/len(y_val):.3f}")
-    # print(f"Test  - Class 0: {(y_test == 0).sum()/len(y_test):.3f}, Class 1: {(y_test == 1).sum()/len(y_test):.3f}")
-
-#     # pos_weight = torch.tensor([(y_train == 0).sum() / (y_train == 1).sum()]).to(device)
-#     pos_weight = torch.sqrt(torch.tensor([(y_train == 0).sum() / (y_train == 1).sum()])).to(device)
-# # This would give ~2.3 instead of 5.3
-#     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-
-    # Try below next
-    # weights = torch.FloatTensor([1 if label == 0 else (y_train == 0).sum()/(y_train == 1).sum() for label in y_train])
-    # sampler = torch.utils.data.WeightedRandomSampler(weights, len(weights))
-
-    # train_loader = torch.utils.data.DataLoader(
-    #     train_dataset, 
-    #     batch_size=batch_size,
-    #     sampler=sampler  # Use sampler instead of shuffle=True
-    # )
-
-    # Initialize model and training components
-    # model = nn.Sequential(nn.Linear(input_dim, 1)).to(device)
-    model = nn.Sequential(nn.Linear(input_dim, 1), nn.Sigmoid()).to(device)
-    criterion = nn.BCELoss()
-    optimizer = optim.Adam(model.parameters(), lr=lr)
-    
+    # Early stopping variables
     best_val_loss = float('inf')
-    counter = 0
+    patience_counter = 0
+    best_model_state = None
     
-    # # Create DataLoader for training data
-    # train_dataset = torch.utils.data.TensorDataset(X_train, y_train)
-    # train_loader = torch.utils.data.DataLoader(
-    #     train_dataset, 
-    #     batch_size=batch_size,
-    #     shuffle=True
-    # )
-
-    # # Separate data for class 0 and class 1
-    # class_0_data = X_train[(y_train == 0).nonzero(as_tuple=True)[0]]
-    # class_1_data = X_train[(y_train == 1).nonzero(as_tuple=True)[0]]
-
-    # # Create the balanced dataset
-    # balanced_dataset = BalancedBindingDataset(class_0_data, class_1_data)
-
-    # # Create DataLoader for the balanced dataset
-    # train_loader = DataLoader(balanced_dataset, batch_size=batch_size, shuffle=True)
-
-    train_loader, val_loader, test_loader = initialize_binding_dataset(X, y, val_size, test_size, batch_size)
-    
+    # Training loop
     for epoch in range(num_epochs):
         # Training phase
         model.train()
-       
-        total_train_loss = 0
-        total_samples = 0
+        train_loss = 0
+        train_correct = 0
+        train_total = 0
         
-        for batch_X, batch_y in train_loader:
-            batch_X, batch_y = batch_X.to(device), batch_y.to(device)
+        for batch_embeddings, batch_targets in train_loader:
+            batch_embeddings = batch_embeddings.to(device)
+            batch_targets = batch_targets.to(device)
+            
+            # Forward pass
+            outputs = model(batch_embeddings).squeeze()
+            loss = model.compute_loss(outputs, batch_targets)
+            
+            # Backward pass
             optimizer.zero_grad()
-            outputs = model(batch_X).squeeze()
-            loss = criterion(outputs, batch_y.float())
             loss.backward()
             optimizer.step()
             
-            total_train_loss += loss.item() * len(batch_X)
-            total_samples += len(batch_X)
-        avg_train_loss = total_train_loss / total_samples
+            # Calculate accuracy
+            predictions = model.predict(batch_embeddings).squeeze()
+            train_correct += (predictions == batch_targets).sum().item()
+            train_total += batch_targets.size(0)
+            train_loss += loss.item()
         
         # Validation phase
         model.eval()
-        total_val_loss = 0
-        avg_val_loss = 0
-
-        with torch.no_grad():
-            total_val_loss = 0
-            correct_predictions = 0
-            total_predictions = 0
-            
-            for X_val, y_val in val_loader:
-                X_val, y_val = X_val.to(device), y_val.to(device)
-                outputs = model(X_val).squeeze()  # Get model predictions (probabilities)
-                
-                # Compute the loss
-                val_loss = criterion(outputs, y_val.float())
-                total_val_loss += val_loss.item() * len(X_val)
-                
-                # Convert outputs to binary predictions (0 or 1)
-                predicted = (outputs >= 0.5).float()  # Apply 0.5 threshold
-                
-                # Count the number of correct predictions
-                correct_predictions += (predicted == y_val).sum().item()
-                total_predictions += len(y_val)
-            
-            # Calculate average validation loss
-            avg_val_loss = total_val_loss / len(val_loader.dataset)
-            
-            # Calculate validation accuracy
-            val_accuracy = correct_predictions / total_predictions * 100  # As percentage
-            
-            print(f"Validation Loss: {avg_val_loss:.4f}")
-            print(f"Validation Accuracy: {val_accuracy:.2f}%")
+        val_loss = 0
+        val_correct = 0
+        val_total = 0
         
-        # Logging
-        print(f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {avg_train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {val_accuracy:.4f}")
+        with torch.no_grad():
+            for batch_embeddings, batch_targets in val_loader:
+                batch_embeddings = batch_embeddings.to(device)
+                batch_targets = batch_targets.to(device)
+                
+                outputs = model(batch_embeddings).squeeze()
+                loss = model.compute_loss(outputs, batch_targets)
+                
+                predictions = model.predict(batch_embeddings).squeeze()
+                val_correct += (predictions == batch_targets).sum().item()
+                val_total += batch_targets.size(0)
+                val_loss += loss.item()
+        
+        # Calculate average losses and accuracies
+        avg_train_loss = train_loss / len(train_loader)
+        avg_val_loss = val_loss / len(val_loader)
+        train_accuracy = train_correct / train_total
+        val_accuracy = val_correct / val_total
+        
+        # Log metrics
         wandb.log({
-            'epoch': epoch,
-            'train_loss': avg_train_loss,
-            'val_loss': val_loss.item(),
-            'val_acc': val_accuracy
+            "epoch": epoch,
+            "train_loss": avg_train_loss,
+            "val_loss": avg_val_loss,
+            "train_accuracy": train_accuracy,
+            "val_accuracy": val_accuracy
         })
         
-        # Early stopping
+        print(f"Epoch {epoch+1}/{num_epochs}")
+        print(f"Train Loss: {avg_train_loss:.4f}, Train Accuracy: {train_accuracy:.4f}")
+        print(f"Val Loss: {avg_val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}")
+        
+        # Early stopping check
         if avg_val_loss < best_val_loss:
-            best_val_loss = val_loss
-            counter = 0
-            model_path = f'{PATH_PREFIX}/binding_id/{model_name}_chunk{chunk_id}_best.pt'
-            torch.save({
-                'model': model.state_dict(),
-                'epoch': epoch,
-                'val_loss': val_loss,
-                'val_acc': val_accuracy,
-                'chunk_id': chunk_id,
-                'split_sizes': {
-                    'val': val_size,
-                    'test': test_size
-                }
-            }, model_path)
+            best_val_loss = avg_val_loss
+            patience_counter = 0
+            best_model_state = model.state_dict()
         else:
-            counter += 1
-            if counter >= patience:
-                print(f"Early stopping triggered after {epoch + 1} epochs")
+            patience_counter += 1
+            if patience_counter >= patience:
+                print(f"Early stopping triggered after {epoch+1} epochs")
                 break
     
-    # Final evaluation
-    # test_acc = get_binding_classifier_accuracy(X_test, y_test, model_path, input_dim)
-    # wandb.log({'test_accuracy': test_acc})
+    # Save the best model
+    model.load_state_dict(best_model_state)
+
+    torch.save(model.state_dict(), 
+               f"{PATH_PREFIX}/{project}/layer{capture_layer}/attr_{attribute_id}/binary_probe_model.pt")
     wandb.finish()
-    
     return model
 
 
 
-def get_binding_classifier_accuracy(X, y, model_path, input_dim=128):
-    """Test a trained binding classifier model."""
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# def get_binding_classifier_accuracy(X, y, model_path, input_dim=128):
+#     """Test a trained binding classifier model."""
+#     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    # Initialize the same model architecture
-    model = nn.Sequential(
-        nn.Linear(input_dim, 1)
-    ).to(device)
+#     # Initialize the same model architecture
+#     model = nn.Sequential(
+#         nn.Linear(input_dim, 1)
+#     ).to(device)
     
-    # Load the best model weights
-    checkpoint = torch.load(model_path, weights_only=False)
-    model.load_state_dict(checkpoint["model"])
+#     # Load the best model weights
+#     checkpoint = torch.load(model_path, weights_only=False)
+#     model.load_state_dict(checkpoint["model"])
     
-    if not X.is_cuda and device.type == "cuda":
-        X = X.to(device)
+#     if not X.is_cuda and device.type == "cuda":
+#         X = X.to(device)
 
-    if not y.is_cuda and device.type == "cuda":
-        y = y.to(device)
+#     if not y.is_cuda and device.type == "cuda":
+#         y = y.to(device)
 
-    # Evaluation
-    model.eval()
-    with torch.no_grad():
-        outputs = model(X).squeeze()
-        # preds = (torch.sigmoid(outputs) > 0.5).float()  # Added sigmoid here
-        preds = (outputs > 0.5).float()  # Added sigmoid here
-        acc = (preds == y.float()).float().mean()
+#     # Evaluation
+#     model.eval()
+#     with torch.no_grad():
+#         outputs = model(X).squeeze()
+#         # preds = (torch.sigmoid(outputs) > 0.5).float()  # Added sigmoid here
+#         preds = (outputs > 0.5).float()  # Added sigmoid here
+#         acc = (preds == y.float()).float().mean()
         
-    print(f"Accuracy: {acc.item()*100:.2f}%")
+#     print(f"Accuracy: {acc.item()*100:.2f}%")
     
-    return acc.item()
+#     return acc.item()
 
 if __name__ == "__main__":
     seed = 42
@@ -500,9 +392,27 @@ if __name__ == "__main__":
     config = GPTConfig44_Complete()
 
     for capture_layer in range(4):
-        construct_binding_id_dataset(
-            config, 
-            capture_layer)
+        # construct_binding_id_dataset(
+        #     config, 
+        #     capture_layer)
+        initialize_binding_dataset(capture_layer)
+        
+
+    # train_binding_classifier_single_chunk(
+    #     dataset_name=dataset_name, 
+    #     capture_layer=capture_layer, 
+    #     chunk_id=0,
+    #     model_name=model_name, 
+    #     val_size=0.05,
+    #     test_size=0.05,
+    #     input_dim=128, 
+    #     num_epochs=100, 
+    #     batch_size=32, 
+    #     lr=0.001, 
+    #     patience=10
+    # )
+
+        
     # construct_binding_id_dataset(
     #     config=config, 
     #     capture_layer=0)
