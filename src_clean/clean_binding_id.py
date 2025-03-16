@@ -256,7 +256,7 @@ def load_binary_dataloader(capture_layer, batch_size):
 def train_binary_probe(
     capture_layer,
     project,
-    embedding_dim=64,
+    embedding_dim=128,
     batch_size=32,
     learning_rate=1e-3,
     num_epochs=100,
@@ -315,6 +315,7 @@ def train_binary_probe(
             train_correct += (predictions == batch_targets).sum().item()
             train_total += batch_targets.size(0)
             train_loss += loss.item()
+            break
         
         # Validation phase
         model.eval()
@@ -334,6 +335,7 @@ def train_binary_probe(
                 val_correct += (predictions == batch_targets).sum().item()
                 val_total += batch_targets.size(0)
                 val_loss += loss.item()
+                break
         
         # Calculate average losses and accuracies
         avg_train_loss = train_loss / len(train_loader)
@@ -364,6 +366,7 @@ def train_binary_probe(
             if patience_counter >= patience:
                 print(f"Early stopping triggered after {epoch+1} epochs")
                 break
+        break
     
     # Save the best model
     model.load_state_dict(best_model_state)
@@ -427,7 +430,7 @@ if __name__ == "__main__":
     #     )
 
     capture_layer = 0
-    initialize_binding_dataset(capture_layer)
+    # initialize_binding_dataset(capture_layer)
     print("Finished initializing dataset")
     train_binary_probe(
         capture_layer=capture_layer,
