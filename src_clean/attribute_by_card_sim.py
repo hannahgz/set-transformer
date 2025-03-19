@@ -27,14 +27,14 @@ def load_model_from_config(config, device=True):
     model.eval()
     return model
 
-def compute_card_attribute_embedding_similarities(model_config, capture_layer, batch_limit=None):
+def compute_card_attribute_embedding_similarities(model_config, capture_layer, batch_limit=None, use_global_centroid=False):
     """
     Computes average cosine similarities between attribute embeddings grouped by their corresponding cards.
     
     Args:
         model_config: Configuration for the model
         capture_layer: Which layer to extract embeddings from
-        batch_limit: Optional limit on number of batches to process
+        batch_limit: Optional limit on number of batches to processf
     
     Returns:
         similarity_matrix: NxN matrix where N is the number of unique cards
@@ -48,6 +48,7 @@ def compute_card_attribute_embedding_similarities(model_config, capture_layer, b
     
     # Dictionary to store attribute embeddings for each card
     card_embeddings_dict = {}
+    all_embeddings = []
     
     # Load dataset
     dataset = torch.load(model_config.dataset_path)
@@ -82,13 +83,22 @@ def compute_card_attribute_embedding_similarities(model_config, capture_layer, b
                 if card_text not in card_embeddings_dict:
                     card_embeddings_dict[card_text] = []
                 card_embeddings_dict[card_text].append(attr_embedding)
+                if use_global_centroid:
+                    all_embeddings.append(attr_embedding)
 
                 # breakpoint()
     
+    if use_global_centroid:
+        all_embeddings = np.vstack(all_embeddings)
+        global_centroid = np.mean(all_embeddings, axis=0)
+        print(f"Global centroid shape: {global_centroid.shape}")
+
     # Convert lists of embeddings to arrays
     for card in card_embeddings_dict:
         if card_embeddings_dict[card]:
             card_embeddings_dict[card] = np.vstack(card_embeddings_dict[card])
+            if use_global_centroid:
+                card_embeddings_dict[card] -= global_centroid
     
     # Sort cards for consistent ordering (usually A, B, C, D, E)
     sorted_cards = sorted(card_embeddings_dict.keys())
@@ -151,7 +161,7 @@ def plot_card_attribute_similarity_matrix(similarity_matrix, card_labels, captur
     plt.tight_layout()
     return plt.gcf()
 
-def analyze_card_attribute_embeddings(model_config, capture_layer):
+def analyze_card_attribute_embeddings(model_config, capture_layer, use_global_centroid=False):
     """
     Complete analysis pipeline that computes similarities and generates visualization.
     
@@ -164,7 +174,8 @@ def analyze_card_attribute_embeddings(model_config, capture_layer):
     """
     similarity_matrix, card_embeddings_dict, card_labels = compute_card_attribute_embedding_similarities(
         model_config, 
-        capture_layer
+        capture_layer,
+        use_global_centroid=use_global_centroid
     )
     
     fig = plot_card_attribute_similarity_matrix(
@@ -174,16 +185,28 @@ def analyze_card_attribute_embeddings(model_config, capture_layer):
     )
     
     # Save results
-    output_dir = f"{PATH_PREFIX}/complete/attribute_similarity"
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Save matrix for future reference
-    np.save(f"{output_dir}/attr_similarity_matrix_layer{capture_layer}.npy", similarity_matrix)
-    
-    fig_dir = f"COMPLETE_FIGS/attribute_similarity"
-    os.makedirs(fig_dir, exist_ok=True)
-    # Save figure
-    fig.savefig(f"{fig_dir}/attr_similarity_heatmap_layer{capture_layer}.png", bbox_inches="tight")
+    if not use_global_centroid:
+        output_dir = f"{PATH_PREFIX}/complete/attribute_similarity"
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Save matrix for future reference
+        np.save(f"{output_dir}/attr_similarity_matrix_layer{capture_layer}.npy", similarity_matrix)
+        
+        fig_dir = f"COMPLETE_FIGS/attribute_similarity"
+        os.makedirs(fig_dir, exist_ok=True)
+        # Save figure
+        fig.savefig(f"{fig_dir}/attr_similarity_heatmap_layer{capture_layer}.png", bbox_inches="tight")
+    else:
+        output_dir = f"{PATH_PREFIX}/complete/attribute_similarity_global_centroid"
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Save matrix for future reference
+        np.save(f"{output_dir}/attr_similarity_matrix_layer{capture_layer}.npy", similarity_matrix)
+        
+        fig_dir = f"COMPLETE_FIGS/attribute_similarity_global_centroid"
+        os.makedirs(fig_dir, exist_ok=True)
+        # Save figure
+        fig.savefig(f"{fig_dir}/attr_similarity_heatmap_layer{capture_layer}.png", bbox_inches="tight")
     
     # Additional analysis: Print stats on number of embeddings collected per card
     print("\nAttribute embeddings collected per card:")
@@ -204,10 +227,12 @@ if __name__ == "__main__":
 
     analyze_card_attribute_embeddings(
         model_config=config,
-        capture_layer=1
+        capture_layer=1,
+        use_global_centroid=True
     )
 
     analyze_card_attribute_embeddings(
         model_config=config,
-        capture_layer=0
+        capture_layer=0,
+        use_global_centroid=True
     )
