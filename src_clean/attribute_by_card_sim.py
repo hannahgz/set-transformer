@@ -180,8 +180,10 @@ def analyze_card_attribute_embeddings(model_config, capture_layer):
     # Save matrix for future reference
     np.save(f"{output_dir}/attr_similarity_matrix_layer{capture_layer}.npy", similarity_matrix)
     
+    fig_dir = f"COMPLETE_FIGS/attribute_similarity"
+    os.makedirs(fig_dir, exist_ok=True)
     # Save figure
-    fig.savefig(f"{output_dir}/attr_similarity_heatmap_layer{capture_layer}.png", bbox_inches="tight")
+    fig.savefig(f"{fig_dir}/attr_similarity_heatmap_layer{capture_layer}.png", bbox_inches="tight")
     
     # Additional analysis: Print stats on number of embeddings collected per card
     print("\nAttribute embeddings collected per card:")
@@ -201,11 +203,11 @@ if __name__ == "__main__":
     config = GPTConfig44_Complete()
 
     analyze_card_attribute_embeddings(
-        config=config,
+        model_config=config,
         capture_layer=1
     )
 
     analyze_card_attribute_embeddings(
-        config=config,
+        model_config=config,
         capture_layer=0
     )
