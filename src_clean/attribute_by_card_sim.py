@@ -225,14 +225,25 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
 
+    # analyze_card_attribute_embeddings(
+    #     model_config=config,
+    #     capture_layer=1,
+    #     use_global_centroid=True
+    # )
+
+    # analyze_card_attribute_embeddings(
+    #     model_config=config,
+    #     capture_layer=0,
+    #     use_global_centroid=True
+    # )
+
     analyze_card_attribute_embeddings(
         model_config=config,
-        capture_layer=1,
-        use_global_centroid=True
+        capture_layer=2,
     )
 
     analyze_card_attribute_embeddings(
         model_config=config,
-        capture_layer=0,
+        capture_layer=2,
         use_global_centroid=True
     )
