@@ -237,13 +237,24 @@ if __name__ == "__main__":
     #     use_global_centroid=True
     # )
 
+    # analyze_card_attribute_embeddings(
+    #     model_config=config,
+    #     capture_layer=2,
+    # )
+
+    # analyze_card_attribute_embeddings(
+    #     model_config=config,
+    #     capture_layer=2,
+    #     use_global_centroid=True
+    # )
+
     analyze_card_attribute_embeddings(
         model_config=config,
-        capture_layer=2,
+        capture_layer=3,
     )
 
     analyze_card_attribute_embeddings(
         model_config=config,
-        capture_layer=2,
+        capture_layer=3,
         use_global_centroid=True
     )
