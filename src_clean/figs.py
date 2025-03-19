@@ -536,7 +536,8 @@ def create_final_test_accuracy_chart(data, output_path="final_test_accuracy_char
 
     # Adjust x-axis labels to show actual layer numbers (0, 1, 2, 3)
     num_layers = len(df['Layer'].unique())
-    plt.xticks(range(num_layers), sorted(df['Layer'].unique()))
+    # plt.xticks(range(num_layers), sorted(df['Layer'].unique()))
+    plt.xticks(range(num_layers), [layer + 1 for layer in sorted(df['Layer'].unique())])
     ax.tick_params(axis='y', which='both', length=5, width=1)
     plt.tick_params(axis='y', which='both', left=True, right=False)
 
@@ -976,9 +977,9 @@ if __name__ == "__main__":
     #     )
 
     # run_probe_weight_loss_fig()
-    # create_test_accuracy_visualization()
+    create_test_accuracy_visualization()
 
-    embedding_ablation_kl_fig()
+    # embedding_ablation_kl_fig()
     # avg_combined_cosine_similarity_probe_embedding_heatmap()
     # combined_probe_weight_cosine_sim(
     #     GPTConfig44_Complete(),
