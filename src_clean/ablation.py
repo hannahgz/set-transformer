@@ -447,7 +447,7 @@ def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ab
         kl_matrix, annot=True, fmt=".1f", cmap="viridis",
         xticklabels=positions_to_ablate, yticklabels=layers_to_ablate,
         cbar_kws={'label': 'KL Divergence', 'pad': 0.02},  # Reduced padding between heatmap and colorbar
-        annot_kws={"fontsize": 16}
+        annot_kws={"fontsize": 18}
     )
 
     # Customize colorbar font size
@@ -455,7 +455,7 @@ def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ab
     # Customize colorbar
     cbar = heatmap.collections[0].colorbar
     cbar.set_label('KL Divergence', fontsize=18)  # Set colorbar label font size
-    cbar.ax.tick_params(labelsize=16)  # Set font size for colorbar tick labels
+    cbar.ax.tick_params(labelsize=18)  # Set font size for colorbar tick labels
     
     # Set font sizes for labels, ticks, and title
     plt.xlabel('Sequence Position', fontsize=18)
@@ -466,9 +466,9 @@ def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ab
     # # Add padding between y-label and y-axis
     # plt.gca().yaxis.set_label_coords(-0.06, 0.5)
     
-    plt.xticks(fontsize=14)
-    plt.yticks(fontsize=14, rotation=0)
-    plt.title('Impact of Embedding Ablation (KL Divergence)', fontsize=20)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18, rotation=0)
+    plt.title('Impact of Embedding Ablation (KL Divergence)', fontsize=24)
     
     # Use tight_layout with specific padding settings
     plt.tight_layout(pad=1.1, w_pad=0.5, h_pad=0.5)
