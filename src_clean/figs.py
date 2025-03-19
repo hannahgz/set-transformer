@@ -949,7 +949,7 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    plot_orig_set_model_loss()
+    # plot_orig_set_model_loss()
 
     # attr_from_last_attr_dataset_size()
     # sns.set_style("white")
@@ -978,7 +978,7 @@ if __name__ == "__main__":
     # run_probe_weight_loss_fig()
     # create_test_accuracy_visualization()
 
-    # embedding_ablation_kl_fig()
+    embedding_ablation_kl_fig()
     # avg_combined_cosine_similarity_probe_embedding_heatmap()
     # combined_probe_weight_cosine_sim(
     #     GPTConfig44_Complete(),
