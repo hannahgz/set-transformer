@@ -444,10 +444,10 @@ def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ab
     
     # Generate heatmap with tighter colorbar spacing
     heatmap = sns.heatmap(
-        kl_matrix, annot=True, fmt=".2f", cmap="viridis",
+        kl_matrix, annot=True, fmt=".1f", cmap="viridis",
         xticklabels=positions_to_ablate, yticklabels=layers_to_ablate,
         cbar_kws={'label': 'KL Divergence', 'pad': 0.02},  # Reduced padding between heatmap and colorbar
-        annot_kws={"fontsize": 14}
+        annot_kws={"fontsize": 16}
     )
 
     # Customize colorbar font size
@@ -455,7 +455,7 @@ def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ab
     # Customize colorbar
     cbar = heatmap.collections[0].colorbar
     cbar.set_label('KL Divergence', fontsize=18)  # Set colorbar label font size
-    cbar.ax.tick_params(labelsize=14)  # Set font size for colorbar tick labels
+    cbar.ax.tick_params(labelsize=16)  # Set font size for colorbar tick labels
     
     # Set font sizes for labels, ticks, and title
     plt.xlabel('Sequence Position', fontsize=18)
