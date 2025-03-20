@@ -606,26 +606,112 @@ def init_card_attr_binding_dataset(config, capture_layer, pred_card_from_attr=Tr
     return combined_input_embeddings, mapped_target_tokens, continuous_to_original
 
 
-def plot_weights_as_heatmap(weights, savefig_path=None):
-    """
-    Visualizes the weight matrix for a single layer as a heatmap.
+# def plot_weights_as_heatmap(weights, savefig_path=None):
+#     """
+#     Visualizes the weight matrix for a single layer as a heatmap.
 
-    Parameters:
-    weights (torch.Tensor): The weight matrix of shape [output_dim, input_dim].
+#     Parameters:
+#     weights (torch.Tensor): The weight matrix of shape [output_dim, input_dim].
+#     """
+#     plt.figure(figsize=(12, 4))  # Adjust the aspect ratio to fit the wide matrix
+#     sns.heatmap(weights.numpy(), annot=False,
+#                 cmap='coolwarm', cbar=True, center=0)
+#     plt.title("Weight Matrix Heatmap")
+#     plt.xlabel("Input Features (64)")
+#     plt.ylabel("Output Dimensions (5)")
+#     plt.xticks(ticks=range(0, weights.size(1)), labels=range(
+#         0, weights.size(1)), fontsize=5, ha="center")  # Tick every 8th input
+#     plt.yticks(ticks=range(weights.size(0)), labels=[
+#                f"{i}" for i in range(weights.size(0))], rotation=0, ha="center")
+#     if savefig_path:
+#         plt.savefig(savefig_path, bbox_inches="tight")
+#     plt.show()
+
+def plot_probe_weights_heatmap(model_config, probe_config, capture_layer, save_path=None):
     """
-    plt.figure(figsize=(12, 4))  # Adjust the aspect ratio to fit the wide matrix
-    sns.heatmap(weights.numpy(), annot=False,
-                cmap='coolwarm', cbar=True, center=0)
-    plt.title("Weight Matrix Heatmap")
-    plt.xlabel("Input Features (64)")
-    plt.ylabel("Output Dimensions (5)")
-    plt.xticks(ticks=range(0, weights.size(1)), labels=range(
-        0, weights.size(1)), fontsize=5, ha="center")  # Tick every 8th input
-    plt.yticks(ticks=range(weights.size(0)), labels=[
-               f"{i}" for i in range(weights.size(0))], rotation=0, ha="center")
-    if savefig_path:
-        plt.savefig(savefig_path, bbox_inches="tight")
-    plt.show()
+    Plots a heatmap of the linear probe weights for a specific layer.
+    
+    Parameters:
+    -----------
+    model_config : object
+        Configuration object containing model parameters.
+    probe_config : object
+        Configuration object for the linear probe.
+    capture_layer : int
+        The layer number to load the probe from.
+    save_path : str, optional
+        Path to save the figure. If None, the figure won't be saved.
+        
+    Returns:
+    --------
+    fig : matplotlib.figure.Figure
+        The figure containing the heatmap.
+    """
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import numpy as np
+    
+    # Load the continuous_to_original mapping and tokenizer
+    continuous_to_original = load_continuous_to_original_from_config(
+        probe_config, capture_layer=capture_layer)
+    tokenizer = load_tokenizer(model_config.tokenizer_path)
+    
+    # Get card labels
+    cards = []
+    for i in range(probe_config.output_dim):
+        cards.append(tokenizer.decode([continuous_to_original[i]])[0])
+    
+    # Sort cards alphabetically for better visualization
+    sorted_indices = sorted(range(len(cards)), key=lambda k: cards[k])
+    sorted_cards = [cards[i] for i in sorted_indices]
+    
+    # Load probe and get weights
+    probe = load_linear_probe_from_config(probe_config, capture_layer)
+    probe_weights = probe.fc.weight.data.detach()  # Shape: [output_dim, input_dim]
+    
+    # Sort the weights according to the sorted cards
+    sorted_weights = probe_weights[sorted_indices]
+    
+    # Create figure and axis
+    fig, ax = plt.subplots(figsize=(14, 6))
+    
+    # Create heatmap
+    sns.heatmap(
+        sorted_weights,
+        cmap='coolwarm',
+        center=0,
+        cbar=True,
+        cbar_kws={'label': 'Weight Value'},
+        ax=ax
+    )
+    
+    # Set labels and title
+    ax.set_ylabel('Card Token')
+    ax.set_xlabel('Hidden Dimension Index')
+    ax.set_title(f'Layer {capture_layer}: Linear Probe Weight Matrix')
+    
+    # Set y-tick labels to the sorted card names
+    ax.set_yticks(np.arange(len(sorted_cards)) + 0.5)
+    ax.set_yticklabels(sorted_cards, rotation=0)
+    
+    # Label all x-axis ticks
+    ax.set_xticks(np.arange(probe_weights.shape[1]) + 0.5)
+
+    # # Improve x-axis ticks - only show a subset of indices for readability
+    # input_dim = probe_weights.shape[1]
+    # if input_dim > 20:
+    #     step = max(1, input_dim // 10)
+    #     xticks = np.arange(0, input_dim, step)
+    #     ax.set_xticks(xticks + 0.5)
+    #     ax.set_xticklabels(xticks)
+    
+    plt.tight_layout()
+    
+    # Save figure if path is provided
+    if save_path:
+        plt.savefig(save_path, bbox_inches='tight', dpi=300)
+    
+    return fig
 
 import torch
 import numpy as np
@@ -815,49 +901,60 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    config = GPTConfig44_Complete()
+    model_config = GPTConfig44_Complete()
+    probe_config = LinearProbeBindingCardAttrConfig()
 
-    pred_card_from_attr = False
-    # for capture_layer in [2, 1, 3, 4]:
-    for capture_layer in [0]:
-        if pred_card_from_attr:
-            print(f"Predicting card from attribute, capture layer: {capture_layer}")
-            output_dim = 5
-        else:
-            print(f"Predicting attribute from card, capture layer: {capture_layer}")
-            output_dim = 12
+    save_dir = f"COMPLETE_FIGS/paper/probe_weight_loss"
+    os.makedirs(save_dir, exist_ok=True)
+    
+    for capture_layer in range(4):
+        plot_probe_weights_heatmap(
+            model_config=model_config, 
+            probe_config=probe_config,
+            capture_layer=capture_layer, 
+            save_path=f"{save_dir}/probe_weights_heatmap_layer{capture_layer}.png")
+    
+    # pred_card_from_attr = False
+    # # for capture_layer in [2, 1, 3, 4]:
+    # for capture_layer in [0]:
+    #     if pred_card_from_attr:
+    #         print(f"Predicting card from attribute, capture layer: {capture_layer}")
+    #         output_dim = 5
+    #     else:
+    #         print(f"Predicting attribute from card, capture layer: {capture_layer}")
+    #         output_dim = 12
 
-        run_classify(
-            input_dim=64,
-            output_dim=output_dim,
-            capture_layer=capture_layer,
-            project="full-complete-classify-card",
-            batch_size=32,
-            lr=0.001,
-            model_type="linear",
-            tokenizer_path=config.tokenizer_path,
-            pred_card_from_attr=pred_card_from_attr)
+    #     run_classify(
+    #         input_dim=64,
+    #         output_dim=output_dim,
+    #         capture_layer=capture_layer,
+    #         project="full-complete-classify-card",
+    #         batch_size=32,
+    #         lr=0.001,
+    #         model_type="linear",
+    #         tokenizer_path=config.tokenizer_path,
+    #         pred_card_from_attr=pred_card_from_attr)
         
-    pred_card_from_attr = True
-    # for capture_layer in [2, 1, 3, 4]:
-    for capture_layer in [0]:
-        if pred_card_from_attr:
-            print(f"Predicting card from attribute, capture layer: {capture_layer}")
-            output_dim = 5
-        else:
-            print(f"Predicting attribute from card, capture layer: {capture_layer}")
-            output_dim = 12
+    # pred_card_from_attr = True
+    # # for capture_layer in [2, 1, 3, 4]:
+    # for capture_layer in [0]:
+    #     if pred_card_from_attr:
+    #         print(f"Predicting card from attribute, capture layer: {capture_layer}")
+    #         output_dim = 5
+    #     else:
+    #         print(f"Predicting attribute from card, capture layer: {capture_layer}")
+    #         output_dim = 12
 
-        run_classify(
-            input_dim=64,
-            output_dim=output_dim,
-            capture_layer=capture_layer,
-            project="full-complete-classify-card",
-            batch_size=32,
-            lr=0.001,
-            model_type="linear",
-            tokenizer_path=config.tokenizer_path,
-            pred_card_from_attr=pred_card_from_attr)
+    #     run_classify(
+    #         input_dim=64,
+    #         output_dim=output_dim,
+    #         capture_layer=capture_layer,
+    #         project="full-complete-classify-card",
+    #         batch_size=32,
+    #         lr=0.001,
+    #         model_type="linear",
+    #         tokenizer_path=config.tokenizer_path,
+    #         pred_card_from_attr=pred_card_from_attr)
 
 
     # n_components = 2
