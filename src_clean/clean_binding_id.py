@@ -660,28 +660,28 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    probe_config = LinearProbeBindingCardAttrConfig()
-    continuous_to_original = load_continuous_to_original_from_config(
-        probe_config, capture_layer=1)
-    breakpoint()
+    # probe_config = LinearProbeBindingCardAttrConfig()
+    # continuous_to_original = load_continuous_to_original_from_config(
+    #     probe_config, capture_layer=1)
+    # breakpoint()
     
-    # config = GPTConfig44_Complete()
+    config = GPTConfig44_Complete()
 
-    # capture_layer = 1
-    # card_index = 0
-    # construct_binding_id_dataset_specific_card(
-    #     config,
-    #     capture_layer,
-    #     card_index)
-    # initialize_binding_dataset_specific_card(
-    #     capture_layer,
-    #     card_index)
-    # train_binary_probe_specific_card(
-    #     capture_layer=capture_layer,
-    #     project="acc-binding-id-specific-card",
-    #     card_index=card_index,
-    #     num_epochs=1,
-    # )
+    capture_layer = 1
+    card_index = 0
+    construct_binding_id_dataset_specific_card(
+        config,
+        capture_layer,
+        card_index)
+    initialize_binding_dataset_specific_card(
+        capture_layer,
+        card_index)
+    train_binary_probe_specific_card(
+        capture_layer=capture_layer,
+        project="acc-binding-id-specific-card",
+        card_index=card_index,
+        num_epochs=1,
+    )
 
     # for capture_layer in range(4):
     #     # construct_binding_id_dataset(
