@@ -24,6 +24,7 @@ import random
 from model import GPTConfig44_Complete
 from data_utils import initialize_loaders, pretty_print_input
 from classify import load_continuous_to_original_from_config, LinearProbeBindingCardAttrConfig
+import argparse
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
@@ -339,7 +340,7 @@ def initialize_binding_dataset_specific_card(capture_layer, card_index, val_size
         "class_1_data_val": class_1_data_val,
         "class_0_data_test": class_0_data_test,
         "class_1_data_test": class_1_data_test
-    }, os.path.join(base_dir, "balanced_data.pt"))
+    }, os.path.join(base_dir, f"balanced_data_{card_index}.pt"))
 
 
 class BinaryProbe(nn.Module):
@@ -379,9 +380,9 @@ class BinaryProbe(nn.Module):
 
 
 def load_binary_dataloader_specific_card(capture_layer, batch_size, card_index):
-    base_dir = f"{PATH_PREFIX}/src_clean/binding_id/44_complete/layer{capture_layer}/card{card_index}"
+    base_dir = f"{PATH_PREFIX}/src_clean/paper/44_complete/layer{capture_layer}"
 
-    saved_data = torch.load(os.path.join(base_dir, "balanced_data.pt"))
+    saved_data = torch.load(os.path.join(base_dir, f"balanced_data_{card_index}.pt"))
     balanced_train_dataset = BalancedBindingDataset(
         saved_data["class_0_data_train"], saved_data["class_1_data_train"])
     balanced_val_dataset = BalancedBindingDataset(
@@ -407,7 +408,7 @@ def train_binary_probe_specific_card(
     batch_size=32,
     learning_rate=1e-3,
     num_epochs=100,
-    patience=10,
+    patience=5,
     device='cuda' if torch.cuda.is_available() else 'cpu'
 ):
     # Load the binary dataset
@@ -518,9 +519,9 @@ def train_binary_probe_specific_card(
     # Save the best model
     model.load_state_dict(best_model_state)
 
-    base_dir = f"{PATH_PREFIX}/src_clean/binding_id/44_complete/layer{capture_layer}/card{card_index}"
+    base_dir = f"{PATH_PREFIX}/src_clean/paper/44_complete/layer{capture_layer}"
     torch.save(model.state_dict(),
-               os.path.join(base_dir, "binary_probe.pt"))
+               os.path.join(base_dir, f"binary_probe_{card_index}.pt"))
     wandb.finish()
     return model
 
@@ -689,11 +690,30 @@ if __name__ == "__main__":
 
     config = GPTConfig44_Complete()
 
-    for capture_layer in range(4):
-        print(f"Constructing dataset for layer {capture_layer}")
-        construct_binding_id_dataset_specific_card(
-            config,
-            capture_layer
+    # for capture_layer in range(4):
+    #     print(f"Constructing dataset for layer {capture_layer}")
+    #     construct_binding_id_dataset_specific_card(
+    #         config,
+    #         capture_layer
+    #     )
+
+    parser = argparse.ArgumentParser(description="Train binary probe for specific card")
+    parser.add_argument('--capture_layer', type=int, required=True, help='Capture layer to use')
+    args = parser.parse_args()
+
+    capture_layer = args.capture_layer
+    # python clean_binding_id.py --capture_layer 0
+
+    for card_index in [0, 2, 4, 7, 10]:
+        initialize_binding_dataset_specific_card(
+            capture_layer=capture_layer,
+            card_index=card_index
+        )
+        train_binary_probe_specific_card(
+            capture_layer=capture_layer,
+            project="acc-binding-id-specific-card",
+            card_index=card_index,
+            num_epochs=100,
         )
     # capture_layer = 1
     # card_index = 0
