@@ -697,13 +697,18 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Train binary probe for specific card")
     parser.add_argument('--capture_layer', type=int, required=True, help='Capture layer to use')
+    parser.add_argument('--card_indices', type=int, nargs='+', required=True, help='List of card indices to use')
     args = parser.parse_args()
 
     capture_layer = args.capture_layer
+    card_indices = args.card_indices
+    print(f"Capture layer: {capture_layer}")
+    print(f"Card indices: {card_indices}")
     # python clean_binding_id.py --capture_layer 0
 
     construct_binding_id_dataset_specific_card(config, capture_layer)
-    for card_index in [0, 2, 4, 7, 10]:
+    # for card_index in [0, 2, 4, 7, 10]:
+    for card_index in card_indices:
         print(f"Initializing dataset for card {card_index}, layer {capture_layer}")
         initialize_binding_dataset_specific_card(
             capture_layer=capture_layer,
