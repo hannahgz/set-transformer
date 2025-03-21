@@ -862,8 +862,9 @@ def plot_consolidated_same_card(layers, tokenizer_path, loss_range=[0, 0.8], acc
             if layer_idx == 0:
                 axes_train_loss[layer_idx].set_ylabel(
                     'Loss', fontsize=label_font_size)
-            axes_train_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
+            # axes_train_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
             # axes_train_loss[layer_idx].set_yscale('log')
+            axes_train_loss[layer_idx].ticklabel_format(useOffset=False, style='plain')
             axes_train_loss[layer_idx].tick_params(labelsize=annot_font_size)
 
             # Plot validation loss
@@ -876,8 +877,9 @@ def plot_consolidated_same_card(layers, tokenizer_path, loss_range=[0, 0.8], acc
             if layer_idx == 0:
                 axes_val_loss[layer_idx].set_ylabel(
                     'Loss', fontsize=label_font_size)
-            axes_val_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
+            # axes_val_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
             # axes_val_loss[layer_idx].set_yscale('log')
+            axes_val_loss[layer_idx].ticklabel_format(useOffset=False, style='plain')
             axes_val_loss[layer_idx].tick_params(labelsize=annot_font_size)
 
             # Plot training accuracy
@@ -890,8 +892,9 @@ def plot_consolidated_same_card(layers, tokenizer_path, loss_range=[0, 0.8], acc
             if layer_idx == 0:
                 axes_train_acc[layer_idx].set_ylabel(
                     'Accuracy', fontsize=label_font_size)
-            axes_train_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
+            # axes_train_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
             # axes_train_acc[layer_idx].set_yscale('log')
+            axes_train_acc[layer_idx].ticklabel_format(useOffset=False, style='plain')
             axes_train_acc[layer_idx].tick_params(labelsize=annot_font_size)
 
             # Plot validation accuracy
@@ -904,8 +907,9 @@ def plot_consolidated_same_card(layers, tokenizer_path, loss_range=[0, 0.8], acc
             if layer_idx == 0:
                 axes_val_acc[layer_idx].set_ylabel(
                     'Accuracy', fontsize=label_font_size)
-            axes_val_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
+            # axes_val_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
             # axes_val_acc[layer_idx].set_yscale('log')
+            axes_val_acc[layer_idx].ticklabel_format(useOffset=False, style='plain')
             axes_val_acc[layer_idx].tick_params(labelsize=annot_font_size)
 
         # Only add legend to the last subplot
