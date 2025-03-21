@@ -824,7 +824,7 @@ def plot_consolidated_same_card(layers, tokenizer_path, loss_range=[0, 0.7], acc
         for run in runs:
             match = re.search(r'layer(\d+)$', run.name)
             if match and int(match.group(1)) == target_layer:
-                card_match = re.search(r'card(\d+)_', run.name)
+                card_match = re.search(r'card(\d+)', run.name)
                 if card_match:
                     card_id = int(card_match.group(1))
                     card_name = tokenizer.id_to_token[card_id]
@@ -845,7 +845,7 @@ def plot_consolidated_same_card(layers, tokenizer_path, loss_range=[0, 0.7], acc
         # Plot for each run
         for run, color in zip(layer_runs, colors):
             # Extract attribute ID and get label
-            card_match = re.search(r'card(\d+)_', run.name)
+            card_match = re.search(r'card(\d+)', run.name)
             card_id = int(card_match.group(1))
             label = tokenizer.id_to_token[card_id]
 
