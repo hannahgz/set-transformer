@@ -783,7 +783,7 @@ def plot_consolidated_attribute_metrics(layers, tokenizer_path, loss_range=[0, 0
     plt.show()
 
 
-def plot_consolidated_same_card(layers, tokenizer_path, loss_range=[0, 0.5], acc_range=[0.7, 1], project_name="acc-binding-id-specific-card", entity="hazhou-harvard"):
+def plot_consolidated_same_card(layers, tokenizer_path, loss_range=[0, 0.7], acc_range=[0.6, 1], project_name="acc-binding-id-specific-card", entity="hazhou-harvard"):
     """
     Create four figures:
     1. Training losses across all layers
