@@ -716,11 +716,15 @@ def save_single_cards():
 
     global config
     model_num = card_groups.get('model_num', 1)
-    if model_num == 100:
-        config = GPTConfig44_SeededOrigDataset(seed=100)
+    if model_num != 1:
+        config = GPTConfig44_SeededOrigDataset(seed=model_num)
     else:
         config = GPTConfig44_Complete()
 
+    layer_num = card_groups.get('layer_num', 4)
+    if layer_num == 3:
+        config = GPTConfig34_Complete()
+    
     attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
         config, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True, value_weighting=value_weighting)
 
@@ -842,15 +846,15 @@ def save_difference_cards():
         "plot_json": plot_json
     })
 
-@app.route('/change_config', methods=['POST'])
-def change_config():
-    global config
-    layers = request.json.get('layers')
-    if layers == 3:
-        config = GPTConfig34_Complete()
-    else:
-        config = GPTConfig44_Complete()
-    return jsonify({"status": "success"})
+# @app.route('/change_config', methods=['POST'])
+# def change_config():
+#     global config
+#     layers = request.json.get('layers')
+#     if layers == 3:
+#         config = GPTConfig34_Complete()
+#     else:
+#         config = GPTConfig44_Complete()
+#     return jsonify({"status": "success"})
 
 
 # @app.route('/change_model_config', methods=['POST'])

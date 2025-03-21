@@ -256,14 +256,14 @@
         var graphs = {{ plot_json | safe }};
         Plotly.newPlot('plotly-div', graphs.data, graphs.layout);
 
-        document.getElementById('layer-select').addEventListener('change', function() {
-            const layers = parseInt(this.value);
-            fetch('/change_config', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({layers: layers})
-            });
-        });
+        // document.getElementById('layer-select').addEventListener('change', function() {
+        //    const layers = parseInt(this.value);
+        //    fetch('/change_config', {
+        //        method: 'POST',
+        //        headers: {'Content-Type': 'application/json'},
+        //        body: JSON.stringify({layers: layers})
+        //    });
+        // });
 
         // document.getElementById('model-select').addEventListener('change', function() {
         //     const modelNum = parseInt(this.value);
@@ -323,11 +323,12 @@
             const seed = parseInt(document.getElementById('seed-input').value) || 0;
             const valueWeighting = document.getElementById('value-weighting').checked;
             const modelNum = parseInt(document.getElementById('model-select').value);
+            const layerNum = parseInt(document.getElementById('layer-select').value);
 
             fetch('/save_difference_cards', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({group1: group1Cards, group2: group2Cards, threshold, seed, valueWeighting, model_num: modelNum})
+                body: JSON.stringify({group1: group1Cards, group2: group2Cards, threshold, seed, valueWeighting, model_num: modelNum, layer_num: layerNum})
             })
             .then(response => response.json())
             .then(data => {
@@ -363,11 +364,12 @@
             const seed = parseInt(document.getElementById('seed-input').value) || 0;
             const valueWeighting = document.getElementById('value-weighting').checked;
             const modelNum = parseInt(document.getElementById('model-select').value);
+            const layerNum = parseInt(document.getElementById('layer-select').value);
 
             fetch('/save_single_cards', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({group1: group1Cards, threshold, seed, valueWeighting, model_num: modelNum})
+                body: JSON.stringify({group1: group1Cards, threshold, seed, valueWeighting, model_num: modelNum, layer_num: layerNum})
             })
             .then(response => response.json())
             .then(data => {
