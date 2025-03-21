@@ -106,7 +106,7 @@ def get_gpu_memory():
 
 
 def construct_binding_id_dataset_specific_card(config, capture_layer):
-    print(f"Constructing dataset for card {card_index}, layer {capture_layer}")
+    # print(f"Constructing dataset for card {card_index}, layer {capture_layer}")
     perms = list(permutations(range(20), 2))
 
     dataset = torch.load(config.dataset_path)
@@ -282,9 +282,9 @@ class BalancedBindingDataset(Dataset):
 
 def initialize_binding_dataset_specific_card(capture_layer, card_index, val_size=0.05, test_size=0.05, batch_size=32):
     # Combine X and y into a single dataset
-    base_dir = f"{PATH_PREFIX}/src_clean/binding_id/44_complete/layer{capture_layer}/card{card_index}"
+    base_dir = f"{PATH_PREFIX}/src_clean/paper/44_complete/layer{capture_layer}"
     X = torch.load(os.path.join(base_dir, "X.pt"))
-    y = torch.load(os.path.join(base_dir, "y.pt"))
+    y = torch.load(os.path.join(base_dir, f"y_{card_index}.pt"))
 
     full_dataset = TensorDataset(X, y)
 
