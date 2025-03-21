@@ -134,7 +134,7 @@ def construct_binding_id_dataset_specific_card(config, capture_layer):
         print(f"Batch {index}/{len(train_loader)}")
         print(
             f"GPU Memory: {used/1024:.2f}GB used out of {total/1024:.2f}GB total")
-        print("Current samples: ", len(y))
+        print("Current samples: ", len(y[0]))
 
         batch = batch.to(device)
         with torch.no_grad():  # Reduce memory usage during inference
@@ -169,7 +169,7 @@ def construct_binding_id_dataset_specific_card(config, capture_layer):
 
                 # breakpoint()
                 # Save intermediate results when threshold is reached
-                if len(y) >= save_threshold:
+                if len(y[0]) >= save_threshold:
 
                     base_dir = f"{PATH_PREFIX}/src_clean/paper/44_complete/layer{capture_layer}"
                     os.makedirs(base_dir, exist_ok=True)
@@ -704,11 +704,14 @@ if __name__ == "__main__":
     capture_layer = args.capture_layer
     # python clean_binding_id.py --capture_layer 0
 
+    construct_binding_id_dataset_specific_card(config, capture_layer)
     for card_index in [0, 2, 4, 7, 10]:
+        print(f"Initializing dataset for card {card_index}, layer {capture_layer}")
         initialize_binding_dataset_specific_card(
             capture_layer=capture_layer,
             card_index=card_index
         )
+        print(f"Training binary probe for card {card_index}, layer {capture_layer}")
         train_binary_probe_specific_card(
             capture_layer=capture_layer,
             project="acc-binding-id-specific-card",
