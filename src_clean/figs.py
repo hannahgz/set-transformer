@@ -822,7 +822,7 @@ def plot_consolidated_same_card(layers, tokenizer_path, loss_range=[0, 0.7], acc
         run_order_mapping = {}
 
         for run in runs:
-            match = re.search(r'layer(\d+)$', run.name)
+            match = re.search(r'layer(\d+)', run.name)
             if match and int(match.group(1)) == target_layer:
                 card_match = re.search(r'card(\d+)', run.name)
                 if card_match:
