@@ -175,10 +175,8 @@ def construct_binding_id_dataset_specific_card(config, capture_layer):
                     os.makedirs(base_dir, exist_ok=True)
                     # Save current chunk
                     print("Saving X tensor")
-                    torch.save(X_tensor, os.path.join(base_dir, f"X.pt"))
-
-                    print("Saving intermediate results")
                     X_tensor = torch.stack(X)
+                    torch.save(X_tensor, os.path.join(base_dir, f"X.pt"))
 
                     for card_index in y.keys():
                         y_tensor = torch.tensor(y[card_index])
