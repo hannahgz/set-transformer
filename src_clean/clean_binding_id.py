@@ -690,6 +690,7 @@ if __name__ == "__main__":
     config = GPTConfig44_Complete()
 
     for capture_layer in range(4):
+        print(f"Constructing dataset for layer {capture_layer}")
         construct_binding_id_dataset_specific_card(
             config,
             capture_layer
