@@ -706,7 +706,7 @@ if __name__ == "__main__":
     print(f"Card indices: {card_indices}")
     # python clean_binding_id.py --capture_layer 0
 
-    construct_binding_id_dataset_specific_card(config, capture_layer)
+    # construct_binding_id_dataset_specific_card(config, capture_layer)
     # for card_index in [0, 2, 4, 7, 10]:
     for card_index in card_indices:
         print(f"Initializing dataset for card {card_index}, layer {capture_layer}")
