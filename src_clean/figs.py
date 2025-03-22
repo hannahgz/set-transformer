@@ -900,7 +900,7 @@ def plot_consolidated_same_card(layers, tokenizer_path, loss_range=[0, 0.8], acc
             # axes_train_acc[layer_idx].set_yscale('log')
             axes_train_acc[layer_idx].ticklabel_format(useOffset=False, style='plain')
             if layer_idx != 0:
-                axes_train_acc[layer_idx].set_ylim(0.992, 1.01)
+                axes_train_acc[layer_idx].set_ylim(0.992, 1.001)
             axes_train_acc[layer_idx].tick_params(labelsize=annot_font_size)
 
             # Plot validation accuracy
@@ -917,7 +917,7 @@ def plot_consolidated_same_card(layers, tokenizer_path, loss_range=[0, 0.8], acc
             # axes_val_acc[layer_idx].set_yscale('log')
             axes_val_acc[layer_idx].ticklabel_format(useOffset=False, style='plain')
             if layer_idx != 0:
-                axes_val_acc[layer_idx].set_ylim(0.996, 1.01)
+                axes_val_acc[layer_idx].set_ylim(0.996, 1.001)
             axes_val_acc[layer_idx].tick_params(labelsize=annot_font_size)
 
         # Only add legend to the last subplot
