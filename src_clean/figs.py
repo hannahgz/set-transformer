@@ -1055,6 +1055,92 @@ def create_loss_figure_orig_set_model(run_data, layers):
     return fig
 
 
+def create_loss_figure_orig_set_model_seeded(run_data, seeds=[1, 100, 200, 300, 400]):
+    """
+    Create a figure with loss plots for a specific model type across multiple layers.
+
+    Args:
+        run_data: Dictionary containing the run data
+        model_type: 'attr_from_card' or 'card_from_attr'
+        layers: List of layer numbers
+        layer_names: List of layer names for plot titles
+
+    Returns:
+        Matplotlib figure
+    """
+
+    annot_font_size += 2
+    title_font_size += 2
+    label_font_size += 2
+
+    # Define colors
+    train_color = '#1f77b4'  # blue for all training curves
+    val_color = '#ff7f0e'    # orange for all validation curves
+
+    # Create figure
+    fig, axes = plt.subplots(1, len(seeds), figsize=(5*len(seeds), 4))
+    model_title = "Set Prediction Model Loss Curves"
+
+    fig.suptitle(f'{model_title}', fontsize=title_font_size)
+
+    # First pass: determine global min and max values across all layers
+    global_min = float('inf')
+    global_max = float('-inf')
+
+    for run_name in run_data:
+        if run_name in run_data and run_data[run_name]["train_loss"] is not None:
+            train_loss = run_data[run_name]["train_loss"]
+            val_loss = run_data[run_name]["val_loss"]
+
+            global_min = min(global_min, np.min(train_loss), np.min(val_loss))
+            global_max = max(global_max, np.max(train_loss), np.max(val_loss))
+
+    # Add padding to the global min/max
+    padding = (global_max - global_min) * 0.1
+    y_min = global_min - padding
+    y_max = global_max + padding
+
+    # Second pass: create the plots with standardized y-axis
+    for i, run_name in enumerate(run_data):
+        ax = axes[i]
+
+        if run_data[run_name]["train_loss"] is not None:
+            # Plot losses
+            steps = run_data[run_name]["steps"]
+            train_loss = run_data[run_name]["train_loss"]
+            val_loss = run_data[run_name]["val_loss"]
+
+            ax.plot(steps, train_loss, color=train_color,
+                    label='Training Loss')
+            ax.plot(steps, val_loss, color=val_color, label='Validation Loss')
+
+            # Set standardized y-axis limits
+            ax.set_ylim(y_min, y_max)
+        else:
+            ax.text(0.5, 0.5, f"No data for {run_name}",
+                    horizontalalignment='center', verticalalignment='center',
+                    transform=ax.transAxes)
+
+        if seeds[i] != 1:
+            ax.set_title(f'Seed {seeds[i]}')
+        else:
+            ax.set_title(f'Seed 42 (Original)')
+        ax.set_xlabel('Steps', fontsize=label_font_size)
+        # ax.grid(True, linestyle='--', alpha=0.7)
+
+        # Only add y-label to the first subplot
+        if i == 0:
+            ax.set_ylabel('Loss', rotation=0,
+                          fontsize=label_font_size, labelpad=20)
+
+        # Add legend to the last subplot
+        if i == len(seeds) - 1:
+            ax.legend(loc='upper right')
+
+    plt.tight_layout(rect=[0.05, 0, 1, 0.99])  # Make room for the title
+    return fig
+
+
 def fetch_wandb_data_set_model(entity, project_name, run_names):
     """
     Fetch run data from W&B for specified runs.
@@ -1120,6 +1206,28 @@ def plot_orig_set_model_loss():
 
     fig.savefig(os.path.join(
         fig_save_dir, f'set_model_losses.png'), dpi=300, bbox_inches='tight')
+    
+def plot_orig_set_model_loss_seeded():
+    run_data = fetch_wandb_data_set_model(
+        entity="hazhou-harvard",
+        project_name="equal-set-prediction-balanced",
+        run_names=[
+            "triples_card_randomization_tuple_randomization_layers_4_heads_4.pt",
+            "seed100/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt",
+            "seed200/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt",
+            "seed300/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt",
+            "seed400/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt",
+            ]
+    )
+
+    fig_save_dir = "COMPLETE_FIGS/paper/set_model_seeded"
+    os.makedirs(fig_save_dir, exist_ok=True)
+
+    fig = create_loss_figure_orig_set_model_seeded(
+        run_data)
+
+    fig.savefig(os.path.join(
+        fig_save_dir, f'set_model_losses.png'), dpi=300, bbox_inches='tight')
 
 
 if __name__ == "__main__":
@@ -1128,12 +1236,14 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
+    plot_orig_set_model_loss_seeded()
+
     # plot_orig_set_model_loss()
 
-    plot_consolidated_same_card(
-        layers=[0, 1, 2, 3],
-        tokenizer_path=GPTConfig44_Complete().tokenizer_path,
-    )
+    # plot_consolidated_same_card(
+    #     layers=[0, 1, 2, 3],
+    #     tokenizer_path=GPTConfig44_Complete().tokenizer_path,
+    # )
 
     # attr_from_last_attr_dataset_size()
     # sns.set_style("white")
