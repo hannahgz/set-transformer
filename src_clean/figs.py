@@ -1069,9 +1069,9 @@ def create_loss_figure_orig_set_model_seeded(run_data, seeds=[1, 100, 200, 300, 
         Matplotlib figure
     """
 
-    annot_font_size += 2
-    title_font_size += 2
-    label_font_size += 2
+    # annot_font_size += 2
+    # title_font_size += 2
+    # label_font_size += 2
 
     # Define colors
     train_color = '#1f77b4'  # blue for all training curves
@@ -1081,7 +1081,7 @@ def create_loss_figure_orig_set_model_seeded(run_data, seeds=[1, 100, 200, 300, 
     fig, axes = plt.subplots(1, len(seeds), figsize=(5*len(seeds), 4))
     model_title = "Set Prediction Model Loss Curves"
 
-    fig.suptitle(f'{model_title}', fontsize=title_font_size)
+    fig.suptitle(f'{model_title}', fontsize=title_font_size + 2)
 
     # First pass: determine global min and max values across all layers
     global_min = float('inf')
@@ -1125,13 +1125,13 @@ def create_loss_figure_orig_set_model_seeded(run_data, seeds=[1, 100, 200, 300, 
             ax.set_title(f'Seed {seeds[i]}')
         else:
             ax.set_title(f'Seed 42 (Original)')
-        ax.set_xlabel('Steps', fontsize=label_font_size)
+        ax.set_xlabel('Steps', fontsize=label_font_size + 2)
         # ax.grid(True, linestyle='--', alpha=0.7)
 
         # Only add y-label to the first subplot
         if i == 0:
             ax.set_ylabel('Loss', rotation=0,
-                          fontsize=label_font_size, labelpad=20)
+                          fontsize=label_font_size + 2, labelpad=20)
 
         # Add legend to the last subplot
         if i == len(seeds) - 1:
@@ -1169,7 +1169,6 @@ def fetch_wandb_data_set_model(entity, project_name, run_names):
             train_key = "train_loss"
             val_key = "val_loss"
             history = run.history(keys=[train_key, val_key])
-            breakpoint()
 
             run_data[run_name] = {
                 "steps": history["_step"].to_numpy(),
