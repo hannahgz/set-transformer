@@ -7,7 +7,7 @@ from typing import List, Tuple
 from dataclasses import dataclass
 import torch
 import os
-from model import GPT, GPTConfig44_Complete, GPTConfig34_Complete, GPTConfig44_SeededOrigDataset
+from model import GPT, GPTConfig44_Complete, GPTConfig34_Complete, GPTConfig44_SeededOrigDataset, GPTConfig24_Complete
 from tokenizer import load_tokenizer
 import random
 
@@ -265,6 +265,7 @@ def attention_weights_from_sequence(
     checkpoint = torch.load(
         config.filename, weights_only=False, map_location=torch.device('cpu'))
 
+    print(f"Checkpoint {checkpoint}")
     model.load_state_dict(checkpoint["model"])
     print("Loaded model")
 
@@ -724,6 +725,8 @@ def save_single_cards():
     layer_num = card_groups.get('layer_num', 4)
     if layer_num == 3:
         config = GPTConfig34_Complete()
+    elif layer_num == 2:
+        config = GPTConfig24_Complete()
     
     attention_weights1, is_correct1, decoded_predictions1, decoded_targets1 = attention_weights_from_sequence(
         config, sequence1, tokenizer_path="all_tokenizer.pkl", get_prediction=True, value_weighting=value_weighting)

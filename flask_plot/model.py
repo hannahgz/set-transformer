@@ -122,6 +122,31 @@ class GPTConfig34_Complete:
     end_of_seq_token: int = 13
     padding_token: int = 14
 
+@dataclass
+class GPTConfig24_Complete:
+    lr: float = 4e-4  # Base learning rate
+    epochs: int = 25  # Reduced epochs due to large dataset
+    batch_size: int = 512  # Increased for better throughput
+    patience: int = 4  # Early stopping patience
+    eval_freq: int = 10000  # Evaluate every 2000 steps
+    n_layer: int = 2
+    n_head: int = 4
+    n_embd: int = 64
+    dropout: float = 0.0
+    n_cards: int = 5
+    block_size: int = 49
+    vocab_size: int = 22
+    bias: bool = False # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+    input_size: int = 41 # (5 cards, 4 attributes/card, 20 * 2 = 40, + 1 for predict = 41)
+    target_size: int = 8
+    pad_symbol: str = "_"
+    out_dir: str = ""
+    tokenizer_path: str = f"{PATH_PREFIX}/all_tokenizer.pkl"
+    dataset_path: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_dataset.pth"
+    filename: str = f"{PATH_PREFIX}/triples_card_randomization_tuple_randomization_layers_2_heads_4.pt"
+    end_of_seq_token: int = 13
+    padding_token: int = 14
+
 class LayerNorm(nn.Module):
     """LayerNorm but with an optional bias. PyTorch doesn't support simply bias=False"""
 
