@@ -1078,7 +1078,7 @@ def create_loss_figure_orig_set_model_seeded(run_data, seeds=[1, 100, 200, 300, 
     val_color = '#ff7f0e'    # orange for all validation curves
 
     # Create figure
-    fig, axes = plt.subplots(1, len(seeds), figsize=(5*len(seeds), 4))
+    fig, axes = plt.subplots(1, len(seeds), figsize=(4*len(seeds), 4))
     model_title = "Set Prediction Model Loss Curves"
 
     fig.suptitle(f'{model_title}', fontsize=title_font_size + 2)
@@ -1122,12 +1122,14 @@ def create_loss_figure_orig_set_model_seeded(run_data, seeds=[1, 100, 200, 300, 
                     transform=ax.transAxes)
 
         if seeds[i] != 1:
-            ax.set_title(f'Seed {seeds[i]}')
+            ax.set_title(f'Seed {seeds[i]}', fontsize = label_font_size + 2)
         else:
-            ax.set_title(f'Seed 42 (Original)')
+            ax.set_title(f'Seed 42 (Original)', fontsize=label_font_size + 2)
         ax.set_xlabel('Steps', fontsize=label_font_size + 2)
         # ax.grid(True, linestyle='--', alpha=0.7)
 
+        ax.tick_params(axis='x', labelsize=label_font_size)
+        ax.tick_params(axis='y', labelsize=label_font_size)
         # Only add y-label to the first subplot
         if i == 0:
             ax.set_ylabel('Loss', rotation=0,
