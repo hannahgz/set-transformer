@@ -1242,6 +1242,8 @@ if __name__ == "__main__":
         layers=[0, 1, 2, 3],
         tokenizer_path=GPTConfig44_Complete().tokenizer_path,
         project_name="attr_from_last_attr_binding_seeded200",
+        loss_range=[0, 0.65],
+        acc_range=[0.65, 1],
     )
 
     plot_consolidated_attribute_metrics(
