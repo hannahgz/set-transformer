@@ -187,7 +187,7 @@ def train_model(
     hidden_size=24,
     batch_size=16,
     learning_rate=1e-3,
-    num_epochs=100,
+    num_epochs=200,
     patience=10,
     val_split=0.1,
     device='cuda' if torch.cuda.is_available() else 'cpu'
