@@ -1237,7 +1237,23 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    plot_orig_set_model_loss_seeded()
+
+    plot_consolidated_attribute_metrics(
+        layers=[0, 1, 2, 3],
+        tokenizer_path=GPTConfig44_Complete().tokenizer_path,
+        project_name="attr_from_last_attr_binding_seeded200",
+    )
+
+    plot_consolidated_attribute_metrics(
+        layers=[0, 1, 2, 3],
+        tokenizer_path=GPTConfig44_Complete().tokenizer_path,
+        project_name="attr_from_answer200",
+        loss_range=[0, 0.63],
+        acc_range=[0.65, 1],
+    )
+
+
+    # plot_orig_set_model_loss_seeded()
 
     # plot_orig_set_model_loss()
 
