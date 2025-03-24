@@ -309,7 +309,8 @@ def train_model(
 def get_layer_activations(model, layer_name, data_loader, device='cuda' if torch.cuda.is_available() else 'cpu'):
     activations = []
     def hook_fn(module, input, output):
-        activations.append(output.detach())
+        # Move the tensor to CPU before storing
+        activations.append(output.detach().cpu())  # Add .cpu() here
 
     # Register a hook to the desired layer
     hook = dict([*model.named_modules()])[layer_name].register_forward_hook(hook_fn)
@@ -325,6 +326,7 @@ def get_layer_activations(model, layer_name, data_loader, device='cuda' if torch
     # Unregister the hook
     hook.remove()
 
+    # No need for additional .cpu() here as we've already moved tensors to CPU in the hook
     return torch.cat(activations, dim=0)
 
 import matplotlib.pyplot as plt
@@ -341,20 +343,18 @@ if __name__ == "__main__":
     train_loader, val_loader = load_binary_dataloader()
     train_activations = get_layer_activations(model, "fc2", train_loader)
 
+    # In your plotting code
+    train_activations_numpy = train_activations.numpy()  # Convert to NumPy array
+
     plt.figure(figsize=(36, 18))
-    for i in range(train_activations.shape[1]):
-        plt.subplot(6, 4, i+1)  # Adjust the grid size based on the number of neurons
-        plt.hist(train_activations[:, i], bins=50, alpha=0.7)
+    for i in range(train_activations_numpy.shape[1]):
+        plt.subplot(6, 4, i+1)
+        plt.hist(train_activations_numpy[:, i], bins=50, alpha=0.7)
         plt.title(f'Neuron {i}')
         plt.xlabel('Activation')
         plt.ylabel('Frequency')
     plt.suptitle('Activation Distributions for Training Set Neurons', fontsize=24)
     plt.tight_layout(rect=[0, 0, 1, 0.96])
-
-    fig_save_path = f"COMPLETE_FIGS/setnet"
-    os.makedirs(fig_save_path, exist_ok=True)
-    plt.savefig(f"{fig_save_path}/train_activations_24.png", bbox_inches="tight")
-    plt.show()
 
     # get_layer_activations
 
