@@ -356,6 +356,10 @@ if __name__ == "__main__":
     plt.suptitle('Activation Distributions for Training Set Neurons', fontsize=24)
     plt.tight_layout(rect=[0, 0, 1, 0.96])
 
+    fig_save_path = f"COMPLETE_FIGS/setnet"
+    os.makedirs(fig_save_path, exist_ok=True)
+    plt.savefig(f"{fig_save_path}/train_activations_24.png", bbox_inches="tight")
+
     # get_layer_activations
 
 # # sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(sample_weights), replacement=True)
