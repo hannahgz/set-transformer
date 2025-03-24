@@ -346,7 +346,7 @@ def get_layer_activations(model, layer_name, data_loader, device='cuda' if torch
     activations = torch.cat(activations, dim=0)
 
     if save_activations_path is not None:
-        os.amekdirs(os.path.dirname(save_activations_path), exist_ok=True)
+        os.makedirs(os.path.dirname(save_activations_path), exist_ok=True)
         torch.save(activations, f"{save_activations_path}")
     return activations
 
