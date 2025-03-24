@@ -184,6 +184,32 @@ def load_binary_dataloader():
     return saved_data['train_loader'], saved_data['val_loader']
 
 
+def create_analysis_dataloader(original_dataloader, batch_size=16):
+    """
+    Create a non-shuffled DataLoader from a shuffled one for consistent analysis.
+    """
+    # First, collect all data from the original loader
+    all_data = []
+    all_targets = []
+    
+    for data, target in original_dataloader:
+        all_data.append(data)
+        all_targets.append(target)
+    
+    # Concatenate all batches
+    all_data = torch.cat(all_data, dim=0)
+    all_targets = torch.cat(all_targets, dim=0)
+    
+    # Create a TensorDataset
+    dataset = TensorDataset(all_data, all_targets)
+    
+    # Create a new DataLoader without shuffling
+    if batch_size is None:
+        batch_size = len(dataset)  # Use a single batch for simplicity
+        
+    non_shuffled_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
+    torch.save(non_shuffled_loader, f"{PATH_PREFIX}/colab/non_shuffled_train_loader.pth")
+
 def train_model(
     project,
     hidden_size=24,
@@ -692,22 +718,25 @@ if __name__ == "__main__":
     # Create overall figure directory
     # os.makedirs(FIG_SAVE_PATH, exist_ok=True)
 
+    
     hidden_size = 16
     model = load_model(project="setnet", hidden_size=hidden_size)
     train_loader, val_loader = load_binary_dataloader()
+    create_analysis_dataloader(train_loader, batch_size=16):
+    analysis_loader = torch.load(f"{PATH_PREFIX}/colab/non_shuffled_train_loader.pth")
     layer_name = "fc1"
 
     fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
     activations = get_layer_activations(
         model,
         layer_name,
-        train_loader,
-        save_activations_path=f"{fig_save_path}/{layer_name}_train_activations.pth")
+        analysis_loader,
+        save_activations_path=f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
 
     plot_activations_by_triplet_category(
         activations,
         neuron_index=1,
-        dataloader=train_loader,
+        dataloader=analysis_loader,
         attribute_index=2,
         hidden_size=hidden_size,
         savefig=True
@@ -715,7 +744,7 @@ if __name__ == "__main__":
     plot_activation_grid_by_triplet_category(
         activations,
         neuron_index=1,
-        dataloader=train_loader,
+        dataloader=analysis_loader,
         attribute_index=2,
         hidden_size=hidden_size,
         savefig=True)
