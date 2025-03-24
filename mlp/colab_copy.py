@@ -126,20 +126,25 @@ def generate_data(batch_size=16):
 
     # Shuffle the training data
     permutation_train = torch.randperm(X_train_tensor.size()[0])
-    breakpoint()
     X_train_tensor = X_train_tensor[permutation_train]
     y_train_tensor = y_train_tensor[permutation_train]
+
+    # Split X_train_tensor into two groups based on y_train_tensor
+    class_0_data_train = X_train_tensor[y_train_tensor.squeeze() == 0]
+    class_1_data_train = X_train_tensor[y_train_tensor.squeeze() == 1]
 
     permutation_val = torch.randperm(X_test_tensor.size()[0])
     X_val_tensor = X_test_tensor[permutation_val]
     y_val_tensor = y_test_tensor[permutation_val]
+    class_0_data_val = X_val_tensor[y_val_tensor.squeeze() == 0]
+    class_1_data_val = X_val_tensor[y_val_tensor.squeeze() == 1]
 
     # Step 3: Create a BalancedDataset for batch processing
-    train_dataset = BalancedDataset(X_train_tensor, y_train_tensor)
+    train_dataset = BalancedDataset(class_0_data_train, class_1_data_train)
     train_loader = DataLoader(
         train_dataset, batch_size=batch_size, shuffle=True)
 
-    val_dataset = BalancedDataset(X_val_tensor, y_val_tensor)
+    val_dataset = BalancedDataset(class_1_data_val, class_0_data_val)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
     # Print train_dataset and val_dataset lengths/sizes
