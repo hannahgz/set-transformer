@@ -605,9 +605,12 @@ def triplet_type_to_labels(triplet_type, attribute_index):
     Returns:
         List of labels for each card in the triplet
     """
-    card_labels = []
-    for card in triplet_type:
-        card_labels.append(attr_id_to_name_dict[attribute_index][card.index(1)])
+    card_labels = ""
+    for index, card in enumerate(triplet_type):
+        card_labels += attr_id_to_name_dict[attribute_index][card.index(1)]
+        if index < 2:
+            card_labels += " | "
+        # card_labels.append(attr_id_to_name_dict[attribute_index][card.index(1)])
     return card_labels
 
     
