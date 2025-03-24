@@ -437,6 +437,53 @@ def analyze_model(project, hidden_size, layer_names=None, device='cuda' if torch
         
         print(f"Saved activation histogram for {layer_name}")
 
+def plot_weight_heatmaps(model, hidden_size, project="setnet"):
+    """
+    Plot simple heatmaps of model weight matrices.
+    
+    Args:
+        model: The trained SetNet model
+        hidden_size: Number of neurons in hidden layer
+        project: Project name for file paths
+    """
+    # Load model if needed
+    if model is None:
+        model_path = f"{PATH_PREFIX}/{project}/hidden_{hidden_size}/model.pt"
+        model = SetNet(hidden_size=hidden_size)
+        model.load_state_dict(torch.load(model_path))
+        model.cpu()  # Ensure model is on CPU for data extraction
+    
+    # Get weights
+    fc1_weights = model.fc1.weight.data.cpu().numpy()  # Shape: [hidden_size, 36]
+    fc2_weights = model.fc2.weight.data.cpu().numpy()  # Shape: [1, hidden_size]
+    
+    # Create figure directory
+    fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
+    os.makedirs(fig_save_path, exist_ok=True)
+    
+    # Plot FC1 weights (36 x hidden_size)
+    plt.figure(figsize=(10, 8))
+    im = plt.imshow(fc1_weights, cmap='viridis')
+    plt.colorbar(im)
+    plt.title(f'FC1 Weights (Input → Hidden Layer) - {hidden_size} neurons')
+    plt.xlabel('Input Feature')
+    plt.ylabel('Hidden Neuron')
+    plt.savefig(f"{fig_save_path}/fc1_weights_heatmap.png", bbox_inches="tight")
+    plt.close()
+    
+    # Plot FC2 weights (hidden_size x 1)
+    plt.figure(figsize=(10, 4))
+    # Reshape to make it a proper heatmap
+    fc2_weights_reshaped = fc2_weights.T  # [hidden_size, 1]
+    im = plt.imshow(fc2_weights_reshaped, cmap='viridis', aspect='auto')
+    plt.colorbar(im)
+    plt.title(f'FC2 Weights (Hidden → Output Layer) - {hidden_size} neurons')
+    plt.xlabel('Output Neuron')
+    plt.ylabel('Hidden Neuron')
+    plt.savefig(f"{fig_save_path}/fc2_weights_heatmap.png", bbox_inches="tight")
+    plt.close()
+    
+    print(f"Weight heatmaps saved to {fig_save_path}")
 
 if __name__ == "__main__":
     # Create overall figure directory
@@ -447,13 +494,15 @@ if __name__ == "__main__":
     # generate_data()
     
     # 2. Train models with different hidden sizes
-    hidden_sizes = [8, 16, 24, 32, 64]
-    for hidden_size in hidden_sizes:
-        print(f"Training model with {hidden_size} hidden neurons...")
-        train_model(project="setnet", hidden_size=hidden_size)
+    # hidden_sizes = [8, 16, 24, 32, 64]
+    # for hidden_size in hidden_sizes:
+    #     print(f"Training model with {hidden_size} hidden neurons...")
+    #     train_model(project="setnet", hidden_size=hidden_size)
     
-    # 3. Analyze trained models
-    hidden_sizes = [8, 16, 24, 32, 64]
-    for hidden_size in hidden_sizes:
-        print(f"Analyzing model with {hidden_size} hidden neurons...")
-        analyze_model(project="setnet", hidden_size=hidden_size)
+    # # 3. Analyze trained models
+    # hidden_sizes = [8, 16, 24, 32, 64]
+    # for hidden_size in hidden_sizes:
+    #     print(f"Analyzing model with {hidden_size} hidden neurons...")
+    #     analyze_model(project="setnet", hidden_size=hidden_size)
+
+    plot_weight_heatmaps(model=None, hidden_size=16, project="setnet")
