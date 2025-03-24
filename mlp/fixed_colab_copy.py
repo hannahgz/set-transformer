@@ -595,7 +595,22 @@ def categorize_triplet(sequence, index):
     # Convert the tuple into a category index (hashable representation)
     return triplet_type
 
+def triplet_type_to_labels(triplet_type, attribute_index):
+    """
+    Convert a triplet type to a list of labels for each card in the triplet.
 
+    Args:
+        triplet_type: Tuple representing the triplet type
+
+    Returns:
+        List of labels for each card in the triplet
+    """
+    card_labels = []
+    for card in triplet_type:
+        card_labels.append(attr_id_to_name_dict[attribute_index][card.index(1)])
+    return card_labels
+
+    
 def assign_triplet_categories(dataloader, index):
     # Dictionary to store each unique triplet type and its corresponding category ID
     categories = {}
@@ -603,7 +618,7 @@ def assign_triplet_categories(dataloader, index):
 
     # Array to store the category assignment for each triplet
     triplet_categories = []
-
+    labels = []
     # Iterate through all triplets in X_train
     # for i in range(dataset.shape[0]):
     for batch_embeddings, batch_targets in dataloader:
@@ -618,20 +633,32 @@ def assign_triplet_categories(dataloader, index):
 
             # Append the category ID to the result list
             triplet_categories.append(categories[triplet_type])
+            labels.append(triplet_type_to_labels(triplet_type, index))
             # breakpoint()
 
     # Convert to a NumPy array for further use
     triplet_categories = np.array(triplet_categories)
 
-    return triplet_categories, list(categories.keys())
+    return triplet_categories, list(categories.keys()), labels
 
 
 attribute_map = {0: "shape", 1: "color", 2: "number", 3: "shading"}
 
+attr_id_to_name_dict = {
+    0: ["oval", "squiggle", "diamond"],
+    1: ["red", "green", "purple"],
+    2: ["one", "two", "three"],
+    3: ["solid", "striped", "open"]
+}
+# shapes = [0, 1, 2]  # 0: oval, 1: squiggle, 2: diamond
+#     colors = [0, 1, 2]  # 0: red, 1: green, 2: purple
+#     numbers = [0, 1, 2]  # 0: one, 1: two, 2: three
+#     shadings = [0, 1, 2]  # 0: solid, 1: striped, 2: open
+
 
 def plot_activations_by_triplet_category(activations, neuron_index, dataloader, attribute_index, hidden_size, savefig=False):
     # Create a color map to distinguish between the categories
-    triplet_categories, key_list = assign_triplet_categories(
+    triplet_categories, key_list, labels = assign_triplet_categories(
         dataloader, attribute_index)
 
     colors = plt.cm.get_cmap('tab20', 27)
@@ -647,8 +674,9 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
                                            neuron_index][triplet_categories == category]
 
         # Plot the histogram for the current category
+    
         plt.hist(category_activations, bins=30, alpha=0.5,
-                 label=f'Category {key_list[category]}', color=colors(category))
+                 label=labels[category], color=colors(category))
 
     # Add labels and a legend
     plt.xlabel('Activation Value')
@@ -668,7 +696,7 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
 
 
 def plot_activation_grid_by_triplet_category(activations, neuron_index, dataloader, attribute_index, hidden_size, savefig=False):
-    triplet_categories, key_list = assign_triplet_categories(
+    triplet_categories, key_list, labels = assign_triplet_categories(
         dataloader, attribute_index)
 
     # Create a color map to distinguish between the categories
@@ -694,9 +722,9 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
 
         # Add title and labels for the individual subplot
         if is_triplet_set(key_list, category):
-            ax.set_title(f'SET: Category {key_list[category]}')
+            ax.set_title(f'SET: {labels[category]}')
         else:
-            ax.set_title(f'Category {key_list[category]}')
+            ax.set_title(f'{labels[category]}')
         ax.set_xlabel('Activation Value')
         ax.set_ylabel('Frequency')
 
