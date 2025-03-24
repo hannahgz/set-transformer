@@ -560,12 +560,38 @@ def plot_weight_heatmaps(model, hidden_size, project="setnet"):
     print(f"Weight heatmaps saved to {fig_save_path}")
 
 
-def is_triplet_set(key_list, index):
-    return (
-        np.all(np.sum(key_list[index], axis=0) == [1, 1, 1], axis=0) or
-        np.all(np.sum(key_list[index], axis=0) == [3, 0, 0], axis=0) or
-        np.all(np.sum(key_list[index], axis=0) == [0, 3, 0], axis=0) or
-        np.all(np.sum(key_list[index], axis=0) == [0, 0, 3], axis=0))
+# def is_triplet_set(key_list, index):
+#     return (
+#         np.all(np.sum(key_list[index], axis=0) == [1, 1, 1], axis=0) or
+#         np.all(np.sum(key_list[index], axis=0) == [3, 0, 0], axis=0) or
+#         np.all(np.sum(key_list[index], axis=0) == [0, 3, 0], axis=0) or
+#         np.all(np.sum(key_list[index], axis=0) == [0, 0, 3], axis=0))
+# Alternative implementation using the original approach but with proper conversion
+def is_triplet_set_alt(category_to_triplet, index):
+    """
+    Alternative implementation of is_triplet_set using the original approach
+    but with proper conversion to numpy arrays.
+    """
+    try:
+        # Convert the tuple of tuples to a numpy array
+        triplet = np.array([[int(val) for val in card] for card in category_to_triplet[index]])
+        
+        # Sum along axis 0 (across the 3 cards) for each attribute position
+        sums = np.sum(triplet, axis=0)
+        
+        # Check the conditions:
+        # - Sum is [3,0,0] or [0,3,0] or [0,0,3] -> all cards have same value
+        # - Sum is [1,1,1] -> all cards have different values
+        return (
+            np.array_equal(sums, [1, 1, 1]) or  # All different
+            np.array_equal(sums, [3, 0, 0]) or  # All same, first value
+            np.array_equal(sums, [0, 3, 0]) or  # All same, second value
+            np.array_equal(sums, [0, 0, 3])     # All same, third value
+        )
+    except Exception as e:
+        print(f"Error in is_triplet_set_alt: {e}")
+        print(f"category_to_triplet[{index}]: {category_to_triplet[index]}")
+        return False
 
 # Define a method to get attribute triplets
 
@@ -617,11 +643,13 @@ def triplet_type_to_labels(triplet_type, attribute_index):
 def assign_triplet_categories(dataloader, index):
     # Dictionary to store each unique triplet type and its corresponding category ID
     categories = {}
+
+    category_to_triplet = {}
     category_counter = 0
 
     # Array to store the category assignment for each triplet
     triplet_categories = []
-    labels = []
+    # labels = []
     # Iterate through all triplets in X_train
     # for i in range(dataset.shape[0]):
     for batch_embeddings, batch_targets in dataloader:
@@ -632,17 +660,18 @@ def assign_triplet_categories(dataloader, index):
             # Assign a category ID to the triplet type if not already assigned
             if triplet_type not in categories:
                 categories[triplet_type] = category_counter
+                category_to_triplet[category_counter] = triplet_type
                 category_counter += 1
 
             # Append the category ID to the result list
             triplet_categories.append(categories[triplet_type])
-            labels.append(triplet_type_to_labels(triplet_type, index))
+            # labels.append(triplet_type_to_labels(triplet_type, index))
             # breakpoint()
 
     # Convert to a NumPy array for further use
-    triplet_categories = np.array(triplet_categories)
+    triplet_categories = np.array(triplet_categories) # [0, 1, 2, 1, 5, 6, ...]
 
-    return triplet_categories, list(categories.keys()), labels
+    return triplet_categories, category_to_triplet
 
 
 attribute_map = {0: "shape", 1: "color", 2: "number", 3: "shading"}
@@ -661,7 +690,7 @@ attr_id_to_name_dict = {
 
 def plot_activations_by_triplet_category(activations, neuron_index, dataloader, attribute_index, hidden_size, savefig=False):
     # Create a color map to distinguish between the categories
-    triplet_categories, key_list, labels = assign_triplet_categories(
+    triplet_categories, category_to_triplet  = assign_triplet_categories(
         dataloader, attribute_index)
 
     colors = plt.cm.get_cmap('tab20', 27)
@@ -677,9 +706,9 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
                                            neuron_index][triplet_categories == category]
 
         # Plot the histogram for the current category
-    
+        curr_label = triplet_type_to_labels(category_to_triplet[category], attribute_index)
         plt.hist(category_activations, bins=30, alpha=0.5,
-                 label=labels[category], color=colors(category))
+                 label=curr_label, color=colors(category))
 
     # Add labels and a legend
     plt.xlabel('Activation Value')
@@ -699,7 +728,7 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
 
 
 def plot_activation_grid_by_triplet_category(activations, neuron_index, dataloader, attribute_index, hidden_size, savefig=False):
-    triplet_categories, key_list, labels = assign_triplet_categories(
+    triplet_categories, category_to_triplet = assign_triplet_categories(
         dataloader, attribute_index)
 
     # Create a color map to distinguish between the categories
@@ -724,10 +753,11 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
         # ax.set_ylim(0, 3000)
 
         # Add title and labels for the individual subplot
-        if is_triplet_set(key_list, category):
-            ax.set_title(f'SET: {labels[category]}')
+        if is_triplet_set_alt(category_to_triplet, category):
+            curr_label = triplet_type_to_labels(category_to_triplet[category], attribute_index)
+            ax.set_title(f'SET: {curr_label}')
         else:
-            ax.set_title(f'{labels[category]}')
+            ax.set_title(f'{curr_label}')
         ax.set_xlabel('Activation Value')
         ax.set_ylabel('Frequency')
 
