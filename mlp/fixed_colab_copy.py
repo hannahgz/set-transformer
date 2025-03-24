@@ -439,7 +439,7 @@ def analyze_model(project, hidden_size, layer_names=None, device='cuda' if torch
 
 def plot_weight_heatmaps(model, hidden_size, project="setnet"):
     """
-    Plot simple heatmaps of model weight matrices.
+    Plot heatmaps of model weight matrices with feature grouping.
     
     Args:
         model: The trained SetNet model
@@ -461,13 +461,31 @@ def plot_weight_heatmaps(model, hidden_size, project="setnet"):
     fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
     os.makedirs(fig_save_path, exist_ok=True)
     
-    # Plot FC1 weights (36 x hidden_size)
-    plt.figure(figsize=(10, 8))
+    # Plot FC1 weights (36 x hidden_size) with feature group delineation
+    plt.figure(figsize=(12, 8))
+    
+    # Create the heatmap
     im = plt.imshow(fc1_weights, cmap='viridis')
     plt.colorbar(im)
+    
+    # Add vertical lines to separate each group of 12 features (each card)
+    for i in range(1, 3):
+        plt.axvline(x=i*12-0.5, color='red', linestyle='-', linewidth=2)
+    
+    # Customize title and labels
     plt.title(f'FC1 Weights (Input → Hidden Layer) - {hidden_size} neurons')
-    plt.xlabel('Input Feature')
+    plt.xlabel('Input Feature (grouped by cards)')
     plt.ylabel('Hidden Neuron')
+    
+    # Add card labels below the x-axis
+    plt.text(6, hidden_size+1, 'Card 1', ha='center')
+    plt.text(18, hidden_size+1, 'Card 2', ha='center')
+    plt.text(30, hidden_size+1, 'Card 3', ha='center')
+    
+    # Extend the bottom margin to fit the card labels
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.15)
+    
     plt.savefig(f"{fig_save_path}/fc1_weights_heatmap.png", bbox_inches="tight")
     plt.close()
     
