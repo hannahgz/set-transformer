@@ -544,12 +544,25 @@ def is_triplet_set(key_list, index):
 # Define a method to get attribute triplets
 
 
+# def categorize_triplet(sequence, index):
+#     # Extract last 3 elements of each card in the triplet
+#     sequence = sequence.astype(int)
+#     card1 = tuple(sequence[0:12][index*3: (index + 1) * 3])
+#     card2 = tuple(sequence[12:24][index*3: (index + 1) * 3])
+#     card3 = tuple(sequence[24:36][index*3: (index + 1) * 3])
+
+#     triplet_type = (card1, card2, card3)
+
+#     # Convert the tuple into a category index (hashable representation)
+#     return triplet_type
+
 def categorize_triplet(sequence, index):
     # Extract last 3 elements of each card in the triplet
     sequence = sequence.astype(int)
-    card1 = tuple(sequence[0:12][index*3: (index + 1) * 3])
-    card2 = tuple(sequence[12:24][index*3: (index + 1) * 3])
-    card3 = tuple(sequence[24:36][index*3: (index + 1) * 3])
+    # Convert np.int64 to regular Python int
+    card1 = tuple(int(x) for x in sequence[0:12][index*3: (index + 1) * 3])
+    card2 = tuple(int(x) for x in sequence[12:24][index*3: (index + 1) * 3])
+    card3 = tuple(int(x) for x in sequence[24:36][index*3: (index + 1) * 3])
 
     triplet_type = (card1, card2, card3)
 
@@ -579,7 +592,7 @@ def assign_triplet_categories(dataloader, index):
 
             # Append the category ID to the result list
             triplet_categories.append(categories[triplet_type])
-            breakpoint()
+            # breakpoint()
 
     # Convert to a NumPy array for further use
     triplet_categories = np.array(triplet_categories)
