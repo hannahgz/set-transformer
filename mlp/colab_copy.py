@@ -111,10 +111,11 @@ def generate_data(batch_size=16):
 
     X = np.array(X)
     y = np.array(y)
+    print(f"X shape: {X.shape}, y shape: {y.shape}")
 
     # Split into train and test sets
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42)
+        X, y, test_size=0.1, random_state=42)
 
     # Step 2: Convert the dataset to PyTorch tensors
     X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
@@ -125,6 +126,7 @@ def generate_data(batch_size=16):
 
     # Shuffle the training data
     permutation_train = torch.randperm(X_train_tensor.size()[0])
+    breakpoint()
     X_train_tensor = X_train_tensor[permutation_train]
     y_train_tensor = y_train_tensor[permutation_train]
 
@@ -151,6 +153,128 @@ def generate_data(batch_size=16):
         "train_loader": train_loader,
         "val_loader": val_loader
     }, f"{save_data_loader_path}/data_loader.pth")
+
+def train_binary_probe(
+    capture_layer,
+    attribute_id,
+    project,
+    embedding_dim=64,
+    batch_size=32,
+    learning_rate=1e-3,
+    num_epochs=100,
+    patience=10,
+    val_split=0.2,
+    device='cuda' if torch.cuda.is_available() else 'cpu'
+): 
+    # Load the binary dataset
+    train_loader, val_loader = load_binary_dataloader(attribute_id, capture_layer, project)
+
+    # Initialize model, optimizer, and move to device
+    model = BinaryProbe(embedding_dim=embedding_dim).to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    
+    # Initialize wandb
+    wandb.init(
+        project=project,
+        config={
+            "learning_rate": learning_rate,
+            "batch_size": batch_size,
+            "embedding_dim": embedding_dim,
+            "capture_layer": capture_layer,
+            "attribute_id": attribute_id,
+            "val_split": val_split
+        },
+        name=f"attr_{attribute_id}_layer{capture_layer}"
+    )
+    
+    # Early stopping variables
+    best_val_loss = float('inf')
+    patience_counter = 0
+    best_model_state = None
+    
+    # Training loop
+    for epoch in range(num_epochs):
+        # Training phase
+        model.train()
+        train_loss = 0
+        train_correct = 0
+        train_total = 0
+        
+        for batch_embeddings, batch_targets in train_loader:
+            batch_embeddings = batch_embeddings.to(device)
+            batch_targets = batch_targets.to(device)
+            
+            # Forward pass
+            outputs = model(batch_embeddings).squeeze()
+            loss = model.compute_loss(outputs, batch_targets)
+            
+            # Backward pass
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            
+            # Calculate accuracy
+            predictions = model.predict(batch_embeddings).squeeze()
+            train_correct += (predictions == batch_targets).sum().item()
+            train_total += batch_targets.size(0)
+            train_loss += loss.item()
+        
+        # Validation phase
+        model.eval()
+        val_loss = 0
+        val_correct = 0
+        val_total = 0
+        
+        with torch.no_grad():
+            for batch_embeddings, batch_targets in val_loader:
+                batch_embeddings = batch_embeddings.to(device)
+                batch_targets = batch_targets.to(device)
+                
+                outputs = model(batch_embeddings).squeeze()
+                loss = model.compute_loss(outputs, batch_targets)
+                
+                predictions = model.predict(batch_embeddings).squeeze()
+                val_correct += (predictions == batch_targets).sum().item()
+                val_total += batch_targets.size(0)
+                val_loss += loss.item()
+        
+        # Calculate average losses and accuracies
+        avg_train_loss = train_loss / len(train_loader)
+        avg_val_loss = val_loss / len(val_loader)
+        train_accuracy = train_correct / train_total
+        val_accuracy = val_correct / val_total
+        
+        # Log metrics
+        wandb.log({
+            "epoch": epoch,
+            "train_loss": avg_train_loss,
+            "val_loss": avg_val_loss,
+            "train_accuracy": train_accuracy,
+            "val_accuracy": val_accuracy
+        })
+        
+        print(f"Epoch {epoch+1}/{num_epochs}")
+        print(f"Train Loss: {avg_train_loss:.4f}, Train Accuracy: {train_accuracy:.4f}")
+        print(f"Val Loss: {avg_val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}")
+        
+        # Early stopping check
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            patience_counter = 0
+            best_model_state = model.state_dict()
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                print(f"Early stopping triggered after {epoch+1} epochs")
+                break
+    
+    # Save the best model
+    model.load_state_dict(best_model_state)
+
+    torch.save(model.state_dict(), 
+               f"{PATH_PREFIX}/{project}/layer{capture_layer}/attr_{attribute_id}/binary_probe_model.pt")
+    wandb.finish()
+    return model
 
 if __name__ == "__main__":
     generate_data()
