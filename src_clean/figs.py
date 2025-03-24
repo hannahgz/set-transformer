@@ -1248,7 +1248,7 @@ if __name__ == "__main__":
         layers=[0, 1, 2, 3],
         tokenizer_path=GPTConfig44_Complete().tokenizer_path,
         project_name="attr_from_answer200",
-        loss_range=[0, 0.63],
+        loss_range=[0, 0.65],
         acc_range=[0.65, 1],
     )
 
