@@ -333,8 +333,10 @@ if __name__ == "__main__":
     # train_model(project="setnet")
     
     # Load saved model
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model = SetNet()
     model.load_state_dict(torch.load(f"{PATH_PREFIX}/setnet/model.pt"))
+    model.to(device)
 
     train_loader, val_loader = load_binary_dataloader()
     train_activations = get_layer_activations(model, "fc2", train_loader)
