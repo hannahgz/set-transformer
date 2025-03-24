@@ -1501,20 +1501,104 @@ def run_layer_probe_similarity_analysis(project, layers, attributes, tokenizer_p
 #     tokenizer_path="path/to/tokenizer"
 # )
 
+def analyze_binary_datasets(parent_folder, capture_layer, attribute_ids):
+    """
+    Load input embeddings and binary targets for all attributes and print statistics
+    
+    Args:
+        parent_folder (str): Name of the parent folder containing the data
+        capture_layer (int): The layer to analyze
+        attribute_ids (list): List of attribute IDs to analyze
+    
+    Returns:
+        dict: Statistics for each attribute
+    """
+    import torch
+    import os
+    
+    PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
+    stats = {}
+    
+    print(f"Analyzing binary datasets for layer {capture_layer}:")
+    print("-" * 50)
+    print("Attribute ID | Positive Examples | Negative Examples | Total | % Positive")
+    print("-" * 80)
+    
+    for attribute_id in attribute_ids:
+        # Construct the path to the binary dataset
+        dataset_path = f"{PATH_PREFIX}/{parent_folder}/layer{capture_layer}/binary_dataset_{attribute_id}.pt"
+        
+        # Check if the dataset exists
+        if not os.path.exists(dataset_path):
+            print(f"Dataset for attribute {attribute_id} not found at {dataset_path}")
+            continue
+        
+        # Load the dataset
+        data = torch.load(dataset_path)
+        
+        # Extract input embeddings and binary targets
+        input_embeddings = data['input_embeddings']
+        binary_targets = data['binary_targets']
+        
+        # Count positive and negative examples
+        positive_count = (binary_targets == 1).sum().item()
+        negative_count = (binary_targets == 0).sum().item()
+        total_count = len(binary_targets)
+        positive_percentage = (positive_count / total_count) * 100
+        
+        # Store statistics
+        stats[attribute_id] = {
+            'positive_count': positive_count,
+            'negative_count': negative_count,
+            'total_count': total_count,
+            'positive_percentage': positive_percentage,
+            'embedding_shape': input_embeddings.shape
+        }
+        
+        # Print statistics
+        print(f"{attribute_id:11d} | {positive_count:17d} | {negative_count:17d} | {total_count:5d} | {positive_percentage:6.2f}%")
+    
+    print("-" * 80)
+    print(f"Total datasets analyzed: {len(stats)}")
+    
+    return stats
+
+# Example usage:
+# attribute_ids = [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]
+# stats = analyze_binary_datasets("all_attr_from_last_attr_binding", 0, attribute_ids)
+
 if __name__ == "__main__":
     seed = 42
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
 
-    config = GPTConfig44_Complete()
-    project = "Attribute From Last Attribute"
-    run_layer_probe_similarity_analysis(
-        project=project,
-        layers=range(4),
-        attributes=[6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11],
-        tokenizer_path=config.tokenizer_path
-    )
+    attribute_ids = [1, 3, 5, 6, 8, 9, 11, 15, 17, 18, 19, 20]
+    stats = analyze_binary_datasets(
+        parent_folder="all_attr_from_last_attr_binding",
+        capture_layer=0, 
+        attribute_ids=attribute_ids)
+    stats = analyze_binary_datasets(
+        parent_folder="all_attr_from_last_attr_binding",
+        capture_layer=1, 
+        attribute_ids=attribute_ids)
+    stats = analyze_binary_datasets(
+        parent_folder="all_attr_from_last_attr_binding",
+        capture_layer=2, 
+        attribute_ids=attribute_ids)
+    stats = analyze_binary_datasets(
+        parent_folder="all_attr_from_last_attr_binding",
+        capture_layer=3, 
+        attribute_ids=attribute_ids)
+
+    # config = GPTConfig44_Complete()
+    # project = "Attribute From Last Attribute"
+    # run_layer_probe_similarity_analysis(
+    #     project=project,
+    #     layers=range(4),
+    #     attributes=[6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11],
+    #     tokenizer_path=config.tokenizer_path
+    # )
     # test_reorder_results(config.tokenizer_path)
     # layers = range(4)
     # attributes = [6, 19, 20, 3, 17, 18, 9, 5, 15, 8, 1, 11]
