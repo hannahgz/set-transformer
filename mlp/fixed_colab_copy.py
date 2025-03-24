@@ -722,7 +722,7 @@ if __name__ == "__main__":
     hidden_size = 16
     model = load_model(project="setnet", hidden_size=hidden_size)
     train_loader, val_loader = load_binary_dataloader()
-    create_analysis_dataloader(train_loader, batch_size=16):
+    create_analysis_dataloader(train_loader, batch_size=16)
     analysis_loader = torch.load(f"{PATH_PREFIX}/colab/non_shuffled_train_loader.pth")
     layer_name = "fc1"
 
