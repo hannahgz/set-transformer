@@ -650,7 +650,7 @@ def plot_consolidated_attribute_metrics(layers, tokenizer_path, loss_range=[0, 0
     fig_val_acc, axes_val_acc = plt.subplots(1, 4, figsize=(24, 5))
 
     # Set style
-    sns.set_style("darkgrid")
+    sns.set_style("white")
 
     tokenizer = load_tokenizer(tokenizer_path)
 
@@ -1238,6 +1238,7 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
 
+    sns.set_style("white")
     plot_consolidated_attribute_metrics(
         layers=[0, 1, 2, 3],
         tokenizer_path=GPTConfig44_Complete().tokenizer_path,
