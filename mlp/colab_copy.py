@@ -306,9 +306,55 @@ def train_model(
     wandb.finish()
     return model
 
+def get_layer_activations(model, layer_name, data_loader, device='cuda' if torch.cuda.is_available() else 'cpu'):
+    activations = []
+    def hook_fn(module, input, output):
+        activations.append(output.detach())
+
+    # Register a hook to the desired layer
+    hook = dict([*model.named_modules()])[layer_name].register_forward_hook(hook_fn)
+
+    model.eval()
+    with torch.no_grad():
+        for batch_embeddings, batch_targets in data_loader:
+            batch_embeddings = batch_embeddings.to(device)
+            batch_targets = batch_targets.to(device)
+
+            outputs = model(batch_embeddings).squeeze()
+
+    # Unregister the hook
+    hook.remove()
+
+    return torch.cat(activations, dim=0)
+
+import matplotlib.pyplot as plt
 if __name__ == "__main__":
-    generate_data()
-    train_model(project="setnet")
+    # generate_data()
+    # train_model(project="setnet")
+    
+    # Load saved model
+    model = SetNet()
+    model.load_state_dict(torch.load(f"{PATH_PREFIX}/setnet/model.pt"))
+
+    train_loader, val_loader = load_binary_dataloader()
+    train_activations = get_layer_activations(model, "fc2", train_loader)
+
+    plt.figure(figsize=(36, 18))
+    for i in range(train_activations.shape[1]):
+        plt.subplot(6, 4, i+1)  # Adjust the grid size based on the number of neurons
+        plt.hist(train_activations[:, i], bins=50, alpha=0.7)
+        plt.title(f'Neuron {i}')
+        plt.xlabel('Activation')
+        plt.ylabel('Frequency')
+    plt.suptitle('Activation Distributions for Training Set Neurons', fontsize=24)
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+
+    fig_save_path = f"COMPLETE_FIGS/setnet"
+    os.makedirs(fig_save_path, exist_ok=True)
+    plt.savefig(f"{fig_save_path}/train_activations_24.png", bbox_inches="tight")
+    plt.show()
+
+    # get_layer_activations
 
 # # sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(sample_weights), replacement=True)
 # train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
