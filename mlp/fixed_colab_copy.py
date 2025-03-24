@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 FIG_SAVE_PATH = "COMPLETE_FIGS/setnet"
 
+
 class BalancedDataset(Dataset):
     def __init__(self, class_0_data, class_1_data):
         """
@@ -24,7 +25,8 @@ class BalancedDataset(Dataset):
         self.class_1_data = class_1_data
         self.length = min(len(class_0_data), len(
             class_1_data)) * 2  # Ensure 50/50 split
-        print(f"Length of class 0 data: {len(class_0_data)}, Length of class 1 data: {len(class_1_data)}")
+        print(
+            f"Length of class 0 data: {len(class_0_data)}, Length of class 1 data: {len(class_1_data)}")
         print("Length of dataset: ", self.length)
 
     def __len__(self):
@@ -53,7 +55,7 @@ class SetNet(nn.Module):
     def __init__(self, hidden_size=24):
         """
         Initialize the SetNet model with customizable hidden layer size.
-        
+
         Args:
             hidden_size (int): Number of neurons in the hidden layer
         """
@@ -69,12 +71,12 @@ class SetNet(nn.Module):
         x = self.relu1(x)
         x = self.sigmoid(self.fc2(x))
         return x
-    
+
     def predict(self, x, threshold=0.5):
         # Returns binary predictions (0 or 1)
         probs = self.forward(x)
         return (probs >= threshold).float()
-    
+
     def compute_loss(self, outputs, targets):
         # Binary cross entropy loss
         return nn.functional.binary_cross_entropy(outputs, targets)
@@ -191,14 +193,14 @@ def train_model(
     patience=10,
     val_split=0.1,
     device='cuda' if torch.cuda.is_available() else 'cpu'
-): 
+):
     # Load the binary dataset
     train_loader, val_loader = load_binary_dataloader()
 
     # Initialize model, optimizer, and move to device
     model = SetNet(hidden_size=hidden_size).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-    
+
     # Initialize wandb
     run_name = f"setnet_hidden_{hidden_size}"
     wandb.init(
@@ -211,12 +213,12 @@ def train_model(
         },
         name=run_name
     )
-    
+
     # Early stopping variables
     best_val_loss = float('inf')
     patience_counter = 0
     best_model_state = None
-    
+
     # Training loop
     for epoch in range(num_epochs):
         # Training phase
@@ -224,51 +226,51 @@ def train_model(
         train_loss = 0
         train_correct = 0
         train_total = 0
-        
+
         for batch_embeddings, batch_targets in train_loader:
             batch_embeddings = batch_embeddings.to(device)
             batch_targets = batch_targets.to(device)
-            
+
             # Forward pass
             outputs = model(batch_embeddings).squeeze()
             loss = model.compute_loss(outputs, batch_targets)
-            
+
             # Backward pass
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            
+
             # Calculate accuracy
             predictions = model.predict(batch_embeddings).squeeze()
             train_correct += (predictions == batch_targets).sum().item()
             train_total += batch_targets.size(0)
             train_loss += loss.item()
-        
+
         # Validation phase
         model.eval()
         val_loss = 0
         val_correct = 0
         val_total = 0
-        
+
         with torch.no_grad():
             for batch_embeddings, batch_targets in val_loader:
                 batch_embeddings = batch_embeddings.to(device)
                 batch_targets = batch_targets.to(device)
-                
+
                 outputs = model(batch_embeddings).squeeze()
                 loss = model.compute_loss(outputs, batch_targets)
-                
+
                 predictions = model.predict(batch_embeddings).squeeze()
                 val_correct += (predictions == batch_targets).sum().item()
                 val_total += batch_targets.size(0)
                 val_loss += loss.item()
-        
+
         # Calculate average losses and accuracies
         avg_train_loss = train_loss / len(train_loader)
         avg_val_loss = val_loss / len(val_loader)
         train_accuracy = train_correct / train_total
         val_accuracy = val_correct / val_total
-        
+
         # Log metrics
         wandb.log({
             "epoch": epoch,
@@ -277,11 +279,13 @@ def train_model(
             "train_accuracy": train_accuracy,
             "val_accuracy": val_accuracy
         })
-        
+
         print(f"Epoch {epoch+1}/{num_epochs}")
-        print(f"Train Loss: {avg_train_loss:.4f}, Train Accuracy: {train_accuracy:.4f}")
-        print(f"Val Loss: {avg_val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}")
-        
+        print(
+            f"Train Loss: {avg_train_loss:.4f}, Train Accuracy: {train_accuracy:.4f}")
+        print(
+            f"Val Loss: {avg_val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}")
+
         # Early stopping check
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss
@@ -292,39 +296,41 @@ def train_model(
             if patience_counter >= patience:
                 print(f"Early stopping triggered after {epoch+1} epochs")
                 break
-    
+
     # Save the best model
     model.load_state_dict(best_model_state)
 
     # Save model with hidden size in path
     save_path = f"{PATH_PREFIX}/{project}/hidden_{hidden_size}"
     os.makedirs(save_path, exist_ok=True)
-    torch.save(model.state_dict(), 
+    torch.save(model.state_dict(),
                f"{save_path}/model.pt")
     wandb.finish()
     return model
 
 
-def get_layer_activations(model, layer_name, data_loader, device='cuda' if torch.cuda.is_available() else 'cpu'):
+def get_layer_activations(model, layer_name, data_loader, device='cuda' if torch.cuda.is_available() else 'cpu', save_activations_path=None):
     """
     Get activations from a specific layer in the model.
-    
+
     Args:
         model: The trained model
         layer_name: Name of the layer to extract activations from 
         data_loader: DataLoader containing samples
         device: Device for computation
-        
+
     Returns:
         Tensor containing activations
     """
     activations = []
+
     def hook_fn(module, input, output):
         # Move the tensor to CPU before storing
         activations.append(output.detach().cpu())
 
     # Register a hook to the desired layer
-    hook = dict([*model.named_modules()])[layer_name].register_forward_hook(hook_fn)
+    hook = dict([*model.named_modules()]
+                )[layer_name].register_forward_hook(hook_fn)
 
     model.eval()
     with torch.no_grad():
@@ -337,27 +343,32 @@ def get_layer_activations(model, layer_name, data_loader, device='cuda' if torch
     # Unregister the hook
     hook.remove()
 
-    return torch.cat(activations, dim=0)
+    activations = torch.cat(activations, dim=0)
+
+    if save_activations_path is not None:
+        os.amekdirs(os.path.dirname(save_activations_path), exist_ok=True)
+        torch.save(activations, f"{save_activations_path}")
+    return activations
 
 
 def generate_activations_hist(activations, hidden_size, layer_name):
     """
     Generate histogram of activations.
-    
+
     Args:
         activations: Tensor of activations
         hidden_size: Number of neurons (for plotting layout)
         layer_name: Name of the layer (for title)
-        
+
     Returns:
         matplotlib figure
     """
     activations_numpy = activations.numpy()
-    
+
     # Calculate appropriate subplot grid size based on hidden_size
     grid_size = determine_grid_size(hidden_size)
     rows, cols = grid_size
-    
+
     plt.figure(figsize=(cols * 6, rows * 4))
     for i in range(activations_numpy.shape[1]):
         plt.subplot(rows, cols, i+1)
@@ -365,7 +376,8 @@ def generate_activations_hist(activations, hidden_size, layer_name):
         plt.title(f'Neuron {i}')
         plt.xlabel('Activation')
         plt.ylabel('Frequency')
-    plt.suptitle(f'{layer_name} Activation Distributions ({hidden_size} neurons)', fontsize=24)
+    plt.suptitle(
+        f'{layer_name} Activation Distributions ({hidden_size} neurons)', fontsize=24)
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     return plt.gcf()
 
@@ -373,33 +385,48 @@ def generate_activations_hist(activations, hidden_size, layer_name):
 def determine_grid_size(num_neurons):
     """
     Determine appropriate grid size for plotting based on number of neurons.
-    
+
     Args:
         num_neurons: Number of neurons
-        
+
     Returns:
         Tuple (rows, cols) for subplot grid
     """
     # Find factors close to square root
     sqrt_n = int(np.sqrt(num_neurons))
-    
+
     # Find the smallest factor >= sqrt_n that divides num_neurons
     while num_neurons % sqrt_n != 0 and sqrt_n > 0:
         sqrt_n -= 1
-    
+
     if sqrt_n == 0:  # Prime number case
         sqrt_n = 1
-    
+
     rows = sqrt_n
     cols = num_neurons // sqrt_n
-    
+
     return rows, cols
+
+
+def load_model(project, hidden_size, device='cuda' if torch.cuda.is_available() else 'cpu'):
+    # Load the model
+    model_path = f"{PATH_PREFIX}/{project}/hidden_{hidden_size}/model.pt"
+    if not os.path.exists(model_path):
+        print(
+            f"Model with hidden size {hidden_size} not found at {model_path}")
+        return
+
+    model = SetNet(hidden_size=hidden_size)
+    model.load_state_dict(torch.load(model_path))
+    model.to(device)
+
+    return model
 
 
 def analyze_model(project, hidden_size, layer_names=None, device='cuda' if torch.cuda.is_available() else 'cpu'):
     """
     Analyze a trained model by visualizing activations of different layers.
-    
+
     Args:
         project: Project name
         hidden_size: Hidden layer size of the model
@@ -408,39 +435,38 @@ def analyze_model(project, hidden_size, layer_names=None, device='cuda' if torch
     """
     if layer_names is None:
         layer_names = ["fc1", "relu1"]  # Default layers to analyze
-    
+
     # Load the model
-    model_path = f"{PATH_PREFIX}/{project}/hidden_{hidden_size}/model.pt"
-    if not os.path.exists(model_path):
-        print(f"Model with hidden size {hidden_size} not found at {model_path}")
-        return
-    
-    model = SetNet(hidden_size=hidden_size)
-    model.load_state_dict(torch.load(model_path))
-    model.to(device)
-    
+    model = load_model(project, hidden_size, device)
+
     # Load data
     train_loader, val_loader = load_binary_dataloader()
-    
+
     # Create output directory for figures
     fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
     os.makedirs(fig_save_path, exist_ok=True)
-    
+
     # Analyze each layer
     for layer_name in layer_names:
         print(f"Analyzing {layer_name} activations...")
-        activations = get_layer_activations(model, layer_name, train_loader, device)
-        
+        activations = get_layer_activations(
+            model,
+            layer_name,
+            train_loader,
+            device,)
+
         fig = generate_activations_hist(activations, hidden_size, layer_name)
-        fig.savefig(f"{fig_save_path}/{layer_name}_activations.png", bbox_inches="tight")
+        fig.savefig(
+            f"{fig_save_path}/{layer_name}_activations.png", bbox_inches="tight")
         plt.close(fig)
-        
+
         print(f"Saved activation histogram for {layer_name}")
+
 
 def plot_weight_heatmaps(model, hidden_size, project="setnet"):
     """
     Plot heatmaps of model weight matrices with feature grouping.
-    
+
     Args:
         model: The trained SetNet model
         hidden_size: Number of neurons in hidden layer
@@ -452,43 +478,46 @@ def plot_weight_heatmaps(model, hidden_size, project="setnet"):
         model = SetNet(hidden_size=hidden_size)
         model.load_state_dict(torch.load(model_path))
         model.cpu()  # Ensure model is on CPU for data extraction
-    
+
     # Get weights
-    fc1_weights = model.fc1.weight.data.cpu().numpy()  # Shape: [hidden_size, 36]
-    fc2_weights = model.fc2.weight.data.cpu().numpy()  # Shape: [1, hidden_size]
-    
+    # Shape: [hidden_size, 36]
+    fc1_weights = model.fc1.weight.data.cpu().numpy()
+    # Shape: [1, hidden_size]
+    fc2_weights = model.fc2.weight.data.cpu().numpy()
+
     # Create figure directory
     fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
     os.makedirs(fig_save_path, exist_ok=True)
-    
+
     # Plot FC1 weights (36 x hidden_size) with feature group delineation
     plt.figure(figsize=(12, 8))
-    
+
     # Create the heatmap
     im = plt.imshow(fc1_weights, cmap='viridis')
     plt.colorbar(im)
-    
+
     # Add vertical lines to separate each group of 12 features (each card)
     for i in range(1, 3):
         plt.axvline(x=i*12-0.5, color='red', linestyle='-', linewidth=2)
-    
+
     # Customize title and labels
     plt.title(f'FC1 Weights (Input → Hidden Layer) - {hidden_size} neurons')
     plt.xlabel('Input Feature (grouped by cards)')
     plt.ylabel('Hidden Neuron')
-    
+
     # Add card labels below the x-axis
     plt.text(6, hidden_size+1, 'Card 1', ha='center')
     plt.text(18, hidden_size+1, 'Card 2', ha='center')
     plt.text(30, hidden_size+1, 'Card 3', ha='center')
-    
+
     # Extend the bottom margin to fit the card labels
     plt.tight_layout()
     plt.subplots_adjust(bottom=0.15)
-    
-    plt.savefig(f"{fig_save_path}/fc1_weights_heatmap.png", bbox_inches="tight")
+
+    plt.savefig(f"{fig_save_path}/fc1_weights_heatmap.png",
+                bbox_inches="tight")
     plt.close()
-    
+
     # Plot FC2 weights (hidden_size x 1)
     plt.figure(figsize=(10, 4))
     # Reshape to make it a proper heatmap
@@ -498,29 +527,196 @@ def plot_weight_heatmaps(model, hidden_size, project="setnet"):
     plt.title(f'FC2 Weights (Hidden → Output Layer) - {hidden_size} neurons')
     plt.xlabel('Output Neuron')
     plt.ylabel('Hidden Neuron')
-    plt.savefig(f"{fig_save_path}/fc2_weights_heatmap.png", bbox_inches="tight")
+    plt.savefig(f"{fig_save_path}/fc2_weights_heatmap.png",
+                bbox_inches="tight")
     plt.close()
-    
+
     print(f"Weight heatmaps saved to {fig_save_path}")
+
+
+def is_triplet_set(key_list, index):
+    return (
+        np.all(np.sum(key_list[index], axis=0) == [1, 1, 1], axis=0) or
+        np.all(np.sum(key_list[index], axis=0) == [3, 0, 0], axis=0) or
+        np.all(np.sum(key_list[index], axis=0) == [0, 3, 0], axis=0) or
+        np.all(np.sum(key_list[index], axis=0) == [0, 0, 3], axis=0))
+
+# Define a method to get attribute triplets
+
+
+def categorize_triplet(sequence, index):
+    # Extract last 3 elements of each card in the triplet
+    card1 = tuple(sequence[0:12][index*3: (index + 1) * 3])
+    card2 = tuple(sequence[12:24][index*3: (index + 1) * 3])
+    card3 = tuple(sequence[24:36][index*3: (index + 1) * 3])
+
+    triplet_type = (card1, card2, card3)
+
+    # Convert the tuple into a category index (hashable representation)
+    return triplet_type
+
+
+def assign_triplet_categories(dataloader, index):
+    # Dictionary to store each unique triplet type and its corresponding category ID
+    categories = {}
+    category_counter = 0
+
+    # Array to store the category assignment for each triplet
+    triplet_categories = []
+
+    # Iterate through all triplets in X_train
+    # for i in range(dataset.shape[0]):
+    for batch_embeddings, batch_targets in dataloader:
+        for sequence in batch_embeddings:
+            triplet_type = categorize_triplet(sequence, index)
+
+            # Assign a category ID to the triplet type if not already assigned
+            if triplet_type not in categories:
+                categories[triplet_type] = category_counter
+                category_counter += 1
+
+            # Append the category ID to the result list
+            triplet_categories.append(categories[triplet_type])
+
+    # Convert to a NumPy array for further use
+    triplet_categories = np.array(triplet_categories)
+
+    return triplet_categories, list(categories.keys())
+
+
+attribute_map = {0: "shape", 1: "color", 2: "number", 3: "shading"}
+
+
+def plot_activations_by_triplet_category(activations, neuron_index, dataloader, attribute_index, hidden_size, savefig=False):
+    # Create a color map to distinguish between the categories
+    triplet_categories, key_list = assign_triplet_categories(
+        dataloader, attribute_index)
+
+    colors = plt.cm.get_cmap('tab20', 27)
+    # colors = plt.cm.get_cmap('tab20', 9)
+
+    # Plot histograms for each category
+    plt.figure(figsize=(10, 8))
+
+    # for category in range(20, 21):
+    for category in range(27):
+        # Filter the activations that belong to the current category
+        category_activations = activations[:,
+                                           neuron_index][triplet_categories == category]
+
+        # Plot the histogram for the current category
+        plt.hist(category_activations, bins=30, alpha=0.5,
+                 label=f'Category {key_list[category]}', color=colors(category))
+
+    # Add labels and a legend
+    plt.xlabel('Activation Value')
+    plt.ylabel('Frequency')
+    plt.title(
+        f'Activations for Neuron {neuron_index} Categorized by Attribute {attribute_index} ({attribute_map[attribute_index]})')
+    plt.legend(loc='upper right', bbox_to_anchor=(1.2, 1))
+
+    # Show the plot
+    plt.tight_layout()
+    if savefig:
+        save_fig_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
+        os.makedirs(save_fig_path, exist_ok=True)
+        plt.savefig(
+            f"{save_fig_path}/activations_neuron{neuron_index}_index{attribute_index}.png", bbox_inches="tight")
+    plt.show()
+
+
+def plot_activation_grid_by_triplet_category(activations, neuron_index, dataloader, attribute_index, hidden_size, savefig=False):
+    triplet_categories, key_list = assign_triplet_categories(
+        dataloader, attribute_index)
+
+    # Create a color map to distinguish between the categories
+    colors = plt.cm.get_cmap('tab20', 27)
+
+    # Set up a 9x3 grid for subplots
+    fig, axes = plt.subplots(9, 3, figsize=(10, 20))  # 9 rows, 3 columns
+    axes = axes.flatten()  # Flatten the axes array for easier indexing
+
+    for category in range(27):
+        # for category in range(20, 21):
+        # Filter the activations that belong to the current category
+        category_activations = activations[:,
+                                           neuron_index][triplet_categories == category]
+
+        # Plot the histogram in the respective subplot
+        ax = axes[category]
+        ax.hist(category_activations, bins=30,
+                alpha=0.5, color=colors(category))
+
+        # ax.set_xlim(-0.1, 24)
+        # ax.set_ylim(0, 3000)
+
+        # Add title and labels for the individual subplot
+        if is_triplet_set(key_list, category):
+            ax.set_title(f'SET: Category {key_list[category]}')
+        else:
+            ax.set_title(f'Category {key_list[category]}')
+        ax.set_xlabel('Activation Value')
+        ax.set_ylabel('Frequency')
+
+    # Adjust layout to prevent overlap
+    plt.suptitle(
+        f'Activations for Neuron {neuron_index} Categorized by Attribute {attribute_index} ({attribute_map[attribute_index]})')
+    plt.tight_layout(rect=[0, 0, 1, 0.99])
+
+    # Save the figure
+    if savefig:
+        save_fig_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
+        os.makedirs(save_fig_path, exist_ok=True)
+        plt.savefig(
+            f"{save_fig_path}/activations_grid_neuron{neuron_index}_index{attribute_index}.png", bbox_inches="tight")
+    plt.show()
+
 
 if __name__ == "__main__":
     # Create overall figure directory
-    os.makedirs(FIG_SAVE_PATH, exist_ok=True)
-    
+    # os.makedirs(FIG_SAVE_PATH, exist_ok=True)
+
+    hidden_size = 16
+    model = load_model(project="setnet", hidden_size=hidden_size)
+    train_loader, val_loader = load_binary_dataloader()
+    layer_name = "fc1"
+
+    fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
+    activations = get_layer_activations(
+        model,
+        layer_name,
+        train_loader,
+        save_activations_path=f"{fig_save_path}/{layer_name}_train_activations.pth")
+
+    plot_activations_by_triplet_category(
+        activations,
+        neuron_index=1,
+        dataloader=train_loader,
+        attribute_index=2,
+        hidden_size=hidden_size,
+        savefig=True
+    )
+    plot_activation_grid_by_triplet_category(
+        activations,
+        neuron_index=1,
+        dataloader=train_loader,
+        attribute_index=2,
+        hidden_size=hidden_size,
+        savefig=True)
     # Example usage:
     # 1. Generate data (run once)
     # generate_data()
-    
+
     # 2. Train models with different hidden sizes
     # hidden_sizes = [8, 16, 24, 32, 64]
     # for hidden_size in hidden_sizes:
     #     print(f"Training model with {hidden_size} hidden neurons...")
     #     train_model(project="setnet", hidden_size=hidden_size)
-    
+
     # # 3. Analyze trained models
     # hidden_sizes = [8, 16, 24, 32, 64]
     # for hidden_size in hidden_sizes:
     #     print(f"Analyzing model with {hidden_size} hidden neurons...")
     #     analyze_model(project="setnet", hidden_size=hidden_size)
 
-    plot_weight_heatmaps(model=None, hidden_size=16, project="setnet")
+    # plot_weight_heatmaps(model=None, hidden_size=16, project="setnet")
