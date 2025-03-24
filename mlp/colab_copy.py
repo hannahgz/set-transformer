@@ -358,7 +358,7 @@ if __name__ == "__main__":
 
     train_loader, val_loader = load_binary_dataloader()
 
-    layer = "relu1"
+    layer = "fc1"
     train_activations = get_layer_activations(model, layer, train_loader)
 
     # # In your plotting code
