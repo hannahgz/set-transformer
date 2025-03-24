@@ -1,6 +1,6 @@
 import torch
 # from model import GPTConfig44_Complete, GPT, GPTConfig24_Complete
-from model import GPT, GPTConfig34_Complete
+from model import GPT, GPTConfig34_Complete, GPTConfig24_Complete, GPTConfig44_Complete
 from data_utils import initialize_triples_datasets, initialize_loaders, find_paired_sequence
 import random
 import numpy as np
@@ -19,32 +19,65 @@ if __name__ == "__main__":
 
     # config = GPTConfig44_Complete()
     # config = GPTConfig24_Complete()
-    config = GPTConfig34_Complete()
+    # config = GPTConfig34_Complete()
+    configs = [
+        GPTConfig24_Complete(),
+        GPTConfig34_Complete(),
+        GPTConfig44_Complete(),
+        ]
     
     # run(
     #     config,
     #     dataset_path=config.dataset_path
     # )
 
-
     # PIPELINE - Calculate accuracy for complete model on base random dataset
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
-    model = GPT(config).to(device)
-    checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
-    model.load_state_dict(checkpoint["model"])
+    dataset_path = GPTConfig44_Complete().dataset_path
 
-    dataset = torch.load(dataset_path)
-    train_loader, val_loader = initialize_loaders(config, dataset)
+    for config in configs:
+        print(f"Running model with layers: {config.n_layer}")
+        model = GPT(config).to(device)
+        checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
+        model.load_state_dict(checkpoint["model"])
 
-    complete_baserandom_val_accuracy = calculate_accuracy(
-        model=model, 
-        dataloader=val_loader,
-        config=config, 
-        tokenizer_path=config.tokenizer_path,
-        save_incorrect_path=f'{PATH_PREFIX}/complete_baserandom_val_incorrect_predictions_34.txt',
-        breakdown=True)
-    print("Val accuracy for complete model with 3 layers 4 heads on base random dataset: ", complete_baserandom_val_accuracy)
+        dataset = torch.load(dataset_path)
+        train_loader, val_loader = initialize_loaders(config, dataset)
+
+        # train_accuracy = calculate_accuracy(
+        #     model=model, 
+        #     dataloader=train_loader,
+        #     config=config, 
+        #     tokenizer_path=config.tokenizer_path)
+        
+        val_accuracy = calculate_accuracy(
+            model=model, 
+            dataloader=val_loader,
+            config=config, 
+            tokenizer_path=config.tokenizer_path)
+        
+        # print(f"Train accuracy: {train_accuracy}")
+        print(f"Val accuracy: {val_accuracy}")
+        
+
+    # # PIPELINE - Calculate accuracy for complete model on base random dataset
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
+    # dataset_path = f"{PATH_PREFIX}/base_card_randomization_tuple_randomization_dataset.pth"
+    # model = GPT(config).to(device)
+    # checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
+    # model.load_state_dict(checkpoint["model"])
+
+    # dataset = torch.load(dataset_path)
+    # train_loader, val_loader = initialize_loaders(config, dataset)
+
+    # complete_baserandom_val_accuracy = calculate_accuracy(
+    #     model=model, 
+    #     dataloader=val_loader,
+    #     config=config, 
+    #     tokenizer_path=config.tokenizer_path,
+    #     save_incorrect_path=f'{PATH_PREFIX}/complete_baserandom_val_incorrect_predictions_34.txt',
+    #     breakdown=True)
+    # print("Val accuracy for complete model with 3 layers 4 heads on base random dataset: ", complete_baserandom_val_accuracy)
 
     # config = GPTConfig44_Equal()
     # dataset_path = f'{PATH_PREFIX}/equal_causal_balanced_dataset.pth'
