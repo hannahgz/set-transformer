@@ -329,6 +329,22 @@ def get_layer_activations(model, layer_name, data_loader, device='cuda' if torch
     # No need for additional .cpu() here as we've already moved tensors to CPU in the hook
     return torch.cat(activations, dim=0)
 
+def generate_activations_hist(activations):
+    import matplotlib.pyplot as plt
+    activations_numpy = activations.numpy()  # Convert to NumPy array
+
+    plt.figure(figsize=(36, 18))
+    for i in range(activations_numpy.shape[1]):
+        plt.subplot(6, 4, i+1)
+        plt.hist(activations_numpy[:, i], bins=50, alpha=0.7)
+        plt.title(f'Neuron {i}')
+        plt.xlabel('Activation')
+        plt.ylabel('Frequency')
+    plt.suptitle('Activation Distributions for Training Set Neurons', fontsize=24)
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    return plt.gcf()
+    # plt.show()
+
 import matplotlib.pyplot as plt
 if __name__ == "__main__":
     # generate_data()
@@ -341,24 +357,27 @@ if __name__ == "__main__":
     model.to(device)
 
     train_loader, val_loader = load_binary_dataloader()
-    train_activations = get_layer_activations(model, "fc2", train_loader)
 
-    # In your plotting code
-    train_activations_numpy = train_activations.numpy()  # Convert to NumPy array
+    layer = "relu1"
+    train_activations = get_layer_activations(model, layer, train_loader)
 
-    plt.figure(figsize=(36, 18))
-    for i in range(train_activations_numpy.shape[1]):
-        plt.subplot(6, 4, i+1)
-        plt.hist(train_activations_numpy[:, i], bins=50, alpha=0.7)
-        plt.title(f'Neuron {i}')
-        plt.xlabel('Activation')
-        plt.ylabel('Frequency')
-    plt.suptitle('Activation Distributions for Training Set Neurons', fontsize=24)
-    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    # # In your plotting code
+    # train_activations_numpy = train_activations.numpy()  # Convert to NumPy array
 
-    fig_save_path = f"COMPLETE_FIGS/setnet"
+    # plt.figure(figsize=(36, 18))
+    # for i in range(train_activations_numpy.shape[1]):
+    #     plt.subplot(6, 4, i+1)
+    #     plt.hist(train_activations_numpy[:, i], bins=50, alpha=0.7)
+    #     plt.title(f'Neuron {i}')
+    #     plt.xlabel('Activation')
+    #     plt.ylabel('Frequency')
+    # plt.suptitle('Activation Distributions for Training Set Neurons', fontsize=24)
+    # plt.tight_layout(rect=[0, 0, 1, 0.96])
+
+    fig = generate_activations_hist(train_activations)
+    fig_save_path = f"COMPLETE_FIGS"
     os.makedirs(fig_save_path, exist_ok=True)
-    plt.savefig(f"{fig_save_path}/train_activations_24.png", bbox_inches="tight")
+    fig.savefig(f"{fig_save_path}/{layer}_train_activations_24.png", bbox_inches="tight")
 
     # get_layer_activations
 
