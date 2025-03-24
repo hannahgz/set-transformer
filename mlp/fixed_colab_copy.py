@@ -758,27 +758,31 @@ if __name__ == "__main__":
     layer_name = "fc1"
 
     fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
-    activations = get_layer_activations(
-        model,
-        layer_name,
-        analysis_loader,
-        save_activations_path=f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
+    # activations = get_layer_activations(
+    #     model,
+    #     layer_name,
+    #     analysis_loader,
+    #     save_activations_path=f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
 
-    plot_activations_by_triplet_category(
-        activations,
-        neuron_index=1,
-        dataloader=analysis_loader,
-        attribute_index=2,
-        hidden_size=hidden_size,
-        savefig=True
-    )
-    plot_activation_grid_by_triplet_category(
-        activations,
-        neuron_index=1,
-        dataloader=analysis_loader,
-        attribute_index=2,
-        hidden_size=hidden_size,
-        savefig=True)
+    activations = torch.load(f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
+
+    neuron_indices = [10, 15]
+    for neuron_index in neuron_indices:
+        plot_activations_by_triplet_category(
+            activations,
+            neuron_index=neuron_index,
+            dataloader=analysis_loader,
+            attribute_index=2,
+            hidden_size=hidden_size,
+            savefig=True
+        )
+        plot_activation_grid_by_triplet_category(
+            activations,
+            neuron_index=neuron_index,
+            dataloader=analysis_loader,
+            attribute_index=2,
+            hidden_size=hidden_size,
+            savefig=True)
     # Example usage:
     # 1. Generate data (run once)
     # generate_data()
