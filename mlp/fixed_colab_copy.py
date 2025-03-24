@@ -546,6 +546,7 @@ def is_triplet_set(key_list, index):
 
 def categorize_triplet(sequence, index):
     # Extract last 3 elements of each card in the triplet
+    sequence = sequence.numpy()
     card1 = tuple(sequence[0:12][index*3: (index + 1) * 3])
     card2 = tuple(sequence[12:24][index*3: (index + 1) * 3])
     card3 = tuple(sequence[24:36][index*3: (index + 1) * 3])
@@ -577,6 +578,7 @@ def assign_triplet_categories(dataloader, index):
 
             # Append the category ID to the result list
             triplet_categories.append(categories[triplet_type])
+            breakpoint()
 
     # Convert to a NumPy array for further use
     triplet_categories = np.array(triplet_categories)
