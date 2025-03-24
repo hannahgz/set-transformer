@@ -7,6 +7,7 @@ import numpy as np
 import itertools
 import os
 from sklearn.model_selection import train_test_split
+import wandb
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
@@ -159,23 +160,48 @@ def generate_data(batch_size=16):
         "val_loader": val_loader
     }, f"{save_data_loader_path}/data_loader.pth")
 
-def train_binary_probe(
-    capture_layer,
-    attribute_id,
+def load_binary_dataloader():
+    dataset_save_path = f"{PATH_PREFIX}/colab/data_loader.pth"
+    saved_data = torch.load(dataset_save_path)
+    return saved_data['train_loader'], saved_data['val_loader']
+
+class SetNet(nn.Module):
+    def __init__(self):
+        super(SetNet, self).__init__()
+        self.fc1 = nn.Linear(36, 24)
+        self.relu1 = nn.ReLU()
+        self.fc2 = nn.Linear(24, 1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu1(x)
+        x = self.sigmoid(self.fc2(x))
+        return x
+    
+    def predict(self, x, threshold=0.5):
+        # Returns binary predictions (0 or 1)
+        probs = self.forward(x)
+        return (probs >= threshold).float()
+    
+    def compute_loss(self, outputs, targets):
+        # Binary cross entropy loss
+        return nn.functional.binary_cross_entropy(outputs, targets)
+    
+def train_model(
     project,
-    embedding_dim=64,
-    batch_size=32,
+    batch_size=16,
     learning_rate=1e-3,
     num_epochs=100,
     patience=10,
-    val_split=0.2,
+    val_split=0.1,
     device='cuda' if torch.cuda.is_available() else 'cpu'
 ): 
     # Load the binary dataset
-    train_loader, val_loader = load_binary_dataloader(attribute_id, capture_layer, project)
+    train_loader, val_loader = load_binary_dataloader()
 
     # Initialize model, optimizer, and move to device
-    model = BinaryProbe(embedding_dim=embedding_dim).to(device)
+    model = SetNet().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     
     # Initialize wandb
@@ -184,12 +210,9 @@ def train_binary_probe(
         config={
             "learning_rate": learning_rate,
             "batch_size": batch_size,
-            "embedding_dim": embedding_dim,
-            "capture_layer": capture_layer,
-            "attribute_id": attribute_id,
             "val_split": val_split
         },
-        name=f"attr_{attribute_id}_layer{capture_layer}"
+        name=f"colab_set_example"
     )
     
     # Early stopping variables
@@ -277,12 +300,13 @@ def train_binary_probe(
     model.load_state_dict(best_model_state)
 
     torch.save(model.state_dict(), 
-               f"{PATH_PREFIX}/{project}/layer{capture_layer}/attr_{attribute_id}/binary_probe_model.pt")
+               f"{PATH_PREFIX}/{project}/model.pt")
     wandb.finish()
     return model
 
 if __name__ == "__main__":
-    generate_data()
+    # generate_data()
+    train_model(project="setnet")
 
 # # sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(sample_weights), replacement=True)
 # train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
