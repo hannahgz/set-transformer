@@ -145,7 +145,7 @@ def generate_data(batch_size=16):
     train_loader = DataLoader(
         train_dataset, batch_size=batch_size, shuffle=True)
 
-    val_dataset = BalancedDataset(class_1_data_val, class_0_data_val)
+    val_dataset = BalancedDataset(class_0_data_val, class_1_data_val)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
     # Print train_dataset and val_dataset lengths/sizes
@@ -299,13 +299,15 @@ def train_model(
     # Save the best model
     model.load_state_dict(best_model_state)
 
+    save_path = f"{PATH_PREFIX}/{project}"
+    os.makedirs(save_path, exist_ok=True)
     torch.save(model.state_dict(), 
                f"{PATH_PREFIX}/{project}/model.pt")
     wandb.finish()
     return model
 
 if __name__ == "__main__":
-    # generate_data()
+    generate_data()
     train_model(project="setnet")
 
 # # sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(sample_weights), replacement=True)
