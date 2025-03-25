@@ -886,22 +886,6 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
     triplet_categories, category_to_triplet = assign_triplet_categories(
         dataloader, attribute_index)
 
-    # Create a color map to distinguish between the categories
-    # colors = plt.cm.get_cmap('tab20', 27)
-    # # Shuffle the colors in a deterministic way
-    # np.random.seed(42)  # Set a seed for reproducibility
-    # shuffled_colors = np.random.permutation(27)
-    # colors = colors(shuffled_colors)
-    # colors = sns.color_palette('husl', 27)
-
-    # colors = plt.cm.get_cmap('tab20', 27)
-
-    # # Generate 27 distinct colors (normalized range)
-    # color_list = [colors(i / 26) for i in range(27)]
-
-    # # Shuffle the colors in a deterministic way
-    # np.random.seed(42)  # Set a seed for reproducibility
-    # colors = np.random.permutation(color_list)
     colors = cc.glasbey[:27]
 
     # Set up a 7x4 grid for subplots (28 total spaces for 27 plots)
@@ -945,6 +929,62 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
         os.makedirs(save_fig_path, exist_ok=True)
         plt.savefig(
             f"{save_fig_path}/activations_grid_neuron{neuron_index}_index{attribute_index}.png", bbox_inches="tight")
+    plt.show()
+
+def plot_activation_grid_by_triplet_category_sorted(activations, neuron_index, dataloader, attribute_index, hidden_size, savefig=False):
+    triplet_categories, category_to_triplet = assign_triplet_categories(
+        dataloader, attribute_index)
+
+    colors = cc.glasbey[:27]  # Keep the original color mapping
+
+    # Calculate mean activation for each category
+    category_means = []
+    for category in range(27):
+        category_activations = activations[:, neuron_index][triplet_categories == category]
+        category_means.append((category, category_activations.mean()))
+    
+    # Sort categories by mean activation value (ascending)
+    sorted_categories = sorted(category_means, key=lambda x: x[1])
+    
+    # Set up a 5x6 grid for subplots
+    fig, axes = plt.subplots(5, 6, figsize=(14, 16))  # 5 rows, 6 columns
+    axes = axes.flatten()  # Flatten the axes array for easier indexing
+
+    # Plot histograms in sorted order
+    for i, (category, mean_val) in enumerate(sorted_categories):
+        # Get activations for this category
+        category_activations = activations[:, neuron_index][triplet_categories == category]
+        
+        # Plot the histogram in the subplot according to sorted position
+        ax = axes[i]
+        ax.hist(category_activations, bins=30,
+                alpha=0.5, color=colors[category])  # Keep original color mapping
+        
+        # Add title and labels for the individual subplot
+        curr_label = triplet_type_to_labels(
+            category_to_triplet[category], attribute_index)
+        if is_triplet_set_alt(category_to_triplet, category):
+            ax.set_title(f'SET: {curr_label} (μ={mean_val:.2f})')
+        else:
+            ax.set_title(f'{curr_label} (μ={mean_val:.2f})')
+        ax.set_xlabel('Activation Value')
+        ax.set_ylabel('Frequency')
+
+    # Hide the empty subplots
+    for i in range(27, 30):
+        axes[i].set_visible(False)
+
+    # Adjust layout to prevent overlap
+    plt.suptitle(
+        f'Neuron {neuron_index} Activations, Categorized by {attribute_map[attribute_index].capitalize()} (Sorted by Mean)', fontsize=16)
+    plt.tight_layout(rect=[0, 0, 1, 0.99])
+
+    # Save the figure
+    if savefig:
+        save_fig_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
+        os.makedirs(save_fig_path, exist_ok=True)
+        plt.savefig(
+            f"{save_fig_path}/activations_grid_neuron{neuron_index}_index{attribute_index}_sorted.png", bbox_inches="tight")
     plt.show()
 
 def get_activations_for_custom_input(model, cards, layer_name="relu1", device='cuda' if torch.cuda.is_available() else 'cpu'):
@@ -1206,15 +1246,15 @@ if __name__ == "__main__":
 
     # # for neuron_index in neuron_indices:
     for neuron_index in number_neuron_indices:
-        plot_activations_by_triplet_category(
-            activations,
-            neuron_index=neuron_index,
-            dataloader=analysis_loader,
-            attribute_index=2,
-            hidden_size=hidden_size,
-            savefig=True
-        )
-        plot_activation_grid_by_triplet_category(
+        # plot_activations_by_triplet_category(
+        #     activations,
+        #     neuron_index=neuron_index,
+        #     dataloader=analysis_loader,
+        #     attribute_index=2,
+        #     hidden_size=hidden_size,
+        #     savefig=True
+        # )
+        plot_activation_grid_by_triplet_category_sorted(
             activations,
             neuron_index=neuron_index,
             dataloader=analysis_loader,
