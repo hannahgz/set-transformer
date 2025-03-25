@@ -636,7 +636,7 @@ def plot_weight_heatmaps_specific(model, hidden_size, project="setnet"):
     plt.tight_layout()
     plt.subplots_adjust(bottom=0.15)
 
-    plt.savefig(f"{fig_save_path}/fc1_weights_heatmap.png",
+    plt.savefig(f"{fig_save_path}/fc1_weights_heatmap_specific.png",
                 bbox_inches="tight")
     plt.close()
 
