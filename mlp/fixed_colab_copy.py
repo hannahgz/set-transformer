@@ -614,16 +614,30 @@ def plot_weight_heatmaps_specific(model, hidden_size, project="setnet"):
         plt.axvline(x=i*12-0.5, color='red', linestyle='-', linewidth=2)
 
     # Add highlight boxes for specific regions
+    linewidth = 3
     # Highlight row 1, positions 6-8
-    rect1 = patches.Rectangle((5.5, 0.5), 3, 1, linewidth=2, edgecolor='white', facecolor='none')
-    ax.add_patch(rect1)
+    rects = [
+        patches.Rectangle((5.5, 0.5), 3, 1, linewidth=linewidth, edgecolor='white', facecolor='none'),
+        patches.Rectangle((17.5, 0.5), 3, 1, linewidth=linewidth, edgecolor='white', facecolor='none'),
+        patches.Rectangle((29.5, 0.5), 3, 1, linewidth=linewidth, edgecolor='white', facecolor='none'),
+        patches.Rectangle((5.5, 9.5), 3, 1, linewidth=linewidth, edgecolor='white', facecolor='none'),
+        patches.Rectangle((17.5, 9.5), 3, 1, linewidth=linewidth, edgecolor='white', facecolor='none'),
+        patches.Rectangle((29.5, 9.5), 3, 1, linewidth=linewidth, edgecolor='white', facecolor='none'),
+        patches.Rectangle((5.5, 14.5), 3, 1, linewidth=linewidth, edgecolor='white', facecolor='none'),
+        patches.Rectangle((17.5, 14.5), 3, 1, linewidth=linewidth, edgecolor='white', facecolor='none'),
+        patches.Rectangle((29.5, 14.5), 3, 1, linewidth=linewidth, edgecolor='white', facecolor='none'),
+    ]
+    for rect in rects:
+        ax.add_patch(rect)
+
+    # ax.add_patch(rect1)
     
-    # Highlight row 1, positions 18-20
-    rect2 = patches.Rectangle((17.5, 0.5), 3, 1, linewidth=2, edgecolor='white', facecolor='none')
-    ax.add_patch(rect2)
+    # # Highlight row 1, positions 18-20
+    # rect2 = patches.Rectangle((17.5, 0.5), 3, 1, linewidth=linewidth, edgecolor='white', facecolor='none')
+    # ax.add_patch(rect2)
 
     # Customize title and labels
-    plt.title(f'FC1 Weights (Input → Hidden Layer) - {hidden_size} neurons', fontsize=16)
+    plt.title(f'FC1 Weights (Input → Hidden Layer) - {hidden_size} neurons, Shape Positions', fontsize=16)
     plt.xlabel('Input Feature (grouped by cards)', labelpad=20, fontsize=16)
     plt.ylabel('Hidden Neuron', fontsize=16)
 
