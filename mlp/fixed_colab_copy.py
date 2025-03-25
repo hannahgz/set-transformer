@@ -575,6 +575,72 @@ def plot_weight_heatmaps(model, hidden_size, project="setnet"):
 #         np.all(np.sum(key_list[index], axis=0) == [0, 3, 0], axis=0) or
 #         np.all(np.sum(key_list[index], axis=0) == [0, 0, 3], axis=0))
 # Alternative implementation using the original approach but with proper conversion
+import matplotlib.patches as patches
+
+def plot_weight_heatmaps_specific(model, hidden_size, project="setnet"):
+    """
+    Plot heatmaps of model weight matrices with feature grouping.
+
+    Args:
+        model: The trained SetNet model
+        hidden_size: Number of neurons in hidden layer
+        project: Project name for file paths
+    """
+    # Load model if needed
+    if model is None:
+        model_path = f"{PATH_PREFIX}/{project}/hidden_{hidden_size}/model.pt"
+        model = SetNet(hidden_size=hidden_size)
+        model.load_state_dict(torch.load(model_path))
+        model.cpu()  # Ensure model is on CPU for data extraction
+
+    # Get weights
+    # Shape: [hidden_size, 36]
+    fc1_weights = model.fc1.weight.data.cpu().numpy()
+
+    # Create figure directory
+    fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
+    os.makedirs(fig_save_path, exist_ok=True)
+
+    # Plot FC1 weights (36 x hidden_size) with feature group delineation
+    fig, ax = plt.subplots(figsize=(12, 8))
+
+    # Create the heatmap
+    im = plt.imshow(fc1_weights, cmap='viridis')
+    # plt.colorbar(im)
+    plt.colorbar(im, ax=ax, shrink=0.8)
+
+    # Add vertical lines to separate each group of 12 features (each card)
+    for i in range(1, 3):
+        plt.axvline(x=i*12-0.5, color='red', linestyle='-', linewidth=2)
+
+    # Add highlight boxes for specific regions
+    # Highlight row 1, positions 6-8
+    rect1 = patches.Rectangle((5.5, 0.5), 3, 1, linewidth=2, edgecolor='white', facecolor='none')
+    ax.add_patch(rect1)
+    
+    # Highlight row 1, positions 18-20
+    rect2 = patches.Rectangle((17.5, 0.5), 3, 1, linewidth=2, edgecolor='white', facecolor='none')
+    ax.add_patch(rect2)
+
+    # Customize title and labels
+    plt.title(f'FC1 Weights (Input → Hidden Layer) - {hidden_size} neurons', fontsize=16)
+    plt.xlabel('Input Feature (grouped by cards)', labelpad=20, fontsize=16)
+    plt.ylabel('Hidden Neuron', fontsize=16)
+
+    plt.figtext(0.175, 0.26, 'Card 1', ha='center', fontsize=14)  # Changed from 0.02 to 0.01
+    plt.figtext(0.425, 0.26, 'Card 2', ha='center', fontsize=14)   # Changed from 0.02 to 0.01
+    plt.figtext(0.675, 0.26, 'Card 3', ha='center', fontsize=14)
+
+    ax.tick_params(axis='both', which='major', labelsize=12)
+    # Extend the bottom margin to fit the card labels
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.15)
+
+    plt.savefig(f"{fig_save_path}/fc1_weights_heatmap.png",
+                bbox_inches="tight")
+    plt.close()
+
+
 def is_triplet_set_alt(category_to_triplet, index):
     """
     Alternative implementation of is_triplet_set using the original approach
@@ -1173,7 +1239,7 @@ def print_dataloader_sizes():
     print(f"Number of elements in val_loader: {len(val_loader.dataset)}")
 
 if __name__ == "__main__":
-    print_dataloader_sizes()
+    # print_dataloader_sizes()
     # plot_consolidated_metrics()
     # Create overall figure directory
     # os.makedirs(FIG_SAVE_PATH, exist_ok=True)
@@ -1247,3 +1313,5 @@ if __name__ == "__main__":
     #     analyze_model(project="setnet", hidden_size=hidden_size)
 
     # plot_weight_heatmaps(model=None, hidden_size=16, project="setnet")
+
+    plot_weight_heatmaps_specific(model=None, hidden_size=16)
