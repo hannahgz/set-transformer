@@ -802,7 +802,7 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
         curr_label = triplet_type_to_labels(
             category_to_triplet[category], attribute_index)
         plt.hist(category_activations, bins=30, alpha=0.5,
-                 label=curr_label, color=colors(category))
+                 label=curr_label, color=colors[category])
 
     # Add labels and a legend
     plt.xlabel('Activation Value', fontsize=14)
@@ -891,7 +891,7 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
         # Plot the histogram in the respective subplot
         ax = axes[category]
         ax.hist(category_activations, bins=30,
-                alpha=0.5, color=colors(category))
+                alpha=0.5, color=colors[category])
 
         # Add title and labels for the individual subplot
         curr_label = triplet_type_to_labels(
