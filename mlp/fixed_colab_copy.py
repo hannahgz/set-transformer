@@ -784,8 +784,17 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
     triplet_categories, category_to_triplet = assign_triplet_categories(
         dataloader, attribute_index)
 
+    colors = plt.cm.get_cmap('tab20', 27)
+
+    # Generate 27 distinct colors (normalized range)
+    color_list = [colors(i / 26) for i in range(27)]
+
+    # Shuffle the colors in a deterministic way
+    np.random.seed(42)  # Set a seed for reproducibility
+    colors = np.random.permutation(color_list)
+
     # colors = plt.cm.get_cmap('tab20', 27)
-    colors = sns.color_palette('husl', 27)
+    # colors = sns.color_palette('husl', 27)
     # colors = plt.cm.get_cmap('tab20', 9)
 
     # Plot histograms for each category
@@ -802,7 +811,7 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
         curr_label = triplet_type_to_labels(
             category_to_triplet[category], attribute_index)
         plt.hist(category_activations, bins=30, alpha=0.5,
-                 label=curr_label, color=colors[category])
+                 label=curr_label, color=colors(category))
 
     # Add labels and a legend
     plt.xlabel('Activation Value', fontsize=14)
@@ -877,10 +886,23 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
 
     # Create a color map to distinguish between the categories
     # colors = plt.cm.get_cmap('tab20', 27)
-    colors = sns.color_palette('husl', 27)
+    # # Shuffle the colors in a deterministic way
+    # np.random.seed(42)  # Set a seed for reproducibility
+    # shuffled_colors = np.random.permutation(27)
+    # colors = colors(shuffled_colors)
+    # colors = sns.color_palette('husl', 27)
+
+    colors = plt.cm.get_cmap('tab20', 27)
+
+    # Generate 27 distinct colors (normalized range)
+    color_list = [colors(i / 26) for i in range(27)]
+
+    # Shuffle the colors in a deterministic way
+    np.random.seed(42)  # Set a seed for reproducibility
+    colors = np.random.permutation(color_list)
 
     # Set up a 7x4 grid for subplots (28 total spaces for 27 plots)
-    fig, axes = plt.subplots(7, 4, figsize=(14, 20))  # 7 rows, 4 columns
+    fig, axes = plt.subplots(5, 6, figsize=(14, 20))  # 5 rows, 6 columns
     axes = axes.flatten()  # Flatten the axes array for easier indexing
 
     for category in range(27):
@@ -891,7 +913,7 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
         # Plot the histogram in the respective subplot
         ax = axes[category]
         ax.hist(category_activations, bins=30,
-                alpha=0.5, color=colors[category])
+                alpha=0.5, color=colors(category))
 
         # Add title and labels for the individual subplot
         curr_label = triplet_type_to_labels(
@@ -905,6 +927,9 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
 
     # Remove the empty subplot (the 28th one)
     axes[27].set_visible(False)
+    axes[28].set_visible(False)
+    axes[29].set_visible(False)
+    # axes[29].set_visible(False)
 
     # Adjust layout to prevent overlap
     plt.suptitle(
