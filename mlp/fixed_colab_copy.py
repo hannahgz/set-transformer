@@ -1167,8 +1167,14 @@ def plot_consolidated_metrics(loss_range=[0, 0.8], acc_range=[0.6, 1.05], projec
     # Display figures
     plt.show()
 
+def print_dataloader_sizes():
+    train_loader, val_loader = load_binary_dataloader()
+    print(f"Number of elements in train_loader: {len(train_loader.dataset)}")
+    print(f"Number of elements in val_loader: {len(val_loader.dataset)}")
+
 if __name__ == "__main__":
-    plot_consolidated_metrics()
+    print_dataloader_sizes()
+    # plot_consolidated_metrics()
     # Create overall figure directory
     # os.makedirs(FIG_SAVE_PATH, exist_ok=True)
 
