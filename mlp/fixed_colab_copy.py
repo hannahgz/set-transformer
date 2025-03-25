@@ -790,7 +790,7 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
 
     # Plot histograms for each category
     # plt.figure(figsize=(12, 8))
-    fig, ax = plt.subplots(figsize=(15, 10))
+    fig, ax = plt.subplots(figsize=(14, 8))
 
     # for category in range(20, 21):
     for category in range(27):
@@ -809,7 +809,7 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
     plt.ylabel('Frequency',fontsize=14)
     plt.title(
         f'Neuron {neuron_index} Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=16)
-    plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
+    plt.legend(loc='upper right', bbox_to_anchor=(1.25, 1))
 
     ax.tick_params(axis='both', which='major', labelsize=12)
     # Show the plot
