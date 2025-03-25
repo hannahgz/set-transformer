@@ -519,26 +519,28 @@ def plot_weight_heatmaps(model, hidden_size, project="setnet"):
     os.makedirs(fig_save_path, exist_ok=True)
 
     # Plot FC1 weights (36 x hidden_size) with feature group delineation
-    plt.figure(figsize=(12, 8))
+    fig, ax = plt.subplots(figsize=(12, 8))
 
     # Create the heatmap
     im = plt.imshow(fc1_weights, cmap='viridis')
-    plt.colorbar(im)
+    # plt.colorbar(im)
+    plt.colorbar(im, ax=ax, shrink=0.8)
 
     # Add vertical lines to separate each group of 12 features (each card)
     for i in range(1, 3):
         plt.axvline(x=i*12-0.5, color='red', linestyle='-', linewidth=2)
 
     # Customize title and labels
-    plt.title(f'FC1 Weights (Input → Hidden Layer) - {hidden_size} neurons')
-    plt.xlabel('Input Feature (grouped by cards)', labelpad=20)
-    plt.ylabel('Hidden Neuron')
+    plt.title(f'FC1 Weights (Input → Hidden Layer) - {hidden_size} neurons', fontsize=20)
+    plt.xlabel('Input Feature (grouped by cards)', labelpad=20, fontsize=16)
+    plt.ylabel('Hidden Neuron', fontsize=16)
 
     # Add card labels below the x-axis
-    plt.text(5, hidden_size+1, 'Card 1', ha='center')
-    plt.text(17, hidden_size+1, 'Card 2', ha='center')
-    plt.text(29, hidden_size+1, 'Card 3', ha='center')
+    plt.text(5, hidden_size+1, 'Card 1', ha='center', fontsize=14)
+    plt.text(17, hidden_size+1, 'Card 2', ha='center', fontsize=14)
+    plt.text(29, hidden_size+1, 'Card 3', ha='center', fontsize = 14)
 
+    ax.tick_params(axis='both', which='major', labelsize=12)
     # Extend the bottom margin to fit the card labels
     plt.tight_layout()
     plt.subplots_adjust(bottom=0.15)
