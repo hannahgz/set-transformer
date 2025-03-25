@@ -637,7 +637,7 @@ def plot_weight_heatmaps_specific(model, hidden_size, project="setnet"):
     # ax.add_patch(rect2)
 
     # Customize title and labels
-    plt.title(f'FC1 Weights (Input → Hidden Layer) - {hidden_size} neurons, Shape Positions', fontsize=16)
+    plt.title(f'FC1 Weights (Input → Hidden Layer) - {hidden_size} neurons, Number Positions', fontsize=16)
     plt.xlabel('Input Feature (grouped by cards)', labelpad=20, fontsize=16)
     plt.ylabel('Hidden Neuron', fontsize=16)
 
