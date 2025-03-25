@@ -191,24 +191,27 @@ def create_analysis_dataloader(original_dataloader, batch_size=16):
     # First, collect all data from the original loader
     all_data = []
     all_targets = []
-    
+
     for data, target in original_dataloader:
         all_data.append(data)
         all_targets.append(target)
-    
+
     # Concatenate all batches
     all_data = torch.cat(all_data, dim=0)
     all_targets = torch.cat(all_targets, dim=0)
-    
+
     # Create a TensorDataset
     dataset = TensorDataset(all_data, all_targets)
-    
+
     # Create a new DataLoader without shuffling
     if batch_size is None:
         batch_size = len(dataset)  # Use a single batch for simplicity
-        
-    non_shuffled_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
-    torch.save(non_shuffled_loader, f"{PATH_PREFIX}/colab/non_shuffled_train_loader.pth")
+
+    non_shuffled_loader = DataLoader(
+        dataset, batch_size=batch_size, shuffle=False)
+    torch.save(non_shuffled_loader,
+               f"{PATH_PREFIX}/colab/non_shuffled_train_loader.pth")
+
 
 def train_model(
     project,
@@ -574,11 +577,12 @@ def is_triplet_set_alt(category_to_triplet, index):
     """
     try:
         # Convert the tuple of tuples to a numpy array
-        triplet = np.array([[int(val) for val in card] for card in category_to_triplet[index]])
-        
+        triplet = np.array([[int(val) for val in card]
+                           for card in category_to_triplet[index]])
+
         # Sum along axis 0 (across the 3 cards) for each attribute position
         sums = np.sum(triplet, axis=0)
-        
+
         # Check the conditions:
         # - Sum is [3,0,0] or [0,3,0] or [0,0,3] -> all cards have same value
         # - Sum is [1,1,1] -> all cards have different values
@@ -621,6 +625,7 @@ def categorize_triplet(sequence, index):
     # Convert the tuple into a category index (hashable representation)
     return triplet_type
 
+
 def triplet_type_to_labels(triplet_type, attribute_index):
     """
     Convert a triplet type to a list of labels for each card in the triplet.
@@ -639,7 +644,7 @@ def triplet_type_to_labels(triplet_type, attribute_index):
         # card_labels.append(attr_id_to_name_dict[attribute_index][card.index(1)])
     return card_labels
 
-    
+
 def assign_triplet_categories(dataloader, index):
     # Dictionary to store each unique triplet type and its corresponding category ID
     categories = {}
@@ -669,7 +674,8 @@ def assign_triplet_categories(dataloader, index):
             # breakpoint()
 
     # Convert to a NumPy array for further use
-    triplet_categories = np.array(triplet_categories) # [0, 1, 2, 1, 5, 6, ...]
+    triplet_categories = np.array(
+        triplet_categories)  # [0, 1, 2, 1, 5, 6, ...]
 
     return triplet_categories, category_to_triplet
 
@@ -690,7 +696,7 @@ attr_id_to_name_dict = {
 
 def plot_activations_by_triplet_category(activations, neuron_index, dataloader, attribute_index, hidden_size, savefig=False):
     # Create a color map to distinguish between the categories
-    triplet_categories, category_to_triplet  = assign_triplet_categories(
+    triplet_categories, category_to_triplet = assign_triplet_categories(
         dataloader, attribute_index)
 
     colors = plt.cm.get_cmap('tab20', 27)
@@ -706,7 +712,8 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
                                            neuron_index][triplet_categories == category]
 
         # Plot the histogram for the current category
-        curr_label = triplet_type_to_labels(category_to_triplet[category], attribute_index)
+        curr_label = triplet_type_to_labels(
+            category_to_triplet[category], attribute_index)
         plt.hist(category_activations, bins=30, alpha=0.5,
                  label=curr_label, color=colors(category))
 
@@ -753,7 +760,8 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
         # ax.set_ylim(0, 3000)
 
         # Add title and labels for the individual subplot
-        curr_label = triplet_type_to_labels(category_to_triplet[category], attribute_index)
+        curr_label = triplet_type_to_labels(
+            category_to_triplet[category], attribute_index)
         if is_triplet_set_alt(category_to_triplet, category):
             ax.set_title(f'SET: {curr_label}')
         else:
@@ -775,47 +783,123 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
     plt.show()
 
 
+def get_activations_for_custom_input(model, cards, layer_name="relu1", device='cuda' if torch.cuda.is_available() else 'cpu'):
+    """
+    Get activations from a specific layer for a custom input triplet.
+
+    Args:
+        model: The trained SetNet model
+        cards: A list/tuple of 3 tuples, each containing (shape, color, number, shading) 
+                       where each value is 0, 1, or 2
+        layer_name: Name of the layer to extract activations from (default: "relu1")
+        device: Device for computation
+
+    Returns:
+        Tensor containing activations for each neuron
+    """
+    # Move model to specified device
+    model = model.to(device)
+
+    # One-hot encode the triplet
+    encoded_triplet = []
+    for card in cards:
+        if len(card) != 4:
+            raise ValueError(
+                f"Each card must have 4 attributes (shape, color, number, shading), got {card}")
+
+        # Convert each attribute to one-hot encoding and concatenate
+        encoded_card = one_hot_encode_card(*card)
+        encoded_triplet.append(encoded_card)
+
+    # Concatenate all three cards' encodings
+    input_data = np.concatenate(encoded_triplet)
+
+    # Convert to torch tensor
+    input_tensor = torch.tensor(input_data, dtype=torch.float32).unsqueeze(
+        0)  # Add batch dimension
+    input_tensor = input_tensor.to(device)
+
+    # Storage for activations
+    activations = []
+
+    # Define hook function
+    def hook_fn(module, input, output):
+        activations.append(output.detach().cpu())
+
+    # Register the hook
+    hook = dict([*model.named_modules()]
+                )[layer_name].register_forward_hook(hook_fn)
+
+    # Set model to evaluation mode
+    model.eval()
+
+    # Forward pass
+    with torch.no_grad():
+        model(input_tensor)
+
+    # Remove the hook
+    hook.remove()
+
+    breakpoint()
+    # Return the activations
+    return activations[0]  # First (and only) batch
+
+
 if __name__ == "__main__":
     # Create overall figure directory
     # os.makedirs(FIG_SAVE_PATH, exist_ok=True)
 
-    
     hidden_size = 16
     model = load_model(project="setnet", hidden_size=hidden_size)
-    # train_loader, val_loader = load_binary_dataloader()
-    # create_analysis_dataloader(train_loader, batch_size=16)
-    layer_name = "fc1"
+    get_activations_for_custom_input(model,
+                                     cards = [(0, 0, 2, 0),
+                                              (2, 0, 0, 0),
+                                              (1, 0, 1, 1)])
+    get_activations_for_custom_input(model,
+                                     cards = [(0, 0, 2, 0),
+                                              (2, 0, 0, 2),
+                                              (1, 0, 1, 1)])
+    get_activations_for_custom_input(model,
+                                     cards = [(0, 0, 2, 0),
+                                              (2, 0, 0, 0),
+                                              (1, 0, 1, 0)])
+    
+    # hidden_size = 16
+    # model = load_model(project="setnet", hidden_size=hidden_size)
+    # # train_loader, val_loader = load_binary_dataloader()
+    # # create_analysis_dataloader(train_loader, batch_size=16)
+    # layer_name = "fc1"
 
-    analysis_loader = torch.load(f"{PATH_PREFIX}/colab/non_shuffled_train_loader.pth")
-    fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
-    # activations = get_layer_activations(
-    #     model,
-    #     layer_name,
-    #     analysis_loader,
-    #     save_activations_path=f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
+    # analysis_loader = torch.load(f"{PATH_PREFIX}/colab/non_shuffled_train_loader.pth")
+    # fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
+    # # activations = get_layer_activations(
+    # #     model,
+    # #     layer_name,
+    # #     analysis_loader,
+    # #     save_activations_path=f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
 
-    activations = torch.load(f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
+    # activations = torch.load(f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
 
-    # number_neuron_indices = [1, 10, 15]
-    shading_neuron_indices = [0, 3, 11, 14]
+    # # number_neuron_indices = [1, 10, 15]
+    # shading_neuron_indices = [0, 3, 11, 14]
 
-    # for neuron_index in neuron_indices:
-    for neuron_index in shading_neuron_indices:
-        plot_activations_by_triplet_category(
-            activations,
-            neuron_index=neuron_index,
-            dataloader=analysis_loader,
-            attribute_index=3,
-            hidden_size=hidden_size,
-            savefig=True
-        )
-        plot_activation_grid_by_triplet_category(
-            activations,
-            neuron_index=neuron_index,
-            dataloader=analysis_loader,
-            attribute_index=3,
-            hidden_size=hidden_size,
-            savefig=True)
+    # # for neuron_index in neuron_indices:
+    # for neuron_index in shading_neuron_indices:
+    #     plot_activations_by_triplet_category(
+    #         activations,
+    #         neuron_index=neuron_index,
+    #         dataloader=analysis_loader,
+    #         attribute_index=3,
+    #         hidden_size=hidden_size,
+    #         savefig=True
+    #     )
+    #     plot_activation_grid_by_triplet_category(
+    #         activations,
+    #         neuron_index=neuron_index,
+    #         dataloader=analysis_loader,
+    #         attribute_index=3,
+    #         hidden_size=hidden_size,
+    #         savefig=True)
     # Example usage:
     # 1. Generate data (run once)
     # generate_data()
