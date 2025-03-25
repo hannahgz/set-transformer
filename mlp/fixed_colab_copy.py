@@ -753,8 +753,8 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
         # ax.set_ylim(0, 3000)
 
         # Add title and labels for the individual subplot
+        curr_label = triplet_type_to_labels(category_to_triplet[category], attribute_index)
         if is_triplet_set_alt(category_to_triplet, category):
-            curr_label = triplet_type_to_labels(category_to_triplet[category], attribute_index)
             ax.set_title(f'SET: {curr_label}')
         else:
             ax.set_title(f'{curr_label}')
