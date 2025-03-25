@@ -964,9 +964,9 @@ def plot_activation_grid_by_triplet_category_sorted(activations, neuron_index, d
         curr_label = triplet_type_to_labels(
             category_to_triplet[category], attribute_index)
         if is_triplet_set_alt(category_to_triplet, category):
-            ax.set_title(f'SET: {curr_label} (μ={mean_val:.2f})')
+            ax.set_title(f'SET: {curr_label}')
         else:
-            ax.set_title(f'{curr_label} (μ={mean_val:.2f})')
+            ax.set_title(f'{curr_label}')
         ax.set_xlabel('Activation Value')
         ax.set_ylabel('Frequency')
 
