@@ -849,8 +849,326 @@ def get_activations_for_custom_input(model, cards, layer_name="relu1", device='c
     # Return the activations
     return activations[0]  # First (and only) batch
 
+annot_font_size = 14
+title_font_size = 16
+label_font_size = 14
+import re
+import seaborn as sns
+import wandb
+import pandas as pd
+
+# def plot_consolidated_same_card(layers, loss_range=[0, 0.8], acc_range=[0.6, 1.05], project_name="setnet", entity="hazhou-harvard"):
+#     """
+#     Create four figures:
+#     1. Training losses across all layers
+#     2. Validation losses across all layers
+#     3. Training accuracies across all layers
+#     4. Validation accuracies across all layers
+
+#     Args:
+#         layers (list): List of layer numbers to plot
+#         tokenizer_path (str): Path to the tokenizer
+#         project_name (str): Name of the W&B project
+#         entity (str): Your W&B username
+#     """
+#     # Initialize wandb
+#     api = wandb.Api()
+
+#     # Get all runs from your project
+#     runs = api.runs(f"{entity}/{project_name}")
+
+#     # Create four figures with (1, 4) subplots
+#     fig_train_loss, axes_train_loss = plt.subplots(1, 4, figsize=(24, 5))
+#     fig_val_loss, axes_val_loss = plt.subplots(1, 4, figsize=(24, 5))
+#     fig_train_acc, axes_train_acc = plt.subplots(1, 4, figsize=(24, 5))
+#     fig_val_acc, axes_val_acc = plt.subplots(1, 4, figsize=(24, 5))
+
+#     # Set style
+#     sns.set_style("white")
+
+#     # desired_order = ["A", "B", "C", "D", "E"]
+#     desired_order = [8, 16, 24, 32, 64]
+#     # Process each layer
+#     for layer_idx, target_layer in enumerate(layers):
+#         # Filter and sort runs for current layer
+#         layer_runs = []
+#         run_order_mapping = {}
+
+#         for run in runs:
+#             match = re.search(r'hidden_(\d+)', run.name)
+#             num_neurons = match.group(1)
+#             order_index = desired_order.index(num_neurons)
+#             run_order_mapping[run] = order_index
+#             layer_runs.append(run)
+
+#         # Sort runs based on desired order
+#         layer_runs.sort(key=lambda x: run_order_mapping[x])
+
+#         # Color map for different attributes
+#         num_runs = len(layer_runs)
+#         colors = plt.cm.rainbow(np.linspace(0, 1, num_runs))
+
+#         # Plot for each run
+#         for run, color in zip(layer_runs, colors):
+#             # Extract attribute ID and get label
+#             match = re.search(r'hidden_(\d+)', run.name)
+#             num_neurons = match.group(1)
+#             label = f"{num_neurons} Neurons"
+
+#             # Convert run history to pandas DataFrame
+#             history = pd.DataFrame(run.history())
+
+#             # Plot training loss
+#             axes_train_loss[layer_idx].plot(history['epoch'], history['train_loss'],
+#                                             label=label, color=color)
+#             axes_train_loss[layer_idx].set_title(
+#                 f'Layer {target_layer + 1}', fontsize=title_font_size)
+#             axes_train_loss[layer_idx].set_xlabel(
+#                 'Epoch', fontsize=label_font_size)
+#             if layer_idx == 0:
+#                 axes_train_loss[layer_idx].set_ylabel(
+#                     'Loss', fontsize=label_font_size)
+#             # axes_train_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
+#             # axes_train_loss[layer_idx].set_yscale('log')
+#             axes_train_loss[layer_idx].ticklabel_format(useOffset=False, style='plain')
+#             if layer_idx != 0:
+#                 axes_train_loss[layer_idx].set_ylim(-0.001, 0.03)
+#             axes_train_loss[layer_idx].tick_params(labelsize=annot_font_size)
+
+#             # Plot validation loss
+#             axes_val_loss[layer_idx].plot(history['epoch'], history['val_loss'],
+#                                           label=label, color=color)
+#             axes_val_loss[layer_idx].set_title(
+#                 f'Layer {target_layer + 1}', fontsize=title_font_size)
+#             axes_val_loss[layer_idx].set_xlabel(
+#                 'Epoch', fontsize=label_font_size)
+#             if layer_idx == 0:
+#                 axes_val_loss[layer_idx].set_ylabel(
+#                     'Loss', fontsize=label_font_size)
+#             # axes_val_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
+#             # axes_val_loss[layer_idx].set_yscale('log')
+#             axes_val_loss[layer_idx].ticklabel_format(useOffset=False, style='plain')
+#             if layer_idx != 0:
+#                 axes_val_loss[layer_idx].set_ylim(-0.001, 0.013)
+#             axes_val_loss[layer_idx].tick_params(labelsize=annot_font_size)
+
+#             # Plot training accuracy
+#             axes_train_acc[layer_idx].plot(history['epoch'], history['train_accuracy'],
+#                                            label=label, color=color)
+#             axes_train_acc[layer_idx].set_title(
+#                 f'Layer {target_layer + 1}', fontsize=title_font_size)
+#             axes_train_acc[layer_idx].set_xlabel(
+#                 'Epoch', fontsize=label_font_size)
+#             if layer_idx == 0:
+#                 axes_train_acc[layer_idx].set_ylabel(
+#                     'Accuracy', fontsize=label_font_size)
+#             # axes_train_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
+#             # axes_train_acc[layer_idx].set_yscale('log')
+#             axes_train_acc[layer_idx].ticklabel_format(useOffset=False, style='plain')
+#             if layer_idx != 0:
+#                 axes_train_acc[layer_idx].set_ylim(0.992, 1.001)
+#             axes_train_acc[layer_idx].tick_params(labelsize=annot_font_size)
+
+#             # Plot validation accuracy
+#             axes_val_acc[layer_idx].plot(history['epoch'], history['val_accuracy'],
+#                                          label=label, color=color)
+#             axes_val_acc[layer_idx].set_title(
+#                 f'Layer {target_layer + 1}', fontsize=title_font_size)
+#             axes_val_acc[layer_idx].set_xlabel(
+#                 'Epoch', fontsize=label_font_size)
+#             if layer_idx == 0:
+#                 axes_val_acc[layer_idx].set_ylabel(
+#                     'Accuracy', fontsize=label_font_size)
+#             # axes_val_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
+#             # axes_val_acc[layer_idx].set_yscale('log')
+#             axes_val_acc[layer_idx].ticklabel_format(useOffset=False, style='plain')
+#             if layer_idx != 0:
+#                 axes_val_acc[layer_idx].set_ylim(0.996, 1.001)
+#             axes_val_acc[layer_idx].tick_params(labelsize=annot_font_size)
+
+#         # Only add legend to the last subplot
+#         if layer_idx == len(layers) - 1:
+#             axes_train_loss[layer_idx].legend(bbox_to_anchor=(
+#                 1.05, 1), loc='upper left', fontsize=annot_font_size)
+#             axes_val_loss[layer_idx].legend(bbox_to_anchor=(
+#                 1.05, 1), loc='upper left', fontsize=annot_font_size)
+#             axes_train_acc[layer_idx].legend(bbox_to_anchor=(
+#                 1.05, 1), loc='upper left', fontsize=annot_font_size)
+#             axes_val_acc[layer_idx].legend(bbox_to_anchor=(
+#                 1.05, 1), loc='upper left', fontsize=annot_font_size)
+
+#     # Set main titles
+#     fig_train_loss.suptitle('Training Losses', fontsize=title_font_size)
+#     fig_val_loss.suptitle('Validation Losses', fontsize=title_font_size)
+#     fig_train_acc.suptitle('Training Accuracies', fontsize=title_font_size)
+#     fig_val_acc.suptitle('Validation Accuracies', fontsize=title_font_size)
+
+#     # Adjust layouts
+#     fig_train_loss.tight_layout()
+#     fig_val_loss.tight_layout()
+#     fig_train_acc.tight_layout()
+#     fig_val_acc.tight_layout()
+
+#     # Create save directory
+#     save_path = f"COMPLETE_FIGS/paper/{project_name}"
+#     os.makedirs(save_path, exist_ok=True)
+
+#     # Save figures
+#     fig_train_loss.savefig(
+#         f'{save_path}/{project_name}_all_layers_train_loss.png', dpi=300, bbox_inches='tight')
+#     fig_val_loss.savefig(
+#         f'{save_path}/{project_name}_all_layers_val_loss.png', dpi=300, bbox_inches='tight')
+#     fig_train_acc.savefig(
+#         f'{save_path}/{project_name}_all_layers_train_acc.png', dpi=300, bbox_inches='tight')
+#     fig_val_acc.savefig(
+#         f'{save_path}/{project_name}_all_layers_val_acc.png', dpi=300, bbox_inches='tight')
+
+#     plt.show()
+
+def plot_consolidated_metrics(loss_range=[0, 0.8], acc_range=[0.6, 1.05], project_name="setnet", entity="hazhou-harvard"):
+    """
+    Create four figures:
+    1. Training losses across all neuron configurations
+    2. Validation losses across all neuron configurations
+    3. Training accuracies across all neuron configurations
+    4. Validation accuracies across all neuron configurations
+
+    Args:
+        loss_range (list): Y-axis range for loss plots
+        acc_range (list): Y-axis range for accuracy plots
+        project_name (str): Name of the W&B project
+        entity (str): Your W&B username
+    """
+    # Initialize wandb
+    api = wandb.Api()
+
+    # Get all runs from your project
+    runs = api.runs(f"{entity}/{project_name}")
+
+    # Create four separate figures
+    fig_train_loss = plt.figure(figsize=(10, 6))
+    fig_val_loss = plt.figure(figsize=(10, 6))
+    fig_train_acc = plt.figure(figsize=(10, 6))
+    fig_val_acc = plt.figure(figsize=(10, 6))
+    
+    # Get axis for each figure
+    ax_train_loss = fig_train_loss.add_subplot(111)
+    ax_val_loss = fig_val_loss.add_subplot(111)
+    ax_train_acc = fig_train_acc.add_subplot(111)
+    ax_val_acc = fig_val_acc.add_subplot(111)
+
+    # Set style
+    sns.set_style("white")
+
+    # Define desired order for neuron counts
+    desired_order = [8, 16, 24, 32, 64]
+    
+    # Filter and sort runs
+    filtered_runs = []
+    run_order_mapping = {}
+
+    for run in runs:
+        match = re.search(r'hidden_(\d+)', run.name)
+        if match:
+            num_neurons = int(match.group(1))
+            if num_neurons in desired_order:
+                order_index = desired_order.index(num_neurons)
+                run_order_mapping[run] = order_index
+                filtered_runs.append(run)
+
+    # Sort runs based on desired order
+    filtered_runs.sort(key=lambda x: run_order_mapping[x])
+
+    # Color map for different attributes
+    num_runs = len(filtered_runs)
+    colors = plt.cm.rainbow(np.linspace(0, 1, num_runs))
+
+    # Plot for each run
+    for run, color in zip(filtered_runs, colors):
+        # Extract number of neurons and get label
+        match = re.search(r'hidden_(\d+)', run.name)
+        num_neurons = match.group(1)
+        label = f"{num_neurons} Neurons"
+
+        # Convert run history to pandas DataFrame
+        history = pd.DataFrame(run.history())
+
+        # Plot training loss
+        ax_train_loss.plot(history['epoch'], history['train_loss'],
+                        label=label, color=color)
+        
+        # Plot validation loss
+        ax_val_loss.plot(history['epoch'], history['val_loss'],
+                      label=label, color=color)
+        
+        # Plot training accuracy
+        ax_train_acc.plot(history['epoch'], history['train_accuracy'],
+                       label=label, color=color)
+        
+        # Plot validation accuracy
+        ax_val_acc.plot(history['epoch'], history['val_accuracy'],
+                     label=label, color=color)
+
+    # Set titles and labels for training loss
+    ax_train_loss.set_title('Training Loss', fontsize=title_font_size)
+    ax_train_loss.set_xlabel('Epoch', fontsize=label_font_size)
+    ax_train_loss.set_ylabel('Loss', fontsize=label_font_size)
+    ax_train_loss.tick_params(labelsize=annot_font_size)
+    ax_train_loss.legend(fontsize=annot_font_size)
+    
+    # Set titles and labels for validation loss
+    ax_val_loss.set_title('Validation Loss', fontsize=title_font_size)
+    ax_val_loss.set_xlabel('Epoch', fontsize=label_font_size)
+    ax_val_loss.set_ylabel('Loss', fontsize=label_font_size)
+    ax_val_loss.tick_params(labelsize=annot_font_size)
+    ax_val_loss.legend(fontsize=annot_font_size)
+    
+    # Set titles and labels for training accuracy
+    ax_train_acc.set_title('Training Accuracy', fontsize=title_font_size)
+    ax_train_acc.set_xlabel('Epoch', fontsize=label_font_size)
+    ax_train_acc.set_ylabel('Accuracy', fontsize=label_font_size)
+    ax_train_acc.tick_params(labelsize=annot_font_size)
+    ax_train_acc.legend(fontsize=annot_font_size)
+    
+    # Set titles and labels for validation accuracy
+    ax_val_acc.set_title('Validation Accuracy', fontsize=title_font_size)
+    ax_val_acc.set_xlabel('Epoch', fontsize=label_font_size)
+    ax_val_acc.set_ylabel('Accuracy', fontsize=label_font_size)
+    ax_val_acc.tick_params(labelsize=annot_font_size)
+    ax_val_acc.legend(fontsize=annot_font_size)
+
+    # Adjust y-axis limits if needed
+    # Uncomment these if you want to use the provided ranges
+    # ax_train_loss.set_ylim(loss_range[0], loss_range[1])
+    # ax_val_loss.set_ylim(loss_range[0], loss_range[1])
+    # ax_train_acc.set_ylim(acc_range[0], acc_range[1])
+    # ax_val_acc.set_ylim(acc_range[0], acc_range[1])
+    
+    # Alternatively, you can set specific ranges like in the original code
+    # ax_train_loss.set_ylim(-0.001, 0.03)
+    # ax_val_loss.set_ylim(-0.001, 0.013)
+    # ax_train_acc.set_ylim(0.992, 1.001)
+    # ax_val_acc.set_ylim(0.996, 1.001)
+
+    # Create save directory
+    save_path = f"COMPLETE_FIGS/paper/{project_name}"
+    os.makedirs(save_path, exist_ok=True)
+
+    # Save figures
+    fig_train_loss.savefig(
+        f'{save_path}/{project_name}_train_loss.png', dpi=300, bbox_inches='tight')
+    fig_val_loss.savefig(
+        f'{save_path}/{project_name}_val_loss.png', dpi=300, bbox_inches='tight')
+    fig_train_acc.savefig(
+        f'{save_path}/{project_name}_train_acc.png', dpi=300, bbox_inches='tight')
+    fig_val_acc.savefig(
+        f'{save_path}/{project_name}_val_acc.png', dpi=300, bbox_inches='tight')
+
+    # Display figures
+    plt.show()
 
 if __name__ == "__main__":
+    plot_consolidated_metrics()
     # Create overall figure directory
     # os.makedirs(FIG_SAVE_PATH, exist_ok=True)
 
@@ -922,4 +1240,4 @@ if __name__ == "__main__":
     #     print(f"Analyzing model with {hidden_size} hidden neurons...")
     #     analyze_model(project="setnet", hidden_size=hidden_size)
 
-    plot_weight_heatmaps(model=None, hidden_size=16, project="setnet")
+    # plot_weight_heatmaps(model=None, hidden_size=16, project="setnet")
