@@ -531,7 +531,7 @@ def plot_weight_heatmaps(model, hidden_size, project="setnet"):
         plt.axvline(x=i*12-0.5, color='red', linestyle='-', linewidth=2)
 
     # Customize title and labels
-    plt.title(f'FC1 Weights (Input → Hidden Layer) - {hidden_size} neurons', fontsize=18)
+    plt.title(f'FC1 Weights (Input → Hidden Layer) - {hidden_size} neurons', fontsize=16)
     plt.xlabel('Input Feature (grouped by cards)', labelpad=20, fontsize=16)
     plt.ylabel('Hidden Neuron', fontsize=16)
 
@@ -539,9 +539,9 @@ def plot_weight_heatmaps(model, hidden_size, project="setnet"):
     # plt.text(5, hidden_size+1, 'Card 1', ha='center', fontsize=14)
     # plt.text(17, hidden_size+1, 'Card 2', ha='center', fontsize=14)
     # plt.text(29, hidden_size+1, 'Card 3', ha='center', fontsize = 14)
-    plt.figtext(0.25, 0.01, 'Card 1', ha='center', fontsize=14)  # Changed from 0.02 to 0.01
-    plt.figtext(0.5, 0.01, 'Card 2', ha='center', fontsize=14)   # Changed from 0.02 to 0.01
-    plt.figtext(0.75, 0.01, 'Card 3', ha='center', fontsize=14)
+    plt.figtext(0.15, 0.3, 'Card 1', ha='center', fontsize=14)  # Changed from 0.02 to 0.01
+    plt.figtext(0.4, 0.3, 'Card 2', ha='center', fontsize=14)   # Changed from 0.02 to 0.01
+    plt.figtext(0.65, 0.3, 'Card 3', ha='center', fontsize=14)
 
     ax.tick_params(axis='both', which='major', labelsize=12)
     # Extend the bottom margin to fit the card labels
