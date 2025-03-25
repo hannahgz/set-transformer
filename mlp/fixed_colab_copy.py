@@ -788,7 +788,8 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
     # colors = plt.cm.get_cmap('tab20', 9)
 
     # Plot histograms for each category
-    plt.figure(figsize=(10, 8))
+    # plt.figure(figsize=(12, 8))
+    fig, ax = plt.subplots(figsize=(9, 6))
 
     # for category in range(20, 21):
     for category in range(27):
@@ -803,12 +804,13 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
                  label=curr_label, color=colors(category))
 
     # Add labels and a legend
-    plt.xlabel('Activation Value')
-    plt.ylabel('Frequency')
+    plt.xlabel('Activation Value', fontsize=14)
+    plt.ylabel('Frequency',fontsize=14)
     plt.title(
-        f'Activations for Neuron {neuron_index} Categorized by Attribute {attribute_index} ({attribute_map[attribute_index]})')
+        f'Neuron {neuron_index} Activations, Categorized by {attribute_map[attribute_index].capitalize}', fontsize=16)
     plt.legend(loc='upper right', bbox_to_anchor=(1.2, 1))
 
+    ax.tick_params(axis='both', which='major', labelsize=12)
     # Show the plot
     plt.tight_layout()
     if savefig:
@@ -819,6 +821,55 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
     plt.show()
 
 
+# def plot_activation_grid_by_triplet_category(activations, neuron_index, dataloader, attribute_index, hidden_size, savefig=False):
+#     triplet_categories, category_to_triplet = assign_triplet_categories(
+#         dataloader, attribute_index)
+
+#     # Create a color map to distinguish between the categories
+#     colors = plt.cm.get_cmap('tab20', 27)
+
+#     # Set up a 9x3 grid for subplots
+#     fig, axes = plt.subplots(9, 3, figsize=(10, 20))  # 9 rows, 3 columns
+#     axes = axes.flatten()  # Flatten the axes array for easier indexing
+
+#     for category in range(27):
+#         # for category in range(20, 21):
+#         # Filter the activations that belong to the current category
+#         category_activations = activations[:,
+#                                            neuron_index][triplet_categories == category]
+
+#         # Plot the histogram in the respective subplot
+#         ax = axes[category]
+#         ax.hist(category_activations, bins=30,
+#                 alpha=0.5, color=colors(category))
+
+#         # ax.set_xlim(-0.1, 24)
+#         # ax.set_ylim(0, 3000)
+
+#         # Add title and labels for the individual subplot
+#         curr_label = triplet_type_to_labels(
+#             category_to_triplet[category], attribute_index)
+#         if is_triplet_set_alt(category_to_triplet, category):
+#             ax.set_title(f'SET: {curr_label}')
+#         else:
+#             ax.set_title(f'{curr_label}')
+#         ax.set_xlabel('Activation Value')
+#         ax.set_ylabel('Frequency')
+
+#     # Adjust layout to prevent overlap
+#     plt.suptitle(
+#         f'Neuron {neuron_index} Activations, Categorized by {attribute_map[attribute_index].capitalize}', fontsize=16)
+#     plt.tight_layout(rect=[0, 0, 1, 0.99])
+
+#     # Save the figure
+#     if savefig:
+#         save_fig_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
+#         os.makedirs(save_fig_path, exist_ok=True)
+#         plt.savefig(
+#             f"{save_fig_path}/activations_grid_neuron{neuron_index}_index{attribute_index}.png", bbox_inches="tight")
+#     plt.show()
+
+
 def plot_activation_grid_by_triplet_category(activations, neuron_index, dataloader, attribute_index, hidden_size, savefig=False):
     triplet_categories, category_to_triplet = assign_triplet_categories(
         dataloader, attribute_index)
@@ -826,23 +877,19 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
     # Create a color map to distinguish between the categories
     colors = plt.cm.get_cmap('tab20', 27)
 
-    # Set up a 9x3 grid for subplots
-    fig, axes = plt.subplots(9, 3, figsize=(10, 20))  # 9 rows, 3 columns
+    # Set up a 7x4 grid for subplots (28 total spaces for 27 plots)
+    fig, axes = plt.subplots(7, 4, figsize=(14, 20))  # 7 rows, 4 columns
     axes = axes.flatten()  # Flatten the axes array for easier indexing
 
     for category in range(27):
-        # for category in range(20, 21):
         # Filter the activations that belong to the current category
         category_activations = activations[:,
-                                           neuron_index][triplet_categories == category]
+                                          neuron_index][triplet_categories == category]
 
         # Plot the histogram in the respective subplot
         ax = axes[category]
         ax.hist(category_activations, bins=30,
                 alpha=0.5, color=colors(category))
-
-        # ax.set_xlim(-0.1, 24)
-        # ax.set_ylim(0, 3000)
 
         # Add title and labels for the individual subplot
         curr_label = triplet_type_to_labels(
@@ -854,9 +901,12 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
         ax.set_xlabel('Activation Value')
         ax.set_ylabel('Frequency')
 
+    # Remove the empty subplot (the 28th one)
+    axes[27].set_visible(False)
+
     # Adjust layout to prevent overlap
     plt.suptitle(
-        f'Activations for Neuron {neuron_index} Categorized by Attribute {attribute_index} ({attribute_map[attribute_index]})')
+        f'Neuron {neuron_index} Activations, Categorized by {attribute_map[attribute_index].capitalize}', fontsize=16)
     plt.tight_layout(rect=[0, 0, 1, 0.99])
 
     # Save the figure
@@ -866,7 +916,6 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
         plt.savefig(
             f"{save_fig_path}/activations_grid_neuron{neuron_index}_index{attribute_index}.png", bbox_inches="tight")
     plt.show()
-
 
 def get_activations_for_custom_input(model, cards, layer_name="relu1", device='cuda' if torch.cuda.is_available() else 'cpu'):
     """
@@ -936,174 +985,6 @@ import re
 import seaborn as sns
 import wandb
 import pandas as pd
-
-# def plot_consolidated_same_card(layers, loss_range=[0, 0.8], acc_range=[0.6, 1.05], project_name="setnet", entity="hazhou-harvard"):
-#     """
-#     Create four figures:
-#     1. Training losses across all layers
-#     2. Validation losses across all layers
-#     3. Training accuracies across all layers
-#     4. Validation accuracies across all layers
-
-#     Args:
-#         layers (list): List of layer numbers to plot
-#         tokenizer_path (str): Path to the tokenizer
-#         project_name (str): Name of the W&B project
-#         entity (str): Your W&B username
-#     """
-#     # Initialize wandb
-#     api = wandb.Api()
-
-#     # Get all runs from your project
-#     runs = api.runs(f"{entity}/{project_name}")
-
-#     # Create four figures with (1, 4) subplots
-#     fig_train_loss, axes_train_loss = plt.subplots(1, 4, figsize=(24, 5))
-#     fig_val_loss, axes_val_loss = plt.subplots(1, 4, figsize=(24, 5))
-#     fig_train_acc, axes_train_acc = plt.subplots(1, 4, figsize=(24, 5))
-#     fig_val_acc, axes_val_acc = plt.subplots(1, 4, figsize=(24, 5))
-
-#     # Set style
-#     sns.set_style("white")
-
-#     # desired_order = ["A", "B", "C", "D", "E"]
-#     desired_order = [8, 16, 24, 32, 64]
-#     # Process each layer
-#     for layer_idx, target_layer in enumerate(layers):
-#         # Filter and sort runs for current layer
-#         layer_runs = []
-#         run_order_mapping = {}
-
-#         for run in runs:
-#             match = re.search(r'hidden_(\d+)', run.name)
-#             num_neurons = match.group(1)
-#             order_index = desired_order.index(num_neurons)
-#             run_order_mapping[run] = order_index
-#             layer_runs.append(run)
-
-#         # Sort runs based on desired order
-#         layer_runs.sort(key=lambda x: run_order_mapping[x])
-
-#         # Color map for different attributes
-#         num_runs = len(layer_runs)
-#         colors = plt.cm.rainbow(np.linspace(0, 1, num_runs))
-
-#         # Plot for each run
-#         for run, color in zip(layer_runs, colors):
-#             # Extract attribute ID and get label
-#             match = re.search(r'hidden_(\d+)', run.name)
-#             num_neurons = match.group(1)
-#             label = f"{num_neurons} Neurons"
-
-#             # Convert run history to pandas DataFrame
-#             history = pd.DataFrame(run.history())
-
-#             # Plot training loss
-#             axes_train_loss[layer_idx].plot(history['epoch'], history['train_loss'],
-#                                             label=label, color=color)
-#             axes_train_loss[layer_idx].set_title(
-#                 f'Layer {target_layer + 1}', fontsize=title_font_size)
-#             axes_train_loss[layer_idx].set_xlabel(
-#                 'Epoch', fontsize=label_font_size)
-#             if layer_idx == 0:
-#                 axes_train_loss[layer_idx].set_ylabel(
-#                     'Loss', fontsize=label_font_size)
-#             # axes_train_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
-#             # axes_train_loss[layer_idx].set_yscale('log')
-#             axes_train_loss[layer_idx].ticklabel_format(useOffset=False, style='plain')
-#             if layer_idx != 0:
-#                 axes_train_loss[layer_idx].set_ylim(-0.001, 0.03)
-#             axes_train_loss[layer_idx].tick_params(labelsize=annot_font_size)
-
-#             # Plot validation loss
-#             axes_val_loss[layer_idx].plot(history['epoch'], history['val_loss'],
-#                                           label=label, color=color)
-#             axes_val_loss[layer_idx].set_title(
-#                 f'Layer {target_layer + 1}', fontsize=title_font_size)
-#             axes_val_loss[layer_idx].set_xlabel(
-#                 'Epoch', fontsize=label_font_size)
-#             if layer_idx == 0:
-#                 axes_val_loss[layer_idx].set_ylabel(
-#                     'Loss', fontsize=label_font_size)
-#             # axes_val_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
-#             # axes_val_loss[layer_idx].set_yscale('log')
-#             axes_val_loss[layer_idx].ticklabel_format(useOffset=False, style='plain')
-#             if layer_idx != 0:
-#                 axes_val_loss[layer_idx].set_ylim(-0.001, 0.013)
-#             axes_val_loss[layer_idx].tick_params(labelsize=annot_font_size)
-
-#             # Plot training accuracy
-#             axes_train_acc[layer_idx].plot(history['epoch'], history['train_accuracy'],
-#                                            label=label, color=color)
-#             axes_train_acc[layer_idx].set_title(
-#                 f'Layer {target_layer + 1}', fontsize=title_font_size)
-#             axes_train_acc[layer_idx].set_xlabel(
-#                 'Epoch', fontsize=label_font_size)
-#             if layer_idx == 0:
-#                 axes_train_acc[layer_idx].set_ylabel(
-#                     'Accuracy', fontsize=label_font_size)
-#             # axes_train_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
-#             # axes_train_acc[layer_idx].set_yscale('log')
-#             axes_train_acc[layer_idx].ticklabel_format(useOffset=False, style='plain')
-#             if layer_idx != 0:
-#                 axes_train_acc[layer_idx].set_ylim(0.992, 1.001)
-#             axes_train_acc[layer_idx].tick_params(labelsize=annot_font_size)
-
-#             # Plot validation accuracy
-#             axes_val_acc[layer_idx].plot(history['epoch'], history['val_accuracy'],
-#                                          label=label, color=color)
-#             axes_val_acc[layer_idx].set_title(
-#                 f'Layer {target_layer + 1}', fontsize=title_font_size)
-#             axes_val_acc[layer_idx].set_xlabel(
-#                 'Epoch', fontsize=label_font_size)
-#             if layer_idx == 0:
-#                 axes_val_acc[layer_idx].set_ylabel(
-#                     'Accuracy', fontsize=label_font_size)
-#             # axes_val_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
-#             # axes_val_acc[layer_idx].set_yscale('log')
-#             axes_val_acc[layer_idx].ticklabel_format(useOffset=False, style='plain')
-#             if layer_idx != 0:
-#                 axes_val_acc[layer_idx].set_ylim(0.996, 1.001)
-#             axes_val_acc[layer_idx].tick_params(labelsize=annot_font_size)
-
-#         # Only add legend to the last subplot
-#         if layer_idx == len(layers) - 1:
-#             axes_train_loss[layer_idx].legend(bbox_to_anchor=(
-#                 1.05, 1), loc='upper left', fontsize=annot_font_size)
-#             axes_val_loss[layer_idx].legend(bbox_to_anchor=(
-#                 1.05, 1), loc='upper left', fontsize=annot_font_size)
-#             axes_train_acc[layer_idx].legend(bbox_to_anchor=(
-#                 1.05, 1), loc='upper left', fontsize=annot_font_size)
-#             axes_val_acc[layer_idx].legend(bbox_to_anchor=(
-#                 1.05, 1), loc='upper left', fontsize=annot_font_size)
-
-#     # Set main titles
-#     fig_train_loss.suptitle('Training Losses', fontsize=title_font_size)
-#     fig_val_loss.suptitle('Validation Losses', fontsize=title_font_size)
-#     fig_train_acc.suptitle('Training Accuracies', fontsize=title_font_size)
-#     fig_val_acc.suptitle('Validation Accuracies', fontsize=title_font_size)
-
-#     # Adjust layouts
-#     fig_train_loss.tight_layout()
-#     fig_val_loss.tight_layout()
-#     fig_train_acc.tight_layout()
-#     fig_val_acc.tight_layout()
-
-#     # Create save directory
-#     save_path = f"COMPLETE_FIGS/paper/{project_name}"
-#     os.makedirs(save_path, exist_ok=True)
-
-#     # Save figures
-#     fig_train_loss.savefig(
-#         f'{save_path}/{project_name}_all_layers_train_loss.png', dpi=300, bbox_inches='tight')
-#     fig_val_loss.savefig(
-#         f'{save_path}/{project_name}_all_layers_val_loss.png', dpi=300, bbox_inches='tight')
-#     fig_train_acc.savefig(
-#         f'{save_path}/{project_name}_all_layers_train_acc.png', dpi=300, bbox_inches='tight')
-#     fig_val_acc.savefig(
-#         f'{save_path}/{project_name}_all_layers_val_acc.png', dpi=300, bbox_inches='tight')
-
-#     plt.show()
 
 def plot_consolidated_metrics(loss_range=[0, 0.8], acc_range=[0.6, 1.05], project_name="setnet", entity="hazhou-harvard"):
     """
@@ -1274,42 +1155,42 @@ if __name__ == "__main__":
     # #                                           (2, 0, 0, 0),
     # #                                           (1, 0, 1, 0)])
 
-    # hidden_size = 16
+    hidden_size = 16
     # model = load_model(project="setnet", hidden_size=hidden_size)
     # # train_loader, val_loader = load_binary_dataloader()
     # # create_analysis_dataloader(train_loader, batch_size=16)
-    # layer_name = "fc1"
+    layer_name = "fc1"
 
-    # analysis_loader = torch.load(f"{PATH_PREFIX}/colab/non_shuffled_train_loader.pth")
-    # fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
+    analysis_loader = torch.load(f"{PATH_PREFIX}/colab/non_shuffled_train_loader.pth")
+    fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
     # # activations = get_layer_activations(
     # #     model,
     # #     layer_name,
     # #     analysis_loader,
     # #     save_activations_path=f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
 
-    # activations = torch.load(f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
+    activations = torch.load(f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
 
-    # # number_neuron_indices = [1, 10, 15]
+    number_neuron_indices = [1, 10, 15]
     # shading_neuron_indices = [0, 3, 11, 14]
 
     # # for neuron_index in neuron_indices:
-    # for neuron_index in shading_neuron_indices:
-    #     plot_activations_by_triplet_category(
-    #         activations,
-    #         neuron_index=neuron_index,
-    #         dataloader=analysis_loader,
-    #         attribute_index=3,
-    #         hidden_size=hidden_size,
-    #         savefig=True
-    #     )
-    #     plot_activation_grid_by_triplet_category(
-    #         activations,
-    #         neuron_index=neuron_index,
-    #         dataloader=analysis_loader,
-    #         attribute_index=3,
-    #         hidden_size=hidden_size,
-    #         savefig=True)
+    for neuron_index in number_neuron_indices:
+        plot_activations_by_triplet_category(
+            activations,
+            neuron_index=neuron_index,
+            dataloader=analysis_loader,
+            attribute_index=2,
+            hidden_size=hidden_size,
+            savefig=True
+        )
+        plot_activation_grid_by_triplet_category(
+            activations,
+            neuron_index=neuron_index,
+            dataloader=analysis_loader,
+            attribute_index=2,
+            hidden_size=hidden_size,
+            savefig=True)
     # Example usage:
     # 1. Generate data (run once)
     # generate_data()
@@ -1328,4 +1209,4 @@ if __name__ == "__main__":
 
     # plot_weight_heatmaps(model=None, hidden_size=16, project="setnet")
 
-    plot_weight_heatmaps_specific(model=None, hidden_size=16)
+    # plot_weight_heatmaps_specific(model=None, hidden_size=16)
