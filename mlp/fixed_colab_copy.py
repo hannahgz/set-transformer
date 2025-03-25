@@ -788,15 +788,15 @@ if __name__ == "__main__":
 
     analysis_loader = torch.load(f"{PATH_PREFIX}/colab/non_shuffled_train_loader.pth")
     fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
-    activations = get_layer_activations(
-        model,
-        layer_name,
-        analysis_loader,
-        save_activations_path=f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
+    # activations = get_layer_activations(
+    #     model,
+    #     layer_name,
+    #     analysis_loader,
+    #     save_activations_path=f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
 
     activations = torch.load(f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
 
-    neuron_indices = [10, 15]
+    neuron_indices = [1, 10, 15]
     for neuron_index in neuron_indices:
         plot_activations_by_triplet_category(
             activations,
