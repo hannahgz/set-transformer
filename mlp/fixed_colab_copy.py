@@ -778,20 +778,22 @@ attr_id_to_name_dict = {
 #     numbers = [0, 1, 2]  # 0: one, 1: two, 2: three
 #     shadings = [0, 1, 2]  # 0: solid, 1: striped, 2: open
 
+import colorcet as cc
 
 def plot_activations_by_triplet_category(activations, neuron_index, dataloader, attribute_index, hidden_size, savefig=False):
     # Create a color map to distinguish between the categories
     triplet_categories, category_to_triplet = assign_triplet_categories(
         dataloader, attribute_index)
 
-    colors = plt.cm.get_cmap('tab20', 27)
+    # colors = plt.cm.get_cmap('tab20', 27)
 
-    # Generate 27 distinct colors (normalized range)
-    color_list = [colors(i / 26) for i in range(27)]
+    # # Generate 27 distinct colors (normalized range)
+    # color_list = [colors(i / 26) for i in range(27)]
 
-    # Shuffle the colors in a deterministic way
-    np.random.seed(42)  # Set a seed for reproducibility
-    colors = np.random.permutation(color_list)
+    # # Shuffle the colors in a deterministic way
+    # np.random.seed(42)  # Set a seed for reproducibility
+    # colors = np.random.permutation(color_list)
+    colors = cc.glasbey[:27]
 
     # colors = plt.cm.get_cmap('tab20', 27)
     # colors = sns.color_palette('husl', 27)
@@ -892,17 +894,18 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
     # colors = colors(shuffled_colors)
     # colors = sns.color_palette('husl', 27)
 
-    colors = plt.cm.get_cmap('tab20', 27)
+    # colors = plt.cm.get_cmap('tab20', 27)
 
-    # Generate 27 distinct colors (normalized range)
-    color_list = [colors(i / 26) for i in range(27)]
+    # # Generate 27 distinct colors (normalized range)
+    # color_list = [colors(i / 26) for i in range(27)]
 
-    # Shuffle the colors in a deterministic way
-    np.random.seed(42)  # Set a seed for reproducibility
-    colors = np.random.permutation(color_list)
+    # # Shuffle the colors in a deterministic way
+    # np.random.seed(42)  # Set a seed for reproducibility
+    # colors = np.random.permutation(color_list)
+    colors = cc.glasbey[:27]
 
     # Set up a 7x4 grid for subplots (28 total spaces for 27 plots)
-    fig, axes = plt.subplots(5, 6, figsize=(14, 20))  # 5 rows, 6 columns
+    fig, axes = plt.subplots(5, 6, figsize=(14, 16))  # 5 rows, 6 columns
     axes = axes.flatten()  # Flatten the axes array for easier indexing
 
     for category in range(27):
