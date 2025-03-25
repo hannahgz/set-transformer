@@ -531,13 +531,13 @@ def plot_weight_heatmaps(model, hidden_size, project="setnet"):
 
     # Customize title and labels
     plt.title(f'FC1 Weights (Input → Hidden Layer) - {hidden_size} neurons')
-    plt.xlabel('Input Feature (grouped by cards)')
+    plt.xlabel('Input Feature (grouped by cards)', labelpad=20)
     plt.ylabel('Hidden Neuron')
 
     # Add card labels below the x-axis
-    plt.text(6, hidden_size+1, 'Card 1', ha='center')
-    plt.text(18, hidden_size+1, 'Card 2', ha='center')
-    plt.text(30, hidden_size+1, 'Card 3', ha='center')
+    plt.text(5, hidden_size+1, 'Card 1', ha='center')
+    plt.text(17, hidden_size+1, 'Card 2', ha='center')
+    plt.text(29, hidden_size+1, 'Card 3', ha='center')
 
     # Extend the bottom margin to fit the card labels
     plt.tight_layout()
@@ -547,20 +547,20 @@ def plot_weight_heatmaps(model, hidden_size, project="setnet"):
                 bbox_inches="tight")
     plt.close()
 
-    # Plot FC2 weights (hidden_size x 1)
-    plt.figure(figsize=(10, 4))
-    # Reshape to make it a proper heatmap
-    fc2_weights_reshaped = fc2_weights.T  # [hidden_size, 1]
-    im = plt.imshow(fc2_weights_reshaped, cmap='viridis', aspect='auto')
-    plt.colorbar(im)
-    plt.title(f'FC2 Weights (Hidden → Output Layer) - {hidden_size} neurons')
-    plt.xlabel('Output Neuron')
-    plt.ylabel('Hidden Neuron')
-    plt.savefig(f"{fig_save_path}/fc2_weights_heatmap.png",
-                bbox_inches="tight")
-    plt.close()
+    # # Plot FC2 weights (hidden_size x 1)
+    # plt.figure(figsize=(10, 4))
+    # # Reshape to make it a proper heatmap
+    # fc2_weights_reshaped = fc2_weights.T  # [hidden_size, 1]
+    # im = plt.imshow(fc2_weights_reshaped, cmap='viridis', aspect='auto')
+    # plt.colorbar(im)
+    # plt.title(f'FC2 Weights (Hidden → Output Layer) - {hidden_size} neurons')
+    # plt.xlabel('Output Neuron')
+    # plt.ylabel('Hidden Neuron')
+    # plt.savefig(f"{fig_save_path}/fc2_weights_heatmap.png",
+    #             bbox_inches="tight")
+    # plt.close()
 
-    print(f"Weight heatmaps saved to {fig_save_path}")
+    # print(f"Weight heatmaps saved to {fig_save_path}")
 
 
 # def is_triplet_set(key_list, index):
@@ -849,22 +849,22 @@ if __name__ == "__main__":
     # Create overall figure directory
     # os.makedirs(FIG_SAVE_PATH, exist_ok=True)
 
-    hidden_size = 16
-    model = load_model(project="setnet", hidden_size=hidden_size)
-    breakpoint()
-    # get_activations_for_custom_input(model,
-    #                                  cards = [(0, 0, 2, 0),
-    #                                           (2, 0, 0, 0),
-    #                                           (1, 0, 1, 1)])
-    # get_activations_for_custom_input(model,
-    #                                  cards = [(0, 0, 2, 0),
-    #                                           (2, 0, 0, 2),
-    #                                           (1, 0, 1, 1)])
-    # get_activations_for_custom_input(model,
-    #                                  cards = [(0, 0, 2, 0),
-    #                                           (2, 0, 0, 0),
-    #                                           (1, 0, 1, 0)])
-    
+    # hidden_size = 16
+    # model = load_model(project="setnet", hidden_size=hidden_size)
+    # breakpoint()
+    # # get_activations_for_custom_input(model,
+    # #                                  cards = [(0, 0, 2, 0),
+    # #                                           (2, 0, 0, 0),
+    # #                                           (1, 0, 1, 1)])
+    # # get_activations_for_custom_input(model,
+    # #                                  cards = [(0, 0, 2, 0),
+    # #                                           (2, 0, 0, 2),
+    # #                                           (1, 0, 1, 1)])
+    # # get_activations_for_custom_input(model,
+    # #                                  cards = [(0, 0, 2, 0),
+    # #                                           (2, 0, 0, 0),
+    # #                                           (1, 0, 1, 0)])
+
     # hidden_size = 16
     # model = load_model(project="setnet", hidden_size=hidden_size)
     # # train_loader, val_loader = load_binary_dataloader()
@@ -917,4 +917,4 @@ if __name__ == "__main__":
     #     print(f"Analyzing model with {hidden_size} hidden neurons...")
     #     analyze_model(project="setnet", hidden_size=hidden_size)
 
-    # plot_weight_heatmaps(model=None, hidden_size=16, project="setnet")
+    plot_weight_heatmaps(model=None, hidden_size=16, project="setnet")
