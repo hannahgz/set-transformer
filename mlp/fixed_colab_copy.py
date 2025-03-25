@@ -851,18 +851,19 @@ if __name__ == "__main__":
 
     hidden_size = 16
     model = load_model(project="setnet", hidden_size=hidden_size)
-    get_activations_for_custom_input(model,
-                                     cards = [(0, 0, 2, 0),
-                                              (2, 0, 0, 0),
-                                              (1, 0, 1, 1)])
-    get_activations_for_custom_input(model,
-                                     cards = [(0, 0, 2, 0),
-                                              (2, 0, 0, 2),
-                                              (1, 0, 1, 1)])
-    get_activations_for_custom_input(model,
-                                     cards = [(0, 0, 2, 0),
-                                              (2, 0, 0, 0),
-                                              (1, 0, 1, 0)])
+    breakpoint()
+    # get_activations_for_custom_input(model,
+    #                                  cards = [(0, 0, 2, 0),
+    #                                           (2, 0, 0, 0),
+    #                                           (1, 0, 1, 1)])
+    # get_activations_for_custom_input(model,
+    #                                  cards = [(0, 0, 2, 0),
+    #                                           (2, 0, 0, 2),
+    #                                           (1, 0, 1, 1)])
+    # get_activations_for_custom_input(model,
+    #                                  cards = [(0, 0, 2, 0),
+    #                                           (2, 0, 0, 0),
+    #                                           (1, 0, 1, 0)])
     
     # hidden_size = 16
     # model = load_model(project="setnet", hidden_size=hidden_size)
