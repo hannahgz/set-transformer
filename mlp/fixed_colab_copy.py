@@ -796,13 +796,16 @@ if __name__ == "__main__":
 
     activations = torch.load(f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
 
-    neuron_indices = [1, 10, 15]
-    for neuron_index in neuron_indices:
+    # number_neuron_indices = [1, 10, 15]
+    shading_neuron_indices = [0, 3, 11, 14]
+
+    # for neuron_index in neuron_indices:
+    for neuron_index in shading_neuron_indices:
         plot_activations_by_triplet_category(
             activations,
             neuron_index=neuron_index,
             dataloader=analysis_loader,
-            attribute_index=2,
+            attribute_index=3,
             hidden_size=hidden_size,
             savefig=True
         )
@@ -810,7 +813,7 @@ if __name__ == "__main__":
             activations,
             neuron_index=neuron_index,
             dataloader=analysis_loader,
-            attribute_index=2,
+            attribute_index=3,
             hidden_size=hidden_size,
             savefig=True)
     # Example usage:
