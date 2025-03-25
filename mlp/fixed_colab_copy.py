@@ -539,9 +539,9 @@ def plot_weight_heatmaps(model, hidden_size, project="setnet"):
     # plt.text(5, hidden_size+1, 'Card 1', ha='center', fontsize=14)
     # plt.text(17, hidden_size+1, 'Card 2', ha='center', fontsize=14)
     # plt.text(29, hidden_size+1, 'Card 3', ha='center', fontsize = 14)
-    plt.figtext(0.2, 0.25, 'Card 1', ha='center', fontsize=14)  # Changed from 0.02 to 0.01
-    plt.figtext(0.45, 0.25, 'Card 2', ha='center', fontsize=14)   # Changed from 0.02 to 0.01
-    plt.figtext(0.7, 0.25, 'Card 3', ha='center', fontsize=14)
+    plt.figtext(0.175, 0.26, 'Card 1', ha='center', fontsize=14)  # Changed from 0.02 to 0.01
+    plt.figtext(0.425, 0.26, 'Card 2', ha='center', fontsize=14)   # Changed from 0.02 to 0.01
+    plt.figtext(0.675, 0.26, 'Card 3', ha='center', fontsize=14)
 
     ax.tick_params(axis='both', which='major', labelsize=12)
     # Extend the bottom margin to fit the card labels
