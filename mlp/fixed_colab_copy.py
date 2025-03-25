@@ -1209,9 +1209,9 @@ if __name__ == "__main__":
     # Create overall figure directory
     # os.makedirs(FIG_SAVE_PATH, exist_ok=True)
 
-    # hidden_size = 16
-    # model = load_model(project="setnet", hidden_size=hidden_size)
-    # breakpoint()
+    hidden_size = 16
+    model = load_model(project="setnet", hidden_size=hidden_size)
+    breakpoint()
     # # get_activations_for_custom_input(model,
     # #                                  cards = [(0, 0, 2, 0),
     # #                                           (2, 0, 0, 0),
@@ -1225,42 +1225,42 @@ if __name__ == "__main__":
     # #                                           (2, 0, 0, 0),
     # #                                           (1, 0, 1, 0)])
 
-    hidden_size = 16
-    # model = load_model(project="setnet", hidden_size=hidden_size)
-    # # train_loader, val_loader = load_binary_dataloader()
-    # # create_analysis_dataloader(train_loader, batch_size=16)
-    layer_name = "fc1"
+    # hidden_size = 16
+    # # model = load_model(project="setnet", hidden_size=hidden_size)
+    # # # train_loader, val_loader = load_binary_dataloader()
+    # # # create_analysis_dataloader(train_loader, batch_size=16)
+    # layer_name = "fc1"
 
-    analysis_loader = torch.load(f"{PATH_PREFIX}/colab/non_shuffled_train_loader.pth")
-    fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
-    # # activations = get_layer_activations(
-    # #     model,
-    # #     layer_name,
-    # #     analysis_loader,
-    # #     save_activations_path=f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
+    # analysis_loader = torch.load(f"{PATH_PREFIX}/colab/non_shuffled_train_loader.pth")
+    # fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
+    # # # activations = get_layer_activations(
+    # # #     model,
+    # # #     layer_name,
+    # # #     analysis_loader,
+    # # #     save_activations_path=f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
 
-    activations = torch.load(f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
+    # activations = torch.load(f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
 
-    number_neuron_indices = [1, 10, 15]
-    # shading_neuron_indices = [0, 3, 11, 14]
+    # number_neuron_indices = [1, 10, 15]
+    # # shading_neuron_indices = [0, 3, 11, 14]
 
-    # # for neuron_index in neuron_indices:
-    for neuron_index in number_neuron_indices:
-        # plot_activations_by_triplet_category(
-        #     activations,
-        #     neuron_index=neuron_index,
-        #     dataloader=analysis_loader,
-        #     attribute_index=2,
-        #     hidden_size=hidden_size,
-        #     savefig=True
-        # )
-        plot_activation_grid_by_triplet_category_sorted(
-            activations,
-            neuron_index=neuron_index,
-            dataloader=analysis_loader,
-            attribute_index=2,
-            hidden_size=hidden_size,
-            savefig=True)
+    # # # for neuron_index in neuron_indices:
+    # for neuron_index in number_neuron_indices:
+    #     # plot_activations_by_triplet_category(
+    #     #     activations,
+    #     #     neuron_index=neuron_index,
+    #     #     dataloader=analysis_loader,
+    #     #     attribute_index=2,
+    #     #     hidden_size=hidden_size,
+    #     #     savefig=True
+    #     # )
+    #     plot_activation_grid_by_triplet_category_sorted(
+    #         activations,
+    #         neuron_index=neuron_index,
+    #         dataloader=analysis_loader,
+    #         attribute_index=2,
+    #         hidden_size=hidden_size,
+    #         savefig=True)
     # Example usage:
     # 1. Generate data (run once)
     # generate_data()
