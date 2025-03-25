@@ -784,12 +784,13 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
     triplet_categories, category_to_triplet = assign_triplet_categories(
         dataloader, attribute_index)
 
-    colors = plt.cm.get_cmap('tab20', 27)
+    # colors = plt.cm.get_cmap('tab20', 27)
+    colors = sns.color_palette('husl', 27)
     # colors = plt.cm.get_cmap('tab20', 9)
 
     # Plot histograms for each category
     # plt.figure(figsize=(12, 8))
-    fig, ax = plt.subplots(figsize=(9, 6))
+    fig, ax = plt.subplots(figsize=(15, 10))
 
     # for category in range(20, 21):
     for category in range(27):
@@ -807,8 +808,8 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
     plt.xlabel('Activation Value', fontsize=14)
     plt.ylabel('Frequency',fontsize=14)
     plt.title(
-        f'Neuron {neuron_index} Activations, Categorized by {attribute_map[attribute_index].capitalize}', fontsize=16)
-    plt.legend(loc='upper right', bbox_to_anchor=(1.2, 1))
+        f'Neuron {neuron_index} Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=16)
+    plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
 
     ax.tick_params(axis='both', which='major', labelsize=12)
     # Show the plot
@@ -875,7 +876,8 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
         dataloader, attribute_index)
 
     # Create a color map to distinguish between the categories
-    colors = plt.cm.get_cmap('tab20', 27)
+    # colors = plt.cm.get_cmap('tab20', 27)
+    colors = sns.color_palette('husl', 27)
 
     # Set up a 7x4 grid for subplots (28 total spaces for 27 plots)
     fig, axes = plt.subplots(7, 4, figsize=(14, 20))  # 7 rows, 4 columns
@@ -906,7 +908,7 @@ def plot_activation_grid_by_triplet_category(activations, neuron_index, dataload
 
     # Adjust layout to prevent overlap
     plt.suptitle(
-        f'Neuron {neuron_index} Activations, Categorized by {attribute_map[attribute_index].capitalize}', fontsize=16)
+        f'Neuron {neuron_index} Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=16)
     plt.tight_layout(rect=[0, 0, 1, 0.99])
 
     # Save the figure
