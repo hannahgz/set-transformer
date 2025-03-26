@@ -1244,7 +1244,7 @@ def plot_mlp_layer3_weights():
     ax = sns.heatmap(weights.T, cmap='coolwarm', center=0,
                      cbar_kws={'pad': 0.01})
     
-    plt.title(f"Layer 4 Weight Matrix", fontsize=18)
+    plt.title(f"Layer 4: MLP Projection Weight Matrix", fontsize=18)
     
     # Create tick positions with wider intervals
     x_ticks = np.arange(0, weights.shape[0], 25)
