@@ -4,7 +4,7 @@ from model import GPT, GPTConfig34_Complete, GPTConfig24_Complete, GPTConfig44_C
 from data_utils import initialize_triples_datasets, initialize_loaders, find_paired_sequence
 import random
 import numpy as np
-from set_transformer_small import run, calculate_accuracy
+from set_transformer_small import run, calculate_accuracy, test_weight_decay_hypothesis
 
 PATH_PREFIX = '/n/holylabs/LABS/wattenberg_lab/Lab/hannahgz_tmp'
 
@@ -17,54 +17,55 @@ if __name__ == "__main__":
 
     # Attempt to improve model accuracy
 
-    # config = GPTConfig44_Complete()
+    config = GPTConfig44_Complete()
+    test_weight_decay_hypothesis(config, config.dataset_path, num_steps=25)
     # config = GPTConfig24_Complete()
     # config = GPTConfig34_Complete()
-    configs = [
-        GPTConfig24_Complete(),
-        GPTConfig34_Complete(),
-        GPTConfig44_Complete(),
-    ]
+    # configs = [
+    #     GPTConfig24_Complete(),
+    #     GPTConfig34_Complete(),
+    #     GPTConfig44_Complete(),
+    # ]
 
-    # run(
-    #     config,
-    #     dataset_path=config.dataset_path
-    # )
+    # # run(
+    # #     config,
+    # #     dataset_path=config.dataset_path
+    # # )
 
-    # PIPELINE - Calculate accuracy for complete model on base random dataset
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    dataset_path = GPTConfig44_Complete().dataset_path
+    # # PIPELINE - Calculate accuracy for complete model on base random dataset
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
+    # dataset_path = GPTConfig44_Complete().dataset_path
 
-    for config in configs:
-        print(f"Running model with layers: {config.n_layer}")
-        model = GPT(config).to(device)
-        checkpoint = torch.load(
-            f"{config.filename}", weights_only=False)
-        model.load_state_dict(checkpoint["model"])
+    # for config in configs:
+    #     print(f"Running model with layers: {config.n_layer}")
+    #     model = GPT(config).to(device)
+    #     checkpoint = torch.load(
+    #         f"{config.filename}", weights_only=False)
+    #     model.load_state_dict(checkpoint["model"])
 
-        dataset = torch.load(dataset_path)
-        train_loader, val_loader = initialize_loaders(config, dataset)
+    #     dataset = torch.load(dataset_path)
+    #     train_loader, val_loader = initialize_loaders(config, dataset)
 
-        train_accuracy = calculate_accuracy(
-            model=model,
-            dataloader=train_loader,
-            config=config,
-            tokenizer_path=config.tokenizer_path)
+    #     train_accuracy = calculate_accuracy(
+    #         model=model,
+    #         dataloader=train_loader,
+    #         config=config,
+    #         tokenizer_path=config.tokenizer_path)
 
-        val_accuracy = calculate_accuracy(
-            model=model,
-            dataloader=val_loader,
-            config=config,
-            tokenizer_path=config.tokenizer_path)
+    #     val_accuracy = calculate_accuracy(
+    #         model=model,
+    #         dataloader=val_loader,
+    #         config=config,
+    #         tokenizer_path=config.tokenizer_path)
 
-        with open(f"{PATH_PREFIX}/train_accuracy_{config.n_layer}_layers.txt", "w") as f:
-            f.write(f"Train accuracy: {train_accuracy}\n")
+    #     with open(f"{PATH_PREFIX}/train_accuracy_{config.n_layer}_layers.txt", "w") as f:
+    #         f.write(f"Train accuracy: {train_accuracy}\n")
 
-        with open(f"{PATH_PREFIX}/val_accuracy_{config.n_layer}_layers.txt", "w") as f:
-            f.write(f"Val accuracy: {val_accuracy}\n")
+    #     with open(f"{PATH_PREFIX}/val_accuracy_{config.n_layer}_layers.txt", "w") as f:
+    #         f.write(f"Val accuracy: {val_accuracy}\n")
 
-        print(f"Train accuracy: {train_accuracy}")
-        print(f"Val accuracy: {val_accuracy}")
+    #     print(f"Train accuracy: {train_accuracy}")
+    #     print(f"Val accuracy: {val_accuracy}")
 
     # # PIPELINE - Calculate accuracy for complete model on base random dataset
     # device = "cuda" if torch.cuda.is_available() else "cpu"

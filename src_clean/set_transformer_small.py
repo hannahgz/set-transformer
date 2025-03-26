@@ -499,3 +499,143 @@ def get_raw_input_embeddings(config, dataset_name, capture_layer):
     torch.save(final_embeddings, embeddings_path)
 
     return final_embeddings
+
+def test_weight_decay_hypothesis(config, dataset_path, num_steps=25):
+    """
+    Test the hypothesis that weight decay contributes significantly to 
+    the initial divergence between training and validation loss.
+    
+    Args:
+        config: Model configuration
+        dataset_path: Path to the dataset
+        num_steps: Number of initial steps to track (default: 25)
+    """
+    # Load dataset
+    dataset = torch.load(dataset_path)
+    train_loader, val_loader = initialize_loaders(config, dataset)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    
+    # Create a fresh model
+    model = GPT(config).to(device)
+    
+    # Set up optimizer (same as in original run)
+    optimizer = optim.AdamW(
+        model.parameters(), lr=config.lr, weight_decay=0.01)
+    
+    # Create tracking lists
+    steps = []
+    pred_losses = []
+    wd_losses = []
+    total_losses = []
+    wd_percentages = []
+    val_losses = []
+    
+    # Function to calculate weight decay loss
+    def calculate_weight_decay_loss(model, weight_decay=0.01):
+        l2_norm = sum(p.pow(2.0).sum() for p in model.parameters())
+        return weight_decay * l2_norm / 2.0
+    
+    # Train for specified number of steps
+    for step in range(num_steps):
+        model.train()
+        batch_pred_losses = []
+        batch_wd_losses = []
+        
+        # Process a single epoch
+        for i, inputs in enumerate(train_loader):
+            inputs = inputs.to(device)
+            optimizer.zero_grad()
+            
+            # Forward pass to get prediction loss
+            _, pred_loss, _, _, _ = model(inputs, True)
+            
+            # Calculate weight decay loss (before backward)
+            wd_loss = calculate_weight_decay_loss(model)
+            
+            # Store batch losses
+            batch_pred_losses.append(pred_loss.item())
+            batch_wd_losses.append(wd_loss.item())
+            
+            # Total loss (what the optimizer actually sees)
+            total_loss = pred_loss + wd_loss
+            
+            # Backward and optimize
+            total_loss.backward()
+            optimizer.step()
+            
+            # Stop after processing some batches
+            if i >= config.eval_freq:
+                break
+        
+        # Calculate average losses for this step
+        avg_pred_loss = sum(batch_pred_losses) / len(batch_pred_losses)
+        avg_wd_loss = sum(batch_wd_losses) / len(batch_wd_losses)
+        avg_total_loss = avg_pred_loss + avg_wd_loss
+        wd_percentage = (avg_wd_loss / avg_total_loss) * 100
+        
+        # Get validation loss
+        model.eval()
+        val_batch_losses = []
+        with torch.no_grad():
+            for val_inputs in val_loader:
+                val_inputs = val_inputs.to(device)
+                _, val_loss, _, _, _ = model(val_inputs, True)
+                val_batch_losses.append(val_loss.item())
+                if len(val_batch_losses) >= 10:  # Limit validation batches for speed
+                    break
+        
+        avg_val_loss = sum(val_batch_losses) / len(val_batch_losses)
+        
+        # Store results
+        steps.append(step)
+        pred_losses.append(avg_pred_loss)
+        wd_losses.append(avg_wd_loss)
+        total_losses.append(avg_total_loss)
+        wd_percentages.append(wd_percentage)
+        val_losses.append(avg_val_loss)
+        
+        # Print progress
+        print(f"Step {step}:")
+        print(f"  Prediction loss: {avg_pred_loss:.4f}")
+        print(f"  Weight decay loss: {avg_wd_loss:.4f}")
+        print(f"  Total training loss: {avg_total_loss:.4f}")
+        print(f"  Weight decay contribution: {wd_percentage:.2f}%")
+        print(f"  Validation loss: {avg_val_loss:.4f}")
+        print("")
+    
+    # # Plot results
+    # plt.figure(figsize=(12, 8))
+    
+    # # Plot losses
+    # plt.subplot(2, 1, 1)
+    # plt.plot(steps, pred_losses, label='Prediction Loss', color='blue', linestyle='--')
+    # plt.plot(steps, total_losses, label='Total Training Loss', color='blue')
+    # plt.plot(steps, val_losses, label='Validation Loss', color='orange')
+    # plt.plot(steps, wd_losses, label='Weight Decay Loss', color='green')
+    # plt.xlabel('Steps')
+    # plt.ylabel('Loss')
+    # plt.title('Loss Components During Initial Training')
+    # plt.legend()
+    # plt.grid(True, alpha=0.3)
+    
+    # # Plot weight decay percentage
+    # plt.subplot(2, 1, 2)
+    # plt.plot(steps, wd_percentages, color='green')
+    # plt.xlabel('Steps')
+    # plt.ylabel('Weight Decay Contribution (%)')
+    # plt.title('Weight Decay Contribution to Total Training Loss')
+    # plt.grid(True, alpha=0.3)
+    
+    # plt.tight_layout()
+    # plt.savefig('weight_decay_analysis.png')
+    # plt.show()
+    
+    # # Return the data for further analysis
+    # return {
+    #     'steps': steps,
+    #     'pred_losses': pred_losses,
+    #     'wd_losses': wd_losses,
+    #     'total_losses': total_losses,
+    #     'wd_percentages': wd_percentages,
+    #     'val_losses': val_losses
+    # }
