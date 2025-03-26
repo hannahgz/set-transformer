@@ -1526,7 +1526,12 @@ def create_accuracy_comparison_chart():
     
     # Set the y-axis to start at 0
     # plt.ylim(0, max(df['Accuracy']) * 1.1)  # Add 10% padding at the top
-    
+    min_acc = 0.75 * 0.99  # Add 1% padding below
+    max_acc = 1 * 1.01  # Add 1% padding above
+
+    # Set custom y-axis limits that focus on the relevant range
+    plt.ylim(min_acc, max_acc)
+
     # Add value annotations on top of bars
     for i, p in enumerate(ax.patches):
         height = p.get_height()
