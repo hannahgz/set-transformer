@@ -1250,9 +1250,13 @@ def plot_mlp_layer3_weights():
     y_ticks = np.arange(0, weights.shape[1], 10)
     
     # Set the tick positions
-    plt.xticks(x_ticks, x_ticks, fontsize=10, rotation=0)
-    plt.yticks(y_ticks, y_ticks, fontsize=10, rotation=0)
+    plt.xticks(x_ticks + 0.5, x_ticks, fontsize=10, rotation=0)
+    plt.yticks(y_ticks + 0.5, y_ticks, fontsize=10, rotation=0)
     
+    # Add proper axis labels based on MLP architecture
+    plt.xlabel("Hidden Layer Neurons (256)", fontsize=12)
+    plt.ylabel("Output Embedding Dimensions (64)", fontsize=12)
+
     # Adjust layout to minimize whitespace
     plt.tight_layout()
     
