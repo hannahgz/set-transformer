@@ -1400,6 +1400,164 @@ def all_neuron_histogram_activation_breakdown():
                 dpi=300,
                 bbox_inches='tight')
 
+def create_accuracy_comparison_chart():
+    """
+    Creates a grouped bar chart showing training and validation accuracies grouped by number of layers.
+    Loads accuracy values directly from text files.
+    
+    Args:
+        path_prefix: Path prefix where the accuracy text files are stored
+        output_path: Path to save the figure
+        
+    Returns:
+        The matplotlib figure object
+    """
+    import os
+    import re
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    
+    # Define font sizes for consistency
+    title_font_size = 16
+    label_font_size = 12
+    annot_font_size = 10
+    
+    # Lists to store data
+    layers = []
+    train_accuracies = []
+    val_accuracies = []
+    
+    # Find all accuracy files in the directory
+    train_pattern = re.compile(r"train_accuracy_(\d+)_layers\.txt")
+    val_pattern = re.compile(r"val_accuracy_(\d+)_layers\.txt")
+    
+    # Process training accuracy files
+    for filename in os.listdir(PATH_PREFIX):
+        train_match = train_pattern.match(filename)
+        if train_match:
+            layer_num = int(train_match.group(1))
+            with open(os.path.join(PATH_PREFIX, filename), 'r') as f:
+                content = f.read()
+                # Extract accuracy value using regex
+                acc_match = re.search(r"Train accuracy: ([\d\.]+)", content)
+                if acc_match:
+                    accuracy = float(acc_match.group(1))
+                    layers.append(layer_num)
+                    train_accuracies.append(accuracy)
+    
+    # Create dictionary to store layer -> train_accuracy mapping
+    layer_to_train = {layer: acc for layer, acc in zip(layers, train_accuracies)}
+    
+    # Reset lists for validation processing
+    layers = []
+    val_accuracies = []
+    
+    # Process validation accuracy files
+    for filename in os.listdir(PATH_PREFIX):
+        val_match = val_pattern.match(filename)
+        if val_match:
+            layer_num = int(val_match.group(1))
+            with open(os.path.join(PATH_PREFIX, filename), 'r') as f:
+                content = f.read()
+                # Extract accuracy value using regex
+                acc_match = re.search(r"Val accuracy: ([\d\.]+)", content)
+                if acc_match:
+                    accuracy = float(acc_match.group(1))
+                    layers.append(layer_num)
+                    val_accuracies.append(accuracy)
+
+    print(f"Train accuracies: {train_accuracies}")
+    print(f"Val accuracies: {val_accuracies}")
+    
+    # Create dictionary to store layer -> val_accuracy mapping
+    layer_to_val = {layer: acc for layer, acc in zip(layers, val_accuracies)}
+    
+    # Get unique sorted layer numbers from both train and val
+    all_layers = sorted(set(list(layer_to_train.keys()) + list(layer_to_val.keys())))
+    
+    # Create data for DataFrame
+    data = {
+        'Layer': [],
+        'Accuracy': [],
+        'Type': []
+    }
+    
+    # Fill in the data
+    for layer in all_layers:
+        if layer in layer_to_train:
+            data['Layer'].append(layer)
+            data['Accuracy'].append(layer_to_train[layer])
+            data['Type'].append('Training')
+        
+        if layer in layer_to_val:
+            data['Layer'].append(layer)
+            data['Accuracy'].append(layer_to_val[layer])
+            data['Type'].append('Validation')
+    
+    # Create DataFrame
+    df = pd.DataFrame(data)
+    
+    # Sort by layer number to ensure sequential order
+    df = df.sort_values(by=['Layer', 'Type'])
+    
+    # Set up the figure
+    plt.figure(figsize=(12, 4))
+    
+    # Set seaborn style
+    sns.set_style("white")
+    
+    # Create grouped bar chart
+    ax = sns.barplot(
+        x='Layer',
+        y='Accuracy',
+        hue='Type',
+        data=df,
+        palette=['#1f77b4', '#ff7f0e']  # Blue for training, Orange for validation
+    )
+    
+    # Customize the plot
+    plt.title('SET Model Accuracy Comparison: Training vs Validation',
+              fontsize=title_font_size)
+    plt.xlabel('Number of Layers', fontsize=label_font_size)
+    plt.ylabel('Accuracy', fontsize=label_font_size)
+    plt.xticks(fontsize=label_font_size)
+    plt.yticks(fontsize=label_font_size)
+    
+    # Set the y-axis to start at 0
+    plt.ylim(0, max(df['Accuracy']) * 1.1)  # Add 10% padding at the top
+    
+    # Add value annotations on top of bars
+    for i, p in enumerate(ax.patches):
+        height = p.get_height()
+        # Only add text if the height is significant
+        if height > 0.001:  # Skip annotations for very small or zero values
+            ax.text(
+                p.get_x() + p.get_width() / 2.,
+                height + 0.01,
+                f'{height:.3f}',
+                ha='center',
+                fontsize=annot_font_size
+            )
+    
+    # Adjust legend
+    plt.legend(title='Accuracy Type', fontsize=label_font_size,
+               title_fontsize=label_font_size, loc='upper left')
+    
+    # # Add grid lines for better readability
+    # plt.grid(axis='y', linestyle='--', alpha=0.7)
+    
+    # Tight layout to ensure everything fits
+    plt.tight_layout()
+    
+    # Create directory if it doesn't exist
+    output_path=f"COMPLETE_FIGS/paper/set_model/accuracy_comparison_chart.png"
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    
+    # Save the figure
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    
+    return plt.gcf()
 
 if __name__ == "__main__":
     seed = 42
@@ -1407,7 +1565,9 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    all_neuron_histogram_activation_breakdown()
+    create_accuracy_comparison_chart()
+
+    # all_neuron_histogram_activation_breakdown()
     # plot_mlp_layer3_weights()
     # sns.set_style("white")
     # plot_consolidated_attribute_metrics(
