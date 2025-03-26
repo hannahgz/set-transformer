@@ -1332,9 +1332,9 @@ def plot_overlap_histograms(neuron_activations, target_neurons, pos_range=range(
 
     # Plot histogram for each neuron and position
     for i, neuron in enumerate(target_neurons):
-        for pos_idx in pos_range:
+        for j, pos_idx in enumerate(pos_range):
             print(f"Plotting neuron {neuron} at position {pos_idx}...")
-            ax = axes[i, pos_idx]
+            ax = axes[i, j]
 
             # Plot histogram for each set type at this position
             for set_type in set_types:
