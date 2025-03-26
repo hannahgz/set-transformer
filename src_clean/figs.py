@@ -1230,6 +1230,20 @@ def plot_orig_set_model_loss_seeded():
     fig.savefig(os.path.join(
         fig_save_dir, f'set_model_losses.png'), dpi=300, bbox_inches='tight')
 
+def plot_mlp_layer3_weights():
+    mlp_weights = torch.load(f"{PATH_PREFIX}/mlp_triples_card_randomization_tuple_randomization_layers_4_heads_4.pt")
+
+    for layer_name, layer_weights in mlp_weights.items():
+        for weight_name, weights in layer_weights.items():
+
+            print(f"Layer: {layer_name}, Weight: {weight_name}")
+            # 1. Direct Heatmap Visualization
+            # plt.figure(figsize=(10, 8))
+            # sns.heatmap(weights, cmap='coolwarm', center=0)
+            # plt.title(f"{layer_name} - {weight_name} Weight Matrix")
+            # plt.tight_layout()
+            # plt.savefig(os.path.join(layer_dir, f"{weight_name}_heatmap.png"))
+            # plt.close()
 
 if __name__ == "__main__":
     seed = 42
@@ -1238,22 +1252,23 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
 
-    sns.set_style("white")
-    plot_consolidated_attribute_metrics(
-        layers=[0, 1, 2, 3],
-        tokenizer_path=GPTConfig44_Complete().tokenizer_path,
-        project_name="attr_from_last_attr_binding_seeded200",
-        loss_range=[0, 0.65],
-        acc_range=[0.65, 1],
-    )
+    plot_mlp_layer3_weights()
+    # sns.set_style("white")
+    # plot_consolidated_attribute_metrics(
+    #     layers=[0, 1, 2, 3],
+    #     tokenizer_path=GPTConfig44_Complete().tokenizer_path,
+    #     project_name="attr_from_last_attr_binding_seeded200",
+    #     loss_range=[0, 0.65],
+    #     acc_range=[0.65, 1],
+    # )
 
-    plot_consolidated_attribute_metrics(
-        layers=[0, 1, 2, 3],
-        tokenizer_path=GPTConfig44_Complete().tokenizer_path,
-        project_name="attr_from_answer200",
-        loss_range=[0, 0.65],
-        acc_range=[0.65, 1],
-    )
+    # plot_consolidated_attribute_metrics(
+    #     layers=[0, 1, 2, 3],
+    #     tokenizer_path=GPTConfig44_Complete().tokenizer_path,
+    #     project_name="attr_from_answer200",
+    #     loss_range=[0, 0.65],
+    #     acc_range=[0.65, 1],
+    # )
 
 
     # plot_orig_set_model_loss_seeded()
