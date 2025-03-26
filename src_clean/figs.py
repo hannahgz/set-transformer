@@ -1238,12 +1238,12 @@ def plot_mlp_layer3_weights():
     weights = mlp_weights[layer_name][weight_name]
     
     # Use a wider figure with appropriate aspect ratio
-    plt.figure(figsize=(14, 6))  # Wider figure
+    plt.figure(figsize=(15, 6))  # Wider figure
     
     # Create the heatmap
     ax = sns.heatmap(weights.T, cmap='coolwarm', center=0)
     
-    plt.title(f"{layer_name} - {weight_name} Weight Matrix", fontsize=14)
+    plt.title(f"Layer 4 Weight Matrix", fontsize=14)
     
     # Create tick positions with wider intervals
     x_ticks = np.arange(0, weights.shape[0], 25)
