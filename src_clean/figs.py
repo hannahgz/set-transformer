@@ -1306,6 +1306,8 @@ def get_neuron_activation(neuron_type="hidden", curr_layer=3):
     return neuron_activations
 
 
+from matplotlib.ticker import FormatStrFormatter
+
 def plot_overlap_histograms(neuron_activations, target_neurons, pos_range=range(36, 40), num_bins=50, figsize=None):
     # Define set filtering types and their colors
     set_types = {
@@ -1335,6 +1337,7 @@ def plot_overlap_histograms(neuron_activations, target_neurons, pos_range=range(
         for j, pos_idx in enumerate(pos_range):
             print(f"Plotting neuron {neuron} at position {pos_idx}...")
             ax = axes[i, j]
+            ax.xaxis.set_major_formatter(FormatStrFormatter('%.3f'))
 
             # Plot histogram for each set type at this position
             for set_type in set_types:
@@ -1360,7 +1363,7 @@ def plot_overlap_histograms(neuron_activations, target_neurons, pos_range=range(
             # Set titles and labels
             # if i == 0:  # Add position labels only on top row
             ax.set_title(f'Position {pos_idx}')
-            if pos_idx == 0:  # Add neuron labels only on leftmost column
+            if j == 0:  # Add neuron labels only on leftmost column
                 ax.set_ylabel(f'Neuron {neuron}')
 
             # Only add legend to the rightmost column
@@ -1383,7 +1386,8 @@ def plot_overlap_histograms(neuron_activations, target_neurons, pos_range=range(
 def all_neuron_histogram_activation_breakdown():
     neuron_activations = get_neuron_activation()
 
-    indices = sorted([185, 25, 93, 36, 166, 89])
+    # indices = sorted([185, 25, 93, 36, 166, 89])
+    indices = sorted([25, 36, 89, 185])
 
     fig = plot_overlap_histograms(
         neuron_activations=neuron_activations,
