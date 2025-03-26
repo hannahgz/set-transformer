@@ -1237,28 +1237,34 @@ def plot_mlp_layer3_weights():
     weight_name = "c_proj"
     weights = mlp_weights[layer_name][weight_name]
     
-    plt.figure(figsize=(10, 6))  # Smaller figure size
-    sns.heatmap(weights.T, cmap='coolwarm', center=0)
+    # Use a wider figure with appropriate aspect ratio
+    plt.figure(figsize=(14, 6))  # Wider figure
     
-    plt.title(f"{layer_name} - {weight_name} Weight Matrix", fontsize=16)
+    # Create the heatmap
+    ax = sns.heatmap(weights.T, cmap='coolwarm', center=0)
     
-    # Increase font size for axes labels
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
+    plt.title(f"{layer_name} - {weight_name} Weight Matrix", fontsize=14)
     
-    # Set wider tick intervals
-    plt.xticks(np.arange(0, weights.shape[0], 25))  # X-axis tick every 25 units
-    plt.yticks(np.arange(0, weights.shape[1], 10))  # Y-axis tick every 10 units
+    # Create tick positions with wider intervals
+    x_ticks = np.arange(0, weights.shape[0], 25)
+    y_ticks = np.arange(0, weights.shape[1], 10)
     
-    # Rotate the x and y axis labels to be horizontal
-    plt.xticks(rotation=0)
-    plt.yticks(rotation=0)
+    # Set the tick positions
+    plt.xticks(x_ticks, x_ticks, fontsize=10, rotation=0)
+    plt.yticks(y_ticks, y_ticks, fontsize=10, rotation=0)
     
+    # Adjust layout to minimize whitespace
     plt.tight_layout()
-
+    
+    # Optional: adjust the colorbar position if it's creating whitespace
+    cbar = ax.collections[0].colorbar
+    cbar.ax.tick_params(labelsize=10)
+    
     fig_save_dir = "COMPLETE_FIGS/paper/mlp"
     os.makedirs(fig_save_dir, exist_ok=True)
-    plt.savefig(os.path.join(fig_save_dir, f"{weight_name}_{layer_name}_heatmap.png"), dpi=300)  # Higher DPI for better quality
+    plt.savefig(os.path.join(fig_save_dir, f"{weight_name}_{layer_name}_heatmap.png"), 
+                dpi=300, 
+                bbox_inches='tight')  # 'tight' parameter reduces extra whitespace
     plt.close()
 
     # for layer_name, layer_weights in mlp_weights.items():
