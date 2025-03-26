@@ -204,7 +204,7 @@ def evaluate_val_loss(model, val_loader, optimizer, best_val_loss, val_losses, c
 
 def model_accuracy(config, model, train_loader, val_loader):
      # Restore the model state dict
-    checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
+    checkpoint = torch.load(f"{config.filename}", weights_only=False)
     model.load_state_dict(checkpoint["model"])
 
     train_accuracy = calculate_accuracy(

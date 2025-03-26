@@ -24,8 +24,8 @@ if __name__ == "__main__":
         GPTConfig24_Complete(),
         GPTConfig34_Complete(),
         GPTConfig44_Complete(),
-        ]
-    
+    ]
+
     # run(
     #     config,
     #     dataset_path=config.dataset_path
@@ -38,27 +38,33 @@ if __name__ == "__main__":
     for config in configs:
         print(f"Running model with layers: {config.n_layer}")
         model = GPT(config).to(device)
-        checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
+        checkpoint = torch.load(
+            f"{config.filename}", weights_only=False)
         model.load_state_dict(checkpoint["model"])
 
         dataset = torch.load(dataset_path)
         train_loader, val_loader = initialize_loaders(config, dataset)
 
-        # train_accuracy = calculate_accuracy(
-        #     model=model, 
-        #     dataloader=train_loader,
-        #     config=config, 
-        #     tokenizer_path=config.tokenizer_path)
-        
-        val_accuracy = calculate_accuracy(
-            model=model, 
-            dataloader=val_loader,
-            config=config, 
+        train_accuracy = calculate_accuracy(
+            model=model,
+            dataloader=train_loader,
+            config=config,
             tokenizer_path=config.tokenizer_path)
-        
-        # print(f"Train accuracy: {train_accuracy}")
+
+        val_accuracy = calculate_accuracy(
+            model=model,
+            dataloader=val_loader,
+            config=config,
+            tokenizer_path=config.tokenizer_path)
+
+        with open(f"{PATH_PREFIX}/train_accuracy_{config.n_layer}_layers.txt", "w") as f:
+            f.write(f"Train accuracy: {train_accuracy}\n")
+
+        with open(f"{PATH_PREFIX}/val_accuracy_{config.n_layer}_layers.txt", "w") as f:
+            f.write(f"Val accuracy: {val_accuracy}\n")
+
+        print(f"Train accuracy: {train_accuracy}")
         print(f"Val accuracy: {val_accuracy}")
-        
 
     # # PIPELINE - Calculate accuracy for complete model on base random dataset
     # device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -71,9 +77,9 @@ if __name__ == "__main__":
     # train_loader, val_loader = initialize_loaders(config, dataset)
 
     # complete_baserandom_val_accuracy = calculate_accuracy(
-    #     model=model, 
+    #     model=model,
     #     dataloader=val_loader,
-    #     config=config, 
+    #     config=config,
     #     tokenizer_path=config.tokenizer_path,
     #     save_incorrect_path=f'{PATH_PREFIX}/complete_baserandom_val_incorrect_predictions_34.txt',
     #     breakdown=True)
@@ -110,7 +116,6 @@ if __name__ == "__main__":
     #     dataset_path=dataset_path
     # )
 
-
     # model = GPT(config).to(device)
     # checkpoint = torch.load(f"{PATH_PREFIX}/{config.filename}", weights_only=False)
     # model.load_state_dict(checkpoint["model"])
@@ -120,56 +125,54 @@ if __name__ == "__main__":
     # train_loader, val_loader = initialize_loaders(config, dataset)
 
     # equal_baserandom_val_accuracy = calculate_accuracy(
-    #     model=model, 
+    #     model=model,
     #     dataloader=val_loader,
-    #     config=config, 
+    #     config=config,
     #     tokenizer_path=tokenizer_path,
     #     save_incorrect_path=f'{PATH_PREFIX}/equal_baserandom_val_incorrect_predictions.txt',
     #     breakdown=True)
     # print("Val accuracy for equal model on base random dataset: ", equal_baserandom_val_accuracy)
 
     # equal_base_train_accuracy = calculate_accuracy(
-    #     model=model, 
+    #     model=model,
     #     dataloader=train_loader,
-    #     config=config, 
+    #     config=config,
     #     tokenizer_path=tokenizer_path,
     #     save_incorrect_path=f'{PATH_PREFIX}/equal_base_train_incorrect_predictions.txt',
     #     breakdown=True)
     # print("Train accuracy for equal model on base dataset: ", equal_base_train_accuracy)
 
     # equal_orig_train_accuracy = calculate_accuracy(
-    #     model=model, 
+    #     model=model,
     #     dataloader=train_loader,
-    #     config=config, 
+    #     config=config,
     #     tokenizer_path=tokenizer_path,
     #     save_incorrect_path=f'{PATH_PREFIX}/equal_orig_train_incorrect_predictions.txt',
     #     breakdown=True)
     # print("Train accuracy for equal model on orig dataset: ", equal_orig_train_accuracy)
 
-
     # equal_equal_val_accuracy = calculate_accuracy(
-    #     model=model, 
+    #     model=model,
     #     dataloader=val_loader,
-    #     config=config, 
+    #     config=config,
     #     tokenizer_path=tokenizer_path,
     #     save_incorrect_path=f'{PATH_PREFIX}/equal_equal_val_incorrect_predictions.txt',
     #     breakdown=True)
     # print("Val accuracy for final model on final dataset: ", equal_equal_val_accuracy)
 
     # equal_equal_train_accuracy = calculate_accuracy(
-    #     model=model, 
+    #     model=model,
     #     dataloader=train_loader,
-    #     config=config, 
+    #     config=config,
     #     tokenizer_path=tokenizer_path,
     #     breakdown=True)
     # print("Train accuracy for final model on final dataset: ", equal_equal_train_accuracy)
 
     # equal_final_val_accuracy = calculate_accuracy(
-    #     model=model, 
+    #     model=model,
     #     dataloader=val_loader,
-    #     config=config, 
+    #     config=config,
     #     tokenizer_path=tokenizer_path,
     #     save_incorrect_path=f'{PATH_PREFIX}/equal_final_incorrect_predictions.txt',
     #     breakdown=True)
     # print("Val accuracy for equal model on final dataset: ", equal_final_val_accuracy)
-
