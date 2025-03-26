@@ -1,3 +1,4 @@
+import pickle
 import torch
 from model import GPT, GPTConfig44_Complete
 from data_utils import load_tokenizer
@@ -864,7 +865,8 @@ def plot_consolidated_same_card(layers, tokenizer_path, loss_range=[0, 0.8], acc
                     'Loss', fontsize=label_font_size)
             # axes_train_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
             # axes_train_loss[layer_idx].set_yscale('log')
-            axes_train_loss[layer_idx].ticklabel_format(useOffset=False, style='plain')
+            axes_train_loss[layer_idx].ticklabel_format(
+                useOffset=False, style='plain')
             if layer_idx != 0:
                 axes_train_loss[layer_idx].set_ylim(-0.001, 0.03)
             axes_train_loss[layer_idx].tick_params(labelsize=annot_font_size)
@@ -881,7 +883,8 @@ def plot_consolidated_same_card(layers, tokenizer_path, loss_range=[0, 0.8], acc
                     'Loss', fontsize=label_font_size)
             # axes_val_loss[layer_idx].set_ylim(loss_range[0], loss_range[1])
             # axes_val_loss[layer_idx].set_yscale('log')
-            axes_val_loss[layer_idx].ticklabel_format(useOffset=False, style='plain')
+            axes_val_loss[layer_idx].ticklabel_format(
+                useOffset=False, style='plain')
             if layer_idx != 0:
                 axes_val_loss[layer_idx].set_ylim(-0.001, 0.013)
             axes_val_loss[layer_idx].tick_params(labelsize=annot_font_size)
@@ -898,7 +901,8 @@ def plot_consolidated_same_card(layers, tokenizer_path, loss_range=[0, 0.8], acc
                     'Accuracy', fontsize=label_font_size)
             # axes_train_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
             # axes_train_acc[layer_idx].set_yscale('log')
-            axes_train_acc[layer_idx].ticklabel_format(useOffset=False, style='plain')
+            axes_train_acc[layer_idx].ticklabel_format(
+                useOffset=False, style='plain')
             if layer_idx != 0:
                 axes_train_acc[layer_idx].set_ylim(0.992, 1.001)
             axes_train_acc[layer_idx].tick_params(labelsize=annot_font_size)
@@ -915,7 +919,8 @@ def plot_consolidated_same_card(layers, tokenizer_path, loss_range=[0, 0.8], acc
                     'Accuracy', fontsize=label_font_size)
             # axes_val_acc[layer_idx].set_ylim(acc_range[0], acc_range[1])
             # axes_val_acc[layer_idx].set_yscale('log')
-            axes_val_acc[layer_idx].ticklabel_format(useOffset=False, style='plain')
+            axes_val_acc[layer_idx].ticklabel_format(
+                useOffset=False, style='plain')
             if layer_idx != 0:
                 axes_val_acc[layer_idx].set_ylim(0.996, 1.001)
             axes_val_acc[layer_idx].tick_params(labelsize=annot_font_size)
@@ -1122,7 +1127,7 @@ def create_loss_figure_orig_set_model_seeded(run_data, seeds=[1, 100, 200, 300, 
                     transform=ax.transAxes)
 
         if seeds[i] != 1:
-            ax.set_title(f'Seed {seeds[i]}', fontsize = label_font_size + 2)
+            ax.set_title(f'Seed {seeds[i]}', fontsize=label_font_size + 2)
         else:
             ax.set_title(f'Seed 42 (Original)', fontsize=label_font_size + 2)
         ax.set_xlabel('Steps', fontsize=label_font_size + 2)
@@ -1207,7 +1212,8 @@ def plot_orig_set_model_loss():
 
     fig.savefig(os.path.join(
         fig_save_dir, f'set_model_losses.png'), dpi=300, bbox_inches='tight')
-    
+
+
 def plot_orig_set_model_loss_seeded():
     run_data = fetch_wandb_data_set_model(
         entity="hazhou-harvard",
@@ -1218,7 +1224,7 @@ def plot_orig_set_model_loss_seeded():
             "seed200/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt",
             "seed300/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt",
             "seed400/triples_card_randomization_tuple_randomization_layers_4_heads_4.pt",
-            ]
+        ]
     )
 
     fig_save_dir = "COMPLETE_FIGS/paper/set_model_seeded"
@@ -1230,30 +1236,32 @@ def plot_orig_set_model_loss_seeded():
     fig.savefig(os.path.join(
         fig_save_dir, f'set_model_losses.png'), dpi=300, bbox_inches='tight')
 
+
 def plot_mlp_layer3_weights():
-    mlp_weights = torch.load(f"{PATH_PREFIX}/mlp_triples_card_randomization_tuple_randomization_layers_4_heads_4.pt")
+    mlp_weights = torch.load(
+        f"{PATH_PREFIX}/mlp_triples_card_randomization_tuple_randomization_layers_4_heads_4.pt")
 
     layer_name = "layer_3"
     weight_name = "c_proj"
     weights = mlp_weights[layer_name][weight_name]
-    
+
     # Use a wider figure with appropriate aspect ratio
     plt.figure(figsize=(15, 6))  # Wider figure
-    
+
     # Create the heatmap
     ax = sns.heatmap(weights.T, cmap='coolwarm', center=0,
                      cbar_kws={'pad': 0.01})
-    
+
     plt.title(f"Layer 4: MLP Projection Weight Matrix", fontsize=18)
-    
+
     # Create tick positions with wider intervals
     x_ticks = np.arange(0, weights.shape[0], 25)
     y_ticks = np.arange(0, weights.shape[1], 10)
-    
+
     # Set the tick positions
     plt.xticks(x_ticks + 0.5, x_ticks, fontsize=12, rotation=0)
     plt.yticks(y_ticks + 0.5, y_ticks, fontsize=12, rotation=0)
-    
+
     # Add proper axis labels based on MLP architecture
     plt.xlabel("Hidden Layer Neurons (256)", fontsize=16)
     plt.ylabel("Output Embedding Dimensions (64)", fontsize=16)
@@ -1264,25 +1272,130 @@ def plot_mlp_layer3_weights():
     # Optional: adjust the colorbar position if it's creating whitespace
     cbar = ax.collections[0].colorbar
     cbar.ax.tick_params(labelsize=12)
-    
+
     fig_save_dir = "COMPLETE_FIGS/paper/mlp"
     os.makedirs(fig_save_dir, exist_ok=True)
-    plt.savefig(os.path.join(fig_save_dir, f"{weight_name}_{layer_name}_heatmap.png"), 
-                dpi=300, 
+    plt.savefig(os.path.join(fig_save_dir, f"{weight_name}_{layer_name}_heatmap.png"),
+                dpi=300,
                 bbox_inches='tight')  # 'tight' parameter reduces extra whitespace
     plt.close()
 
     # for layer_name, layer_weights in mlp_weights.items():
-        # for weight_name, weights in layer_weights.items():
+    # for weight_name, weights in layer_weights.items():
 
-            # print(f"Layer: {layer_name}, Weight: {weight_name}")
-            # 1. Direct Heatmap Visualization
-            # plt.figure(figsize=(10, 8))
-            # sns.heatmap(weights, cmap='coolwarm', center=0)
-            # plt.title(f"{layer_name} - {weight_name} Weight Matrix")
-            # plt.tight_layout()
-            # plt.savefig(os.path.join(layer_dir, f"{weight_name}_heatmap.png"))
-            # plt.close()
+    # print(f"Layer: {layer_name}, Weight: {weight_name}")
+    # 1. Direct Heatmap Visualization
+    # plt.figure(figsize=(10, 8))
+    # sns.heatmap(weights, cmap='coolwarm', center=0)
+    # plt.title(f"{layer_name} - {weight_name} Weight Matrix")
+    # plt.tight_layout()
+    # plt.savefig(os.path.join(layer_dir, f"{weight_name}_heatmap.png"))
+    # plt.close()
+
+
+def get_neuron_activation(neuron_type="hidden", curr_layer=3):
+    output_dir = f"{PATH_PREFIX}/data/mlp_fixed/{neuron_type}/layer{curr_layer}"
+
+    pkl_filename = os.path.join(
+        output_dir, f"neuron_activations_layer{curr_layer}_all_positions.pkl")
+
+    # Load neuron activations
+    with open(pkl_filename, "rb") as f:
+        neuron_activations = pickle.load(f)
+
+    return neuron_activations
+
+
+def plot_overlap_histograms(neuron_activations, target_neurons, pos_range=range(36, 40), num_bins=50, figsize=None):
+    # Define set filtering types and their colors
+    set_types = {
+        0: {"name": "No Set", "color": "blue", "alpha": 0.5},
+        1: {"name": "One Set", "color": "green", "alpha": 0.5},
+        2: {"name": "Two Set", "color": "red", "alpha": 0.5}
+    }
+
+    # Calculate rows and columns for subplot grid
+    n_neurons = len(target_neurons)
+    n_cols = len(pos_range)  # Each column represents a position
+    n_rows = n_neurons  # Each row represents a neuron
+
+    # Set default figsize based on number of neurons if not provided
+    if figsize is None:
+        figsize = (20, 4 * n_neurons)
+
+    # Create figure and subplots
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize)
+
+    # Handle the case of a single neuron (1D array)
+    if n_neurons == 1:
+        axes = axes.reshape(1, -1)
+
+    # Plot histogram for each neuron and position
+    for i, neuron in enumerate(target_neurons):
+        for pos_idx in pos_range:
+            print(f"Plotting neuron {neuron} at position {pos_idx}...")
+            ax = axes[i, pos_idx]
+
+            # Plot histogram for each set type at this position
+            for set_type in set_types:
+                activations = neuron_activations[neuron][pos_idx][set_type]
+                if not activations:  # Skip if no data for this set type
+                    continue
+
+                # Calculate statistics for this set type
+                mean_act = np.mean(activations)
+                median_act = np.median(activations)
+
+                set_info = set_types[set_type]
+
+                # Plot histogram with alpha transparency to show overlap
+                ax.hist(activations, bins=num_bins, alpha=set_info["alpha"],
+                        color=set_info["color"], edgecolor='black',
+                        label=f'{set_info["name"]} (n={len(activations)})')
+
+                # Add vertical lines for mean values
+                ax.axvline(mean_act, color=set_info["color"], linestyle='dashed', linewidth=2,
+                           label=f'{set_info["name"]} Mean: {mean_act:.3f}')
+
+            # Set titles and labels
+            # if i == 0:  # Add position labels only on top row
+            ax.set_title(f'Position {pos_idx}')
+            if pos_idx == 0:  # Add neuron labels only on leftmost column
+                ax.set_ylabel(f'Neuron {neuron}')
+
+            # Only add legend to the rightmost column
+            # if pos_idx == n_cols - 1:
+            ax.legend(loc='best', fontsize=8)
+
+            # Remove x-axis labels except for bottom row
+            # if i != n_rows - 1:
+            #     ax.set_xticklabels([])
+            if i == n_rows - 1:
+                ax.set_xlabel('Activation Value')
+
+    plt.tight_layout()
+    print(
+        f"Done! Plotted histograms for {len(target_neurons)} neurons with overlapping set types.")
+
+    return fig
+
+
+def all_neuron_histogram_activation_breakdown():
+    neuron_activations = get_neuron_activation()
+
+    indices = sorted([185, 25, 93, 36, 166, 89])
+
+    fig = plot_overlap_histograms(
+        neuron_activations=neuron_activations,
+        target_neurons=indices)
+    
+    fig_save_dir = "COMPLETE_FIGS/paper/mlp"
+    os.makedirs(fig_save_dir, exist_ok=True)
+
+    plt.savefig(os.path.join(fig_save_dir, f"hidden_consolidated_selected_neurons.png"),
+                dpi=300,
+                bbox_inches='tight')
+
 
 if __name__ == "__main__":
     seed = 42
@@ -1290,8 +1403,8 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-
-    plot_mlp_layer3_weights()
+    all_neuron_histogram_activation_breakdown()
+    # plot_mlp_layer3_weights()
     # sns.set_style("white")
     # plot_consolidated_attribute_metrics(
     #     layers=[0, 1, 2, 3],
@@ -1308,7 +1421,6 @@ if __name__ == "__main__":
     #     loss_range=[0, 0.65],
     #     acc_range=[0.65, 1],
     # )
-
 
     # plot_orig_set_model_loss_seeded()
 
