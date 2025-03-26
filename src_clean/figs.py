@@ -1236,18 +1236,31 @@ def plot_mlp_layer3_weights():
     layer_name = "layer_3"
     weight_name = "c_proj"
     weights = mlp_weights[layer_name][weight_name]
-    breakpoint()
-
-    plt.figure(figsize=(12, 8))
+    
+    plt.figure(figsize=(10, 6))  # Smaller figure size
     sns.heatmap(weights.T, cmap='coolwarm', center=0)
+    
     plt.title(f"{layer_name} - {weight_name} Weight Matrix", fontsize=16)
+    
+    # Increase font size for axes labels
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    
+    # Set wider tick intervals
+    plt.xticks(np.arange(0, weights.shape[0], 25))  # X-axis tick every 25 units
+    plt.yticks(np.arange(0, weights.shape[1], 10))  # Y-axis tick every 10 units
+    
+    # Rotate the x and y axis labels to be horizontal
+    plt.xticks(rotation=0)
+    plt.yticks(rotation=0)
+    
     plt.tight_layout()
 
     fig_save_dir = "COMPLETE_FIGS/paper/mlp"
     os.makedirs(fig_save_dir, exist_ok=True)
-    plt.savefig(os.path.join(fig_save_dir, f"{weight_name}_{layer_name}_heatmap.png"))
+    plt.savefig(os.path.join(fig_save_dir, f"{weight_name}_{layer_name}_heatmap.png"), dpi=300)  # Higher DPI for better quality
     plt.close()
-    
+
     # for layer_name, layer_weights in mlp_weights.items():
         # for weight_name, weights in layer_weights.items():
 
