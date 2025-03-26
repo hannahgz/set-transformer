@@ -1233,10 +1233,25 @@ def plot_orig_set_model_loss_seeded():
 def plot_mlp_layer3_weights():
     mlp_weights = torch.load(f"{PATH_PREFIX}/mlp_triples_card_randomization_tuple_randomization_layers_4_heads_4.pt")
 
-    for layer_name, layer_weights in mlp_weights.items():
-        for weight_name, weights in layer_weights.items():
+    layer_name = "layer_3"
+    weight_name = "c_proj"
+    weights = mlp_weights[layer_name][weight_name]
+    breakpoint()
 
-            print(f"Layer: {layer_name}, Weight: {weight_name}")
+    plt.figure(figsize=(12, 8))
+    sns.heatmap(weights.T, cmap='coolwarm', center=0)
+    plt.title(f"{layer_name} - {weight_name} Weight Matrix", fontsize=16)
+    plt.tight_layout()
+
+    fig_save_dir = "COMPLETE_FIGS/paper/mlp"
+    os.makedirs(fig_save_dir, exist_ok=True)
+    plt.savefig(os.path.join(fig_save_dir, f"{weight_name}_{layer_name}_heatmap.png"))
+    plt.close()
+    
+    # for layer_name, layer_weights in mlp_weights.items():
+        # for weight_name, weights in layer_weights.items():
+
+            # print(f"Layer: {layer_name}, Weight: {weight_name}")
             # 1. Direct Heatmap Visualization
             # plt.figure(figsize=(10, 8))
             # sns.heatmap(weights, cmap='coolwarm', center=0)
