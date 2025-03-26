@@ -1420,8 +1420,8 @@ def create_accuracy_comparison_chart():
     
     # Define font sizes for consistency
     title_font_size = 16
-    label_font_size = 12
-    annot_font_size = 10
+    label_font_size = 14
+    annot_font_size = 12
     
     # Lists to store data
     layers = []
@@ -1525,7 +1525,7 @@ def create_accuracy_comparison_chart():
     plt.yticks(fontsize=label_font_size)
     
     # Set the y-axis to start at 0
-    plt.ylim(0, max(df['Accuracy']) * 1.1)  # Add 10% padding at the top
+    # plt.ylim(0, max(df['Accuracy']) * 1.1)  # Add 10% padding at the top
     
     # Add value annotations on top of bars
     for i, p in enumerate(ax.patches):
