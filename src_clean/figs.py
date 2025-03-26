@@ -1241,7 +1241,8 @@ def plot_mlp_layer3_weights():
     plt.figure(figsize=(15, 6))  # Wider figure
     
     # Create the heatmap
-    ax = sns.heatmap(weights.T, cmap='coolwarm', center=0)
+    ax = sns.heatmap(weights.T, cmap='coolwarm', center=0,
+                     cbar_kws={'pad': 0.01})
     
     plt.title(f"Layer 4 Weight Matrix", fontsize=18)
     
@@ -1250,8 +1251,8 @@ def plot_mlp_layer3_weights():
     y_ticks = np.arange(0, weights.shape[1], 10)
     
     # Set the tick positions
-    plt.xticks(x_ticks + 0.5, x_ticks, fontsize=10, rotation=0)
-    plt.yticks(y_ticks + 0.5, y_ticks, fontsize=10, rotation=0)
+    plt.xticks(x_ticks + 0.5, x_ticks, fontsize=12, rotation=0)
+    plt.yticks(y_ticks + 0.5, y_ticks, fontsize=12, rotation=0)
     
     # Add proper axis labels based on MLP architecture
     plt.xlabel("Hidden Layer Neurons (256)", fontsize=16)
@@ -1259,12 +1260,10 @@ def plot_mlp_layer3_weights():
 
     # Adjust layout to minimize whitespace
     plt.tight_layout()
-    
-    plt.subplots_adjust(right=0.9) # Reduce right margin to move colorbar closer
 
     # Optional: adjust the colorbar position if it's creating whitespace
     cbar = ax.collections[0].colorbar
-    cbar.ax.tick_params(labelsize=16)
+    cbar.ax.tick_params(labelsize=12)
     
     fig_save_dir = "COMPLETE_FIGS/paper/mlp"
     os.makedirs(fig_save_dir, exist_ok=True)
