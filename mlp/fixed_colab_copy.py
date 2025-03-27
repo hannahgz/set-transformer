@@ -1010,7 +1010,10 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
     # Create a separate axes for the legend at the right
     # legend_ax = fig.add_subplot(gs[0, 2])
     # legend_ax.axis('off')  # Hide the axes
-    legend_ax = fig.add_axes([0.78, 0.1, 0.2, 0.8])
+    # legend_ax = fig.add_axes([0.78, 0.1, 0.2, 0.8])
+    # legend_ax.axis('off')
+    fig.subplots_adjust(right=0.75)  # Make room for legend
+    legend_ax = fig.add_axes([0.78, 0.1, 0.2, 0.8])  # Create custom axes for legend
     legend_ax.axis('off')
     
     # Create a single legend with two columns
@@ -1026,7 +1029,8 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
     if legend.get_title():
         legend.get_title().set_fontsize(legend_font_size)
     
-    plt.tight_layout()
+    # plt.tight_layout()
+    plt.tight_layout(rect=[0, 0, 0.75, 1])
     
     if savefig:
         save_fig_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
