@@ -966,19 +966,9 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
     triplet_categories, category_to_triplet = assign_triplet_categories(
         dataloader, attribute_index)
     colors = cc.glasbey[:27]
-    
-    # # Create figure with a layout that reserves space for the legend on the right
-    # fig = plt.figure(figsize=(24, 8))  # Wider figure to accommodate legend on right
-    
-    # # Create a gridspec with 3 columns - 2 for plots, 1 for legend
-    # gs = fig.add_gridspec(1, 3, width_ratios=[2, 2, 1], wspace=0.05)  # 2:2:1 ratio
-    
-    # # Create the subplots
-    # ax1 = fig.add_subplot(gs[0, 0])
-    # ax2 = fig.add_subplot(gs[0, 1])
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 8))
-    fig.subplots_adjust(right=0.7)  # Make room for legend on right
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 8), wspace=0.1)
+    fig.subplots_adjust(right=0.6)  # Make room for legend on right
     
     # Plot for Neuron 1
     handles = []  # To store plot handles for legend
@@ -1007,20 +997,14 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
     ax2.set_title(f'Neuron 10 Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=title_font_size)
     ax2.tick_params(axis='both', which='major', labelsize=tick_font_size)
     
-    # Create a separate axes for the legend at the right
-    # legend_ax = fig.add_subplot(gs[0, 2])
-    # legend_ax.axis('off')  # Hide the axes
-    # legend_ax = fig.add_axes([0.78, 0.1, 0.2, 0.8])
-    # legend_ax.axis('off')
-    # fig.subplots_adjust(right=0.7)  # Make room for legend
-    legend_ax = fig.add_axes([0.73, 0.1, 0.2, 0.8])  # Create custom axes for legend
+    legend_ax = fig.add_axes([0.62, 0.1, 0.35, 0.8])  # Create custom axes for legend
     legend_ax.axis('off')
     
     # Create a single legend with two columns
     legend = legend_ax.legend(handles, labels, 
                              loc='center', 
                              fontsize=legend_font_size,
-                             bbox_to_anchor=(0.05, 0.5),  # Center position
+                            #  bbox_to_anchor=(0.05, 0.5),  # Center position
                              ncol=2,  # Use 2 columns
                              frameon=True,  # Add a frame around the legend
                              title=f"{attribute_map[attribute_index].capitalize()} Categories")  # Optional: add a title
@@ -1030,7 +1014,7 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
         legend.get_title().set_fontsize(legend_font_size)
     
     # plt.tight_layout()
-    plt.tight_layout(rect=[0, 0, 0.75, 1])
+    plt.tight_layout(rect=[0, 0, 0.6, 1])
     
     if savefig:
         save_fig_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
