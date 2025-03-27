@@ -867,6 +867,95 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
     
 #     plt.show()
 
+# def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, savefig=False):
+#     title_font_size = 24
+#     label_font_size = 20
+#     tick_font_size = 20
+#     legend_font_size = 20
+    
+#     # Create a color map
+#     triplet_categories, category_to_triplet = assign_triplet_categories(
+#         dataloader, attribute_index)
+#     colors = cc.glasbey[:27]
+    
+#     # Create figure with a layout that reserves space for the legend on the right
+#     fig = plt.figure(figsize=(24, 10))  # Wider figure to accommodate legend on right
+    
+#     # Create a gridspec with 3 columns - 2 for plots, 1 for legend
+#     gs = fig.add_gridspec(1, 3, width_ratios=[2, 2, 1])  # 2:2:1 ratio
+    
+#     # Create the subplots
+#     ax1 = fig.add_subplot(gs[0, 0])
+#     ax2 = fig.add_subplot(gs[0, 1])
+    
+#     # Plot for Neuron 1
+#     handles = []  # To store plot handles for legend
+#     labels = []   # To store labels for legend
+    
+#     for category in range(27):
+#         category_activations = activations[:, 1][triplet_categories == category]
+#         curr_label = triplet_type_to_labels(category_to_triplet[category], attribute_index)
+#         h = ax1.hist(category_activations, bins=30, alpha=0.5, label=curr_label, color=colors[category])
+#         handles.append(plt.Rectangle((0,0),1,1, color=colors[category], alpha=0.5))
+#         labels.append(curr_label)
+    
+#     ax1.set_xlabel('Activation Value', fontsize=label_font_size)
+#     ax1.set_ylabel('Frequency', fontsize=label_font_size)
+#     ax1.set_title(f'Neuron 1 Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=title_font_size)
+#     ax1.tick_params(axis='both', which='major', labelsize=tick_font_size)
+    
+#     # Plot for Neuron 10
+#     for category in range(27):
+#         category_activations = activations[:, 10][triplet_categories == category]
+#         curr_label = triplet_type_to_labels(category_to_triplet[category], attribute_index)
+#         ax2.hist(category_activations, bins=30, alpha=0.5, label=curr_label, color=colors[category])
+    
+#     ax2.set_xlabel('Activation Value', fontsize=label_font_size)
+#     ax2.set_ylabel('Frequency', fontsize=label_font_size)
+#     ax2.set_title(f'Neuron 10 Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=title_font_size)
+#     ax2.tick_params(axis='both', which='major', labelsize=tick_font_size)
+    
+#     # Create a separate axes for the legend at the right
+#     legend_ax = fig.add_subplot(gs[0, 2])
+#     legend_ax.axis('off')  # Hide the axes
+    
+#     # Add the legend to the right axes with 2 columns side by side
+#     # Split items into two columns
+#     left_column = []
+#     right_column = []
+    
+#     for i, (handle, label) in enumerate(zip(handles, labels)):
+#         if i % 2 == 0:  # Even indices go to left column
+#             left_column.append((handle, label))
+#         else:  # Odd indices go to right column
+#             right_column.append((handle, label))
+    
+#     # Create the left column legend
+#     left_handles = [item[0] for item in left_column]
+#     left_labels = [item[1] for item in left_column]
+#     legend1 = legend_ax.legend(left_handles, left_labels, 
+#                               loc='center left', fontsize=legend_font_size,
+#                               bbox_to_anchor=(0.0, 0.5))
+#     legend_ax.add_artist(legend1)  # Add first legend to figure
+    
+#     # Create the right column legend
+#     right_handles = [item[0] for item in right_column]
+#     right_labels = [item[1] for item in right_column]
+#     legend2 = legend_ax.legend(right_handles, right_labels, 
+#                               loc='center right', fontsize=legend_font_size,
+#                               bbox_to_anchor=(1.0, 0.5))
+    
+#     plt.tight_layout()
+    
+#     if savefig:
+#         save_fig_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
+#         os.makedirs(save_fig_path, exist_ok=True)
+#         plt.savefig(f"{save_fig_path}/activations_neurons_1_and_10_index{attribute_index}.png", 
+#                    bbox_inches="tight")
+    
+#     plt.show()
+
+
 def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, savefig=False):
     title_font_size = 24
     label_font_size = 20
@@ -919,31 +1008,18 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
     legend_ax = fig.add_subplot(gs[0, 2])
     legend_ax.axis('off')  # Hide the axes
     
-    # Add the legend to the right axes with 2 columns side by side
-    # Split items into two columns
-    left_column = []
-    right_column = []
+    # Create a single legend with two columns
+    legend = legend_ax.legend(handles, labels, 
+                             loc='center', 
+                             fontsize=legend_font_size,
+                             bbox_to_anchor=(0.05, 0.5),  # Center position
+                             ncol=2,  # Use 2 columns
+                             frameon=True,  # Add a frame around the legend
+                             title=f"{attribute_map[attribute_index].capitalize()} Categories")  # Optional: add a title
     
-    for i, (handle, label) in enumerate(zip(handles, labels)):
-        if i % 2 == 0:  # Even indices go to left column
-            left_column.append((handle, label))
-        else:  # Odd indices go to right column
-            right_column.append((handle, label))
-    
-    # Create the left column legend
-    left_handles = [item[0] for item in left_column]
-    left_labels = [item[1] for item in left_column]
-    legend1 = legend_ax.legend(left_handles, left_labels, 
-                              loc='center left', fontsize=legend_font_size,
-                              bbox_to_anchor=(0.0, 0.5))
-    legend_ax.add_artist(legend1)  # Add first legend to figure
-    
-    # Create the right column legend
-    right_handles = [item[0] for item in right_column]
-    right_labels = [item[1] for item in right_column]
-    legend2 = legend_ax.legend(right_handles, right_labels, 
-                              loc='center right', fontsize=legend_font_size,
-                              bbox_to_anchor=(1.0, 0.5))
+    # Optionally adjust legend title font size
+    if legend.get_title():
+        legend.get_title().set_fontsize(legend_font_size)
     
     plt.tight_layout()
     
@@ -954,7 +1030,6 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
                    bbox_inches="tight")
     
     plt.show()
-
 
 # def plot_activation_grid_by_triplet_category(activations, neuron_index, dataloader, attribute_index, hidden_size, savefig=False):
 #     triplet_categories, category_to_triplet = assign_triplet_categories(
