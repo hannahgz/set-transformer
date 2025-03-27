@@ -967,7 +967,7 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
         dataloader, attribute_index)
     colors = cc.glasbey[:27]
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 8))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 8))
     fig.subplots_adjust(right=0.6)  # Make room for legend on right
     
     # Plot for Neuron 1
