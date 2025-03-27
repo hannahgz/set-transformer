@@ -967,15 +967,18 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
         dataloader, attribute_index)
     colors = cc.glasbey[:27]
     
-    # Create figure with a layout that reserves space for the legend on the right
-    fig = plt.figure(figsize=(24, 8))  # Wider figure to accommodate legend on right
+    # # Create figure with a layout that reserves space for the legend on the right
+    # fig = plt.figure(figsize=(24, 8))  # Wider figure to accommodate legend on right
     
-    # Create a gridspec with 3 columns - 2 for plots, 1 for legend
-    gs = fig.add_gridspec(1, 3, width_ratios=[2, 2, 1], wspace=0.05)  # 2:2:1 ratio
+    # # Create a gridspec with 3 columns - 2 for plots, 1 for legend
+    # gs = fig.add_gridspec(1, 3, width_ratios=[2, 2, 1], wspace=0.05)  # 2:2:1 ratio
     
-    # Create the subplots
-    ax1 = fig.add_subplot(gs[0, 0])
-    ax2 = fig.add_subplot(gs[0, 1])
+    # # Create the subplots
+    # ax1 = fig.add_subplot(gs[0, 0])
+    # ax2 = fig.add_subplot(gs[0, 1])
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+    fig.subplots_adjust(right=0.75)  # Make room for legend on right
     
     # Plot for Neuron 1
     handles = []  # To store plot handles for legend
@@ -1005,8 +1008,10 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
     ax2.tick_params(axis='both', which='major', labelsize=tick_font_size)
     
     # Create a separate axes for the legend at the right
-    legend_ax = fig.add_subplot(gs[0, 2])
-    legend_ax.axis('off')  # Hide the axes
+    # legend_ax = fig.add_subplot(gs[0, 2])
+    # legend_ax.axis('off')  # Hide the axes
+    legend_ax = fig.add_axes([0.78, 0.1, 0.2, 0.8])
+    legend_ax.axis('off')
     
     # Create a single legend with two columns
     legend = legend_ax.legend(handles, labels, 
