@@ -984,7 +984,7 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
     
     ax1.set_xlabel('Activation Value', fontsize=label_font_size)
     ax1.set_ylabel('Frequency', fontsize=label_font_size)
-    ax1.set_title(f'Neuron 1 Activations by {attribute_map[attribute_index].capitalize()}', fontsize=title_font_size)
+    ax1.set_title(f'TEST: Neuron 1 Activations by {attribute_map[attribute_index].capitalize()}', fontsize=title_font_size)
     ax1.tick_params(axis='both', which='major', labelsize=tick_font_size)
     
     # Plot for Neuron 10
