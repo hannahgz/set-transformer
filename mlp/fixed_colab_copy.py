@@ -977,8 +977,8 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
     # ax1 = fig.add_subplot(gs[0, 0])
     # ax2 = fig.add_subplot(gs[0, 1])
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
-    fig.subplots_adjust(right=0.75)  # Make room for legend on right
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 8))
+    fig.subplots_adjust(right=0.7)  # Make room for legend on right
     
     # Plot for Neuron 1
     handles = []  # To store plot handles for legend
@@ -1012,8 +1012,8 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
     # legend_ax.axis('off')  # Hide the axes
     # legend_ax = fig.add_axes([0.78, 0.1, 0.2, 0.8])
     # legend_ax.axis('off')
-    fig.subplots_adjust(right=0.75)  # Make room for legend
-    legend_ax = fig.add_axes([0.78, 0.1, 0.2, 0.8])  # Create custom axes for legend
+    # fig.subplots_adjust(right=0.7)  # Make room for legend
+    legend_ax = fig.add_axes([0.73, 0.1, 0.2, 0.8])  # Create custom axes for legend
     legend_ax.axis('off')
     
     # Create a single legend with two columns
