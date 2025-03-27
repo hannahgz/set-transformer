@@ -818,47 +818,115 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
             f"{save_fig_path}/activations_neuron{neuron_index}_index{attribute_index}.png", bbox_inches="tight")
     plt.show()
 
+# def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, savefig=False):
+#     # Create a color map
+#     triplet_categories, category_to_triplet = assign_triplet_categories(
+#         dataloader, attribute_index)
+#     colors = cc.glasbey[:27]
+    
+#     # Create figure with two subplots of identical size
+#     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 8), constrained_layout=True)
+    
+#     # Plot for Neuron 1 (no legend)
+#     for category in range(27):
+#         category_activations = activations[:, 1][triplet_categories == category]
+#         curr_label = triplet_type_to_labels(category_to_triplet[category], attribute_index)
+#         ax1.hist(category_activations, bins=30, alpha=0.5, label=curr_label, color=colors[category])
+    
+#     ax1.set_xlabel('Activation Value', fontsize=14)
+#     ax1.set_ylabel('Frequency', fontsize=14)
+#     ax1.set_title(f'Neuron 1 Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=16)
+#     ax1.tick_params(axis='both', which='major', labelsize=12)
+    
+#     # Plot for Neuron 10 (with legend)
+#     for category in range(27):
+#         category_activations = activations[:, 10][triplet_categories == category]
+#         curr_label = triplet_type_to_labels(category_to_triplet[category], attribute_index)
+#         ax2.hist(category_activations, bins=30, alpha=0.5, label=curr_label, color=colors[category])
+    
+#     ax2.set_xlabel('Activation Value', fontsize=14)
+#     ax2.set_ylabel('Frequency', fontsize=14)
+#     ax2.set_title(f'Neuron 10 Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=16)
+#     ax2.tick_params(axis='both', which='major', labelsize=12)
+    
+#     # Add legend outside of the second plot with larger text
+#     fig.legend(loc='center right', fontsize=12, bbox_to_anchor=(1.15, 0.5))
+    
+#     plt.tight_layout()
+#     if savefig:
+#         save_fig_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
+#         os.makedirs(save_fig_path, exist_ok=True)
+#         plt.savefig(f"{save_fig_path}/activations_neurons_1_and_10_index{attribute_index}.png", 
+#                    bbox_inches="tight",
+#                    dpi=300)
+    
+#     plt.show()
+
 def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, savefig=False):
+    title_font_size = 24
+    label_font_size = 20
+    tick_font_size = 16
+    legend_font_size = 14
     # Create a color map
     triplet_categories, category_to_triplet = assign_triplet_categories(
         dataloader, attribute_index)
     colors = cc.glasbey[:27]
     
-    # Create figure with two subplots of identical size
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 8), constrained_layout=True)
+    # Create figure with two subplots and extra space for the legend
+    fig = plt.figure(figsize=(20, 10))  # Increased height for legend space
     
-    # Plot for Neuron 1 (no legend)
+    # Create a gridspec that reserves space at the bottom for the legend
+    gs = fig.add_gridspec(2, 2, height_ratios=[4, 1])  # Top row for plots, bottom row for legend
+    
+    # Create the subplots in the top row
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax2 = fig.add_subplot(gs[0, 1])
+    
+    # Plot for Neuron 1
+    handles = []  # To store plot handles for legend
+    labels = []   # To store labels for legend
+    
     for category in range(27):
         category_activations = activations[:, 1][triplet_categories == category]
         curr_label = triplet_type_to_labels(category_to_triplet[category], attribute_index)
-        ax1.hist(category_activations, bins=30, alpha=0.5, label=curr_label, color=colors[category])
+        h = ax1.hist(category_activations, bins=30, alpha=0.5, label=curr_label, color=colors[category])
+        handles.append(plt.Rectangle((0,0),1,1, color=colors[category], alpha=0.5))
+        labels.append(curr_label)
     
-    ax1.set_xlabel('Activation Value', fontsize=14)
-    ax1.set_ylabel('Frequency', fontsize=14)
-    ax1.set_title(f'Neuron 1 Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=16)
-    ax1.tick_params(axis='both', which='major', labelsize=12)
+    ax1.set_xlabel('Activation Value', fontsize=label_font_size)
+    ax1.set_ylabel('Frequency', fontsize=label_font_size)
+    ax1.set_title(f'Neuron 1 Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=title_font_size)
+    ax1.tick_params(axis='both', which='major', labelsize=tick_font_size)
     
-    # Plot for Neuron 10 (with legend)
+    # Plot for Neuron 10
     for category in range(27):
         category_activations = activations[:, 10][triplet_categories == category]
         curr_label = triplet_type_to_labels(category_to_triplet[category], attribute_index)
         ax2.hist(category_activations, bins=30, alpha=0.5, label=curr_label, color=colors[category])
     
-    ax2.set_xlabel('Activation Value', fontsize=14)
-    ax2.set_ylabel('Frequency', fontsize=14)
-    ax2.set_title(f'Neuron 10 Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=16)
-    ax2.tick_params(axis='both', which='major', labelsize=12)
+    ax2.set_xlabel('Activation Value', fontsize=label_font_size)
+    ax2.set_ylabel('Frequency', fontsize=label_font_size)
+    ax2.set_title(f'Neuron 10 Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=title_font_size)
+    ax2.tick_params(axis='both', which='major', labelsize=tick_font_size)
     
-    # Add legend outside of the second plot with larger text
-    fig.legend(loc='center right', fontsize=12, bbox_to_anchor=(1.15, 0.5))
+    # Create a separate axes for the legend at the bottom spanning both columns
+    legend_ax = fig.add_subplot(gs[1, :])
+    legend_ax.axis('off')  # Hide the axes
+    
+    # Add the legend to the bottom axes with multiple columns
+    legend = legend_ax.legend(handles, labels, loc='center', ncol=5, fontsize=legend_font_size,
+                             mode="expand", borderaxespad=0.)
     
     plt.tight_layout()
+    
+    # Adjust the layout to make room for the legend
+    plt.subplots_adjust(bottom=0.2)
+    
     if savefig:
         save_fig_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
         os.makedirs(save_fig_path, exist_ok=True)
         plt.savefig(f"{save_fig_path}/activations_neurons_1_and_10_index{attribute_index}.png", 
-                   bbox_inches="tight",
-                   dpi=300)
+                   bbox_inches="tight")
     
     plt.show()
 
