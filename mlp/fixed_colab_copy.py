@@ -967,7 +967,7 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
         dataloader, attribute_index)
     colors = cc.glasbey[:27]
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(30, 8))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(30, 8), num=np.random.randint(1000))
     fig.subplots_adjust(right=0.65)  # Make room for legend on right
     
     # Plot for Neuron 1
@@ -1413,6 +1413,13 @@ if __name__ == "__main__":
         hidden_size=hidden_size,
         savefig=True
     )
+    # plot_both_neurons(
+    #     activations=activations,
+    #     dataloader=analysis_loader,
+    #     attribute_index=2,
+    #     hidden_size=hidden_size,
+    #     savefig=True
+    # )
     # hidden_size = 16
     # model = load_model(project="setnet", hidden_size=hidden_size)
     # breakpoint()
