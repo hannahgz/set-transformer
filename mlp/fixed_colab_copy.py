@@ -867,18 +867,19 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
     label_font_size = 20
     tick_font_size = 16
     legend_font_size = 14
+    
     # Create a color map
     triplet_categories, category_to_triplet = assign_triplet_categories(
         dataloader, attribute_index)
     colors = cc.glasbey[:27]
     
-    # Create figure with two subplots and extra space for the legend
-    fig = plt.figure(figsize=(20, 10))  # Increased height for legend space
+    # Create figure with a layout that reserves space for the legend on the right
+    fig = plt.figure(figsize=(24, 10))  # Wider figure to accommodate legend on right
     
-    # Create a gridspec that reserves space at the bottom for the legend
-    gs = fig.add_gridspec(2, 2, height_ratios=[4, 1])  # Top row for plots, bottom row for legend
+    # Create a gridspec with 3 columns - 2 for plots, 1 for legend
+    gs = fig.add_gridspec(1, 3, width_ratios=[2, 2, 1])  # 2:2:1 ratio
     
-    # Create the subplots in the top row
+    # Create the subplots
     ax1 = fig.add_subplot(gs[0, 0])
     ax2 = fig.add_subplot(gs[0, 1])
     
@@ -909,18 +910,37 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
     ax2.set_title(f'Neuron 10 Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=title_font_size)
     ax2.tick_params(axis='both', which='major', labelsize=tick_font_size)
     
-    # Create a separate axes for the legend at the bottom spanning both columns
-    legend_ax = fig.add_subplot(gs[1, :])
+    # Create a separate axes for the legend at the right
+    legend_ax = fig.add_subplot(gs[0, 2])
     legend_ax.axis('off')  # Hide the axes
     
-    # Add the legend to the bottom axes with multiple columns
-    legend = legend_ax.legend(handles, labels, loc='center', ncol=5, fontsize=legend_font_size,
-                             mode="expand", borderaxespad=0.)
+    # Add the legend to the right axes with 2 columns side by side
+    # Split items into two columns
+    left_column = []
+    right_column = []
+    
+    for i, (handle, label) in enumerate(zip(handles, labels)):
+        if i % 2 == 0:  # Even indices go to left column
+            left_column.append((handle, label))
+        else:  # Odd indices go to right column
+            right_column.append((handle, label))
+    
+    # Create the left column legend
+    left_handles = [item[0] for item in left_column]
+    left_labels = [item[1] for item in left_column]
+    legend1 = legend_ax.legend(left_handles, left_labels, 
+                              loc='center left', fontsize=legend_font_size,
+                              bbox_to_anchor=(0.0, 0.5))
+    legend_ax.add_artist(legend1)  # Add first legend to figure
+    
+    # Create the right column legend
+    right_handles = [item[0] for item in right_column]
+    right_labels = [item[1] for item in right_column]
+    legend2 = legend_ax.legend(right_handles, right_labels, 
+                              loc='center right', fontsize=legend_font_size,
+                              bbox_to_anchor=(1.0, 0.5))
     
     plt.tight_layout()
-    
-    # Adjust the layout to make room for the legend
-    plt.subplots_adjust(bottom=0.2)
     
     if savefig:
         save_fig_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
