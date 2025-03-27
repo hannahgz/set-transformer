@@ -967,8 +967,8 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
         dataloader, attribute_index)
     colors = cc.glasbey[:27]
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 8))
-    fig.subplots_adjust(right=0.6)  # Make room for legend on right
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(30, 8))
+    fig.subplots_adjust(right=0.65)  # Make room for legend on right
     
     # Plot for Neuron 1
     handles = []  # To store plot handles for legend
@@ -983,7 +983,7 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
     
     ax1.set_xlabel('Activation Value', fontsize=label_font_size)
     ax1.set_ylabel('Frequency', fontsize=label_font_size)
-    ax1.set_title(f'Neuron 1 Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=title_font_size)
+    ax1.set_title(f'Neuron 1 Activations by {attribute_map[attribute_index].capitalize()}', fontsize=title_font_size)
     ax1.tick_params(axis='both', which='major', labelsize=tick_font_size)
     
     # Plot for Neuron 10
@@ -994,10 +994,10 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
     
     ax2.set_xlabel('Activation Value', fontsize=label_font_size)
     ax2.set_ylabel('Frequency', fontsize=label_font_size)
-    ax2.set_title(f'Neuron 10 Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=title_font_size)
+    ax2.set_title(f'Neuron 10 Activations by {attribute_map[attribute_index].capitalize()}', fontsize=title_font_size)
     ax2.tick_params(axis='both', which='major', labelsize=tick_font_size)
     
-    legend_ax = fig.add_axes([0.62, 0.1, 0.35, 0.8])  # Create custom axes for legend
+    legend_ax = fig.add_axes([0.66, 0.1, 0.33, 0.8])  # Create custom axes for legend
     legend_ax.axis('off')
     
     # Create a single legend with two columns
@@ -1014,7 +1014,7 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
         legend.get_title().set_fontsize(legend_font_size)
     
     # plt.tight_layout()
-    plt.tight_layout(rect=[0, 0, 0.6, 1])
+    plt.tight_layout(rect=[0, 0, 0.65, 1])
     
     if savefig:
         save_fig_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
