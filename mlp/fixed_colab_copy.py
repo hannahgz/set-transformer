@@ -785,22 +785,8 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
     triplet_categories, category_to_triplet = assign_triplet_categories(
         dataloader, attribute_index)
 
-    # colors = plt.cm.get_cmap('tab20', 27)
-
-    # # Generate 27 distinct colors (normalized range)
-    # color_list = [colors(i / 26) for i in range(27)]
-
-    # # Shuffle the colors in a deterministic way
-    # np.random.seed(42)  # Set a seed for reproducibility
-    # colors = np.random.permutation(color_list)
     colors = cc.glasbey[:27]
 
-    # colors = plt.cm.get_cmap('tab20', 27)
-    # colors = sns.color_palette('husl', 27)
-    # colors = plt.cm.get_cmap('tab20', 9)
-
-    # Plot histograms for each category
-    # plt.figure(figsize=(12, 8))
     fig, ax = plt.subplots(figsize=(14, 8))
 
     # for category in range(20, 21):
@@ -830,6 +816,50 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
         os.makedirs(save_fig_path, exist_ok=True)
         plt.savefig(
             f"{save_fig_path}/activations_neuron{neuron_index}_index{attribute_index}.png", bbox_inches="tight")
+    plt.show()
+
+def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, savefig=False):
+    # Create a color map
+    triplet_categories, category_to_triplet = assign_triplet_categories(
+        dataloader, attribute_index)
+    colors = cc.glasbey[:27]
+    
+    # Create figure with two subplots of identical size
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 8), constrained_layout=True)
+    
+    # Plot for Neuron 1 (no legend)
+    for category in range(27):
+        category_activations = activations[:, 1][triplet_categories == category]
+        curr_label = triplet_type_to_labels(category_to_triplet[category], attribute_index)
+        ax1.hist(category_activations, bins=30, alpha=0.5, label=curr_label, color=colors[category])
+    
+    ax1.set_xlabel('Activation Value', fontsize=14)
+    ax1.set_ylabel('Frequency', fontsize=14)
+    ax1.set_title(f'Neuron 1 Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=16)
+    ax1.tick_params(axis='both', which='major', labelsize=12)
+    
+    # Plot for Neuron 10 (with legend)
+    for category in range(27):
+        category_activations = activations[:, 10][triplet_categories == category]
+        curr_label = triplet_type_to_labels(category_to_triplet[category], attribute_index)
+        ax2.hist(category_activations, bins=30, alpha=0.5, label=curr_label, color=colors[category])
+    
+    ax2.set_xlabel('Activation Value', fontsize=14)
+    ax2.set_ylabel('Frequency', fontsize=14)
+    ax2.set_title(f'Neuron 10 Activations, Categorized by {attribute_map[attribute_index].capitalize()}', fontsize=16)
+    ax2.tick_params(axis='both', which='major', labelsize=12)
+    
+    # Add legend outside of the second plot with larger text
+    fig.legend(loc='center right', fontsize=12, bbox_to_anchor=(1.15, 0.5))
+    
+    plt.tight_layout()
+    if savefig:
+        save_fig_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
+        os.makedirs(save_fig_path, exist_ok=True)
+        plt.savefig(f"{save_fig_path}/activations_neurons_1_and_10_index{attribute_index}.png", 
+                   bbox_inches="tight",
+                   dpi=300)
+    
     plt.show()
 
 
@@ -1210,8 +1240,21 @@ if __name__ == "__main__":
     # os.makedirs(FIG_SAVE_PATH, exist_ok=True)
 
     hidden_size = 16
-    model = load_model(project="setnet", hidden_size=hidden_size)
-    breakpoint()
+    layer_name = "fc1"
+    analysis_loader = torch.load(f"{PATH_PREFIX}/colab/non_shuffled_train_loader.pth")
+    fig_save_path = f"{FIG_SAVE_PATH}/hidden_{hidden_size}"
+    activations = torch.load(f"{fig_save_path}/{layer_name}_non_shuffled_train_activations.pth")
+
+    plot_both_neurons(
+        activations=activations,
+        dataloader=analysis_loader,
+        attribute_index=2,
+        hidden_size=hidden_size,
+        savefig=True
+    )
+    # hidden_size = 16
+    # model = load_model(project="setnet", hidden_size=hidden_size)
+    # breakpoint()
     # # get_activations_for_custom_input(model,
     # #                                  cards = [(0, 0, 2, 0),
     # #                                           (2, 0, 0, 0),
