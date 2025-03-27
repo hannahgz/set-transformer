@@ -968,10 +968,10 @@ def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, sav
     colors = cc.glasbey[:27]
     
     # Create figure with a layout that reserves space for the legend on the right
-    fig = plt.figure(figsize=(24, 10))  # Wider figure to accommodate legend on right
+    fig = plt.figure(figsize=(24, 8))  # Wider figure to accommodate legend on right
     
     # Create a gridspec with 3 columns - 2 for plots, 1 for legend
-    gs = fig.add_gridspec(1, 3, width_ratios=[2, 2, 1])  # 2:2:1 ratio
+    gs = fig.add_gridspec(1, 3, width_ratios=[2, 2, 1], wspace=0.05)  # 2:2:1 ratio
     
     # Create the subplots
     ax1 = fig.add_subplot(gs[0, 0])
