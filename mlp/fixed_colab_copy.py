@@ -957,6 +957,7 @@ def plot_activations_by_triplet_category(activations, neuron_index, dataloader, 
 
 
 def plot_both_neurons(activations, dataloader, attribute_index, hidden_size, savefig=False):
+    plt.close('all')
     title_font_size = 24
     label_font_size = 20
     tick_font_size = 20
