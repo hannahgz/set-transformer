@@ -468,7 +468,7 @@ def generate_heatmap_from_kl_matrix(kl_matrix, positions_to_ablate, layers_to_ab
     
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18, rotation=0)
-    plt.title('Impact of Embedding Ablation (KL Divergence)', fontsize=24)
+    plt.title('Impact of Activation Ablation (KL Divergence)', fontsize=24)
     
     # Use tight_layout with specific padding settings
     plt.tight_layout(pad=1.1, w_pad=0.5, h_pad=0.5)
@@ -775,7 +775,7 @@ if __name__ == "__main__":
     fig_save_path = f"COMPLETE_FIGS/paper/ablation_study"
     os.makedirs(fig_save_path, exist_ok=True)
     fig.savefig(os.path.join(
-        fig_save_path, f"avg_embedding_ablation_heatmap_ablate_type_{ablate_type}.png"), bbox_inches="tight")
+        fig_save_path, f"avg_activation_ablation_heatmap_ablate_type_{ablate_type}.png"), bbox_inches="tight")
 
     # # Save the KL divergence matrix
     # matrix_path = f"results/ablation_study"
