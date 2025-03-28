@@ -633,17 +633,17 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
 
-    config = GPTConfig44_Complete()
-    checkpoint = torch.load(config.filename, weights_only=False)
+    # config = GPTConfig44_Complete()
+    # checkpoint = torch.load(config.filename, weights_only=False)
 
-    # Create the model architecture
-    model = GPT(config).to(device)
+    # # Create the model architecture
+    # model = GPT(config).to(device)
 
-    # Load the weights
-    model.load_state_dict(checkpoint['model'])
-    model.eval()  # Set to evaluation mode
+    # # Load the weights
+    # model.load_state_dict(checkpoint['model'])
+    # model.eval()  # Set to evaluation mode
 
-    tokenizer = load_tokenizer(config.tokenizer_path)
+    # tokenizer = load_tokenizer(config.tokenizer_path)
 
     # input_seq = [
     #     "B", "diamond", "C", "green", "B", "three", "B", "green", "D", "two",
